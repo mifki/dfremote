@@ -1,0 +1,10 @@
+prefix=/usr/local 
+exec_prefix=${prefix} 
+libdir=${exec_prefix}/lib 
+includedir=${prefix}/include 
+
+Name: libNoPoll
+Description: LibNoPoll: websocket toolkit library
+Version: 0.2.6.b130 
+Libs: -L${libdir} -lnopoll 
+Cflags: -I${includedir}/nopoll

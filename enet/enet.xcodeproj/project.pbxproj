@@ -1,0 +1,252 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		58799ADF1AD1BAB100FD78CF /* .deps */ = {isa = PBXFileReference; lastKnownFileType = folder; path = .deps; sourceTree = "<group>"; };
+		58799AE01AD1BAB100FD78CF /* .libs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = .libs; sourceTree = "<group>"; };
+		58799AE11AD1BAB100FD78CF /* aclocal.m4 */ = {isa = PBXFileReference; lastKnownFileType = text; path = aclocal.m4; sourceTree = "<group>"; };
+		58799AE21AD1BAB100FD78CF /* callbacks.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callbacks.c; sourceTree = "<group>"; };
+		58799AE31AD1BAB100FD78CF /* callbacks.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = callbacks.lo; sourceTree = "<group>"; };
+		58799AE41AD1BAB100FD78CF /* callbacks.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = callbacks.o; sourceTree = "<group>"; };
+		58799AE51AD1BAB100FD78CF /* ChangeLog */ = {isa = PBXFileReference; lastKnownFileType = text; path = ChangeLog; sourceTree = "<group>"; };
+		58799AE61AD1BAB100FD78CF /* compile */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile; sourceTree = "<group>"; };
+		58799AE71AD1BAB100FD78CF /* compress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		58799AE81AD1BAB100FD78CF /* compress.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = compress.lo; sourceTree = "<group>"; };
+		58799AE91AD1BAB100FD78CF /* compress.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = compress.o; sourceTree = "<group>"; };
+		58799AEA1AD1BAB100FD78CF /* config.guess */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = config.guess; sourceTree = "<group>"; };
+		58799AEB1AD1BAB100FD78CF /* config.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = config.log; sourceTree = "<group>"; };
+		58799AEC1AD1BAB100FD78CF /* config.status */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = config.status; sourceTree = "<group>"; };
+		58799AED1AD1BAB100FD78CF /* config.sub */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = config.sub; sourceTree = "<group>"; };
+		58799AEE1AD1BAB100FD78CF /* configure */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = configure; sourceTree = "<group>"; };
+		58799AEF1AD1BAB100FD78CF /* configure.ac */ = {isa = PBXFileReference; lastKnownFileType = text; path = configure.ac; sourceTree = "<group>"; };
+		58799AF01AD1BAB100FD78CF /* depcomp */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = depcomp; sourceTree = "<group>"; };
+		58799AF11AD1BAB100FD78CF /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docs; sourceTree = "<group>"; };
+		58799AF21AD1BAB100FD78CF /* Doxyfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Doxyfile; sourceTree = "<group>"; };
+		58799AF31AD1BAB100FD78CF /* enet.dsp */ = {isa = PBXFileReference; lastKnownFileType = text; path = enet.dsp; sourceTree = "<group>"; };
+		58799AF41AD1BAB100FD78CF /* enet.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = enet.lib; sourceTree = "<group>"; };
+		58799AF51AD1BAB100FD78CF /* enet64.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = enet64.lib; sourceTree = "<group>"; };
+		58799AF61AD1BAB100FD78CF /* enet_dll.cbp */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = enet_dll.cbp; sourceTree = "<group>"; };
+		58799AF71AD1BAB100FD78CF /* host.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
+		58799AF81AD1BAB100FD78CF /* host.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = host.lo; sourceTree = "<group>"; };
+		58799AF91AD1BAB100FD78CF /* host.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = host.o; sourceTree = "<group>"; };
+		58799AFA1AD1BAB100FD78CF /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
+		58799AFB1AD1BAB100FD78CF /* install-sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "install-sh"; sourceTree = "<group>"; };
+		58799AFC1AD1BAB100FD78CF /* libenet.la */ = {isa = PBXFileReference; lastKnownFileType = text; path = libenet.la; sourceTree = "<group>"; };
+		58799AFD1AD1BAB100FD78CF /* libenet.pc */ = {isa = PBXFileReference; lastKnownFileType = text; path = libenet.pc; sourceTree = "<group>"; };
+		58799AFE1AD1BAB100FD78CF /* libenet.pc.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = libenet.pc.in; sourceTree = "<group>"; };
+		58799AFF1AD1BAB100FD78CF /* libtool */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = libtool; sourceTree = "<group>"; };
+		58799B001AD1BAB100FD78CF /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		58799B011AD1BAB100FD78CF /* list.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		58799B021AD1BAB100FD78CF /* list.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = list.lo; sourceTree = "<group>"; };
+		58799B031AD1BAB100FD78CF /* list.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = list.o; sourceTree = "<group>"; };
+		58799B041AD1BAB100FD78CF /* ltmain.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ltmain.sh; sourceTree = "<group>"; };
+		58799B051AD1BAB100FD78CF /* m4 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = m4; sourceTree = "<group>"; };
+		58799B061AD1BAB100FD78CF /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		58799B071AD1BAB100FD78CF /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		58799B081AD1BAB100FD78CF /* Makefile.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.in; sourceTree = "<group>"; };
+		58799B091AD1BAB100FD78CF /* missing */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = missing; sourceTree = "<group>"; };
+		58799B0A1AD1BAB100FD78CF /* packet.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = packet.c; sourceTree = "<group>"; };
+		58799B0B1AD1BAB100FD78CF /* packet.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = packet.lo; sourceTree = "<group>"; };
+		58799B0C1AD1BAB100FD78CF /* packet.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = packet.o; sourceTree = "<group>"; };
+		58799B0D1AD1BAB100FD78CF /* peer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = peer.c; sourceTree = "<group>"; };
+		58799B0E1AD1BAB100FD78CF /* peer.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = peer.lo; sourceTree = "<group>"; };
+		58799B0F1AD1BAB100FD78CF /* peer.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = peer.o; sourceTree = "<group>"; };
+		58799B101AD1BAB100FD78CF /* protocol.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = protocol.c; sourceTree = "<group>"; };
+		58799B111AD1BAB100FD78CF /* protocol.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = protocol.lo; sourceTree = "<group>"; };
+		58799B121AD1BAB100FD78CF /* protocol.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = protocol.o; sourceTree = "<group>"; };
+		58799B131AD1BAB100FD78CF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		58799B141AD1BAB100FD78CF /* unix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unix.c; sourceTree = "<group>"; };
+		58799B151AD1BAB100FD78CF /* unix.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = unix.lo; sourceTree = "<group>"; };
+		58799B161AD1BAB100FD78CF /* unix.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = unix.o; sourceTree = "<group>"; };
+		58799B171AD1BAB100FD78CF /* win32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = win32.c; sourceTree = "<group>"; };
+		58799B181AD1BAB100FD78CF /* win32.lo */ = {isa = PBXFileReference; lastKnownFileType = text; path = win32.lo; sourceTree = "<group>"; };
+		58799B191AD1BAB100FD78CF /* win32.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = win32.o; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		58799AD91AD1BAB100FD78CF = {
+			isa = PBXGroup;
+			children = (
+				58799ADF1AD1BAB100FD78CF /* .deps */,
+				58799AE01AD1BAB100FD78CF /* .libs */,
+				58799AE11AD1BAB100FD78CF /* aclocal.m4 */,
+				58799AE21AD1BAB100FD78CF /* callbacks.c */,
+				58799AE31AD1BAB100FD78CF /* callbacks.lo */,
+				58799AE41AD1BAB100FD78CF /* callbacks.o */,
+				58799AE51AD1BAB100FD78CF /* ChangeLog */,
+				58799AE61AD1BAB100FD78CF /* compile */,
+				58799AE71AD1BAB100FD78CF /* compress.c */,
+				58799AE81AD1BAB100FD78CF /* compress.lo */,
+				58799AE91AD1BAB100FD78CF /* compress.o */,
+				58799AEA1AD1BAB100FD78CF /* config.guess */,
+				58799AEB1AD1BAB100FD78CF /* config.log */,
+				58799AEC1AD1BAB100FD78CF /* config.status */,
+				58799AED1AD1BAB100FD78CF /* config.sub */,
+				58799AEE1AD1BAB100FD78CF /* configure */,
+				58799AEF1AD1BAB100FD78CF /* configure.ac */,
+				58799AF01AD1BAB100FD78CF /* depcomp */,
+				58799AF11AD1BAB100FD78CF /* docs */,
+				58799AF21AD1BAB100FD78CF /* Doxyfile */,
+				58799AF31AD1BAB100FD78CF /* enet.dsp */,
+				58799AF41AD1BAB100FD78CF /* enet.lib */,
+				58799AF51AD1BAB100FD78CF /* enet64.lib */,
+				58799AF61AD1BAB100FD78CF /* enet_dll.cbp */,
+				58799AF71AD1BAB100FD78CF /* host.c */,
+				58799AF81AD1BAB100FD78CF /* host.lo */,
+				58799AF91AD1BAB100FD78CF /* host.o */,
+				58799AFA1AD1BAB100FD78CF /* include */,
+				58799AFB1AD1BAB100FD78CF /* install-sh */,
+				58799AFC1AD1BAB100FD78CF /* libenet.la */,
+				58799AFD1AD1BAB100FD78CF /* libenet.pc */,
+				58799AFE1AD1BAB100FD78CF /* libenet.pc.in */,
+				58799AFF1AD1BAB100FD78CF /* libtool */,
+				58799B001AD1BAB100FD78CF /* LICENSE */,
+				58799B011AD1BAB100FD78CF /* list.c */,
+				58799B021AD1BAB100FD78CF /* list.lo */,
+				58799B031AD1BAB100FD78CF /* list.o */,
+				58799B041AD1BAB100FD78CF /* ltmain.sh */,
+				58799B051AD1BAB100FD78CF /* m4 */,
+				58799B061AD1BAB100FD78CF /* Makefile */,
+				58799B071AD1BAB100FD78CF /* Makefile.am */,
+				58799B081AD1BAB100FD78CF /* Makefile.in */,
+				58799B091AD1BAB100FD78CF /* missing */,
+				58799B0A1AD1BAB100FD78CF /* packet.c */,
+				58799B0B1AD1BAB100FD78CF /* packet.lo */,
+				58799B0C1AD1BAB100FD78CF /* packet.o */,
+				58799B0D1AD1BAB100FD78CF /* peer.c */,
+				58799B0E1AD1BAB100FD78CF /* peer.lo */,
+				58799B0F1AD1BAB100FD78CF /* peer.o */,
+				58799B101AD1BAB100FD78CF /* protocol.c */,
+				58799B111AD1BAB100FD78CF /* protocol.lo */,
+				58799B121AD1BAB100FD78CF /* protocol.o */,
+				58799B131AD1BAB100FD78CF /* README */,
+				58799B141AD1BAB100FD78CF /* unix.c */,
+				58799B151AD1BAB100FD78CF /* unix.lo */,
+				58799B161AD1BAB100FD78CF /* unix.o */,
+				58799B171AD1BAB100FD78CF /* win32.c */,
+				58799B181AD1BAB100FD78CF /* win32.lo */,
+				58799B191AD1BAB100FD78CF /* win32.o */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		58799ADE1AD1BAB100FD78CF /* enet */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 58799B1A1AD1BAB100FD78CF /* Build configuration list for PBXLegacyTarget "enet" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/vit/Development/Projects/df-ifort/enet";
+			dependencies = (
+			);
+			name = enet;
+			passBuildSettingsInEnvironment = 1;
+			productName = enet;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		58799ADA1AD1BAB100FD78CF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = 58799ADD1AD1BAB100FD78CF /* Build configuration list for PBXProject "enet" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 58799AD91AD1BAB100FD78CF;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				58799ADE1AD1BAB100FD78CF /* enet */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		58799ADB1AD1BAB100FD78CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		58799ADC1AD1BAB100FD78CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		58799B1B1AD1BAB100FD78CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = enet;
+			};
+			name = Debug;
+		};
+		58799B1C1AD1BAB100FD78CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = enet;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		58799ADD1AD1BAB100FD78CF /* Build configuration list for PBXProject "enet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				58799ADB1AD1BAB100FD78CF /* Debug */,
+				58799ADC1AD1BAB100FD78CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		58799B1A1AD1BAB100FD78CF /* Build configuration list for PBXLegacyTarget "enet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				58799B1B1AD1BAB100FD78CF /* Debug */,
+				58799B1C1AD1BAB100FD78CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 58799ADA1AD1BAB100FD78CF /* Project object */;
+}
