@@ -2,7 +2,7 @@
 
 To install, copy the plugin file for your operating system and DFHack version to `hack/plugins` folder inside your DF folder, and `remote` folder to `hack/lua` folder.
 
-See http://mifki.com/df/setup for more info and iOS client app.
+See http://mifki.com/df for more info and iOS client app.
 
 
 ## License
