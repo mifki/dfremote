@@ -55,7 +55,7 @@ local labor_groups = {
         { "Dissector", df.profession.FISH_DISSECTOR, df.unit_labor.DISSECT_FISH, df.job_skill.DISSECT_FISH }
     } },
     { "Metalsmithing", 8, {
-        { "Furnace Op", df.profession.FURNACE_OPERATOR, df.unit_labor.SMELT, df.job_skill.SMELT }, 
+        { "Furnace Operator", df.profession.FURNACE_OPERATOR, df.unit_labor.SMELT, df.job_skill.SMELT }, 
         { "Weaponsmith", df.profession.WEAPONSMITH, df.unit_labor.FORGE_WEAPON, df.job_skill.FORGE_WEAPON }, 
         { "Armorer", df.profession.ARMORER, df.unit_labor.FORGE_ARMOR, df.job_skill.FORGE_ARMOR }, 
         { "Blacksmith", df.profession.BLACKSMITH, df.unit_labor.FORGE_FURNITURE, df.job_skill.FORGE_FURNITURE }, 
@@ -89,7 +89,7 @@ local labor_groups = {
         { "Alchemist", df.profession.ALCHEMIST, df.unit_labor.ALCHEMIST, df.job_skill.ALCHEMY }, 
         { "Cleaning", df.profession.NONE, df.unit_labor.CLEAN, df.job_skill.NONE }, 
         { "Lever Operator", df.profession.NONE, df.unit_labor.PULL_LEVER, df.job_skill.NONE }, 
-        { "Remove Const", df.profession.NONE, df.unit_labor.REMOVE_CONSTRUCTION, df.job_skill.NONE }
+        { "Construction Removal", df.profession.NONE, df.unit_labor.REMOVE_CONSTRUCTION, df.job_skill.NONE }
     } },
     { "Hauling", 3, {
         { "Stone", df.profession.NONE, df.unit_labor.HAUL_STONE, df.job_skill.NONE }, 
