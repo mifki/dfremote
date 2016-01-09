@@ -929,6 +929,16 @@ function select_confirm()
         end
     end]]
 
+    -- limit zones to 31x31 max
+    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle and df.global.selection_rect.start_x ~= -30000 then
+        df.global.cursor.x = math.min(df.global.cursor.x, df.global.selection_rect.start_x + 30)
+        df.global.cursor.x = math.max(df.global.cursor.x, df.global.selection_rect.start_x - 30)
+        df.global.cursor.y = math.min(df.global.cursor.y, df.global.selection_rect.start_y + 30)
+        df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
+        df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
+        df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
+    end
+
     local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
 
     local ws = dfhack.gui.getCurViewscreen()
@@ -1021,6 +1031,16 @@ function set_cursor_pos(data)
     gui.simulateInput(ws, 'CURSOR_UP_Z')
 
     if data:byte(3) ~= 0 then
+        -- limit zones to 31x31 max
+        if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle and df.global.selection_rect.start_x ~= -30000 then
+            df.global.cursor.x = math.min(df.global.cursor.x, df.global.selection_rect.start_x + 30)
+            df.global.cursor.x = math.max(df.global.cursor.x, df.global.selection_rect.start_x - 30)
+            df.global.cursor.y = math.min(df.global.cursor.y, df.global.selection_rect.start_y + 30)
+            df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
+            df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
+            df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
+        end
+
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
 
         gui.simulateInput(ws, 'SELECT')
