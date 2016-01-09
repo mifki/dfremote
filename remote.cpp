@@ -1043,6 +1043,8 @@ void remote_stop()
 
 void remote_publish(string &name)
 {
+    publish_name = name;
+
     if (!remote_on || !name.size())
         return;
 
@@ -1052,7 +1054,6 @@ void remote_publish(string &name)
         mediation_peer = NULL;
     }
 
-    publish_name = name;
     last_publish_attempt = enet_time_get();
 
     ENetAddress mediation_address;
