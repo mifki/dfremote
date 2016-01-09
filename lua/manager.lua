@@ -47,38 +47,43 @@ function get_manager_orders_screen()
     end   
 end
 
+local function populate_order_templates()
+	--todo: convert this to use execute_with function
+	local ws = get_manager_orders_screen()
+	order_templates = {}
+	order_template_names = {}
+
+	for i,o in ipairs(ws.orders) do
+		local btn = df.interface_button_building_new_jobst:new()
+		btn.reaction_name = o.reaction_name
+		btn.hist_figure_id = o.hist_figure_id
+		btn.job_type = o.job_type
+		btn.item_type = o.item_type
+		btn.item_subtype = o.item_subtype
+		btn.mat_type = o.mat_type
+		btn.mat_index = o.mat_index
+		btn.item_category.whole = o.item_category.whole
+		btn.material_category.whole = o.material_category.whole
+		table.insert(order_template_names, utils.call_with_string(btn, 'getLabel'))
+
+		local ot = {}
+		ot.reaction_name = o.reaction_name
+		ot.hist_figure_id = o.hist_figure_id
+		ot.job_type = o.job_type
+		ot.item_type = o.item_type
+		ot.item_subtype = o.item_subtype
+		ot.mat_type = o.mat_type
+		ot.mat_index = o.mat_index
+		ot.item_category_whole = o.item_category.whole
+		ot.material_category_whole = o.material_category.whole
+		table.insert(order_templates, ot)
+	end
+	close_all()
+end
+
 function manager_get_ordertemplates(fromidx) 
-	if not order_templates or #order_templates == nil then
-		local ws = get_manager_orders_screen()
-		order_templates = {}
-		order_template_names = {}
-
-		for i,o in ipairs(ws.orders) do
-			local btn = df.interface_button_building_new_jobst:new()
-			btn.reaction_name = o.reaction_name
-			btn.hist_figure_id = o.hist_figure_id
-			btn.job_type = o.job_type
-			btn.item_type = o.item_type
-			btn.item_subtype = o.item_subtype
-			btn.mat_type = o.mat_type
-			btn.mat_index = o.mat_index
-			btn.item_category.whole = o.item_category.whole
-			btn.material_category.whole = o.material_category.whole
-			table.insert(order_template_names, utils.call_with_string(btn, 'getLabel'))
-
-			local ot = {}
-			ot.reaction_name = o.reaction_name
-			ot.hist_figure_id = o.hist_figure_id
-			ot.job_type = o.job_type
-			ot.item_type = o.item_type
-			ot.item_subtype = o.item_subtype
-			ot.mat_type = o.mat_type
-			ot.mat_index = o.mat_index
-			ot.item_category_whole = o.item_category.whole
-			ot.material_category_whole = o.material_category.whole
-			table.insert(order_templates, ot)
-		end
-		close_all()
+	if not order_templates or #order_templates == nil or fromidx == 0 then
+		populate_order_templates()
 	end
 
 	local ret = {}
@@ -89,6 +94,11 @@ function manager_get_ordertemplates(fromidx)
 end
 
 function manager_new_order(idx, amount)
+	--xxx: this temporary fixes the bug in the app where templates are not reloaded when connected to another server
+	if not order_templates or #order_templates == nil then
+		populate_order_templates()
+	end
+
 	local ot = order_templates[idx + 1]
 	local o = df.manager_order:new()
 
