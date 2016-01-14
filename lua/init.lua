@@ -898,24 +898,75 @@ end
 
 --todo: need to preserve cursor pos when switching between these modes
 function query_building()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.cursor.z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_BUILDJOB')    
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function query_unit()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.cursor.z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_VIEWUNIT')    
+    gui.simulateInput(ws, 'D_VIEWUNIT') 
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function query_look()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.cursor.z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_LOOK')
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 
@@ -979,7 +1030,6 @@ function zlevel_set(data)
         df.global.window_z = z - 1
         df.global.cursor.z = z - 1
         gui.simulateInput(ws, 'CURSOR_UP_Z')
-        
     else
         df.global.window_z = z + 1
         df.global.cursor.z = z + 1
@@ -1073,6 +1123,10 @@ function designate(idx)
         return
     end
 
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.cursor.z
+
     reset_main()
 
     gui.simulateInput(ws, 'D_DESIGNATE')
@@ -1080,6 +1134,19 @@ function designate(idx)
     local cmd = designate_cmds[idx]
     for i,v in ipairs(cmd) do
         gui.simulateInput(ws, v)
+    end
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
     end
 
     return true
