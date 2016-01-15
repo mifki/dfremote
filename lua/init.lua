@@ -235,7 +235,7 @@ function get_look_list(detailed)
             
             --todo: material
             --todo: damp !
-            print(ttmat)
+            --print(ttmat)
 
             if ttmat == df.tiletype_material.GRASS_LIGHT or ttmat == df.tiletype_material.GRASS_DARK or
                 ttmat == df.tiletype_material.GRASS_DRY or ttmat == df.tiletype_material.GRASS_DEAD then
@@ -362,7 +362,8 @@ function get_look_list(detailed)
                 title = mi.plant.growths[v.spatter_item_subtype].name_plural
                 color = 2
 
-            elseif v.spatter_item_type == -1 then
+            --todo: what are situations v.spatter_item_type == -1 but mi == nil ?
+            elseif v.spatter_item_type == -1 and mi then
                 --<a spattering of> <Urist McMiner> <dwarf> <blood>
 
                 local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.spatter_size+1] or ''
