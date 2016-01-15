@@ -263,7 +263,7 @@ function get_look_list(detailed)
                 --xxx: this is from MapCache::prepare() but why???
                 local mapcol = df.global.world.map.column_index[math.floor(x/48)*3][math.floor(y/48)*3]
                 
-                print(bx,by)
+                --print(bx,by)
                 for i,p in ipairs(mapcol.plants) do
                     if not p.tree_info then
                         local pos = p.pos
