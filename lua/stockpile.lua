@@ -643,7 +643,10 @@ function building_stockpile_getsettings()
                     num_all = (type(group[3]) == 'table') and #group[3] or group[3]
                 end
 
-                table.insert(grps, { group_name, num_enabled, num_all })
+                --todo: maybe not return empty categories? but then need to remove them form schema or adjust index in building_stockpile_setenabled() 
+                --if num_all > 0 then
+                    table.insert(grps, { group_name, num_enabled, num_all })
+                --end
             end
 
             for j,flag in ipairs(flags) do
