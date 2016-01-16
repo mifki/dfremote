@@ -347,7 +347,7 @@ function labors_get_all_dwarves()
 
 	            table.insert(allowed, { uname, unit.id, -1, prof, sqname, laborcount })
 		    else
-		    	table.insert(disallowed, { uname, unit.id, -1, prof, false, 0 })
+		    	table.insert(disallowed, { uname, unit.id, -1, prof, mp.NIL, 0 })
 	        end
 	    end
     end    
