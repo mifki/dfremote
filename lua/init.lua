@@ -903,7 +903,7 @@ function query_building()
 
     local x = df.global.cursor.x
     local y = df.global.cursor.y
-    local z = df.global.cursor.z
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_BUILDJOB')    
@@ -927,7 +927,7 @@ function query_unit()
 
     local x = df.global.cursor.x
     local y = df.global.cursor.y
-    local z = df.global.cursor.z
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_VIEWUNIT') 
@@ -951,7 +951,7 @@ function query_look()
 
     local x = df.global.cursor.x
     local y = df.global.cursor.y
-    local z = df.global.cursor.z
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_LOOK')
@@ -1126,7 +1126,7 @@ function designate(idx)
 
     local x = df.global.cursor.x
     local y = df.global.cursor.y
-    local z = df.global.cursor.z
+    local z = df.global.window_z
 
     reset_main()
 
