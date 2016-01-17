@@ -10,9 +10,12 @@ function execute_with_main_mode(mode, fn)
 	df.global.ui.main.mode = mode
 
 	local ok,ret = pcall(fn, ws)
-	if not ok then print (ret) ; ret = nil end
 
     df.global.ui.main.mode = q
+
+	if not ok then
+		error (ret)
+	end
     return ret	
 end
 

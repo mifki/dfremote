@@ -602,16 +602,16 @@ end
 function building_stockpile_getsettings()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        return nil
+        error('not a stockpile')
     end
 
     local ss = bld.settings
