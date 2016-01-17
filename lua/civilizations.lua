@@ -32,7 +32,7 @@ function civilization_get_info(civid)
     local leaders = {}
     for i,v in ipairs(ws.important_leader_nemesis) do
         local fig = v.figure
-        local name = unitname(fig)
+        local name = hfname(fig)
 
         local race = df.global.world.raws.creatures.all[fig.race]
         local prof = dfhack.units.getCasteProfessionName(fig.race, fig.caste, fig.profession, false)

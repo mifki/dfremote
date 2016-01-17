@@ -279,7 +279,7 @@ function building_query_selected(bldid)
 
         elseif btype == df.building_type.Slab then
             local slabitem = bld.contained_items[0].item
-            local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and unitname(df.historical_figure.find(slabitem.topic)) or mp.NIL
+            local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and hfname(df.historical_figure.find(slabitem.topic)) or mp.NIL
             --todo: show full description and not just the name
             table.insert(ret, inmemory)
 

@@ -371,7 +371,7 @@ function get_look_list(detailed)
                     spatterprefix = spatterprefix .. ' '
                 end
 
-                local creatureprefix = mi.figure and (unitname(mi.figure) .. ' ') or ''
+                local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
 
                 local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
                 title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
