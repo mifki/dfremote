@@ -145,8 +145,8 @@ function embark_get_reclaim_sites()
 		local site = df.world_site.find(v)
 		if not site then goto continue end
 
-		local name = translatename(site.name) --dfhack.df2utf(dfhack.TranslateName(site.name))
-		local name_eng = dfhack.df2utf(dfhack.TranslateName(site.name, true))
+		local name = translatename(site.name)
+		local name_eng = translatename(site.name, true)
 
 		ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 		ws.reclaim_idx = i
@@ -164,7 +164,7 @@ function embark_get_reclaim_sites()
 		end
 
 		local ab = ws.site_abandoned
-		local retired = ab and ab._type == df.history_event_site_retiredst
+		local retired = ab and ab._type == df.history_event_site_retiredst or false
 
 		table.insert(ret, { name, name_eng, site_info, retired })
 
