@@ -56,7 +56,7 @@ designate_cmds = {}
 --xxx: makeing it possible to access a global with the currently being linked building type
 --xxx: this is a hack until the required global is added to dfhack !!
 if dfhack.getOSType() == 'windows' then
-    dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807)
+    dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807+dfhack.internal.getRebaseDelta())
 else
     dfhack.internal.setAddress('art_image_chunk_next_id', dfhack.internal.getAddress('ui_workshop_in_add')+1)
 end
