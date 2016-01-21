@@ -1461,6 +1461,7 @@ local handlers = {
         [13] = building_workshop_cancel,
         [14] = building_workshop_reorder,
         [15] = building_workshop_addjob,
+        [16] = building_workshop_profile_get,
 
         [30] = building_room_free,
         [31] = building_room_owner_get_candidates,
