@@ -66,7 +66,7 @@ local labor_groups = {
         { "Setter", df.profession.GEM_SETTER, df.unit_labor.ENCRUST_GEM, df.job_skill.ENCRUSTGEM }
     } },
     { "Crafts", 9, {
-        { "Leatherworkr", df.profession.LEATHERWORKER, df.unit_labor.LEATHER, df.job_skill.LEATHERWORK }, 
+        { "Leatherworker", df.profession.LEATHERWORKER, df.unit_labor.LEATHER, df.job_skill.LEATHERWORK }, 
         { "Woodcrafter", df.profession.WOODCRAFTER, df.unit_labor.WOOD_CRAFT, df.job_skill.WOODCRAFT }, 
         { "Stonecrafter", df.profession.STONECRAFTER, df.unit_labor.STONE_CRAFT, df.job_skill.STONECRAFT }, 
         { "Bone Carver", df.profession.BONE_CARVER, df.unit_labor.BONE_CARVE, df.job_skill.BONECARVE }, 
@@ -106,7 +106,7 @@ local labor_groups = {
     } },
 };
 
-local labor_groups2 = {
+--[[local labor_groups2 = {
     { "Mining", 7, {
         { "Mining", df.profession.MINER, df.unit_labor.MINE, df.job_skill.MINING, true }
     } },
@@ -174,7 +174,7 @@ local labor_groups2 = {
         { "Setter", df.profession.GEM_SETTER, df.unit_labor.ENCRUST_GEM, df.job_skill.ENCRUSTGEM }
     } },
     { "Crafts", 9, {
-        { "Leatherworkring", df.profession.LEATHERWORKER, df.unit_labor.LEATHER, df.job_skill.LEATHERWORK }, 
+        { "Leatherworking", df.profession.LEATHERWORKER, df.unit_labor.LEATHER, df.job_skill.LEATHERWORK }, 
         { "Woodcrafting", df.profession.WOODCRAFTER, df.unit_labor.WOOD_CRAFT, df.job_skill.WOODCRAFT }, 
         { "Stonecrafting", df.profession.STONECRAFTER, df.unit_labor.STONE_CRAFT, df.job_skill.STONECRAFT }, 
         { "Bone Carving", df.profession.BONE_CARVER, df.unit_labor.BONE_CARVE, df.job_skill.BONECARVE }, 
@@ -212,7 +212,7 @@ local labor_groups2 = {
         { "Trade Goods", df.profession.NONE, df.unit_labor.HAUL_TRADE, df.job_skill.NONE }, 
         { "Water", df.profession.NONE, df.unit_labor.HAUL_WATER, df.job_skill.NONE }
     } },
-};
+};]]
 
 local special_labors = { df.unit_labor.MINE, df.unit_labor.CUTWOOD, df.unit_labor.HUNT }
 
