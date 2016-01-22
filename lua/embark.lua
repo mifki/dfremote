@@ -1,10 +1,10 @@
 local finder_params = {
-	{ 'Savagery', df.embark_finder_option.Savagery, { 'Low', 'Meidum', 'High' } },
-	{ 'Evil', df.embark_finder_option.Evil, { 'Low', 'Meidum', 'High' } },
-	{ 'Elevation', df.embark_finder_option.Elevation, { 'Low', 'Meidum', 'High' } },
-	{ 'Temperature', df.embark_finder_option.Temperature, { 'Low', 'Meidum', 'High' } },
-	{ 'Rain', df.embark_finder_option.Rain, { 'Low', 'Meidum', 'High' } },
-	{ 'Drainage', df.embark_finder_option.Drainage, { 'Low', 'Meidum', 'High' } },
+	{ 'Savagery', df.embark_finder_option.Savagery, { 'Low', 'Medium', 'High' } },
+	{ 'Evil', df.embark_finder_option.Evil, { 'Low', 'Medium', 'High' } },
+	{ 'Elevation', df.embark_finder_option.Elevation, { 'Low', 'Medium', 'High' } },
+	{ 'Temperature', df.embark_finder_option.Temperature, { 'Low', 'Medium', 'High' } },
+	{ 'Rain', df.embark_finder_option.Rain, { 'Low', 'Medium', 'High' } },
+	{ 'Drainage', df.embark_finder_option.Drainage, { 'Low', 'Medium', 'High' } },
 	{ 'Flux Stone Layer', df.embark_finder_option.FluxStone, { 'No', 'Yes' } },
 	{ 'Aquifer', df.embark_finder_option.Aquifer, { 'No', 'Yes' } },
 	{ 'River', df.embark_finder_option.River, { 'No', 'Yes' } },
@@ -52,7 +52,7 @@ function embark_newgame(folder)
         	idx = i
         	break
         end
-	end    
+	end
 
 	if idx == -1 then
 		return
@@ -67,7 +67,7 @@ function embark_newgame(folder)
 
     if ws.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectWorld then
     	ws.sel_submenu_line = idx
-	    gui.simulateInput(ws, 'SELECT')	
+	    gui.simulateInput(ws, 'SELECT')
 	    ws:logic()
 	    ws:render()
 
@@ -80,7 +80,7 @@ function embark_newgame(folder)
     end
 
 	ws.sel_menu_line = 0
-    gui.simulateInput(ws, 'SELECT')	    
+    gui.simulateInput(ws, 'SELECT')
 end
 
 function embark_get_overview()
@@ -106,9 +106,9 @@ function embark_get_overview()
 		--todo: handle (set to 1) ws.show_play_now ~= 1
 
 		local profiles = {}
-		
+
 		--xxx: ws.choices is holding the list of profiles, but the structure is unknown. the first field is string and is the name
-		--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily		
+		--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily
 		for i,v in ipairs(ws.choices) do
 			if ws.choice_types[i] == 2 then
 				local name = df.reinterpret_cast(df.interaction,v).name
@@ -122,9 +122,9 @@ function embark_get_overview()
 		return { 'profile', profiles, fort_name, fort_name_eng }
 	end
 
-    --todo: handle (close) viewscreen_selectitemst - won't be supported	
+    --todo: handle (close) viewscreen_selectitemst - won't be supported
 
-	return nil	
+	return nil
 end
 
 function embark_get_reclaim_sites()
@@ -145,8 +145,8 @@ function embark_get_reclaim_sites()
 		local site = df.world_site.find(v)
 		if not site then goto continue end
 
-		local name = translatename(site.name) --dfhack.df2utf(dfhack.TranslateName(site.name))
-		local name_eng = dfhack.df2utf(dfhack.TranslateName(site.name, true))
+		local name = translatename(site.name)
+		local name_eng = translatename(site.name, true)
 
 		ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 		ws.reclaim_idx = i
@@ -164,7 +164,7 @@ function embark_get_reclaim_sites()
 		end
 
 		local ab = ws.site_abandoned
-		local retired = ab and ab._type == df.history_event_site_retiredst
+		local retired = ab and ab._type == df.history_event_site_retiredst or false
 
 		table.insert(ret, { name, name_eng, site_info, retired })
 
@@ -218,7 +218,7 @@ local function embark_site_info()
 
 	local biomes = {}
 	ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
-	
+
 	for i=0,#loc.biome_rgn.x-1 do
 		ws.biome_idx = i
 		ws:render()
@@ -242,7 +242,7 @@ local function embark_site_info()
 			table.insert(features, line)
 		end
 
-		table.insert(biomes, { name, landscape,temp,trees,veg,sur, features })		
+		table.insert(biomes, { name, landscape,temp,trees,veg,sur, features })
 	end
 
 	local ret = {
@@ -260,7 +260,7 @@ function embark_finder_find(w, h, params)
 	end
 
 	if #params ~= #finder_params then
-		return 
+		return
 	end
 
 	ws.page = df.viewscreen_choose_start_sitest.T_page.Find
@@ -334,7 +334,7 @@ function embark_finder_next()
 		return nil
 	end
 
-	ws.page = df.viewscreen_choose_start_sitest.T_page.Biome	
+	ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 
 	if #matches == 0 then
 		local wdata = df.global.world.world_data
@@ -401,8 +401,8 @@ function embark_cancel()
     optsws.parent = ws
     ws.child = optsws
 
-    gui.simulateInput(optsws, 'SELECT')	
-	
+    gui.simulateInput(optsws, 'SELECT')
+
 	ws = dfhack.gui.getCurViewscreen()
 end
 
@@ -448,7 +448,7 @@ function embark_reclaim(idx)
         ws = parent
 	end
 
-    if ws._type == df.viewscreen_textviewerst then	
+    if ws._type == df.viewscreen_textviewerst then
     	local text = ''
     	for i,v in ipairs(ws.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
@@ -456,12 +456,12 @@ function embark_reclaim(idx)
 	    text = text:gsub('%s+', ' ')
 
         local title = ws.title
-        title = title:gsub("^%s+", ""):gsub("%s+$", "")	    
+        title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
 	    return { title, text }
 	end
 
-	return { '' }		
+	return { '' }
 end
 
 function embark_play(idx)
@@ -490,11 +490,11 @@ function embark_play(idx)
 	if ws._type == df.viewscreen_setupdwarfgamest and (istrue(ws.in_problems) or ws.points_remaining > 0) then
 		ws.in_problems = 0
 		ws.points_remaining = 0
-		gui.simulateInput(ws, 'SETUP_EMBARK')		
+		gui.simulateInput(ws, 'SETUP_EMBARK')
 		ws = dfhack.gui.getCurViewscreen()
 	end
 
-    if ws._type == df.viewscreen_textviewerst then	
+    if ws._type == df.viewscreen_textviewerst then
     	local text = ''
     	for i,v in ipairs(ws.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
@@ -502,12 +502,12 @@ function embark_play(idx)
 	    text = text:gsub('%s+', ' ')
 
         local title = ws.title
-        title = title:gsub("^%s+", ""):gsub("%s+$", "")	    
+        title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
 	    return { title, text }
 	end
 
-	return { '' }	
+	return { '' }
 end
 
 function embark_back_to_map()

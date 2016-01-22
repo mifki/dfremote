@@ -115,11 +115,124 @@ function read_trader_reply()
     return dfhack.df2utf(reply), dfhack.df2utf(mood)
 end
 
---todo: adultsize  !!
-function item_price_for_caravan(item, caravan, pricetable)
-    local value = dfhack.items.getValue(item)
-    --todo: this is bad. should replicate getValue() from dfhack that will accept caravan argument
-    value = value - item:getImprovementsValue(nil) + item:getImprovementsValue(caravan)
+-- exact copy of Item::getValue() but also accepts caravan_state, race and quantity
+function item_value_for_caravan(item, caravan, entity, creature, qty)
+    local item_type = item:getType()
+    local item_subtype = item:getSubtype()
+    local mat_type = item:getMaterial()
+    local mat_subtype = item:getMaterialIndex()
+
+    -- Get base value for item type, subtype, and material
+    local value
+    if item_type == df.item_type.CHEESE then
+        --todo: seems to be wrong in dfhack's getItemBaseValue() ?
+        value = 10
+    else
+        value = dfhack.items.getItemBaseValue(item_type, item_subtype, mat_type, mat_subtype)
+    end
+
+    -- Apply entity value modifications
+    if entity and creature and entity.entity_raw.sphere_alignment.WAR ~= 256 then
+        -- weapons
+        if item_type == df.item_type.WEAPON then
+            local def = df.global.world.raws.itemdefs.weapons[item_subtype]
+            if creature.adultsize >= def.minimum_size then
+                value = value * 2
+            end
+        end
+
+        -- armor gloves shoes helms pants
+        --todo: why 7 ?
+        if creature.adultsize >= 7 then
+            if item_type == df.item_type.ARMOR or item_type == df.item_type.GLOVES or item_type == df.item_type.SHOES or item_type == df.item_type.HELM or item_type == df.item_type.PANTS then
+                local def = item.subtype --df.global.world.raws.itemdefs.gloves[item_subtype]
+                if def.armorlevel > 0 or def.flags.METAL_ARMOR_LEVELS then
+                    value = value * 2
+                end
+            end
+        end
+
+        -- shields
+        if item_type == df.item_type.SHIELD then
+            local def = item.subtype --df.global.world.raws.itemdefs.gloves[item_subtype]
+            if def.armorlevel > 0 then
+                value = value * 2
+            end
+        end
+
+        -- ammo
+        if item_type == df.item_type.AMMO then
+            value = value * 2
+        end
+
+        -- quiver
+        if item_type == df.item_type.QUIVER then
+            value = value * 2
+        end
+    end
+
+    -- Improve value based on quality
+    local quality = item:getQuality()
+    value = value * (quality + 1)
+    if quality == 5 then
+        value = value * 2
+    end
+
+    -- Add improvement values
+    local impValue = item:getThreadDyeValue(caravan) + item:getImprovementsValue(caravan)
+    if item_type == df.item_type.AMMO then -- Ammo improvements are worth less
+        impValue = impValue / 30
+    end
+    value = value + impValue
+
+    -- Degrade value due to wear
+    local wear = item:getWear()
+    if wear == 1 then
+        value = value * 3 / 4
+    elseif wear == 2 then
+        value = value / 2
+    elseif wear == 3 then
+        value = value / 4
+    end
+
+    -- Ignore value bonuses from magic, since that never actually happens
+
+    -- Artifacts have 10x value
+    if item.flags.artifact_mood then
+        value = value * 10
+    end
+
+    -- Boost value from stack size or the supplied quantity
+    if qty and qty > 0 then
+        value = value * qty
+    else
+        value = value * item:getStackSize()
+    end
+    -- ...but not for coins
+    if item_type == df.item_type.COIN then
+        value = value / 500
+        if value < 1 then
+            value = 1
+        end
+    end
+
+    -- Handle vermin swarms
+    if item_type == df.item_type.VERMIN or item_type == df.item_type.PET then
+        local divisor = 1
+        local creature = df.global.world.raws.creatures.all[mat_type]
+        if creature and mat_subtype < #creature.caste then
+            divisor = creature.caste[mat_subtype].misc.petvalue_divisor
+        end
+        if divisor > 1 then
+            value = value / divisor
+        end
+    end
+
+    return math.floor(value)
+end
+
+function item_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
+    local value = item_value_for_caravan(item, caravan, entity, creature, qty)
 
     if not pricetable then
         return value
@@ -144,16 +257,16 @@ function item_price_for_caravan(item, caravan, pricetable)
     return value
 end
 
-function item_or_container_value(item, caravan, pricetable, qty)
-    local value = item_price_for_caravan(item, caravan, pricetable)
-    if qty and qty > 0 then
+function item_or_container_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
+    local value = item_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
+    --[[if qty and qty > 0 then
         value = value / item.stack_size * qty
-    end
+    end]]
 
     for i,ref in ipairs(item.general_refs) do
         if ref:getType() == df.general_ref_type.CONTAINS_ITEM then
             local item2 = df.item.find(ref.item_id)
-            value = value + item_price_for_caravan(item2, caravan, pricetable)
+            value = value + item_price_for_caravan(item2, caravan, entity, creature, nil, pricetable)
         
         elseif ref:getType() == df.general_ref_type.CONTAINS_UNIT then
             local unit2 = df.unit.find(ref.unit_id)
@@ -172,15 +285,17 @@ function depot_calculate_profit()
         return nil
     end
 
+    local creature = df.global.world.raws.creatures.all[ws.entity.race]    
+
     local trader_profit = 0
     for i,t in ipairs(ws.trader_selected) do
         if istrue(t) then
-            trader_profit = trader_profit - item_or_container_value(ws.trader_items[i], ws.caravan, ws.caravan.buy_prices, ws.trader_count[i]) --nil --ws.caravan.sell_prices)
+            trader_profit = trader_profit - item_or_container_price_for_caravan(ws.trader_items[i], ws.caravan, ws.entity, creature, ws.trader_count[i], ws.caravan.buy_prices) --nil --ws.caravan.sell_prices)
         end
     end
     for i,t in ipairs(ws.broker_selected) do
         if istrue(t) then
-            trader_profit = trader_profit + item_or_container_value(ws.broker_items[i], ws.caravan, ws.caravan.buy_prices, ws.broker_count[i])
+            trader_profit = trader_profit + item_or_container_price_for_caravan(ws.broker_items[i], ws.caravan, ws.entity, creature, ws.broker_count[i], ws.caravan.buy_prices)
         end
     end
         
@@ -270,12 +385,13 @@ function depot_trade_get_items(their)
     local sel = their and ws.trader_selected or ws.broker_selected
     local counts = their and ws.trader_count or ws.broker_count
     local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
+    local creature = df.global.world.raws.creatures.all[ws.entity.race]
 
     local ret = {}
 
     for i,item in ipairs(items) do
         local title = itemname(item, 0, true)
-        local value = item_or_container_value(item, ws.caravan, prices)
+        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
 
         local inner = is_contained(item)
         local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN)

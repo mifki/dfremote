@@ -219,6 +219,8 @@ function stocks_get_items(type, grouped)
             for j,item in ipairs(v.items) do
                 local title = itemname(item, 4, true)
 
+                --todo: check that using flags.in_building is ok and shouldn't rather check the actual ref to the containing building
+                --todo: the same for inventory ?
                 table.insert(ret, { title, item.id, item.flags.whole, item_can_melt(item), item_is_fort_owned(item) })
             end
         end        

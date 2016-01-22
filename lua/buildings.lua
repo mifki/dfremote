@@ -279,7 +279,7 @@ function building_query_selected(bldid)
 
         elseif btype == df.building_type.Slab then
             local slabitem = bld.contained_items[0].item
-            local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and unitname(df.historical_figure.find(slabitem.topic)) or mp.NIL
+            local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and hfname(df.historical_figure.find(slabitem.topic)) or mp.NIL
             --todo: show full description and not just the name
             table.insert(ret, inmemory)
 
@@ -751,7 +751,38 @@ function building_workshop_addjob(bldid, idx)
 
         btn:click()
     end
+end
 
+function building_workshop_profile_get(bldid)
+    --[[local bld = df.building.find(bldid)
+    if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
+        return nil
+    end]]
+
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    local profile = bld.profile
+    local workers = {}
+    local permitted_workers = {}
+
+    for i,v in ipairs(profile.permitted_workers) do
+        table.insert(permitted_workers, v)
+    end
+
+    for i,unit in ipairs(unitlist_get_units(df.viewscreen_unitlist_page.Citizens)) do
+        table.insert(workers, { unit_fulltitle(unit), unit.id })
+    end
+
+    return { workers, permitted_workers, profile.min_level, profile.max_level }
 end
 
 function building_room_free(bldid)
@@ -1431,3 +1462,4 @@ function building_well_is_active()
 end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))
+print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))

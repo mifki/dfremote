@@ -94,8 +94,6 @@ function meeting_get()
     end
 
     if ws._type == df.viewscreen_topicmeetingst then
-    	--local topic = ws.meeting.topic_list[0]
-    	--local topic_discussed = ws.popup.activity.flags.topic_discussed
     	activity = ws.popup.activity
 
     	--todo: include all lines here! :)
@@ -122,23 +120,11 @@ function meeting_get()
     	else
 	    	text, reply, actions = read_meeting_screen()
     	end
+    end
 
-
-    	--[[if topic == df.meeting_topic.ImportAgreement then
-    		if not topic_discussed then
-		    	return { 'let us discuss import', { { 'Done', df.interface_key.OPTION1 } } }
-		    else
-		    	return { 'we have discussed import', { { 'Done', df.interface_key.OPTION1 } } }
-		    end
-    	end
-
-    	if topic == df.meeting_topic.ExportAgreement then
-    		if not topic_discussed then
-		    	return { 'let us discuss export', { { 'Done', df.interface_key.OPTION1 } } }
-		    else
-		    	return { 'we have discussed export', { { 'Done', df.interface_key.OPTION1 } } }
-		    end
-    	end]]
+    --todo: this is temporary to avoid app crash. anyway I don't understand how this happens
+    if not activity then
+    	return { text or 'Could not read meeting screen.', actions or { 'Done' }, '', '', false }
     end
 
     local actor_name  = unitname(activity.unit_actor)

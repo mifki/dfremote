@@ -7,6 +7,9 @@ end
 
 function zone_settings_get(bldid)
     local zone = df.building.find(bldid)
+    if not zone then
+        error('no zone found for id')
+    end
     local title = 'Activity Zone #' .. tostring(zone.zone_num)
 
     return { title, zone.id, zone.zone_flags.whole }

@@ -56,7 +56,11 @@ designate_cmds = {}
 
 --xxx: makeing it possible to access a global with the currently being linked building type
 --xxx: this is a hack until the required global is added to dfhack !!
-dfhack.internal.setAddress('art_image_chunk_next_id', dfhack.internal.getAddress('ui_workshop_in_add')+1)
+if dfhack.getOSType() == 'windows' then
+    dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807+dfhack.internal.getRebaseDelta())
+else
+    dfhack.internal.setAddress('art_image_chunk_next_id', dfhack.internal.getAddress('ui_workshop_in_add')+1)
+end
 
 function close_all()
     local ws = dfhack.gui.getCurViewscreen()
@@ -236,7 +240,7 @@ function get_look_list(detailed)
             
             --todo: material
             --todo: damp !
-            print(ttmat)
+            --print(ttmat)
 
             if ttmat == df.tiletype_material.GRASS_LIGHT or ttmat == df.tiletype_material.GRASS_DARK or
                 ttmat == df.tiletype_material.GRASS_DRY or ttmat == df.tiletype_material.GRASS_DEAD then
@@ -264,7 +268,7 @@ function get_look_list(detailed)
                 --xxx: this is from MapCache::prepare() but why???
                 local mapcol = df.global.world.map.column_index[math.floor(x/48)*3][math.floor(y/48)*3]
                 
-                print(bx,by)
+                --print(bx,by)
                 for i,p in ipairs(mapcol.plants) do
                     if not p.tree_info then
                         local pos = p.pos
@@ -363,7 +367,8 @@ function get_look_list(detailed)
                 title = mi.plant.growths[v.spatter_item_subtype].name_plural
                 color = 2
 
-            elseif v.spatter_item_type == -1 then
+            --todo: what are situations v.spatter_item_type == -1 but mi == nil ?
+            elseif v.spatter_item_type == -1 and mi then
                 --<a spattering of> <Urist McMiner> <dwarf> <blood>
 
                 local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.spatter_size+1] or ''
@@ -371,7 +376,7 @@ function get_look_list(detailed)
                     spatterprefix = spatterprefix .. ' '
                 end
 
-                local creatureprefix = mi.figure and (unitname(mi.figure) .. ' ') or ''
+                local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
 
                 local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
                 title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
@@ -892,24 +897,75 @@ end
 
 --todo: need to preserve cursor pos when switching between these modes
 function query_building()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_BUILDJOB')    
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function query_unit()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_VIEWUNIT')    
+    gui.simulateInput(ws, 'D_VIEWUNIT') 
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function query_look()
-    df.global.ui.main.mode = 0
+    reset_main()
+
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_LOOK')
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 
@@ -922,6 +978,16 @@ function select_confirm()
             zoombacktobld = bld
         end
     end]]
+
+    -- limit zones to 31x31 max
+    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle and df.global.selection_rect.start_x ~= -30000 then
+        df.global.cursor.x = math.min(df.global.cursor.x, df.global.selection_rect.start_x + 30)
+        df.global.cursor.x = math.max(df.global.cursor.x, df.global.selection_rect.start_x - 30)
+        df.global.cursor.y = math.min(df.global.cursor.y, df.global.selection_rect.start_y + 30)
+        df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
+        df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
+        df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
+    end
 
     local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
 
@@ -963,7 +1029,6 @@ function zlevel_set(data)
         df.global.window_z = z - 1
         df.global.cursor.z = z - 1
         gui.simulateInput(ws, 'CURSOR_UP_Z')
-        
     else
         df.global.window_z = z + 1
         df.global.cursor.z = z + 1
@@ -1015,6 +1080,16 @@ function set_cursor_pos(data)
     gui.simulateInput(ws, 'CURSOR_UP_Z')
 
     if data:byte(3) ~= 0 then
+        -- limit zones to 31x31 max
+        if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle and df.global.selection_rect.start_x ~= -30000 then
+            df.global.cursor.x = math.min(df.global.cursor.x, df.global.selection_rect.start_x + 30)
+            df.global.cursor.x = math.max(df.global.cursor.x, df.global.selection_rect.start_x - 30)
+            df.global.cursor.y = math.min(df.global.cursor.y, df.global.selection_rect.start_y + 30)
+            df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
+            df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
+            df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
+        end
+
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
 
         gui.simulateInput(ws, 'SELECT')
@@ -1047,6 +1122,10 @@ function designate(idx)
         return
     end
 
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
+
     reset_main()
 
     gui.simulateInput(ws, 'D_DESIGNATE')
@@ -1054,6 +1133,19 @@ function designate(idx)
     local cmd = designate_cmds[idx]
     for i,v in ipairs(cmd) do
         gui.simulateInput(ws, v)
+    end
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
     end
 
     return true
@@ -1363,6 +1455,7 @@ local handlers = {
         [13] = building_workshop_cancel,
         [14] = building_workshop_reorder,
         [15] = building_workshop_addjob,
+        [16] = building_workshop_profile_get,
 
         [30] = building_room_free,
         [31] = building_room_owner_get_candidates,

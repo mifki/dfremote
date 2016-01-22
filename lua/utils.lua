@@ -52,7 +52,15 @@ function capitalize(str)
 end
 
 function unitname(unit, eng)
-    local name = dfhack.df2utf(dfhack.TranslateName(dfhack.units.getVisibleName(unit), eng):gsub('`', '\''))
+    --xxx: temporary - logs say this was called with nil unit from somewhere several times
+    if not unit then
+        return '#no unit#'
+    end
+
+    --xxx: temporary fix for unitname() still may be called for non-units (like histfigs) somewhere
+    local nameobj = unit._type == df.unit and dfhack.units.getVisibleName(unit) or unit.name
+    
+    local name = dfhack.df2utf(dfhack.TranslateName(nameobj, eng):gsub('`', '\''))
     return string.utf8capitalize(name)
 end
 

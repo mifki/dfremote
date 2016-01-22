@@ -602,16 +602,16 @@ end
 function building_stockpile_getsettings()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        return nil
+        error('not a stockpile')
     end
 
     local ss = bld.settings
@@ -643,7 +643,10 @@ function building_stockpile_getsettings()
                     num_all = (type(group[3]) == 'table') and #group[3] or group[3]
                 end
 
-                table.insert(grps, { group_name, num_enabled, num_all })
+                --todo: maybe not return empty categories? but then need to remove them form schema or adjust index in building_stockpile_setenabled() 
+                --if num_all > 0 then
+                    table.insert(grps, { group_name, num_enabled, num_all })
+                --end
             end
 
             for j,flag in ipairs(flags) do
