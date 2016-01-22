@@ -483,8 +483,9 @@ bool send_map_updates(send_func sendfunc, void *conn)
             {
                 int newwx = std::max(0, (int)roundf(centerdata[0] - newwidth/2.0f));
                 int newwy = std::max(0, (int)roundf(centerdata[1] - newheight/2.0f));
-
-                if (wx != newwx || wy != newwy || *df::global::window_z != centerdata[2])
+                
+                //TODO: by this time, window_z already matches new center, need to use wz
+                if (1 || wx != newwx || wy != newwy || *df::global::window_z != centerdata[2])
                 {
                     *firstb |= (1 << 2);
                     memcpy(b, centerdata, len2);

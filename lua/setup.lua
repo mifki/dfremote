@@ -230,6 +230,7 @@ function setup_get_mapinfo(wtoken)
 
     if #df.global.world.status.announcements > 0 then
         lastann = df.global.world.status.announcements[#df.global.world.status.announcements-1].id
+        lastannrep = df.global.world.status.announcements[#df.global.world.status.announcements-1].repeat_count
     else
         lastann = 0
     end

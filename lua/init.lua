@@ -48,6 +48,7 @@ local lastblderrstr = ''
 local lastblderrsync = 0
 
 lastann = 0
+lastannrep = 0
 local lastextdata = nil
 
 building_btns = {}
@@ -708,30 +709,24 @@ function get_status()
     local hasnewann = false
     local annzoomed = false
     for i,ann in ripairs(df.global.world.status.announcements) do
-        if ann.id <= lastann then
+        if ann.id <= lastann and not (ann.id == lastann and ann.repeat_count > lastannrep) then
             break
         end
 
         local flags = df.global.announcements.flags[ann.type]
         if flags.D_DISPLAY then
             hasnewann = true
-            --break
         end
 
-        if true and flags.D_DISPLAY and flags.RECENTER and ann.pos.x ~= -30000 and not annzoomed then
+        --xxx: the game doesn't update coords for repeating announcements, so no point sending
+        --xxx: but the game has already jumped so until we use wz var, we have to send new center
+        if --[[lastann < ann.id and]] flags.D_DISPLAY and flags.RECENTER and ann.pos.x ~= -30000 and not annzoomed then
             recenter_view(ann.pos.x, ann.pos.y, ann.pos.z)
-            --print ('zooming to',ann.pos.x, ann.pos.y, ann.pos.z)
             annzoomed = true
         end
     end
 
     if #df.global.world.status.popups > 0 then
-        --print (df.global.world.status.popups[#df.global.world.status.popups-1], last_popup)
-        --[[print('game')
-        printall(df.global.world.status.popups)
-        print('sent')
-        printall(sent_popups)]]
-        --if df.global.world.status.popups[#df.global.world.status.popups-1] ~= sent_popups[1] then
         if last_popup ~= df.global.world.status.popups[#df.global.world.status.popups-1] then
             hasnewann = true
         end
@@ -798,7 +793,6 @@ function get_status_ext(needs_sync)
     local centerdata = nil
     if send_center then
         send_center = false
-        --print ('will send center', centerx, centery, centerz)
         centerdata = string.char(centerx, centery, centerz)
     end
 
@@ -1561,6 +1555,7 @@ end
 
 if #df.global.world.status.announcements > 0 then
     lastann = df.global.world.status.announcements[#df.global.world.status.announcements-1].id
+    lastannrep = df.global.world.status.announcements[#df.global.world.status.announcements-1].repeat_count
 end
 
 local remote = {

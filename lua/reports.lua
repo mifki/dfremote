@@ -6,7 +6,7 @@ function announcements_get_new()
     local annzoomed = false
     local cont = ''
     for i,ann in ripairs(df.global.world.status.announcements) do
-        if ann.id <= lastann then
+        if ann.id <= lastann and not (ann.id == lastann and ann.repeat_count > lastannrep) then
             break
         end
 
@@ -28,6 +28,7 @@ function announcements_get_new()
         end
     end
     lastann = df.global.world.status.announcements[#df.global.world.status.announcements-1].id
+    lastannrep = df.global.world.status.announcements[#df.global.world.status.announcements-1].repeat_count
 
     for i,popup in ripairs(df.global.world.status.popups) do
         if popup == last_popup then
