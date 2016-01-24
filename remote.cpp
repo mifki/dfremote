@@ -148,7 +148,7 @@ static string publish_name;
 static long last_publish_attempt;
 static bool mediation_connected;
 
-static std::string pwd_hash;
+static std::string pwd_hash = "";
 
 void remote_publish(string &name);
 
@@ -1129,7 +1129,7 @@ void set_timer(int timeout, string fn)
 
 bool verify_pwd(string pwdhash)
 {
-    return (pwd_hash == pwdhash || (pwd_hash.size() == 0 && pwdhash.size() == 0));
+    return (pwd_hash.size() == 0 || pwd_hash == pwdhash);
 }
 
 bool check_wtoken(unsigned int wtoken)
