@@ -243,7 +243,22 @@ function building_query_selected(bldid)
         local moodinfo = building_workshop_get_mood(bld)
         local workshop_type = (btype ~= df.building_type.Trap and bld.type or bld.trap_type)
 
-        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL }
+        local profile_info = mp.NIL
+        if have_noble('MANAGER') then
+            local min = bld.profile.min_level
+            local max = bld.profile.max_level
+
+            if min == 3000 then
+                min = 15
+            end
+            if max == 3000 then
+                max = 15
+            end
+
+            profile_info = { #bld.profile.permitted_workers, min, max }
+        end
+
+        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info }
 
     elseif btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
         or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
@@ -759,7 +774,7 @@ function building_workshop_profile_get(bldid)
         return nil
     end]]
 
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
     end
@@ -782,7 +797,91 @@ function building_workshop_profile_get(bldid)
         table.insert(workers, { unit_fulltitle(unit), unit.id })
     end
 
-    return { workers, permitted_workers, profile.min_level, profile.max_level }
+    local min = profile.min_level
+    local max = profile.max_level
+
+    if min == 3000 then
+        min = 15
+    end
+    if max == 3000 then
+        max = 15
+    end
+
+    return { workers, permitted_workers, min, max }
+end
+
+function building_workshop_profile_set_minmax(bldid, min, max)
+    --[[local bld = df.building.find(bldid)
+    if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
+        return nil
+    end]]
+
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    local profile = bld.profile
+
+    if min == 15 then
+        min = 3000
+    end
+    if max == 15 then
+        max = 3000
+    end
+
+    profile.min_level = min    
+    profile.max_level = max    
+
+    return true
+end
+
+function building_workshop_profile_set_unit(bldid, unitid, on)
+    --[[local bld = df.building.find(bldid)
+    if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
+        return nil
+    end]]
+
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    local profile = bld.profile
+
+    on = istrue(on)
+
+    if unitid == -1 then
+        if on then
+            profile.permitted_workers:resize(0)
+        end
+
+    else
+        if on then
+            utils.insert_sorted(profile.permitted_workers, unitid)
+        else
+            -- it's not sorted in game, can't use erase_sorted()
+
+            for i,v in ipairs(profile.permitted_workers) do
+                if v == unitid then
+                    profile.permitted_workers:erase(i)
+                    break
+                end
+            end
+        end
+    end
+
+    return true
 end
 
 function building_room_free(bldid)
