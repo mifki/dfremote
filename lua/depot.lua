@@ -46,6 +46,40 @@ function depot_movegoods_get()
     return ret
 end
 
+function depot_movegoods_get2()
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return nil
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    if bld:getType() ~= df.building_type.TradeDepot then
+        return
+    end
+
+    gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
+
+    ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_layer_assigntradest then
+        return mp.NIL
+    end
+
+    gui.simulateInput(ws, 'ASSIGNTRADE_SORT')
+
+    local ret = {}
+    
+    for i,info in ipairs(ws.info) do
+        local title = itemname(info.item, 0, true)
+        table.insert(ret, { title, info.item.id, info.distance, info.status })
+    end
+
+    return ret
+end
+
 function depot_movegoods_set(idx, status)
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -400,6 +434,38 @@ function depot_trade_get_items(their)
 
         --todo: use getStackSize() ?
         table.insert(ret, { title, value, item.weight, sel[i], flags, item.stack_size, counts[i] })
+    end
+
+    return ret
+end
+
+function depot_trade_get_items2(their)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_tradegoodsst then
+        return nil
+    end
+
+    their = istrue(their)
+
+    local items = their and ws.trader_items or ws.broker_items
+    local sel = their and ws.trader_selected or ws.broker_selected
+    local counts = their and ws.trader_count or ws.broker_count
+    local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
+    local creature = df.global.world.raws.creatures.all[ws.entity.race]
+
+    local ret = {}
+
+    for i,item in ipairs(items) do
+        local title = itemname(item, 0, true)
+        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
+
+        local inner = is_contained(item)
+        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN)
+        local stolen = entity_stolen and (df.historical_entity.find(entity_stolen.entity_id) ~= nil)
+        local flags = packbits(inner, stolen, item.flags.foreign)
+
+        --todo: use getStackSize() ?
+        table.insert(ret, { title, item.id, value, item.weight, sel[i], flags, item.stack_size, counts[i] })
     end
 
     return ret

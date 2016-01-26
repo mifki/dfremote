@@ -275,3 +275,33 @@ function generic_item_name(type, subtype, mat_class, mat_type, mat_index, single
 
     return title
 end
+
+function item_zoom(itemid)
+    local item = df.item.find(itemid)
+    if not item then
+        return false
+    end
+
+    local x,y,z = dfhack.items.getPosition(item)
+    if x ~= -30000 then
+        recenter_view(x, y, z)
+
+        local ws = dfhack.gui.getCurViewscreen()
+        gui.simulateInput(ws, 'D_LOOK')
+
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+
+        return true
+    end
+
+    return false
+end

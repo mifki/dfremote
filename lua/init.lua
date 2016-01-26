@@ -1433,9 +1433,11 @@ local handlers = {
         [4] = depot_trade_dotrade,
         [5] = depot_trade_seize,
         [6] = depot_trade_offer,
+        [7] = depot_trade_get_items2,
 
         [20] = depot_movegoods_get,
         [21] = depot_movegoods_set,
+        [22] = depot_movegoods_get2,
 
         [30] = depot_access,
     },
@@ -1521,6 +1523,7 @@ local handlers = {
         [3] = item_get_description,
         [4] = item_get_contained_items,
         [5] = item_get_contained_units,
+        [6] = item_zoom,
     },
 
     [198] = {
