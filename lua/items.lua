@@ -106,6 +106,12 @@ function item_action(itemid, action, value)
     return true
 end
 
+local item_spatter_sizes = {
+    { 0, 'spatter' },
+    { 25, 'smear' },
+    { 50, 'covering' },
+}
+
 function item_query(itemid)
     local item = df.item.find(itemid)
     if not item then
@@ -129,7 +135,34 @@ function item_query(itemid)
         end
     end
 
-    return { realname or dispname, item.id, item.flags.whole, item_can_melt(item), realname and dispname or mp.NIL, value, item.weight, itemscnt, unitscnt }
+    local contaminants = {}
+    if item.contaminants then
+        for i,v in ipairs(item.contaminants) do
+            local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+            if mi then
+                local spattersize = ''
+                for k,w in ripairs_tbl(item_spatter_sizes) do
+                    if v.size >= w[1] then
+                        spattersize = ' ' .. w[2]
+                        break
+                    end
+                end
+
+                local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
+
+                local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
+                local title = creatureprefix .. matprefix .. mi.material.state_name[v.mat_state] .. spattersize
+
+                --todo: any other colors?
+                --local c = df.global.world.raws.language.colors[mi.material.state_color[v.mat_state]]
+                local color = 2 + 8 --c.color + c.bold*8
+
+                table.insert(contaminants, { title, color })
+            end
+        end
+    end
+
+    return { realname or dispname, item.id, item.flags.whole, item_can_melt(item), realname and dispname or mp.NIL, value, item.weight, itemscnt, unitscnt, contaminants }
 end
 
 function item_get_description(itemid)
@@ -305,3 +338,5 @@ function item_zoom(itemid)
 
     return false
 end
+
+--print(pcall(function() return json:encode(item_query(99838)) end))
