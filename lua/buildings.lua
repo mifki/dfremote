@@ -871,7 +871,6 @@ function building_workshop_profile_set_unit(bldid, unitid, on)
             utils.insert_sorted(profile.permitted_workers, unitid)
         else
             -- it's not sorted in game, can't use erase_sorted()
-
             for i,v in ipairs(profile.permitted_workers) do
                 if v == unitid then
                     profile.permitted_workers:erase(i)
@@ -1561,4 +1560,4 @@ function building_well_is_active()
 end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))
-print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))
+--print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))
