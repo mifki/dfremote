@@ -731,7 +731,8 @@ void enthreadmain(ENetHost *server)
             switch (event.type)
             {
             case ENET_EVENT_TYPE_CONNECT:
-                *out2 << "connected " << address2ip(&event.peer->address) << std::endl;
+                if (debug)
+                    *out2 << "connected " << address2ip(&event.peer->address) << std::endl;
 
                 if (event.peer == mediation_peer)
                 {
@@ -768,6 +769,8 @@ void enthreadmain(ENetHost *server)
 
                             if (pwd_hash.size() && pwd_hash != hash)
                             {
+                                *out2 << "invalid password from " << address2ip(&event.peer->address) << std::endl;
+
                                 unsigned char *b = buf;
                                 *(b++) = 128;
                                 *(unsigned short*)b = seq + 1;
@@ -782,6 +785,8 @@ void enthreadmain(ENetHost *server)
                             }
                             else
                             {
+                                *out2 << "client connected from " << address2ip(&event.peer->address) << std::endl;
+
                                 const char *server_ver = NULL;
                                 Lua::PushModulePublic(*out2, L, "remote", "matching_version");
                                 lua_pushlstring(L, ver.c_str(), ver.size());
@@ -864,9 +869,12 @@ void enthreadmain(ENetHost *server)
                     mediation_connected = false;
                 }
                 else if (client_peer == event.peer)
-                    *out2 << "disconnected client" << std::endl;
+                    *out2 << "client disconnected" << std::endl;
                 else
-                    *out2 << "disconnected " << address2ip(&event.peer->address) << std::endl;
+                {
+                    if (debug)
+                        *out2 << "disconnected " << address2ip(&event.peer->address) << std::endl;
+                }
 
                 if (client_peer == event.peer)
                 {
@@ -1007,7 +1015,8 @@ void remote_start()
             *out2 << "Disabled menu-mouse plugin, which is potentially interfering with Remote" << std::endl;
     }
 
-    *out2 << "Dwarf Fortress Remote server listening on port " << enet_port << std::endl;
+    *out2 << COLOR_LIGHTGREEN << "Dwarf Fortress Remote server listening on port " << enet_port << std::endl;
+    *out2 << COLOR_RESET;
 
     wx = *df::global::window_x;
     wy = *df::global::window_y;
@@ -1107,8 +1116,8 @@ bool remote_print_version()
     if (s)
     {
         *out2 << COLOR_LIGHTGREEN << "Dwarf Fortress Remote version " << s << std::endl;
-        *out2 << COLOR_LIGHTGREEN << "Type `help remote` for help." << std::endl;
         *out2 << COLOR_RESET;
+        *out2 << "Type `help remote` for help." << std::endl;
 
         return true;
     }
