@@ -600,7 +600,7 @@ function stockpile_settings_schema()
 end
 
 function building_stockpile_getsettings()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen')
     end
@@ -669,18 +669,18 @@ end
 
 --todo: support passing path as the first param
 function building_stockpile_setenabled(...)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        return
+        error('not a stockpile')
     end
 
     local path = table.pack(...)
@@ -764,18 +764,18 @@ function building_stockpile_setenabled(...)
 end
 
 function building_stockpile_setflag(group, flag, enabled)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        return
+        error('not a stockpile')
     end
 
     enabled = istrue(enabled)
@@ -805,18 +805,18 @@ function building_stockpile_setflag(group, flag, enabled)
 end
 
 function building_stockpile_setmax(barrels, bins, wheelbarrows)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        return
+        error('not a stockpile')
     end
 
     bld.max_barrels = barrels

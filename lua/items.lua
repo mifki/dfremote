@@ -45,13 +45,13 @@ function item_is_fort_owned(item)
 end
 
 function building_get_contained_items(bldid)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local ret = {}
@@ -71,7 +71,7 @@ function item_action(itemid, action, value)
     local item = df.item:is_instance(itemid) and itemid or df.item.find(itemid)
 
     if not item then
-        return false
+        error('no item '..tostring(itemid))
     end
 
     value = istrue(value)
@@ -115,7 +115,7 @@ local item_spatter_sizes = {
 function item_query(itemid)
     local item = df.item.find(itemid)
     if not item then
-        return nil
+        error('no item '..tostring(itemid))
     end
 
     local dispname,realname = itemname(item, 0, true)
@@ -168,7 +168,7 @@ end
 function item_get_description(itemid)
     local item = df.item.find(itemid)
     if not item then
-        return nil
+        error('no item '..tostring(itemid))
     end
 
     local itemws = df.viewscreen_itemst:new()
@@ -201,7 +201,7 @@ end
 function item_get_contained_items(itemid)
     local item = df.item.find(itemid)
     if not item then
-        return nil
+        error('no item '..tostring(itemid))
     end
 
     local ret = {}
@@ -222,7 +222,7 @@ end
 function item_get_contained_units(itemid)
     local item = df.item.find(itemid)
     if not item then
-        return nil
+        error('no item '..tostring(itemid))
     end
 
     local ret = {}

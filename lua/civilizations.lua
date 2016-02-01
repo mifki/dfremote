@@ -18,7 +18,7 @@ end
 function civilization_get_info(civid)
     local civ = df.historical_entity.find(civid)
     if not civ then
-        return nil
+        error('no civ '..tostring(civid))
     end
 
     local civsws = df.viewscreen_civlistst:new()
@@ -99,7 +99,7 @@ end
 function civilization_get_agreement(civid, idx)
     local civ = df.historical_entity.find(civid)
     if not civ then
-        return nil
+        error('no civ '..tostring(civid))
     end
 
     local civsws = df.viewscreen_civlistst:new()

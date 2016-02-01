@@ -93,13 +93,13 @@ end
 function unit_query_selected(unitid)
     local unit
     if not unitid or unitid == -1 or unitid == 0 then
-        local ws = dfhack.gui.getCurViewscreen()
+        local ws = screen_main()
         if ws._type ~= df.viewscreen_dwarfmodest then
-            return nil
+            error('wrong screen')
         end
 
         if df.global.ui.main.mode ~= 24 or df.global.ui_selected_unit == -1 then
-            return nil
+            error('no selected unit')
         end
 
         unit = df.global.world.units.active[df.global.ui_selected_unit]
@@ -107,7 +107,7 @@ function unit_query_selected(unitid)
         unit = df.unit.find(unitid)
 
         if not unit then
-            return nil
+            error('no unit '..tostring(unitid))
         end
     end
 
@@ -753,7 +753,7 @@ function unit_get_thoughts(unitid, is_histfig)
     if istrue(is_histfig) then
         local hf = df.historical_figure.find(unitid)
         if not hf then
-            return
+            error('no hfname '..tostring(unitid))
         end
 
         local dummyunit
@@ -783,7 +783,7 @@ function unit_get_thoughts(unitid, is_histfig)
     else
         local unit = df.unit.find(unitid)
         if not unit then
-            return
+            error('no unit '..tostring(unitid))
         end
 
         --xxx: this method creates an extra screen but doesn't require to check isCitizen and other flags we're unaware of
@@ -951,7 +951,7 @@ local relations_hf = {
 function unit_get_relationships(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
     local unitws = df.viewscreen_unitst:new()
@@ -1054,7 +1054,7 @@ local inventory_item_modes = {
 function unit_get_inventory(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
     local ret = {}
@@ -1090,7 +1090,7 @@ local skill_class_names = {
 function unit_get_skills(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
     local ret = {}
@@ -1119,7 +1119,7 @@ end
 function unit_get_health(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
     if not have_noble('CHIEF_MEDICAL_DWARF') then
@@ -1172,7 +1172,7 @@ end
 function unit_customize(unitid, nickname, profname)
     local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
     if nickname ~= nil then

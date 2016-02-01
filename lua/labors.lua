@@ -283,7 +283,7 @@ function labors_get_dwarves_with_labor(laboridx)
 	local labor = find_labor_obj(laboridx)
 
     if not labor then
-        return
+        error('no labor ' .. tostring(laboridx))
     end
 
     local enabled = {}
@@ -358,7 +358,7 @@ end
 function labors_get_dwarf_labors(unitid)
 	local unit = df.unit.find(unitid)
     if not unit then
-        return
+        error('no unit '..tostring(unitid))
     end
 
 	local ulabors = unit.status.labors
@@ -389,6 +389,7 @@ function labors_get_dwarf_labors(unitid)
             ret[labor[3]+1] = { ulabors[labor[3]], rating }
         end
     end
+    
 	return ret	
 end
 

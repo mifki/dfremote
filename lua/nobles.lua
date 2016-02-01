@@ -356,7 +356,7 @@ end
 function noble_get_reqs(code, unitid)
     local unit = unitid and unitid ~= -1 and df.unit.find(unitid) or find_noble(code)
     if not unit then
-        return nil
+        error('no unit '..tostring(code)..' '..tostring(unitid))
     end
 
     local owns = {}

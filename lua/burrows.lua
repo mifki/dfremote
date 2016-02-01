@@ -56,7 +56,7 @@ function burrow_get_info(id)
 
 	local burrow = df.burrow.find(id)
 	if not burrow then
-		return nil
+		error('no burrow '..tostring(id))
 	end
 
 	return { burrowname(burrow), id, #burrow.units, burrow.limit_workshops, burrow.name }
@@ -65,7 +65,7 @@ end
 function burrow_limit_workshops(id, limit)
 	local burrow = df.burrow.find(id)
 	if not burrow then
-		return
+		error('no burrow '..tostring(id))
 	end
 
 	burrow.limit_workshops = istrue(limit) and 1 or 0
@@ -114,7 +114,7 @@ end
 function burrow_get_units(id)
 	local burrow = df.burrow.find(id)
 	if not burrow then
-		return
+		error('no burrow '..tostring(id))
 	end
 
 	--local added = {}
@@ -141,12 +141,12 @@ end
 function burrow_set_unit(id, unitid, enable)
 	local burrow = df.burrow.find(id)
 	if not burrow then
-		return
+		error('no burrow '..tostring(id))
 	end
 
 	local unit = df.unit.find(unitid)
 	if not unit then
-		return
+		error('no unit '..tostring(unitid))
 	end
 
 	dfhack.burrows.setAssignedUnit(burrow, unit, istrue(enable))
@@ -155,12 +155,14 @@ function burrow_set_unit(id, unitid, enable)
 end
 
 function burrow_set_name(id, name)
-	local b = df.burrow.find(id)
-	if not b then
-		return
+	local burrow = df.burrow.find(id)
+	if not burrow then
+		error('no burrow '..tostring(id))
 	end
 
-	b.name = name
+	burrow.name = name
+
+	return true
 end
 
 function burrow_zoom(id)

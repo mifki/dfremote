@@ -80,7 +80,7 @@ end
 function justice_get_crime_details(crimeid)
 	local v = df.crime.find(crimeid)
 	if not v then
-		return nil
+		error('no crime '..tostring(crimeid))
 	end
 
 	local victim = df.unit.find(v.victim)
@@ -115,7 +115,7 @@ end
 function justice_get_convict_info(unitid)
 	local unit = df.unit.find(unitid)
 	if not unit then
-		return
+		error('no unit '..tostring(unitid))
 	end
 
 	local officer = nil
