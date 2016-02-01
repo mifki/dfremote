@@ -363,39 +363,43 @@ function get_look_list(detailed)
             --todo: hazel tree seeds -> hazel nuts
             --todo: oak seed -> acorns
 
-            if v.spatter_item_type == df.item_type.PLANT_GROWTH then
-                title = mi.plant.growths[v.spatter_item_subtype].name_plural
-                color = 2
+            --todo: what are the situations mi == nil ?
+            if mi then
+                if v.spatter_item_type == df.item_type.PLANT_GROWTH then
+                    title = mi.plant.growths[v.spatter_item_subtype].name_plural
+                    color = 2
 
-            --todo: what are situations v.spatter_item_type == -1 but mi == nil ?
-            elseif v.spatter_item_type == -1 and mi then
-                --<a spattering of> <Urist McMiner> <dwarf> <blood>
+                elseif v.spatter_item_type == -1 then
+                    --<a spattering of> <Urist McMiner> <dwarf> <blood>
 
-                local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.spatter_size+1] or ''
-                if #spatterprefix > 0 then
-                    spatterprefix = spatterprefix .. ' '
+                    local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.spatter_size+1] or ''
+                    if #spatterprefix > 0 then
+                        spatterprefix = spatterprefix .. ' '
+                    end
+
+                    local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
+
+                    local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
+                    title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
+
+                    local c = df.global.world.raws.language.colors[mi.material.state_color[v.spatter_mat_state]]
+                    color = c.color + c.bold*8
+
+                else
+                    title = mi.material.prefix .. ' ' .. mi.material.state_name.Solid
+                    color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
                 end
-
-                local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
-
-                local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
-                title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
-
-                local c = df.global.world.raws.language.colors[mi.material.state_color[v.spatter_mat_state]]
-                color = c.color + c.bold*8
-
-            else
-                title = mi.material.prefix .. ' ' .. mi.material.state_name.Solid
-                color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
-            end 
+            end
         end
 
         --title = dfhack.df2utf(title)
 
-        if detailed then
-            table.insert(ret, { title, color, t, table.unpack(data) })
-        else
-            table.insert(ret, { title, color })
+        if #title > 0 then
+            if detailed then
+                table.insert(ret, { title, color, t, table.unpack(data) })
+            else
+                table.insert(ret, { title, color })
+            end
         end
     end
 
