@@ -34,7 +34,7 @@ function waypoints_nearest_point()
 		return nil
 	end
 
-	local dist = 30000
+	local dist = 999999
 	local pt = nil
 
 	for i,v in ipairs(df.global.ui.waypoints.points) do
