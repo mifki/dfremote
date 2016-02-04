@@ -267,7 +267,7 @@ function building_query_selected(bldid)
         or btype == df.building_type.Chain or btype == df.building_type.Well then
 
         local owner = bld.owner
-        local ownername = bld.owner and unit_fulltitle(owner) or ''
+        local ownername = owner and unit_fulltitle(owner) or ''
         local ownerprof = owner and unitprof(owner) or '' --todo: unused because fulltitle already includes profession
         ret = { btype, genflags, bname, bld.is_room, ownername, ownerprof }
 

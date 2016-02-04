@@ -317,6 +317,10 @@ end
 
 --todo: this should probably return the colour as well
 function unit_fulltitle(unit)
+    if not unit then
+        return '#no unit, please report#'
+    end
+    
     local uname = unitname(unit)
     local fullprof = unit_fullprof(unit)
     local fullname = (#uname>0 and uname .. ', ' or '') .. fullprof

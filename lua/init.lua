@@ -205,7 +205,7 @@ function get_look_list(detailed)
                 data = { bld.id }
             end
 
-        elseif t == df.ui_look_list.T_items.T_type.Unit then
+        elseif t == df.ui_look_list.T_items.T_type.Unit and v.unit then
             title = unit_fulltitle(v.unit)
             --xxx: game shows all units in white in loo[k] mode
             color = 15 --dfhack.units.getProfessionColor(v.unit)
