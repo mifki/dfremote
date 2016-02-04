@@ -150,7 +150,7 @@ local flow_type_names = {
     'ItemCloud'
 }
 
-local grass_density = { 'Sparse', '', 'Dense', }
+local grass_density_prefix = { 'Sparse ', '', 'Dense ' }
 
 local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
 
@@ -255,10 +255,12 @@ function get_look_list(detailed)
                     end
                 end
 
-                local plant = plant_index ~= -1 and df.plant_raw.find(plant_index)
-                local density = grass_density[math.floor(amount/33.4)+1]
+                local plant = plant_index ~= -1 and df.plant_raw.find(plant_index) or nil
 
-                title = density .. (#density > 0 and ' ' or '') .. (plant and plant.name or 'grass')
+                --todo: check the formula, the resulting density is reported to be nil sometimes
+                local density = grass_density_prefix[math.floor(amount/33.4)+1] or ''
+
+                title = density .. (plant and plant.name or 'grass')
             
             elseif ttmat == df.tiletype_material.MUSHROOM or ttmat == df.tiletype_material.ROOT or
                 ttmat == df.tiletype_material.TREE or ttmat == df.tiletype_material.PLANT then
