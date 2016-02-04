@@ -86,6 +86,11 @@ function zone_information_get(bldid, mode)
             gui.simulateInput(ws, 'CIVZONE_POND_OPTIONS')
 
             for i,v in ipairs(df.global.ui_building_assign_type) do
+                --xxx: this shouldn't happen, but was reported. bug in game? 
+                if i >= #df.global.ui_building_assign_is_marked or i >= #df.global.ui_building_assign_units or i >= #df.global.ui_building_assign_items then
+                    break
+                end
+
                 local title = '?something?'
                 local obj = nil
                 local is_assigned = istrue(df.global.ui_building_assign_is_marked[i])
@@ -153,18 +158,27 @@ function zone_assign(bldid, mode, objid, objtype, on)
     execute_with_selected_zone(bldid, function(ws)
         gui.simulateInput(ws, (mode == df.building_civzonest.T_zone_flags.pit_pond and 'CIVZONE_POND_OPTIONS' or 'CIVZONE_PEN_OPTIONS'))
 
-        for i,v in ipairs(df.global.ui_building_assign_type) do
-            if (objtype == 0 and v == 0 and df.global.ui_building_assign_units[i].id == objid) or
-                (objtype == 1 and v == 1 and df.global.ui_building_assign_items[i].id == objid) then
-                if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
-                    df.global.ui_building_item_cursor = i
-                    local ws = dfhack.gui.getCurViewscreen()
-                    gui.simulateInput(ws, 'SELECT')
-                end
+        local vect = nil
+        if objtype == 0 then
+            vect = df.global.ui_building_assign_units
+        elseif objtype == 1 then
+            vect = df.global.ui_building_assign_items
+        end
 
-                break
+        if vect then
+            for i,v in ipairs(vect) do
+                if v and v.id == objid then
+                    if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
+                        df.global.ui_building_item_cursor = i
+                        local ws = dfhack.gui.getCurViewscreen()
+                        gui.simulateInput(ws, 'SELECT')
+                    end
+
+                    break            
+                end
             end
-        end    
+        end
+
     end)
 end
 
