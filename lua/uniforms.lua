@@ -270,6 +270,11 @@ function uniform_apply(squadid, unitid, uniid)
 		return
 	end
 
+	--xxx: temporary until this is fixed in publicly available app version
+	if unitid == 0 then
+		unitid = -1
+	end
+
     return execute_with_military_screen(function(ws)
     	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
     	gui.simulateInput(ws, 'D_MILITARY_EQUIP_UNIFORM')
