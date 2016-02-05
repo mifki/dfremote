@@ -74,7 +74,7 @@ function depot_movegoods_get2()
     
     for i,info in ipairs(ws.info) do
         local title = itemname(info.item, 0, true)
-        table.insert(ret, { title, info.item.id, info.distance, info.status })
+        table.insert(ret, { title, info.item.id, info.status, info.status }) -- .distance
     end
 
     return ret
