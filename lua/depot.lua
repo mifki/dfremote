@@ -15,23 +15,23 @@ end
 function depot_movegoods_get()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.TradeDepot then
-        return
+        error('not a depot')
     end
 
     gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
 
     ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_layer_assigntradest then
-        return mp.NIL
+        error('can not switch to move goods screen')
     end
 
     gui.simulateInput(ws, 'ASSIGNTRADE_SORT')
@@ -49,23 +49,23 @@ end
 function depot_movegoods_get2()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.TradeDepot then
-        return
+        error('not a depot')
     end
 
     gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
 
     ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_layer_assigntradest then
-        return mp.NIL
+        error('can not switch to move goods screen')
     end
 
     gui.simulateInput(ws, 'ASSIGNTRADE_SORT')
@@ -316,7 +316,7 @@ end
 function depot_calculate_profit()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
-        return nil
+        error('wrong screen')
     end
 
     local creature = df.global.world.raws.creatures.all[ws.entity.race]    
@@ -341,12 +341,12 @@ function depot_trade_overview()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
         if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-            return nil
+            error('no selected building')
         end
 
         local bld = df.global.world.selected_building
         if bld:getType() ~= df.building_type.TradeDepot then
-            return nil
+            error('not a depot')
         end
     
         gui.simulateInput(ws, 'BUILDJOB_DEPOT_TRADE')
@@ -358,7 +358,7 @@ function depot_trade_overview()
         ws:render() --to populate item lists
 
         if ws._type ~= df.viewscreen_tradegoodsst then
-            return mp.NIL
+            error('can not switch to trade screen')
         end        
     end
 
@@ -410,7 +410,7 @@ end
 function depot_trade_get_items(their)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
-        return nil
+        error('wrong screen')
     end
 
     their = istrue(their)
@@ -442,7 +442,7 @@ end
 function depot_trade_get_items2(their)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
-        return nil
+        error('wrong screen')
     end
 
     their = istrue(their)
@@ -566,7 +566,7 @@ end
 function depot_access()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     reset_main()

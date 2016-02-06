@@ -6,7 +6,7 @@ function worldgen_status()
     end
 
     if ws._type ~= df.viewscreen_new_regionst then
-        return nil
+        error('wrong screen')
     end
 
     if ws.unk_b4 ~= 0 then
@@ -14,7 +14,7 @@ function worldgen_status()
     end
 
     if (istrue(ws.simple_mode) or istrue(ws.in_worldgen)) and not worldgen_params then
-        return nil
+        error('wrong state')
     end
 
     local state = df.global.world.worldgen_status.state
@@ -58,7 +58,7 @@ function worldgen_accept()
     local ws = dfhack.gui.getCurViewscreen()
 
     if ws._type ~= df.viewscreen_new_regionst then
-        return nil
+        error('wrong screen')
     end
 
     if istrue(ws.worldgen_paused) then
@@ -66,18 +66,20 @@ function worldgen_accept()
     elseif df.global.world.worldgen_status.state == 10 then
         gui.simulateInput(ws, 'SELECT')        
     end
+
+    return true
 end
 
 function worldgen_cancel()
     local ws = dfhack.gui.getCurViewscreen()
 
     if ws._type ~= df.viewscreen_new_regionst then
-        return nil
+        error('wrong screen')
     end
 
     -- Loading raws, can't cancel
     if ws.unk_b4 ~= 0 then
-        return nil
+        return
     end
 
     if istrue(ws.simple_mode) or istrue(ws.in_worldgen) then

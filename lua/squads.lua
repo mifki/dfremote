@@ -86,7 +86,7 @@ end
 function squads_get_info()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then

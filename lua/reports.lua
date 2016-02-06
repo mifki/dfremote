@@ -105,7 +105,7 @@ end
 function reports_get(unitid, rtype)
     local unit = df.unit.find(unitid)
     if not unit then
-        return nil
+        error('no unit '..tostring(unitid))
     end
 
     local ret = {}

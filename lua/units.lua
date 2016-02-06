@@ -757,7 +757,7 @@ function unit_get_thoughts(unitid, is_histfig)
     if istrue(is_histfig) then
         local hf = df.historical_figure.find(unitid)
         if not hf then
-            error('no hfname '..tostring(unitid))
+            error('no hf '..tostring(unitid))
         end
 
         local dummyunit
@@ -829,7 +829,7 @@ function unit_get_thoughts(unitid, is_histfig)
     ws.breakdown_level = 2
 
     if ws._type ~= df.viewscreen_textviewerst then
-        return nil
+        error('can not switch to thoughts screen')
     end
 
     local text = ''
@@ -965,7 +965,7 @@ function unit_get_relationships(unitid)
 
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_layer_unit_relationshipst then
-        return nil
+        error('can not switch to relationships screen')
     end
 
     local ret = {}
@@ -1137,7 +1137,7 @@ function unit_get_health(unitid)
 
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_layer_unit_healthst then
-        return nil
+        error('can not switch to health screen')
     end
 
     local ret = {}

@@ -106,7 +106,7 @@ end
 function alert_set_burrow(id, burrowid, enabled)
     local alert = alert_find_by_id(id)
     if not alert then
-        return nil
+        error('no alert '..tostring(id))
     end
 
     if istrue(enabled) then
@@ -119,8 +119,10 @@ end
 function alert_set_name(id, name)
     local alert = alert_find_by_id(id)
     if not alert then
-        return nil
+        error('no alert '..tostring(id))
     end
 
     alert.name = name
+
+    return true
 end

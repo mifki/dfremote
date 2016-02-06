@@ -541,7 +541,7 @@ function noble_get_demands(unitid)
     if unitid then
         local unit = df.unit.find(unitid)
         if not unit then
-            return nil
+            error('no unit '..tostring(unitid))
         end
 
         process_demands(unit, ret)

@@ -218,7 +218,7 @@ end
 
 function setup_get_mapinfo(wtoken)
     if screen_main()._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     --todo: detect world change here and reset cached designations, buildings, labors

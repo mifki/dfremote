@@ -183,13 +183,13 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
     	local crime = focus_crime(ws, crimeid)
 
     	if not crime or crime.convicted ~= -1 or not crime.flags.needs_trial then
-    		return
+    		error('no crime or convicted or no trial '..tostring(crimeid))
     	end
 
 		gui.simulateInput(ws, 'SELECT')	
 
 		if ws.cur_column ~= 2 then
-			return
+			error('can not switch to choices list')
 		end
 
 		local ret = {}
@@ -219,13 +219,13 @@ function justice_convict(crimeid, unitid)
     	local crime = focus_crime(ws, crimeid)
 
     	if not crime or crime.convicted ~= -1 or not crime.flags.needs_trial then
-    		return
+    		error('no crime or convicted or no trial '..tostring(crimeid))
     	end
 
 		gui.simulateInput(ws, 'SELECT')	
 
 		if ws.cur_column ~= 2 then
-			return
+			error('can not switch to choices list')
 		end
 
 		for i,unit in ipairs(ws.convict_choices) do
@@ -233,9 +233,11 @@ function justice_convict(crimeid, unitid)
 				ws.cursor_right = i
 				gui.simulateInput(ws, 'SELECT')
 
-				return
+				return true
 			end
 		end
+
+		error('can not find unit '..tostring(unitid))
 	end)	
 end
 

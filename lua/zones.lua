@@ -120,7 +120,7 @@ end
 function zone_information_set(bldid, mode, option, value)
     local zone = df.building.find(bldid)
     if not zone or zone:getType() ~= df.building_type.Civzone then
-        return nil
+        error('no zone or not a zone'..tostring(bldid))
     end
 
     if mode == df.building_civzonest.T_zone_flags.gather then

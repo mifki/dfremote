@@ -124,7 +124,7 @@ end
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     local bld
@@ -135,7 +135,7 @@ function building_query_selected(bldid)
     end
 
     if not bld then
-        return nil
+        error('no building '..tostring(bldid))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building ~= bld then
@@ -573,11 +573,11 @@ local glasses = { 'green glass', 'clear glass', 'crystal glass' }
 function building_workshop_get_jobchoices(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     local ret = {}
@@ -679,17 +679,17 @@ local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP
 function building_workshop_addjob(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
 
     if #bld.jobs >= 10 then
-        return nil
+        error('too many jobs')
     end
 
     if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then
@@ -766,6 +766,8 @@ function building_workshop_addjob(bldid, idx)
 
         btn:click()
     end
+
+    return true
 end
 
 function building_workshop_profile_get(bldid)
@@ -923,18 +925,17 @@ end
 
 local room_candidate_ids = {}
 function building_room_owner_get_candidates(bldid)
-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     if not df.global.world.selected_building.is_room then
-        return nil
+        error('not a room')
     end
 
     local keys = {
@@ -1155,15 +1156,15 @@ end
 function building_room_set_squaduse(bldid, squadid, mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     if not df.global.world.selected_building.is_room then
-        return nil
+        error('not a room')
     end
 
     local bld = df.global.world.selected_building
@@ -1171,7 +1172,7 @@ function building_room_set_squaduse(bldid, squadid, mode)
 
     local squad = df.squad.find(squadid)
     if not squad then
-        return
+        error('no squad '..tostring(squadid))
     end
 
     if btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
@@ -1235,6 +1236,8 @@ function building_room_set_squaduse(bldid, squadid, mode)
         --TODO: is this enough?
         df.global.ui.equipment.update.buildings = true
     end
+
+    return true
 end
 
 
@@ -1433,11 +1436,11 @@ local assign_animal_keys = {
 function building_assign_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return nil
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return nil
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building

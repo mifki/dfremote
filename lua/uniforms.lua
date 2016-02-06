@@ -53,7 +53,7 @@ end
 function uniform_get_info(id)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
-		return nil
+		error('no uniform '..tostring(id))
 	end
 
 	local items = {}
@@ -105,19 +105,23 @@ end
 function uniform_set_name(id, name)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
-		return nil
+		error('no uniform '..tostring(id))
 	end
 
 	uniform.name = name
+
+	return true
 end
 
 function uniform_set_flags(id, flags)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
-		return nil
+		error('no uniform '..tostring(id))
 	end
 
 	uniform.flags.whole = flags
+
+	return true
 end
 
 uniform_additem_keys = {
