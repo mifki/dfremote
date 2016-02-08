@@ -139,11 +139,11 @@ end
 function squads_cancel_order(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -159,11 +159,11 @@ end
 function squads_order_move(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -179,11 +179,11 @@ end
 function squads_order_attack_list(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -201,11 +201,11 @@ end
 function squads_order_attack_rect(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -224,11 +224,11 @@ end
 function squads_order_attack_map(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -245,17 +245,17 @@ end
 function squads_attack_list_get(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     local squadsui = df.global.ui.squads
 
     if not squadsui.in_kill_list then
-    	return
+    	error('wrong state')
     end
 
     local ret = {}
@@ -271,17 +271,17 @@ end
 function squads_attack_list_confirm(idxs)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen')
     end
 
     if df.global.ui.main.mode ~= 1 then
-        return
+        error('wrong mode')
     end
 
     local squadsui = df.global.ui.squads
 
     if not squadsui.in_kill_list then
-    	return
+    	error('wrong state')
     end
 
     for i=0,#df.global.ui.squads.sel_kill_targets-1 do
@@ -300,12 +300,12 @@ end
 function squad_set_alert(id, alertid, retain)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
-        return
+        error('no squad '..tostring(id))
     end    
 
     local idx = alert_id2index(alertid)
     if idx == -1 then
-        return
+        error('no alert '..tostring(alertid))
     end
 
     execute_with_military_screen(function(ws)
@@ -357,7 +357,7 @@ end
 function squad_set_supplies(id, water, food)
     local squad = df.squad.find(id)
     if not squad then
-        return
+        error('no squad '..tostring(id))
     end
 
     squad.carry_water = water
@@ -365,21 +365,25 @@ function squad_set_supplies(id, water, food)
 
     df.global.ui.equipment.update.backpack = true    
     df.global.ui.equipment.update.flask = true
+
+    return true
 end
 
 function squad_set_name(id, name)
     local squad = df.squad.find(id)
     if not squad then
-        return
+        error('no squad '..tostring(id))
     end
 
     squad.alias = name
+
+    return true
 end
 
 function squad_get_info(id)
     local squad = df.squad.find(id)
     if not squad then
-        return
+        error('no squad '..tostring(id))
     end
 
     local name = squadname(squad)

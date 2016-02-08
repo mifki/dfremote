@@ -689,7 +689,7 @@ function building_workshop_addjob(bldid, idx)
     local bld = df.global.world.selected_building
 
     if #bld.jobs >= 10 then
-        error('too many jobs')
+        return --error('too many jobs')
     end
 
     if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then
