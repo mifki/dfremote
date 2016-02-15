@@ -1,3 +1,15 @@
+local function animal_is_geldable(unit)
+	local bparts = df.global.world.raws.creatures.all[unit.race].caste[unit.caste].body_info.body_parts
+
+	for i,v in ipairs(bparts) do
+		if v.flags[38] then --xxxdfhack: .GELDABLE in 0.42
+			return true
+		end
+	end
+
+	return false
+end
+
 --todo: convert this to use list from animals screen
 --todo: support vermin
 function animals_get()
@@ -21,7 +33,7 @@ function animals_get()
 
 			local geld = unit.flags3[29]
 			local gelded = unit.flags3.gelded
-			local can_geld = unit.sex == 1 --todo: set this properly - stores somewhere in race/caste
+			local can_geld = not gelded and unit.sex == 1 and animal_is_geldable(unit)
 			
 			local trainable = not work and not owner and unit.profession ~= df.profession.CHILD
 			local trainable_war = trainable and caste.flags.TRAINABLE_WAR 
@@ -31,7 +43,7 @@ function animals_get()
 
 			local training = (trainable_war or trainable_hunting) and df.training_assignment.find(unit.id)
 			local trainer = (training and training.trainer_id ~= -1) and df.unit.find(training.trainer_id) or nil
-			local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or false
+			local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or mp.NIL
 
 			--xxx: I'm quite sure there will be no units with id 0,1,2, so let's use these values for our special cases
 			local trainerid = training and (trainer and trainer.id or bit32.band(training.auto_mode, 3)) or 0
