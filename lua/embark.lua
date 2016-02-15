@@ -513,7 +513,7 @@ end
 function embark_back_to_map()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_setupdwarfgamest then
-		error('wrong screen')
+		error('wrong screen '..tostring(ws._type))
 	end
 
 	ws.parent.breakdown_level = 0
