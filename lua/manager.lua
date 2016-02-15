@@ -25,60 +25,37 @@ end
 local order_templates = nil
 local order_template_names = nil
 
-function get_manager_orders_screen()
-    local ws = dfhack.gui.getCurViewscreen()
-    
-    if ws._type == df.viewscreen_createquotast then
-        return ws
-    end
-
-    if ws._type == df.viewscreen_dwarfmodest then
-        df.global.ui.main.mode = 0
-        gui.simulateInput(ws, 'D_JOBLIST')
-        ws = dfhack.gui.getCurViewscreen()
-        gui.simulateInput(ws, 'UNITJOB_MANAGER')
-        ws = dfhack.gui.getCurViewscreen()
-        gui.simulateInput(ws, 'MANAGER_NEW_ORDER')
-        --ws = dfhack.gui.getCurViewscreen()
-        --ws.page_cursor = 1 --todo: visible_pages
-        --gui.simulateInput(ws, 'SELECT')
-
-        return dfhack.gui.getCurViewscreen()
-    end   
-end
-
 local function populate_order_templates()
-	--todo: convert this to use execute_with function
-	local ws = get_manager_orders_screen()
-	order_templates = {}
-	order_template_names = {}
+	execute_with_manager_orders_screen(function(ws)
+		order_templates = {}
+		order_template_names = {}
 
-	for i,o in ipairs(ws.orders) do
-		local btn = df.interface_button_building_new_jobst:new()
-		btn.reaction_name = o.reaction_name
-		btn.hist_figure_id = o.hist_figure_id
-		btn.job_type = o.job_type
-		btn.item_type = o.item_type
-		btn.item_subtype = o.item_subtype
-		btn.mat_type = o.mat_type
-		btn.mat_index = o.mat_index
-		btn.item_category.whole = o.item_category.whole
-		btn.material_category.whole = o.material_category.whole
-		table.insert(order_template_names, utils.call_with_string(btn, 'getLabel'))
+		for i,o in ipairs(ws.orders) do
+			local btn = df.interface_button_building_new_jobst:new()
+			btn.reaction_name = o.reaction_name
+			btn.hist_figure_id = o.hist_figure_id
+			btn.job_type = o.job_type
+			btn.item_type = o.item_type
+			btn.item_subtype = o.item_subtype
+			btn.mat_type = o.mat_type
+			btn.mat_index = o.mat_index
+			btn.item_category.whole = o.item_category.whole
+			btn.material_category.whole = o.material_category.whole
+			table.insert(order_template_names, utils.call_with_string(btn, 'getLabel'))
 
-		local ot = {}
-		ot.reaction_name = o.reaction_name
-		ot.hist_figure_id = o.hist_figure_id
-		ot.job_type = o.job_type
-		ot.item_type = o.item_type
-		ot.item_subtype = o.item_subtype
-		ot.mat_type = o.mat_type
-		ot.mat_index = o.mat_index
-		ot.item_category_whole = o.item_category.whole
-		ot.material_category_whole = o.material_category.whole
-		table.insert(order_templates, ot)
-	end
-	close_all()
+			local ot = {}
+			ot.reaction_name = o.reaction_name
+			ot.hist_figure_id = o.hist_figure_id
+			ot.job_type = o.job_type
+			ot.item_type = o.item_type
+			ot.item_subtype = o.item_subtype
+			ot.mat_type = o.mat_type
+			ot.mat_index = o.mat_index
+			ot.item_category_whole = o.item_category.whole
+			ot.material_category_whole = o.material_category.whole
+			table.insert(order_templates, ot)
+		end
+	end)
 end
 
 function manager_get_ordertemplates(fromidx) 

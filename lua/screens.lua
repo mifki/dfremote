@@ -123,3 +123,36 @@ function execute_with_status_page(pageid, fn)
         return ret
 	end)
 end
+
+function execute_with_manager_screen(fn)
+	local jobsws = df.viewscreen_joblistst:new()
+	gui.simulateInput(jobsws, 'UNITJOB_MANAGER')
+	jobsws:delete()
+
+	local managerws = dfhack.gui.getCurViewscreen()
+
+	local ok,ret = pcall(fn, managerws)
+
+	managerws.breakdown_level = 2
+
+	if not ok then
+		error (ret)
+	end
+	return ret
+end
+
+function execute_with_manager_orders_screen(fn)
+	return execute_with_manager_screen(function(ws)
+		gui.simulateInput(ws, 'MANAGER_NEW_ORDER')
+		local ordersws = dfhack.gui.getCurViewscreen()
+
+		local ok,ret = pcall(fn, ordersws)
+
+		ordersws.breakdown_level = 2
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end
