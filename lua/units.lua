@@ -144,7 +144,9 @@ function unit_query_selected(unitid)
         end
     end
 
-    return { uname, uname_en, unit.id, unit.sex, prof, profcolor, jobtitle, jobcolor, flags, effects, custom_name, custom_prof, positions }
+    local num_assigned_animals = #unit_get_assigned_animals(unit.id)
+
+    return { uname, uname_en, unit.id, unit.sex, prof, profcolor, jobtitle, jobcolor, flags, effects, custom_name, custom_prof, positions, num_assigned_animals }
 end
 
 function unit_get_squad(unit)
@@ -459,7 +461,7 @@ end
 function units_list_dwarves()
     return execute_with_units_screen(function(ws)
         local ret = {}
-        
+
         for i,unit in ipairs(ws.units[0]) do
             table.insert(ret, unitlist_process_citizen(unit))
         end
@@ -1218,3 +1220,56 @@ function unit_assigned_status(unit, bld)
 
     return 0
 end
+
+function unit_get_assigned_animals(unitid)
+    local ret = {}
+
+    for i,unit in ipairs(df.global.world.units.active) do
+        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
+            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+
+            if work and unit.relations.pet_owner_id == unitid then
+                local name = unit_fulltitle(unit)
+
+                table.insert(ret, { name, unit.id, unit.sex })
+            end
+        end
+    end
+
+    return ret
+end
+
+function unit_get_assign_animal_choices(unitid)
+    local ret = {}
+
+    for i,unit in ipairs(df.global.world.units.active) do
+        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
+            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+
+            if work and unit.relations.pet_owner_id == -1 then
+                local name = unit_fulltitle(unit)
+
+                table.insert(ret, { name, unit.id, unit.sex })
+            end
+        end
+    end
+
+    return ret
+end
+
+function unit_assign_animals(unitid, animalids)
+    local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit '..tostring(unitid))
+    end
+
+    for i,v in ipairs(animalids) do
+        local animal = df.unit.find(v)
+
+        if animal then
+            animal.relations.pet_owner_id = unit.id
+        end
+    end
+end
+
+--print(pcall(function() return json:encode(unit_get_assign_animal_choices()) end))
