@@ -1214,6 +1214,7 @@ local handlers = {
 
     [130] = {
         [1] = animals_get,
+        [2] = animals_get2,
         
         [11] = animals_set_slaughter,
         [12] = animals_set_available,
