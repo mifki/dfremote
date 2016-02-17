@@ -106,7 +106,7 @@ function item_action(itemid, action, value)
     return true
 end
 
-local item_spatter_sizes = {
+item_spatter_sizes = {
     { 0, 'spatter' },
     { 25, 'smear' },
     { 50, 'covering' },
@@ -135,6 +135,7 @@ function item_query(itemid)
         end
     end
 
+    --todo: game shows "water covering" BUT "coating of <name>'s elf blood" for the same spatter size
     local contaminants = {}
     if item.contaminants then
         for i,v in ipairs(item.contaminants) do

@@ -144,9 +144,12 @@ function unit_query_selected(unitid)
         end
     end
 
+    local num_inventory = #unit.inventory
+    local num_spatters = #unit.body.spatters
     local num_assigned_animals = #unit_get_assigned_animals(unit.id)
 
-    return { uname, uname_en, unit.id, unit.sex, prof, profcolor, jobtitle, jobcolor, flags, effects, custom_name, custom_prof, positions, num_assigned_animals }
+    return { uname, uname_en, unit.id, unit.sex, prof, profcolor, jobtitle, jobcolor, flags, effects,
+             custom_name, custom_prof, positions, num_assigned_animals, num_inventory, num_spatters }
 end
 
 function unit_get_squad(unit)
@@ -1044,17 +1047,17 @@ local inventory_item_modes = {
     'SewnInto',
     'Hauled']]
 
-    'Hauled',
+    'hauled',
     '##',
     '##',
-    'In ##',
+    'in ##',
     '##',
-    'Wrapped around ##',
-    'Stuck in ##',
+    'wrapped around ##',
+    'stuck in ##',
     '##',
-    'Pet', -- comment='Left shoulder, right shoulder, or head, selected randomly using pet_seed'/>
-    'Sewn into ##',
-    'Strapped to ##'
+    'pet', -- comment='Left shoulder, right shoulder, or head, selected randomly using pet_seed'/>
+    'sewn into ##',
+    'strapped to ##'
 }
 
 function unit_get_inventory(unitid)
@@ -1071,13 +1074,61 @@ function unit_get_inventory(unitid)
 
         local frm = inventory_item_modes[v.mode+1]
         local part = (v.body_part_id ~= -1) and unit.body.body_plan.body_parts[v.body_part_id].name_singular[0].value or ''
-        local where = frm and part and frm:gsub('##', capitalize(part)) or ''
+        local where = frm and part and frm:gsub('##', part) or ''
 
         --xxx: let's show hauled items on top
         table.insert(ret, (v.mode == 0) and 1 or #ret+1, { title, item.id, where })
     end    
 
     return ret
+end
+
+function unit_get_inventory_and_spatters(unitid)
+    local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit '..tostring(unitid))
+    end
+
+    local inv = {}
+    local spatters = {}
+
+    for i,v in ipairs(unit.inventory) do
+        local item = v.item
+        local title = itemname(item, 3, true)
+
+        local frm = inventory_item_modes[v.mode+1]
+        local part = (v.body_part_id ~= -1) and unit.body.body_plan.body_parts[v.body_part_id].name_singular[0].value or ''
+        local where = frm and part and frm:gsub('##', part) or ''
+
+        --xxx: let's show hauled items on top
+        table.insert(inv, (v.mode == 0) and 1 or #inv+1, { title, item.id, where })
+    end
+
+    --todo: game shows "water covering" BUT "coating of <name>'s elf blood" for the same spatter size
+    for i,v in ipairs(unit.body.spatters) do
+        local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+        if mi then
+            local spattersize = ''
+            for k,w in ripairs_tbl(item_spatter_sizes) do
+                if v.size >= w[1] then
+                    spattersize = ' ' .. w[2]
+                    break
+                end
+            end
+
+            local creatureprefix = mi.figure and (hfname(mi.figure) .. ' ') or ''
+
+            local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
+            local title = creatureprefix .. matprefix .. mi.material.state_name[v.mat_state] .. spattersize
+
+            local part = (v.body_part_id ~= -1) and unit.body.body_plan.body_parts[v.body_part_id].name_singular[0].value or ''
+            local where = part
+
+            table.insert(spatters, { title, where })
+        end
+    end
+
+    return { inv, spatters }
 end
 
 local skill_class_names = {
