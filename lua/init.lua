@@ -1362,6 +1362,7 @@ local handlers = {
         [3] = building_stockpile_setenabled,
         [4] = building_stockpile_setflag,
         [5] = building_stockpile_create,
+        [6] = building_stockpile_getsettings_level3,
     },
 
     [144] = {
