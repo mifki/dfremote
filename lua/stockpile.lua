@@ -1271,7 +1271,7 @@ function building_stockpile_getsettings()
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        error('not a stockpile')
+        error('not a stockpile '..tostring(bld))
     end
 
     local ss = bld.settings
@@ -1341,7 +1341,7 @@ function building_stockpile_getsettings_level3(l1, l2)
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        error('not a stockpile')
+        error('not a stockpile '..tostring(bld))
     end
 
     local ss = bld.settings
@@ -1378,7 +1378,7 @@ function building_stockpile_setenabled(...)
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        error('not a stockpile')
+        error('not a stockpile '..tostring(bld))
     end
 
     local path = table.pack(...)
@@ -1473,7 +1473,7 @@ function building_stockpile_setflag(group, flag, enabled)
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        error('not a stockpile')
+        error('not a stockpile '..tostring(bld))
     end
 
     enabled = istrue(enabled)
@@ -1514,7 +1514,7 @@ function building_stockpile_setmax(barrels, bins, wheelbarrows)
 
     local bld = df.global.world.selected_building
     if bld:getType() ~= df.building_type.Stockpile then
-        error('not a stockpile')
+        error('not a stockpile '..tostring(bld))
     end
 
     bld.max_barrels = barrels
