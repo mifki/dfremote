@@ -778,20 +778,26 @@ function shield_titles()
 end
 
 
-function organic_leather_titles()
-    local types = df.global.world.raws.mat_table.organic_types.Leather
-    local indexes = df.global.world.raws.mat_table.organic_indexes.Leather
+function organic_titles_prefixstate(group, state, suffix)
+    local types = df.global.world.raws.mat_table.organic_types[group]
+    local indexes = df.global.world.raws.mat_table.organic_indexes[group]
+    
     local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
+    
+    for i=0,#types-1 do
+        local mi = dfhack.matinfo.decode(types[i], indexes[i])
         if mi then
             local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
+            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[state] .. suffix)
             table.insert(ret, t)
         end
     end
 
     return ret
+end
+
+function organic_leather_titles()
+    return organic_titles_prefixstate('Leather', 0, '')
 end
 
 function organic_meat_titles()
@@ -877,17 +883,64 @@ function organic_egg_titles()
     return ret
 end
 
-function organic_threadcloth_titles(group, suffix)
-    local types = df.global.world.raws.mat_table.organic_types[group]
-    local indexes = df.global.world.raws.mat_table.organic_indexes[group]
+function organic_silk_thread_titles()
+    return organic_titles_prefixstate('Silk', 0, ' thread')
+end
+
+function organic_silk_cloth_titles()
+    return organic_titles_prefixstate('Silk', 0, ' cloth')
+end
+
+function organic_plantfiber_thread_titles()
+    return organic_titles_prefixstate('PlantFiber', 0, ' thread')
+end
+
+function organic_plantfiber_cloth_titles()
+    return organic_titles_prefixstate('PlantFiber', 0, ' cloth')
+end
+
+function organic_yarn_thread_titles()
+    return organic_titles_prefixstate('Yarn', 0, ' thread')
+end
+
+function organic_yarn_cloth_titles()
+    return organic_titles_prefixstate('Yarn', 0, ' cloth')
+end
+
+function organic_metalthread_thread_titles()
+    return organic_titles_prefixstate('MetalThread', 0, ' strands')
+end
+
+function organic_metalthread_cloth_titles()
+    return organic_titles_prefixstate('MetalThread', 0, ' cloth')
+end
+
+function organic_plantdrink_titles()
+    return organic_titles_prefixstate('PlantDrink', 'Liquid', '')
+end
+
+function organic_creaturedrink_titles()
+    return organic_titles_prefixstate('CreatureDrink', 'Liquid', '')
+end
+
+function organic_plantcheese_titles()
+    return organic_titles_prefixstate('PlantCheese', 0, '')
+end
+
+function organic_creaturecheese_titles()
+    return organic_titles_prefixstate('CreatureCheese', 0, '')
+end
+
+function organic_seed_titles()
+    local types = df.global.world.raws.mat_table.organic_types.Seed
+    local indexes = df.global.world.raws.mat_table.organic_indexes.Seed
     
     local ret = {}
     
     for i=0,#types-1 do
         local mi = dfhack.matinfo.decode(types[i], indexes[i])
         if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0] .. suffix)
+            local t = capitalize(mi.plant.seed_plural)
             table.insert(ret, t)
         end
     end
@@ -895,130 +948,69 @@ function organic_threadcloth_titles(group, suffix)
     return ret
 end
 
-function organic_silk_thread_titles()
-    return organic_threadcloth_titles('Silk', ' thread')
+function organic_leaf_titles()
+    local types = df.global.world.raws.mat_table.organic_types.Leaf
+    local indexes = df.global.world.raws.mat_table.organic_indexes.Leaf
+    
+    local ret = {}
+    
+    for i=0,#types-1 do
+        local mi = dfhack.matinfo.decode(types[i], indexes[i])
+        if mi then
+            local t = nil
+            for j,growth in ipairs(mi.plant.growths) do
+                if growth.str_growth_item[3] == mi.material.id then
+                    t = growth.name
+                    break
+                end
+            end
+            t = t or ((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[state] .. suffix)
+            t = capitalize(t)
+            table.insert(ret, t)
+        end
+    end
+
+    return ret
 end
 
-function organic_silk_cloth_titles()
-    return organic_threadcloth_titles('Silk', ' cloth')
+function organic_plantpowder_titles()
+    return organic_titles_prefixstate('PlantPowder', 'Powder', '')
 end
 
-function organic_plantfiber_thread_titles()
-    return organic_threadcloth_titles('PlantFiber', ' thread')
-end
-
-function organic_plantfiber_cloth_titles()
-    return organic_threadcloth_titles('PlantFiber', ' cloth')
-end
-
-function organic_yarn_thread_titles()
-    return organic_threadcloth_titles('Yarn', ' thread')
-end
-
-function organic_yarn_cloth_titles()
-    return organic_threadcloth_titles('Yarn', ' cloth')
-end
-
-function organic_metalthread_thread_titles()
-    return organic_threadcloth_titles('MetalThread', ' strands')
-end
-
-function organic_metalthread_cloth_titles()
-    return organic_threadcloth_titles('MetalThread', ' cloth')
+function organic_creaturepowder_titles()
+    return organic_titles_prefixstate('CreaturePowder', 'Powder', '')
 end
 
 function organic_glob_titles()
-    local types = df.global.world.raws.mat_table.organic_types.Glob
-    local indexes = df.global.world.raws.mat_table.organic_indexes.Glob
-    local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name.Solid)
-            table.insert(ret, t)
-        end
-    end
-
-    return ret
+    return organic_titles_prefixstate('Glob', 0, '')
 end
 
 function organic_paste_titles()
-    local types = df.global.world.raws.mat_table.organic_types.Paste
-    local indexes = df.global.world.raws.mat_table.organic_indexes.Paste
-    local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name.Paste)
-            table.insert(ret, t)
-        end
-    end
-
-    return ret
+    return organic_titles_prefixstate('Paste', 'Paste', '')
 end
 
 function organic_pressed_titles()
-    local types = df.global.world.raws.mat_table.organic_types.Pressed
-    local indexes = df.global.world.raws.mat_table.organic_indexes.Pressed
-    local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name.Pressed)
-            table.insert(ret, t)
-        end
-    end
-
-    return ret
+    return organic_titles_prefixstate('Pressed', 'Pressed', '')
 end
 
 function organic_plantliquid_titles()
-    local types = df.global.world.raws.mat_table.organic_types.PlantLiquid
-    local indexes = df.global.world.raws.mat_table.organic_indexes.PlantLiquid
-    local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[1])
-            table.insert(ret, t)
-        end
-    end
-
-    return ret
+    return organic_titles_prefixstate('PlantLiquid', 'Liquid', '')
 end
 
 function organic_animalliquid_titles()
-    local types = df.global.world.raws.mat_table.organic_types.CreatureLiquid
-    local indexes = df.global.world.raws.mat_table.organic_indexes.CreatureLiquid
-    local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[1])
-            table.insert(ret, t)
-        end
-    end
-
-    return ret
+    return organic_titles_prefixstate('CreatureLiquid', 'Liquid', '')
 end
 
 function organic_miscliquid_titles()
-    local types = df.global.world.raws.mat_table.organic_types.MiscLiquid
-    local indexes = df.global.world.raws.mat_table.organic_indexes.MiscLiquid
+    return organic_titles_prefixstate('MiscLiquid', 'Liquid', '')
+end
+
+function inorganic_titles()
     local ret = {}
-    for i,v in ipairs(types) do
-        local mi = dfhack.matinfo.decode(v, indexes[i])
-        if mi then
-            local mat = mi.material
-            local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[1])
-            table.insert(ret, t)
-        end
-    end
+    for i,v in ipairs(df.global.world.raws.inorganics) do
+        local t = capitalize(v.material.state_name[0])
+        table.insert(ret, t)
+    end    
 
     return ret
 end
@@ -1045,14 +1037,14 @@ function stockpile_settings_schema()
             { 'Unprepared Fish', 'unprepared_fish', #df.global.world.raws.mat_table.organic_types.UnpreparedFish, nil, organic_rawfish_titles  },
             { 'Egg', 'egg', #df.global.world.raws.mat_table.organic_types.Eggs, nil, organic_egg_titles },
             { 'Plants', 'plants', #df.global.world.raws.mat_table.organic_types.Plants, foodplant_to_plant_idx, foodplant_titles },
-            { 'Drink (Plant)', 'drink_plant', #df.global.world.raws.mat_table.organic_types.PlantDrink },
-            { 'Drink (Animal)', 'drink_animal', #df.global.world.raws.mat_table.organic_types.CreatureDrink },
-            { 'Cheese (Plant)', 'cheese_plant', #df.global.world.raws.mat_table.organic_types.PlantCheese },
-            { 'Cheese (Animal)', 'cheese_animal', #df.global.world.raws.mat_table.organic_types.CreatureCheese },
-            { 'Seeds', 'seeds', #df.global.world.raws.mat_table.organic_types.Seed, },
-            { 'Fruit/Leaves', 'leaves', #df.global.world.raws.mat_table.organic_types.Leaf },
-            { 'Milled Plant', 'powder_plant', #df.global.world.raws.mat_table.organic_types.PlantPowder },
-            { 'Bone Meal', 'powder_creature', #df.global.world.raws.mat_table.organic_types.CreaturePowder },
+            { 'Drink (Plant)', 'drink_plant', #df.global.world.raws.mat_table.organic_types.PlantDrink, nil, organic_plantdrink_titles },
+            { 'Drink (Animal)', 'drink_animal', #df.global.world.raws.mat_table.organic_types.CreatureDrink, nil, organic_creaturedrink_titles },
+            { 'Cheese (Plant)', 'cheese_plant', #df.global.world.raws.mat_table.organic_types.PlantCheese, nil, organic_plantcheese_titles },
+            { 'Cheese (Animal)', 'cheese_animal', #df.global.world.raws.mat_table.organic_types.CreatureCheese, nil, organic_creaturecheese_titles },
+            { 'Seeds', 'seeds', #df.global.world.raws.mat_table.organic_types.Seed, nil, organic_seed_titles },
+            { 'Fruit/Leaves', 'leaves', #df.global.world.raws.mat_table.organic_types.Leaf, nil, organic_leaf_titles },
+            { 'Milled Plant', 'powder_plant', #df.global.world.raws.mat_table.organic_types.PlantPowder, nil, organic_plantpowder_titles },
+            { 'Bone Meal', 'powder_creature', #df.global.world.raws.mat_table.organic_types.CreaturePowder, nil, organic_creaturepowder_titles },
             { 'Fat', 'glob', #df.global.world.raws.mat_table.organic_types.Glob, nil, organic_glob_titles },
             { 'Paste', 'glob_paste', #df.global.world.raws.mat_table.organic_types.Paste, nil, organic_paste_titles },
             { 'Pressed Material', 'glob_pressed', #df.global.world.raws.mat_table.organic_types.Pressed, nil, organic_pressed_titles },
@@ -1141,7 +1133,7 @@ function stockpile_settings_schema()
     {
         'Coins', 'coins',
         {
-            { 'Coins', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx }, --todo: not only metals
+            { 'Coins', 'mats', #df.global.world.raws.inorganics, nil, inorganic_titles },
         },
         {
         }
