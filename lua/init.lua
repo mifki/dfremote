@@ -1354,6 +1354,9 @@ local handlers = {
         [3] = justice_get_crime_details,
         [4] = justice_get_convict_choices,
         [5] = justice_convict,
+
+        --xxx: temporary due to a typo in the app
+        [10] = setup_get_settings,
     },
 
     [140] = {
@@ -1654,7 +1657,9 @@ function handle_command(cmd, subcmd, seq, data, foreign)
         end
     end
 
-    return false
+    local err = 'no cmd ' .. tostring(cmd) .. ' ' .. tostring(subcmd)
+    print(err)
+    return true, generrseqstr(seq) .. err
 end
 
 function matching_version(clientver, apply)
