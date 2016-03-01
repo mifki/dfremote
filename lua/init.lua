@@ -754,6 +754,15 @@ function get_status()
         table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit) })
     end
 
+    --[[local siege = false
+    --todo: do we need to check all of them - can early be active if later not?
+    for i,v in ripairs(df.global.ui.invasions.list) do
+        if v.flags.active and v.flags.siege then
+            siege = true
+            break
+        end
+    end]]
+
     return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit), ext
 end
 
