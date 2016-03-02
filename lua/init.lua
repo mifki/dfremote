@@ -415,7 +415,6 @@ end
 --print(pcall(function() print(json:encode(get_look_list(true))) end))
 
 function look_get_details()
-
     local c = df.global.cursor
     local bx = bit32.rshift(c.x, 4)
     local by = bit32.rshift(c.y, 4)
@@ -431,8 +430,40 @@ function look_get_details()
     return { get_look_list(true), flags }
 end
 
+--todo: do this in C for speed?
+function count_idlers()
+    local cnt = 0
+
+    for i,unit in ipairs(df.global.world.units.active) do
+        if not unit.flags1.dead and not unit.job.current_job then
+            local prf = unit.profession
+            if dfhack.units.isCitizen(unit) then
+                if prf ~= df.profession.BABY and prf ~= df.profession.CHILD and prf ~= df.profession.DRUNK and not df.profession.attrs[prf].military then
+                    local on_break = false
+                    for j,t in ipairs(unit.status.misc_traits) do
+                        if t.id == df.misc_trait_type.OnBreak or t.id == df.misc_trait_type.Migrant then
+                            on_break = true
+                            break
+                        end
+                    end
+
+                    if not on_break and #unit.specific_refs == 0 then
+                        cnt = cnt + 1
+                    end
+                end
+            end
+        end
+    end
+
+    return cnt
+end
+
 last_popup = nil
 sent_popups = {}
+
+local last_idlers = nil
+local last_siege = nil
+local last_day = nil
 
 function get_status()
     if screen_main()._type ~= df.viewscreen_dwarfmodest then
@@ -744,26 +775,54 @@ function get_status()
     end
 
     local ext = nil
+
     if hasnewann then
         ext = ext or {}
         table.insert(ext, announcements_get_new())
     end
+    
     if last_follow_unit then
         ext = ext or {}
         --todo: both unit and job colours
         table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit) })
     end
 
-    --[[local siege = false
-    --todo: do we need to check all of them - can early be active if later not?
+    --todo: don't update idlers every time
+    local hasnewidlers = false
+    local idlers = count_idlers()
+    if idlers ~= last_idlers then
+        last_idlers = idlers
+        hasnewidlers = true
+        ext = ext or {}
+        table.insert(ext, idlers)
+    end
+
+    local hasnewsiege = false
+    local siege = false
+    --todo: do we need to check all of them - can early ones be active if later not?
     for i,v in ripairs(df.global.ui.invasions.list) do
         if v.flags.active and v.flags.siege then
             siege = true
             break
         end
-    end]]
+    end
+    if siege ~= last_siege then
+        last_siege = siege
+        hasnewsiege = true
+        ext = ext or {}
+        table.insert(ext, siege)
+    end
 
-    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit), ext
+    local hasnewday = false
+    local day = math.floor(df.global.cur_year_tick / TU_PER_DAY)
+    if day ~= last_day then
+        last_day = day
+        hasnewday = true
+        ext = ext or {}
+        table.insert(ext, day)
+    end
+
+    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday), ext
 end
 
 local send_center = false
@@ -792,6 +851,9 @@ function get_status_ext(needs_sync)
         --todo: shouldn't it send ext when needs_sync as well !?
         sent_popups = {}
         last_popup = nil
+        last_idlers = nil
+        last_siege = nil
+        last_day = nil
     elseif not send_center then
         center_sent = true
     end

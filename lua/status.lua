@@ -4,18 +4,18 @@ TU_PER_MONTH = TU_PER_DAY * 28
 TU_PER_YEAR = TU_PER_MONTH * 12
 
 MONTHS = {
- 'Granite',
- 'Slate',
- 'Felsite',
- 'Hematite',
- 'Malachite',
- 'Galena',
- 'Limestone',
- 'Sandstone',
- 'Timber',
- 'Moonstone',
- 'Opal',
- 'Obsidian',
+    'Granite',
+    'Slate',
+    'Felsite',
+    'Hematite',
+    'Malachite',
+    'Galena',
+    'Limestone',
+    'Sandstone',
+    'Timber',
+    'Moonstone',
+    'Opal',
+    'Obsidian',
 }
 
 function format_date(year, ticks)
@@ -33,9 +33,7 @@ end
 local seasons = { 'Spring', 'Summer', 'Autumn', 'Winter' }
 local seasonparts = { 'Early ', 'Mid-', 'Late ' }
 
-local site_ranks = {
-    'Outpost', 'Hamlet', 'Village', 'Town', 'City', 'Metropolis',
-}
+local site_ranks = { 'Outpost', 'Hamlet', 'Village', 'Town', 'City', 'Metropolis' }
 
 --xxx: this is done manually because the in-game display doesn't quite match ui.tasks.unit_counts and df.profession structures
 function get_unit_counts()
@@ -99,17 +97,11 @@ function status_get_overview()
     local ret_food = { food.total, food.meat, food.fish, food.plant, food.seeds, food.drink, food.other }
 
     local site = df.world_site.find(df.global.ui.site_id)
-    local is_mountainhome = find_noble('MONARCH') ~= nil
+    local is_mountainhome = have_noble('MONARCH') --todo: what if monarch dies? there should be more correct way
     local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. string.utf8capitalize(dfhack.df2utf(dfhack.TranslateName(site.name))) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
 
-    local year = df.global.cur_year
     local month = math.floor(df.global.cur_year_tick / TU_PER_MONTH)
-    local day = math.floor((df.global.cur_year_tick-month*TU_PER_MONTH) / TU_PER_DAY) + 1
-
-    local b = day % 10
-    local suf = math.floor((day % 100) / 10) == 1 and 'th' or b == 1 and 'st' or b == 2 and 'nd' or b == 3 and 'rd' or 'th'
-
-    local datestr = day .. suf .. ' ' .. MONTHS[month+1] .. ', ' .. year .. ', ' .. seasonparts[month%3+1] .. seasons[math.floor(month/3)+1]
+    local datestr = format_date(df.global.cur_year, df.global.cur_year_tick) .. ', ' .. seasonparts[month%3+1] .. seasons[math.floor(month/3)+1]
 
     local population = df.global.ui.tasks.population    
     local c1,c2,c3 = get_unit_counts()
