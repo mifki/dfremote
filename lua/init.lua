@@ -438,7 +438,9 @@ function count_idlers()
         if not unit.flags1.dead and not unit.job.current_job then
             local prf = unit.profession
             if dfhack.units.isCitizen(unit) then
-                if prf ~= df.profession.BABY and prf ~= df.profession.CHILD and prf ~= df.profession.DRUNK and not df.profession.attrs[prf].military then
+                --todo: need to check activity_entry.events for individual drills ?
+                if prf ~= df.profession.BABY and prf ~= df.profession.CHILD and prf ~= df.profession.DRUNK and
+                   not df.profession.attrs[prf].military and #unit.military.individual_drills == 0 then
                     local on_break = false
                     for j,t in ipairs(unit.status.misc_traits) do
                         if t.id == df.misc_trait_type.OnBreak or t.id == df.misc_trait_type.Migrant then
