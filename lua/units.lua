@@ -95,7 +95,7 @@ function unit_query_selected(unitid)
     if not unitid or unitid == -1 or unitid == 0 then
         local ws = screen_main()
         if ws._type ~= df.viewscreen_dwarfmodest then
-            error('wrong screen')
+            error('wrong screen '..tostring(ws._type))
         end
 
         if df.global.ui.main.mode ~= 24 or df.global.ui_selected_unit == -1 then

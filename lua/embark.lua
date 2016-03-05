@@ -130,7 +130,7 @@ end
 function embark_get_reclaim_sites()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen')
+		error('wrong screen '..tostring(ws._type))
 	end
 
 	if #df.global.world.world_data.old_sites == 0 then
@@ -210,7 +210,7 @@ end
 local function embark_site_info()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen')
+		error('wrong screen '..tostring(ws._type))
 	end
 
 	local loc = ws.location
@@ -282,7 +282,7 @@ end
 function embark_finder_status()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen')
+		error('wrong screen '..tostring(ws._type))
 	end
 
 	--[[if ws.page ~= df.viewscreen_choose_start_sitest.T_page.Find then
@@ -323,7 +323,7 @@ end
 function embark_finder_next()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen')
+		error('wrong screen '..tostring(ws._type))
 	end
 
 	--todo: handle case when there's no search matches

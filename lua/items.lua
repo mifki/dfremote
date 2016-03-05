@@ -47,7 +47,7 @@ end
 function building_get_contained_items(bldid)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then

@@ -86,7 +86,7 @@ end
 function squads_get_info()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -139,7 +139,7 @@ end
 function squads_cancel_order(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -159,7 +159,7 @@ end
 function squads_order_move(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -179,7 +179,7 @@ end
 function squads_order_attack_list(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -201,7 +201,7 @@ end
 function squads_order_attack_rect(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -224,7 +224,7 @@ end
 function squads_order_attack_map(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -245,7 +245,7 @@ end
 function squads_attack_list_get(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then
@@ -271,7 +271,7 @@ end
 function squads_attack_list_confirm(idxs)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 1 then

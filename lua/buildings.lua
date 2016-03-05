@@ -124,7 +124,7 @@ end
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     local bld
@@ -573,7 +573,7 @@ local glasses = { 'green glass', 'clear glass', 'crystal glass' }
 function building_workshop_get_jobchoices(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -679,7 +679,7 @@ local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP
 function building_workshop_addjob(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -927,7 +927,7 @@ local room_candidate_ids = {}
 function building_room_owner_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1156,7 +1156,7 @@ end
 function building_room_set_squaduse(bldid, squadid, mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1436,7 +1436,7 @@ local assign_animal_keys = {
 function building_assign_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen')
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
