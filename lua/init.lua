@@ -466,6 +466,7 @@ sent_popups = {}
 local last_idlers = nil
 local last_siege = nil
 local last_day = nil
+local idlers_wait = 0
 
 function get_status()
     if screen_main()._type ~= df.viewscreen_dwarfmodest then
@@ -789,14 +790,18 @@ function get_status()
         table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit) })
     end
 
-    --todo: don't update idlers every time
     local hasnewidlers = false
-    local idlers = count_idlers()
-    if idlers ~= last_idlers then
-        last_idlers = idlers
-        hasnewidlers = true
-        ext = ext or {}
-        table.insert(ext, idlers)
+    if idlers_wait == 0 then
+        idlers_wait = 4
+        local idlers = count_idlers()
+        if idlers ~= last_idlers then
+            last_idlers = idlers
+            hasnewidlers = true
+            ext = ext or {}
+            table.insert(ext, idlers)
+        end
+    else
+        idlers_wait = idlers_wait - 1
     end
 
     local hasnewsiege = false
@@ -856,6 +861,7 @@ function get_status_ext(needs_sync)
         last_idlers = nil
         last_siege = nil
         last_day = nil
+        idlers_wait = 0
     elseif not send_center then
         center_sent = true
     end
