@@ -99,6 +99,8 @@ function reports_get_groups()
     --todo: would it be faster to insert items to right positions instead of sorting?
     table.sort(ret, function(a,b) return (a[4] > b[4]) or (a[4] == b[4] and a[5] > b[5]) end)
 
+    df.global.world.status.flags.whole = bit32.band(df.global.world.status.flags.whole, bit32.bnot(7))
+
     return ret
 end
 

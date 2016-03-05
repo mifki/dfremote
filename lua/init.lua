@@ -466,6 +466,7 @@ sent_popups = {}
 local last_idlers = nil
 local last_siege = nil
 local last_day = nil
+local last_report_alert = nil
 local idlers_wait = 0
 
 function get_status()
@@ -829,7 +830,16 @@ function get_status()
         table.insert(ext, day)
     end
 
-    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday), ext
+    local hasnewreportalert = false
+    local report_alert = bit32.band(df.global.world.status.flags.whole, 7) --combat/hunting/sparring
+    if report_alert ~= last_report_alert then
+        last_report_alert = report_alert
+        hasnewreportalert = true
+        ext = ext or {}
+        table.insert(ext, report_alert)
+    end
+
+    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert), ext
 end
 
 local send_center = false
@@ -861,6 +871,7 @@ function get_status_ext(needs_sync)
         last_idlers = nil
         last_siege = nil
         last_day = nil
+        last_report_alert = nil
         idlers_wait = 0
     elseif not send_center then
         center_sent = true
