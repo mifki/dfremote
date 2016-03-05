@@ -49,6 +49,8 @@
 #include "modules/Items.h"
 #include "df/graphic.h"
 #include "df/enabler.h"
+#include "df/init.h"
+#include "df/d_init.h"
 #include "df/renderer.h"
 #include "df/interfacest.h"
 #include "df/viewscreen_dwarfmodest.h"
@@ -994,6 +996,7 @@ void remote_start()
         return;
     }
 
+    //TODO: move all this to Lua
     {
         std::vector <std::string> args;
         args.push_back("0");
@@ -1014,6 +1017,22 @@ void remote_start()
         if (Core::getInstance().runCommand(*out2, "menu-mouse", args) == CR_OK)
             *out2 << "Disabled menu-mouse plugin, which is potentially interfering with Remote" << std::endl;
     }
+
+    {
+        if (df::global::init->font.use_ttf != df::init_font::T_use_ttf::TTF_OFF)
+        {
+            df::global::init->font.use_ttf = df::init_font::T_use_ttf::TTF_OFF;
+            *out2 << "Disabled TTF fonts because some of the Remote functionality require tile fonts" << std::endl;
+        }
+    }
+
+    /*{
+        if (df::global::d_init->idlers != df::d_init_idlers::OFF)
+        {
+            df::global::d_init->idlers = df::d_init_idlers::OFF;
+            *out2 << "Disabled idlers display so that they are not counted twice" << std::endl;
+        }
+    }*/
 
     *out2 << COLOR_LIGHTGREEN << "Dwarf Fortress Remote server listening on port " << enet_port << std::endl;
     *out2 << COLOR_RESET;
