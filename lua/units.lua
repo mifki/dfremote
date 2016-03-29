@@ -360,10 +360,15 @@ function unit_jobtitle(unit, norepeatsuffix)
                 local rc = o:reasonCannot(unit)
                 if rc ~= 0 then
                     jobtitle = 'Soldier (' .. reason_titles[rc+1] .. ')'
+                    jobcolor = 6
                 else
                     jobtitle = utils.call_with_string(o, 'getDescription')
-                    return jobtitle, jobcolor
+    
+                    if o._type ~= df.squad_order_trainst then
+                        return jobtitle, jobcolor
+                    end
                 end
+
             end
         end
 
