@@ -200,14 +200,14 @@ local reason_titles = {
     'activity_cancelled',
     'no_barracks',
     'improper_barracks',
-    'no_activity',
+    'no activity',
     'cannot_individually_drill',
     'does_not_exist',
     'no_archery_target',
     'improper_building',
-    'unreachable_location',
-    'invalid_location',
-    'no_reachable_valid_target',
+    'unreachable location',
+    'invalid location',
+    'no reachable valid target',
     'no_burrow',
     'not_in_squad',
     'no_patrol_route',
@@ -351,6 +351,22 @@ function unit_jobtitle(unit, norepeatsuffix)
     end
 
     if not unit.job.current_job then
+        if unit.profession ~= unit.profession2 then
+            local o = unit_get_order(unit)
+
+            if o then
+                jobcolor = 6 + 8
+
+                local rc = o:reasonCannot(unit)
+                if rc ~= 0 then
+                    jobtitle = 'Soldier (' .. reason_titles[rc+1] .. ')'
+                else
+                    jobtitle = utils.call_with_string(o, 'getDescription')
+                    return jobtitle, jobcolor
+                end
+            end
+        end
+
         if #unit.military.individual_drills > 0 then
             local act_id = unit.military.individual_drills[0] --todo: what if there are > 1 ? 
             local act = df.activity_entry.find(act_id)
@@ -386,21 +402,8 @@ function unit_jobtitle(unit, norepeatsuffix)
                     jobcolor = 14
 
                 elseif unit.profession ~= unit.profession2 then
-                    local o = unit_get_order(unit)
-
-                    if o then
-                        local rc = o:reasonCannot(unit)
-                        if rc ~= 0 then
-                            jobtitle = 'Soldier (' .. reason_titles[rc+1] .. ')'
-                        else
-                            jobtitle = utils.call_with_string(o, 'getDescription')
-                        end
-
-                        jobcolor = 6 + 8
-                    else
-                        jobtitle = 'Soldier (no activity)'
-                        jobcolor = 6
-                    end
+                    jobtitle = 'Soldier (no activity)'
+                    jobcolor = 6
                 end
             end
         end
