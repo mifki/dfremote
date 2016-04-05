@@ -101,6 +101,14 @@ static int32_t *gscreentexpos_old;
 static int8_t *gscreentexpos_addcolor_old;
 static uint8_t *gscreentexpos_grayscale_old, *gscreentexpos_cf_old, *gscreentexpos_cbr_old;
 
+// Buffers for rendering lower levels before merging    
+static uint8_t *mscreen;
+static int32_t *mscreentexpos;
+static int8_t *mscreentexpos_addcolor;
+static uint8_t *mscreentexpos_grayscale;
+static uint8_t *mscreentexpos_cf;
+static uint8_t *mscreentexpos_cbr;
+
 #include "patches.hpp"
 
 #ifdef WIN32
@@ -164,6 +172,33 @@ std::string client_addr;
 
 static int timer_timeout = -1;
 static string timer_fn;
+
+static int maxlevels = 3;
+
+static void patch_rendering(bool enable_lower_levels)
+{
+#ifndef NO_RENDERING_PATCH
+    static bool ready = false;
+    static unsigned char orig[MAX_PATCH_LEN];
+
+    long addr = p_render_lower_levels.addr;
+    #ifdef WIN32
+        addr += Core::getInstance().vinfo->getRebaseDelta();
+    #endif
+
+    if (!ready)
+    {
+        (new MemoryPatcher(Core::getInstance().p))->makeWritable((void*)addr, sizeof(p_render_lower_levels.len));
+        memcpy(orig, (void*)addr, p_render_lower_levels.len);
+        ready = true;
+    }
+
+    if (enable_lower_levels)
+        memcpy((void*)addr, orig, p_render_lower_levels.len);
+    else
+        apply_patch(NULL, p_render_lower_levels);
+#endif
+}
 
 #include "dwarfmode.hpp"
 #include "itemcache.hpp"
