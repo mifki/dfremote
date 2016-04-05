@@ -554,6 +554,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
         int maxx = std::min(newwidth, world->map.x_count - gwindow_x);
         int maxy = std::min(newheight, world->map.y_count - gwindow_y);
         int cnt = 0;
+        int lastdz = 0;
         for (int y = 0; y < maxy; y++)
         {
             for (int x = 0; x < maxx; x++)
@@ -574,11 +575,19 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     *(b++) = y + gwindow_y;
                     *(b++) = s[0]; //ch
 
-                    unsigned char bg   = s[2];
-                    unsigned char bold = ((s[3]&0x0f) != 0) * 8;
+                    int dz = (s[3] & 0xf0) >> 4;
+
+                    unsigned char bg   = s[2] & 7;
+                    unsigned char bold = (s[3] & 1) * 8;
                     unsigned char fg   = (s[1] + bold) % 16;
 
                     *(b++) = fg | (bg << 4);
+
+                    if (lastdz != dz) {
+                        *(b-1) |= 128;
+                        *(b++) = dz - lastdz;
+                        lastdz = dz;
+                    }
 
                     rblk->data[xx%16 + (yy%16) * 16] = *is;
 
