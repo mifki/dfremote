@@ -87,8 +87,8 @@ void render_remote_map()
 
             do
             {
-                if (p == maxlevels)
-                    patch_rendering(true);
+                // if (p == maxlevels)
+                //     patch_rendering(true);
 
                 (*df::global::window_z)--;
 

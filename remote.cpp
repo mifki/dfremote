@@ -569,7 +569,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
                 unsigned int *is = (unsigned int*)gscreen + tile;
-                if (*is != rblk->data[xx%16 + (yy%16) * 16])
+                if (*is != rblk->data[xx%16 + (yy%16) * 16] && s[0])
                 {
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
