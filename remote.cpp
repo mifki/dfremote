@@ -321,6 +321,8 @@ void empty_map_cache()
                 free(sent_blocks_idx[i][j][z]);
 
     memset(sent_blocks_idx, 0, sizeof(sent_blocks_idx));
+
+    memset(rendered_tiles, 0, sizeof(rendered_tiles));
 }
 
 bool block_is_unmined(int bx, int by, int zlevel)

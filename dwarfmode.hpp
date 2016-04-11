@@ -185,8 +185,16 @@ void render_remote_map()
                                 df::tiletype t1 = block1->tiletype[xxrem][yyrem];
                                 if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
                                 {
-                                    empty_tiles_left = true;
-                                    continue;
+                                    if (p < maxp)
+                                    {
+                                        empty_tiles_left = true;
+                                        continue;
+                                    }
+                                    if (!rendered_tiles[zz*256*256 + xx+yy*256])
+                                    {
+                                        empty_tiles_left = true;
+                                        continue;
+                                    }                                    
                                 }
                             }
                         }
