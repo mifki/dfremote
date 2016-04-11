@@ -163,12 +163,21 @@ void render_remote_map()
 
                         int d = p;
                         ch = mscreen[stile2+0];
-                        if (p < maxp)
+                        // if (p < maxp)
                         {
                             if (ch == 0)
                             {
-                                empty_tiles_left = true;
-                                continue;
+                                if (p < maxp)
+                                {
+                                    empty_tiles_left = true;
+                                    continue;
+                                }
+
+                                if (!rendered_tiles[zz*256*256 + xx+yy*256])
+                                {
+                                    empty_tiles_left = true;
+                                    continue;
+                                }
                             }
                             else if (ch == 31)
                             {
@@ -284,9 +293,12 @@ void render_remote_map()
                         x0 = x + 1;
                 }
 
-                if (p++ >= maxp)
+                // if (p++ >= maxp)
+                    // break;
+                if (p++ >= 15)
                     break;
             } while(empty_tiles_left);
+            *out2 << "P " << p << std::endl;
 
             (*df::global::window_z) = zz0;
         }

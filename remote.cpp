@@ -138,6 +138,8 @@ struct rendered_block {
 
 rendered_block *sent_blocks_idx[16][16][200];
 
+bool rendered_tiles[256*256*200];
+
 static lua_State *L;
 
 static int wx, wy;
@@ -569,7 +571,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
                 unsigned int *is = (unsigned int*)gscreen + tile;
-                if (*is != rblk->data[xx%16 + (yy%16) * 16] && s[0])
+                //TODO: exculde depth information when saving/comparing sent tiles
+                if (*is != rblk->data[xx%16 + (yy%16) * 16]) // && s[0]) //TODO: don't send zeroes (empty tiles) unless the tile has changed from non-empty
                 {
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
@@ -590,6 +593,12 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     }
 
                     rblk->data[xx%16 + (yy%16) * 16] = *is;
+                    
+                    if (dz)
+                    {
+                        for (int z = zlevel-dz+1;z<=zlevel;z++)
+                            rendered_tiles[z*256*256 + xx+yy*256] = true;
+                    }
 
                     //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
                     if (++cnt >= 5000)
