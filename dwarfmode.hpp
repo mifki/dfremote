@@ -181,6 +181,8 @@ void render_remote_map()
                             }
                             else if (ch == 31)
                             {
+                                mscreen[stile2+0] = 30;
+
                                 df::map_block *block1 = world->map.block_index[xxquot][yyquot][zz-1];
                                 df::tiletype t1 = block1->tiletype[xxrem][yyrem];
                                 if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
@@ -196,6 +198,7 @@ void render_remote_map()
                                         continue;
                                     }                                    
                                 }
+                                d++;
                             }
                         }
 
