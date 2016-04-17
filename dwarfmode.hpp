@@ -297,7 +297,7 @@ void render_remote_map()
                             *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
                             *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
                         }
-                        gscreen[stile+3] = (0x10*d) | (gscreen[stile+3]&0x0f);
+                        gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
                     }
 
                     if (!empty_tiles_left)
@@ -306,12 +306,14 @@ void render_remote_map()
 
                 // if (p++ >= maxp)
                     // break;
-                if (p++ >= 15)
+                if (p++ >= 30)
                     break;
             } while(empty_tiles_left);
             *out2 << "P " << p << std::endl;
 
             (*df::global::window_z) = zz0;
+
+            patch_rendering(true);            
         }
 
         waiting_render = false;

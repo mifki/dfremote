@@ -136,9 +136,9 @@ struct rendered_block {
     unsigned int data[16*16];
 };
 
-rendered_block *sent_blocks_idx[16][16][200];
+rendered_block *sent_blocks_idx[16][16][256];
 
-bool rendered_tiles[256*256*200];
+bool rendered_tiles[256*256*256];
 
 static lua_State *L;
 
@@ -317,7 +317,7 @@ void empty_map_cache()
 {
     for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
-            for (int z = 0; z < 200; z++)
+            for (int z = 0; z < 256; z++)
                 free(sent_blocks_idx[i][j][z]);
 
     memset(sent_blocks_idx, 0, sizeof(sent_blocks_idx));
@@ -407,12 +407,11 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     *(b++) = 0;
 
     int cnt = 0;
+    int lastdz = 0;
 
     //XXX: for example, if the game has already ended, we're on end announcement screen
     if (!world->map.block_index)
-    {
         goto enough;
-    }
 
     for (int by = 0; by < blk_h; by++)
     {
@@ -453,13 +452,27 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
                     *(b++) = s[0]; //ch
 
-                    int bg = s[2];
-                    int bold = (s[3] != 0) * 8;
+                    int dz = (s[3] & 0xfe) >> 1;                    
+
+                    int bg = s[2] & 7;
+                    int bold = (s[3] & 1) * 8;
                     int fg   = (s[1] + bold) % 16;
 
                     *(b++) = fg + (bg << 4);
 
+                    if (lastdz != dz) {
+                        *(b-1) |= 128;
+                        *(b++) = dz - lastdz;
+                        lastdz = dz;
+                    }                    
+
                     rblk->data[i + j * 16] = *is;
+
+                    if (dz)
+                    {
+                        for (int z = zlevel-dz+1;z<=zlevel;z++)
+                            rendered_tiles[z*256*256 + x+y*256] = true;
+                    }                    
                 }
             }
         }
@@ -573,14 +586,14 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
                 unsigned int *is = (unsigned int*)gscreen + tile;
-                //TODO: exculde depth information when saving/comparing sent tiles
-                if (*is != rblk->data[xx%16 + (yy%16) * 16]) // && s[0]) //TODO: don't send zeroes (empty tiles) unless the tile has changed from non-empty
+                //TODO: exclude depth information when saving/comparing sent tiles
+                if (*is != rblk->data[xx%16 + (yy%16) * 16])
                 {
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
                     *(b++) = s[0]; //ch
 
-                    int dz = (s[3] & 0xf0) >> 4;
+                    int dz = (s[3] & 0xfe) >> 1;
 
                     unsigned char bg   = s[2] & 7;
                     unsigned char bold = (s[3] & 1) * 8;
@@ -1056,7 +1069,15 @@ void remote_start()
         std::vector <std::string> args;
         args.push_back("0");
         if (Core::getInstance().runCommand(*out2, "multilevel", args) == CR_OK)
-            *out2 << "Disabled multilevel rendering, which is not supported" << std::endl;
+            *out2 << "Disabled multilevel rendering to improve performance" << std::endl;
+    }
+
+    {
+        if (df::global::init->display.flag.is_set(df::init_display_flags::USE_GRAPHICS))
+        {
+            df::global::init->display.flag.set(df::init_display_flags::USE_GRAPHICS, true);
+            *out2 << "Disabled creature graphics as it is not supported" << std::endl;
+        }
     }
 
     {
