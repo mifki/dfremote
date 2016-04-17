@@ -258,7 +258,13 @@ function building_query_selected(bldid)
             profile_info = { #bld.profile.permitted_workers, min, max }
         end
 
-        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info }
+        local clt = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and bld:getClutterLevel() or 0
+        local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0
+
+        --TODO: how to determine this properly?
+        local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bldid) == 0 or false
+
+        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info, clt, num_items, millstone_needs_power }
 
     elseif btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
         or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
