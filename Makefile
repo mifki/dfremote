@@ -1,6 +1,6 @@
 DFHACKVER ?= 0.40.24-r5
 
-DFVERNUM = `echo $(DFHACKVER) | sed -e s/-r.*// -e s/\\\\.//g`
+DFVERNUM = `echo $(DFHACKVER) | sed -e s/-.*// -e s/\\\\.//g`
 
 DF ?= /Users/vit/Downloads/df_40_24_osx
 DH ?= /Users/vit/Downloads/dfhack-4024
