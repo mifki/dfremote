@@ -1086,11 +1086,13 @@ function select_confirm()
     end
 
     local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
+    local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'SELECT')
 
-    if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 then
+    if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
+       oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
         df.global.ui.main.mode = 17
         local ws = screen_main()
         gui.simulateInput(ws, 'CURSOR_DOWN_Z')
@@ -1187,10 +1189,12 @@ function set_cursor_pos(data)
         end
 
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
+        local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE 
 
         gui.simulateInput(ws, 'SELECT')
 
-        if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 then
+        if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
+            oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
             df.global.ui.main.mode = 17
             local ws = screen_main()
             gui.simulateInput(ws, 'CURSOR_DOWN_Z')
