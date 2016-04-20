@@ -44,6 +44,23 @@ function item_is_fort_owned(item)
     return true
 end
 
+function item_is_in_stockpile(item, sp)
+    local cont = dfhack.items.getContainer(item)
+    if cont then
+        return item_is_in_stockpile(cont, sp)
+    end
+
+    if item.pos.z ~= sp.z or item.pos.x < sp.x1 or item.pos.x >= sp.x2 or item.pos.y < sp.y1 or item.pos.y >= sp.y2 then
+        return false
+    end
+
+    local e = (item.pos.x - sp.x1) + (item.pos.y - sp.y1) * sp.room.width
+    
+    return (sp.room.extents[e] == 1)
+end
+
+--todo: output for stockpiles should be improved before used in app (currently containers and items inside are mixed)
+--todo: make this use bldid too
 function building_get_contained_items(bldid)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -57,11 +74,23 @@ function building_get_contained_items(bldid)
     local ret = {}
     local bld = df.global.world.selected_building
 
-    for i,citem in ipairs(bld.contained_items) do
-        local item = citem.item
-        local title = itemname(item, 0, true)
+    if bld._type == df.building_stockpilest then
+        for i,item in ipairs(df.global.world.items.other.IN_PLAY) do
+            --todo: check that the item is owned by the civ
+            if item_is_in_stockpile(item,bld) then
+                local title = itemname(item, 0, true)
 
-        table.insert(ret, { title, item.id, item.flags.whole, item_can_melt(item) })
+                table.insert(ret, { title, item.id, item.flags.whole, item_can_melt(item) })
+            end
+        end
+
+    else
+        for i,citem in ipairs(bld.contained_items) do
+            local item = citem.item
+            local title = itemname(item, 0, true)
+
+            table.insert(ret, { title, item.id, item.flags.whole, item_can_melt(item) })
+        end
     end
 
     return ret
@@ -340,4 +369,4 @@ function item_zoom(itemid)
     return false
 end
 
---print(pcall(function() return json:encode(item_query(99838)) end))
+print(pcall(function() return json:encode(building_get_contained_items()) end))
