@@ -151,7 +151,7 @@ function building_query_selected(bldid)
     local bname = bldname(bld)
     local ret = nil
 
-    local removing = (#bld.jobs == 1 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
+    local removing = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
     local actual = df.building_actual:is_instance(bld)
     local forbidden = actual and #bld.contained_items > 0 and bld.contained_items[0].item.flags.forbid
 
