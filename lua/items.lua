@@ -369,4 +369,4 @@ function item_zoom(itemid)
     return false
 end
 
-print(pcall(function() return json:encode(building_get_contained_items()) end))
+--print(pcall(function() return json:encode(building_get_contained_items()) end))

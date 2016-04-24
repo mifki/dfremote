@@ -6,13 +6,12 @@ function zone_create()
 end
 
 function zone_settings_get(bldid)
-    local zone = df.building.find(bldid)
+    local zone = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected
     if not zone then
         error('no zone found for id '..tostring(bldid))
     end
-    local title = 'Activity Zone #' .. tostring(zone.zone_num)
 
-    return { title, zone.id, zone.zone_flags.whole }
+    return { zonename(zone), zone.id, zone.zone_flags.whole }
 end
 
 function zone_settings_set(bldid, option, value)

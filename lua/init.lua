@@ -550,13 +550,19 @@ function get_status()
 
     -- zones [i]
     if mainmode == df.ui_sidebar_mode.Zones then
-        local zonemode = df.global.ui_sidebar_menus.zone.mode
-        if zonemode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle then
-            return 61, (df.global.selection_rect.start_x ~= -30000 and 1 or 0)
-        elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.Flow then
-            return 62, (df.global.ui_building_in_resize and 1 or 0)
-        elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.FloorFlow then
-            return 63, (df.global.ui_building_in_resize and 1 or 0)
+        if df.global.ui_sidebar_menus.zone.selected then
+            local zone = df.global.ui_sidebar_menus.zone.selected
+            local info = { zonename(zone), zone.zone_flags.whole }
+            return 64, 1, info
+        else
+            local zonemode = df.global.ui_sidebar_menus.zone.mode
+            if zonemode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle then
+                return 61, (df.global.selection_rect.start_x ~= -30000 and 1 or 0)
+            elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.Flow then
+                return 62, (df.global.ui_building_in_resize and 1 or 0)
+            elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.FloorFlow then
+                return 63, (df.global.ui_building_in_resize and 1 or 0)
+            end
         end
     end
 

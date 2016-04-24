@@ -140,10 +140,10 @@ local track_stop_friction_values = { 10, 50, 500, 10000, 50000 }
 function build_options_get()
     if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
          local zonemode = df.global.ui_sidebar_menus.zone.mode
-         local selzone = df.global.ui_sidebar_menus.zone.selected
-         local selzone_name = selzone and ('Activity Zone #'..tostring(selzone.zone_num)) or  mp.NIL
-         local selzone_id = selzone and selzone.id or mp.NIL
-         return { df.building_type.Civzone, zonemode, selzone_name, selzone_id }
+         --local selzone = df.global.ui_sidebar_menus.zone.selected
+         --local selzone_name = selzone and ('Activity Zone #'..tostring(selzone.zone_num)) or  mp.NIL
+         --local selzone_id = selzone and selzone.id or mp.NIL
+         return { df.building_type.Civzone, zonemode --[[, selzone_name, selzone_id]] }
     end
 
     if df.global.ui.main.mode ~= 16 or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
