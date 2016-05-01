@@ -695,7 +695,17 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         {
             send_initial_map(seq, mdata[3], sendfunc, conn);
             return;
-        }    
+        }
+
+        if (cmd == 18)
+        {
+            while(map_render_enabled && waiting_render);
+
+            maxlevels = (int)mdata[3];
+
+            waiting_render = true;
+            return;
+        }
 
         if (cmd == 90)
         {
