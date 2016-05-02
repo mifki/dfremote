@@ -1,22 +1,24 @@
-    int get_menu_width()
-    {
-        uint8_t menu_width, area_map_width;
-        Gui::getMenuWidth(menu_width, area_map_width);
-        int32_t menu_w = 0;
+#define MAX_LEVELS_RENDER_EVER 30
 
-        bool menuforced = (ui->main.mode != df::ui_sidebar_mode::Default || df::global::cursor->x != -30000);
+int get_menu_width()
+{
+    uint8_t menu_width, area_map_width;
+    Gui::getMenuWidth(menu_width, area_map_width);
+    int32_t menu_w = 0;
 
-        if ((menuforced || menu_width == 1) && area_map_width == 2) // Menu + area map
-            menu_w = 55;
-        else if (menu_width == 2 && area_map_width == 2) // Area map only
-            menu_w = 24;
-        else if (menu_width == 1) // Wide menu
-            menu_w = 55;
-        else if (menuforced || (menu_width == 2 && area_map_width == 3)) // Menu only
-            menu_w = 31; 
+    bool menuforced = (ui->main.mode != df::ui_sidebar_mode::Default || df::global::cursor->x != -30000);
 
-        return menu_w;
-    }
+    if ((menuforced || menu_width == 1) && area_map_width == 2) // Menu + area map
+        menu_w = 55;
+    else if (menu_width == 2 && area_map_width == 2) // Area map only
+        menu_w = 24;
+    else if (menu_width == 1) // Wide menu
+        menu_w = 55;
+    else if (menuforced || (menu_width == 2 && area_map_width == 3)) // Menu only
+        menu_w = 31; 
+
+    return menu_w;
+}
 
 void render_remote_map()
 {
@@ -30,11 +32,11 @@ void render_remote_map()
         int tdimy = gps->dimy;
 
         uint8_t *sctop                     = enabler->renderer->screen;
-        int32_t *screentexpostop           = enabler->renderer->screentexpos;
-        int8_t *screentexpos_addcolortop   = enabler->renderer->screentexpos_addcolor;
-        uint8_t *screentexpos_grayscaletop = enabler->renderer->screentexpos_grayscale;
-        uint8_t *screentexpos_cftop        = enabler->renderer->screentexpos_cf;
-        uint8_t *screentexpos_cbrtop       = enabler->renderer->screentexpos_cbr;
+        // int32_t *screentexpostop           = enabler->renderer->screentexpos;
+        // int8_t *screentexpos_addcolortop   = enabler->renderer->screentexpos_addcolor;
+        // uint8_t *screentexpos_grayscaletop = enabler->renderer->screentexpos_grayscale;
+        // uint8_t *screentexpos_cftop        = enabler->renderer->screentexpos_cf;
+        // uint8_t *screentexpos_cbrtop       = enabler->renderer->screentexpos_cbr;
 
         // In fort mode render_map() will render starting at (1,1)
         // and will use dimensions from init->display.grid to calculate map region to render
@@ -42,11 +44,11 @@ void render_remote_map()
         // So we adjust all this so that it renders to our gdimx x gdimy buffer starting at (0,0).
         gps->screen                 = enabler->renderer->screen                 = gscreen - 4*newheight - 4;
         gps->screen_limit           = gscreen + newwidth * newheight * 4;
-        gps->screentexpos           = enabler->renderer->screentexpos           = gscreentexpos           - newheight - 1;
-        gps->screentexpos_addcolor  = enabler->renderer->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
-        gps->screentexpos_grayscale = enabler->renderer->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
-        gps->screentexpos_cf        = enabler->renderer->screentexpos_cf        = gscreentexpos_cf        - newheight - 1;
-        gps->screentexpos_cbr       = enabler->renderer->screentexpos_cbr       = gscreentexpos_cbr       - newheight - 1;
+        // gps->screentexpos           = enabler->renderer->screentexpos           = gscreentexpos           - newheight - 1;
+        // gps->screentexpos_addcolor  = enabler->renderer->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
+        // gps->screentexpos_grayscale = enabler->renderer->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
+        // gps->screentexpos_cf        = enabler->renderer->screentexpos_cf        = gscreentexpos_cf        - newheight - 1;
+        // gps->screentexpos_cbr       = enabler->renderer->screentexpos_cbr       = gscreentexpos_cbr       - newheight - 1;
 
         init->display.grid_x = newwidth + gmenu_w + 2;
         init->display.grid_y = newheight + 2;
@@ -60,24 +62,21 @@ void render_remote_map()
         gwindow_x = *df::global::window_x = wx;
         gwindow_y = *df::global::window_y = wy;
         gwindow_z = *df::global::window_z = std::max(0, std::min(*df::global::window_z, world->map.z_count-1));
-        //*out2 << "rendering " << gwindow_x << " " << gwindow_y << std::endl;
 
-        if (maxlevels/* && shadowsloaded*/)
+        if (maxlevels)
             patch_rendering(false);
 
         render_map();
 
-        if (maxlevels/* && shadowsloaded*/)
+        if (maxlevels)
         {
-            // multi_rendered = false;
-
             gps->screen                 = mscreen - 4*newheight - 4;
             gps->screen_limit           = mscreen + newwidth * newheight * 4;
-            gps->screentexpos           = mscreentexpos           - newheight - 1;
-            gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
-            gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
-            gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
-            gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
+            // gps->screentexpos           = mscreentexpos           - newheight - 1;
+            // gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
+            // gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
+            // gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
+            // gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
 
             bool empty_tiles_left, rendered1st = false;
             int p = 1;
@@ -87,9 +86,6 @@ void render_remote_map()
 
             do
             {
-                // if (p == maxlevels)
-                //     patch_rendering(true);
-
                 (*df::global::window_z)--;
 
                 if (p > 1)
@@ -115,10 +111,6 @@ void render_remote_map()
                     {
                         const int tile = x * newheight + y, stile = tile * 4;
 
-#ifndef NO_RENDERING_PATCH
-                        // Fast path. When rendering patch is available, tiles that are empty on the current level
-                        // (and only them) will have symbol 00. We only also check for 31 which is a down ramp.
-
                         //if ((gscreen[stile+3]&0xf0))
                         //    continue;
 
@@ -130,6 +122,10 @@ void render_remote_map()
                         int yy = *df::global::window_y + y;
                         if (xx < 0 || yy < 0)
                             continue;
+
+                        // bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
+                        // if (!must_render_tile)
+                        //     continue;
 
                         int xxquot = xx >> 4, xxrem = xx & 15;
                         int yyquot = yy >> 4, yyrem = yy & 15;                    
@@ -144,8 +140,6 @@ void render_remote_map()
 
                         if (p == 1 && !rendered1st)
                         {
-                            // multi_rendered = true;
-
                             (*df::global::window_x) += x0;
                             init->display.grid_x -= x0;
 
@@ -163,140 +157,43 @@ void render_remote_map()
 
                         int d = p;
                         ch = mscreen[stile2+0];
-                        // if (p < maxp)
+
+                        if (ch == 0)
                         {
-                            if (ch == 0)
+                            bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
+                            if (must_render_tile)
                             {
-                                if (p < maxp)
-                                {
-                                    empty_tiles_left = true;
-                                    continue;
-                                }
-
-                                if (!rendered_tiles[zz*256*256 + xx+yy*256])
-                                {
-                                    empty_tiles_left = true;
-                                    continue;
-                                }
-                            }
-                            else if (ch == 31)
-                            {
-                                mscreen[stile2+0] = 30;
-
-                                df::map_block *block1 = world->map.block_index[xxquot][yyquot][zz-1];
-                                df::tiletype t1 = block1->tiletype[xxrem][yyrem];
-                                if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
-                                {
-                                    if (p < maxp)
-                                    {
-                                        empty_tiles_left = true;
-                                        continue;
-                                    }
-                                    if (!rendered_tiles[zz*256*256 + xx+yy*256])
-                                    {
-                                        empty_tiles_left = true;
-                                        continue;
-                                    }                                    
-                                }
-                                d++;
+                                empty_tiles_left = true;
+                                continue;
                             }
                         }
-
-#else
-                        // Slow path. Without rendering patch we have to check all symbols that the game
-                        // may render for lower levels if a tile is empty on the current level.
-
-                        if ((gscreen[stile+3]&0xf0))
-                            continue;
-
-                        unsigned char ch = gscreen[stile+0];
-                        if (ch != 31 && ch != 249 && ch != 250 && ch != 254 && ch != skytile && ch != chasmtile && !(ch >= '1' && ch <= '7'))
-                            continue;
-
-                        int xx = *df::global::window_x + x;
-                        int yy = *df::global::window_y + y;
-                        if (xx < 0 || yy < 0)
-                            continue;
-
-                        int xxquot = xx >> 4, xxrem = xx & 15;
-                        int yyquot = yy >> 4, yyrem = yy & 15;                    
-
-                        //TODO: check for z=0 (?)
-                        bool e0,h,h0;
-                        //*out2 << xx << " " << world->map.x_count << " " << yy << " " << world->map.y_count << " " << *df::global::window_x << " " << *df::global::window_y << std::endl;
-                        df::map_block *block0 = world->map.block_index[xxquot][yyquot][zz0];
-                        h0 = block0 && block0->designation[xxrem][yyrem].bits.hidden;
-                        if (h0)
-                            continue;
-                        e0 = !block0 || ((block0->tiletype[xxrem][yyrem] == df::tiletype::OpenSpace || block0->tiletype[xxrem][yyrem] == df::tiletype::RampTop) && !block0->designation[xxrem][yyrem].bits.flow_size);
-                        if (!(e0))
-                            continue;
-
-                        if (p == 1 && !rendered1st)
+                        else if (ch == 31)
                         {
-                            multi_rendered = true;
+                            mscreen[stile2+0] = 30;
 
-                            (*df::global::window_x) += x0;
-                            init->display.grid_x -= x0;
-
-                            render_map();
-
-                            (*df::global::window_x) -= x0;
-                            init->display.grid_x += x0;
-
-                            x00 = x0;
-
-                            rendered1st = true;                        
-                        }                    
-
-                        const int tile2 = (x-(x00)) * newheight + y, stile2 = tile2 * 4;                    
-
-                        int d = p;
-                        ch = mscreen[stile2+0];
-                        if (!(ch!=31&&ch != 249 && ch != 250 && ch != 254 && ch != skytile && ch != chasmtile && !(ch >= '1' && ch <= '7')))
-                        {
                             df::map_block *block1 = world->map.block_index[xxquot][yyquot][zz-1];
-                            if (!block1)
+                            df::tiletype t1 = block1->tiletype[xxrem][yyrem];
+                            if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
                             {
-                                //TODO: skip all other y's in this block
-                                if (p < maxp)
+                                bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
+                                if (must_render_tile)
                                 {
                                     empty_tiles_left = true;
                                     continue;
                                 }
-                                else
-                                    d = p+1;
                             }
-                            else
-                            {
-                                //TODO: check for hidden also
-                                df::tiletype t1 = block1->tiletype[xxrem][yyrem];
-                                if ((t1 == df::tiletype::OpenSpace || t1 == df::tiletype::RampTop) && !block1->designation[xxrem][yyrem].bits.flow_size)
-                                {
-                                    if (p < maxp)
-                                    {
-                                        empty_tiles_left = true;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        if (t1 != df::tiletype::RampTop)
-                                            d = p+1;
-                                    }
-                                }
-                            }
+                            d++;
                         }
-    #endif
 
                         *((int*)gscreen + tile) = *((int*)mscreen + tile2);
-                        if (*(mscreentexpos+tile2))
-                        {
-                            *(gscreentexpos + tile) = *(mscreentexpos + tile2);
-                            *(gscreentexpos_addcolor + tile) = *(mscreentexpos_addcolor + tile2);
-                            *(gscreentexpos_grayscale + tile) = *(mscreentexpos_grayscale + tile2);
-                            *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
-                            *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
-                        }
+                        // if (*(mscreentexpos+tile2))
+                        // {
+                        //     *(gscreentexpos + tile) = *(mscreentexpos + tile2);
+                        //     *(gscreentexpos_addcolor + tile) = *(mscreentexpos_addcolor + tile2);
+                        //     *(gscreentexpos_grayscale + tile) = *(mscreentexpos_grayscale + tile2);
+                        //     *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
+                        //     *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
+                        // }
                         gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
                     }
 
@@ -304,12 +201,10 @@ void render_remote_map()
                         x0 = x + 1;
                 }
 
-                // if (p++ >= maxp)
-                    // break;
-                if (p++ >= 30)
+                if (p++ >= MAX_LEVELS_RENDER_EVER)
                     break;
             } while(empty_tiles_left);
-            *out2 << "P " << p << std::endl;
+            *out2 << "rendered levels: " << p-1 << std::endl;
 
             (*df::global::window_z) = zz0;
 
@@ -328,11 +223,11 @@ void render_remote_map()
 
         gps->screen = enabler->renderer->screen = sctop;
         gps->screen_limit = gps->screen + gps->dimx * gps->dimy * 4;
-        gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
-        gps->screentexpos_addcolor = enabler->renderer->screentexpos_addcolor = screentexpos_addcolortop;
-        gps->screentexpos_grayscale = enabler->renderer->screentexpos_grayscale = screentexpos_grayscaletop;
-        gps->screentexpos_cf = enabler->renderer->screentexpos_cf = screentexpos_cftop;
-        gps->screentexpos_cbr = enabler->renderer->screentexpos_cbr = screentexpos_cbrtop;
+        // gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
+        // gps->screentexpos_addcolor = enabler->renderer->screentexpos_addcolor = screentexpos_addcolortop;
+        // gps->screentexpos_grayscale = enabler->renderer->screentexpos_grayscale = screentexpos_grayscaletop;
+        // gps->screentexpos_cf = enabler->renderer->screentexpos_cf = screentexpos_cftop;
+        // gps->screentexpos_cbr = enabler->renderer->screentexpos_cbr = screentexpos_cbrtop;
 }
 
 

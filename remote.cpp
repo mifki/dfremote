@@ -82,32 +82,19 @@ static int gwindow_x, gwindow_y, gwindow_z;
 static int gmenu_w;
 
 // Buffers for map rendering
-static uint8_t *_gscreen[2];
-static int32_t *_gscreentexpos[2];
-static int8_t *_gscreentexpos_addcolor[2];
-static uint8_t *_gscreentexpos_grayscale[2];
-static uint8_t *_gscreentexpos_cf[2];
-static uint8_t *_gscreentexpos_cbr[2];
-
-// Current buffers
 static uint8_t *gscreen;
-static int32_t *gscreentexpos;
-static int8_t *gscreentexpos_addcolor;
-static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
+// static int32_t *gscreentexpos;
+// static int8_t *gscreentexpos_addcolor;
+// static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
 
-// Previous buffers to determine changed tiles
-static uint8_t *gscreen_old;
-static int32_t *gscreentexpos_old;
-static int8_t *gscreentexpos_addcolor_old;
-static uint8_t *gscreentexpos_grayscale_old, *gscreentexpos_cf_old, *gscreentexpos_cbr_old;
 
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
-static int32_t *mscreentexpos;
-static int8_t *mscreentexpos_addcolor;
-static uint8_t *mscreentexpos_grayscale;
-static uint8_t *mscreentexpos_cf;
-static uint8_t *mscreentexpos_cbr;
+// static int32_t *mscreentexpos;
+// static int8_t *mscreentexpos_addcolor;
+// static uint8_t *mscreentexpos_grayscale;
+// static uint8_t *mscreentexpos_cf;
+// static uint8_t *mscreentexpos_cbr;
 
 #include "patches.hpp"
 
@@ -585,9 +572,10 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 if (!rblk)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
-                unsigned int *is = (unsigned int*)gscreen + tile;
-                //TODO: exclude depth information when saving/comparing sent tiles
-                if (*is != rblk->data[xx%16 + (yy%16) * 16])
+                unsigned int is = *((unsigned int*)gscreen + tile);
+                is &= 0x01ffffff; // Ignore depth information
+
+                if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
@@ -607,7 +595,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
                         lastdz = dz;
                     }
 
-                    rblk->data[xx%16 + (yy%16) * 16] = *is;
+                    rblk->data[xx%16 + (yy%16) * 16] = is;
                     
                     if (dz)
                     {
@@ -703,6 +691,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
             maxlevels = (int)mdata[3];
 
+            empty_map_cache();
             waiting_render = true;
             return;
         }
