@@ -691,7 +691,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
             maxlevels = (int)mdata[3];
 
-            empty_map_cache();
+            //empty_map_cache();
             waiting_render = true;
             return;
         }

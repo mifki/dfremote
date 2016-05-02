@@ -68,7 +68,7 @@ void render_remote_map()
 
         render_map();
 
-        if (maxlevels)
+        if (maxlevels && *df::global::window_z > 0)
         {
             gps->screen                 = mscreen - 4*newheight - 4;
             gps->screen_limit           = mscreen + newwidth * newheight * 4;
@@ -82,7 +82,7 @@ void render_remote_map()
             int p = 1;
             int x0 = 0;
             int zz0 = *df::global::window_z; 
-            int maxp = std::min(maxlevels, zz0);   
+            int maxp = std::min(maxlevels-1, zz0);   
 
             do
             {
@@ -204,7 +204,6 @@ void render_remote_map()
                 if (p++ >= MAX_LEVELS_RENDER_EVER)
                     break;
             } while(empty_tiles_left);
-            *out2 << "rendered levels: " << p-1 << std::endl;
 
             (*df::global::window_z) = zz0;
 
