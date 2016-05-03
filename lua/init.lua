@@ -544,20 +544,30 @@ function get_status()
         if df.global.selection_rect.start_x == -30000 then
             return 31, mainmode
         else
-            return 32, mainmode
+            local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
+            local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
+            local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
+            return 32, mainmode, { dx, dy, dz }
         end
     end
 
     -- zones [i]
     if mainmode == df.ui_sidebar_mode.Zones then
-        if df.global.ui_sidebar_menus.zone.selected then
+        if df.global.ui_sidebar_menus.zone.selected and not df.global.ui_building_in_resize then
             local zone = df.global.ui_sidebar_menus.zone.selected
             local info = { zonename(zone), zone.zone_flags.whole }
             return 64, 1, info
         else
             local zonemode = df.global.ui_sidebar_menus.zone.mode
             if zonemode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle then
-                return 61, (df.global.selection_rect.start_x ~= -30000 and 1 or 0)
+                if df.global.selection_rect.start_x == -30000 then
+                    return 61, 0
+                else
+                    local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
+                    local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
+                    local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
+                    return 61, 1, { dx, dy, dz }
+                end
             elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.Flow then
                 return 62, (df.global.ui_building_in_resize and 1 or 0)
             elseif zonemode == df.ui_sidebar_menus.T_zone.T_mode.FloorFlow then
@@ -587,7 +597,11 @@ function get_status()
         if df.global.selection_rect.start_x == -30000 then
             return 41, 0
         else
-            return 42, 0
+            local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
+            local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
+            local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
+
+            return 42, 0, { dx, dy, dz }
         end
     end
 
