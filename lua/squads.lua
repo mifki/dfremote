@@ -84,7 +84,7 @@ function squads_get_list()
 end
 
 function squads_get_info()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = screen_main() --dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
     end
