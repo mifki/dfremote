@@ -33,6 +33,9 @@ void allocate_buffers(int tiles)
     // REALLOC(mscreentexpos_grayscale, uint8_t, tiles);
     // REALLOC(mscreentexpos_cf,        uint8_t, tiles);
     // REALLOC(mscreentexpos_cbr,       uint8_t, tiles);
+    
+    REALLOC(gscreendummy,            int32_t, tiles);
+    
 
     // We need to zero out these buffers because game doesn't change them for tiles without creatures,
     // so there will be garbage that will cause every tile to be updated each frame and other bad things

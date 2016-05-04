@@ -96,6 +96,9 @@ static uint8_t *mscreen;
 // static uint8_t *mscreentexpos_cf;
 // static uint8_t *mscreentexpos_cbr;
 
+// We don't support creature graphics yet, but still screentexpos* should point to big enough buffers or one buffer
+static int32_t *gscreendummy;
+
 #include "patches.hpp"
 
 #ifdef WIN32
