@@ -1,15 +1,33 @@
---todo: unused ?
-function can_trade()
-    if #df.global.ui.caravans then
-        return false
+function depot_can_trade(bld)
+    for i,v in ipairs(df.global.ui.caravans) do
+        if v.trade_state == 2 and v.time_remaining > 0 then
+            for i,job in ipairs(bld.jobs) do
+                if job.job_type == df.job_type.TradeAtDepot then
+                    local worker_ref = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER)
+                    local worker = worker_ref and df.unit.find(worker_ref.unit_id)
+                    return worker
+                        and worker.pos.z == bld.z
+                        and worker.pos.x >= bld.x1 and worker.pos.x <= bld.x2
+                        and worker.pos.y >= bld.y1 and worker.pos.y <= bld.y2
+                        or false
+                end
+            end
+        
+        break
+        end
     end
 
-    local caravan = df.global.ui.caravans[0]
-    if (caravan.trade_state ~= 1 and trade_state ~= 2) or caravan.time_remaining == 0 then
-        return false
-    end
+    return false
+end
 
-    return true
+function depot_can_movegoods()
+    for i,v in ipairs(df.global.ui.caravans) do
+        if v.trade_state == 1 or (v.trade_state == 2 and v.time_remaining > 0) then
+            return true
+        end
+    end
+    
+    return false
 end
 
 function depot_movegoods_get()
