@@ -191,23 +191,8 @@ function building_query_selected(bldid)
 
         local caravan_state = #df.global.ui.caravans > 0 and df.global.ui.caravans[0].trade_state or 0
 
-        local can_trade = false
-        local can_movegoods = (caravan_state > 0)
-
-        if caravan_state == 2 then
-            for i,job in ipairs(bld.jobs) do
-                if job.job_type == df.job_type.TradeAtDepot then
-                    local worker_ref = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER)
-                    local worker = worker_ref and df.unit.find(worker_ref.unit_id)
-                    can_trade = worker
-                        and worker.pos.z == bld.z
-                        and worker.pos.x >= bld.x1 and worker.pos.x <= bld.x2
-                        and worker.pos.y >= bld.y1 and worker.pos.y <= bld.y2
-                        or false
-                    break
-                end
-            end
-        end
+        local can_trade = depot_can_trade(bld)
+        local can_movegoods = depot_can_movegoods(bld)
 
         local avail_flags = packbits(can_movegoods, can_trade)
 
