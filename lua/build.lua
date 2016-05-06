@@ -31,11 +31,38 @@ function build_get_errors()
     return ret
 end
 
-function build_confirm()
+function build_confirm(fast)
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
 
     gui.simulateInput(ws, 'SELECT')
+    
+    if istrue(fast) then
+        if df.global.ui.main.mode == 16 and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
+            local continue
+            repeat
+                continue = false
+                for i,choice in ipairs(df.global.ui_build_selector.choices) do
+                    if choice:getNumCandidates() > 0 then
+                        df.global.ui_build_selector.sel_index = i
+                        gui.simulateInput(ws, 'SELECT')
+                        
+                        if df.global.ui_build_selector.building_type == -1 then
+                            if lastbldcmd ~= -1 then
+                                build(lastbldcmd)
+                            else
+                                df.global.ui.main.mode = 0
+                            end
+                            
+                            return {}
+                        else
+                            continue = true
+                        end
+                    end
+                end
+            until not continue
+        end
+    end
 
     return build_req_get(true) or {} --todo: or nil ?
 end
