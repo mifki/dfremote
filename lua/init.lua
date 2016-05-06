@@ -216,9 +216,12 @@ function get_look_list(detailed)
             end
 
         elseif t == df.ui_look_list.T_items.T_type.Water then
-            --todo: stagnant
-            if v.spatter_size > 7 then
-                title = 'salt water ['.. (v.spatter_size-8) ..'/7]'
+            if v.spatter_size >= 24 then
+                title = 'stagnant salt water ['.. (v.spatter_size%8) ..'/7]'
+            elseif v.spatter_size >= 16 then
+                title = 'stagnant water ['.. (v.spatter_size%8) ..'/7]'
+            elseif v.spatter_size >= 8 then
+                title = 'salt water ['.. (v.spatter_size%8) ..'/7]'
             else
                 title = 'water ['.. v.spatter_size ..'/7]'
             end
