@@ -158,7 +158,7 @@ function build_has_options()
     local bsub = df.global.ui_build_selector.building_subtype
 
     return btype == df.building_type.Bridge or btype == df.building_type.AxleHorizontal or btype == df.building_type.ScrewPump
-     or btype == df.building_type.Rollers
+     or btype == df.building_type.Rollers or btype == df.building_type.WaterWheel
      or (btype == df.building_type.Trap and (bsub == 1 or bsub == 5)) --pressure plate, track stop
 end
 
@@ -180,7 +180,8 @@ function build_options_get()
     local btype = df.global.ui_build_selector.building_type
 
     local ret
-    if btype == df.building_type.Bridge or btype == df.building_type.AxleHorizontal or btype == df.building_type.ScrewPump then
+    if btype == df.building_type.Bridge or btype == df.building_type.AxleHorizontal
+        or btype == df.building_type.ScrewPump or btype == df.building_type.WaterWheel then
         ret = { btype, df.global.world.selected_direction }
     
     elseif btype == df.building_type.Rollers then
@@ -268,11 +269,13 @@ function build_options_set(option, value)
 
     local btype = df.global.ui_build_selector.building_type
 
-    if btype == df.building_type.Bridge or btype == df.building_type.AxleHorizontal or btype == df.building_type.Rollers or btype == df.building_type.ScrewPump then
+    if btype == df.building_type.Bridge or btype == df.building_type.AxleHorizontal 
+        or btype == df.building_type.Rollers or btype == df.building_type.ScrewPump
+        or btype == df.building_type.WaterWheel then
         if option == 1 then
             df.global.world.selected_direction = value
 
-            if btype == df.building_type.AxleHorizontal then
+            if btype == df.building_type.AxleHorizontal or btype == df.building_type.WaterWheel then
                 fix_build_size(value == 0)
             elseif btype == df.building_type.Rollers --[[or btype == df.building_type.ScrewPump]] then
                 fix_build_size(value == 0 or value == 2)
