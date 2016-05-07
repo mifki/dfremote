@@ -667,7 +667,7 @@ local jobs_kennels = { 'HOTKEY_KENNEL_CATCH_VERMIN', 'HOTKEY_KENNEL_TAME_VERMIN'
 local jobs_dyers = { 'HOTKEY_DYER_THREAD', 'HOTKEY_DYER_CLOTH' }
 local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP_CAGE', 'HOTKEY_TRAP_CHAIN', 'HOTKEY_TRAP_DOOR', 'HOTKEY_TRAP_FLOODGATE', 'HOTKEY_TRAP_HATCH', 'HOTKEY_TRAP_GRATE_WALL', 'HOTKEY_TRAP_GRATE_FLOOR', 'HOTKEY_TRAP_BARS_VERTICAL', 'HOTKEY_TRAP_BARS_FLOOR', 'HOTKEY_TRAP_SUPPORT', 'HOTKEY_TRAP_SPIKE', 'HOTKEY_TRAP_GEAR_ASSEMBLY', 'HOTKEY_TRAP_TRACK_STOP' }
 
-function building_workshop_addjob(bldid, idx)
+function building_workshop_addjob(bldid, idx, rep)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
@@ -756,6 +756,14 @@ function building_workshop_addjob(bldid, idx)
         btn.building = bld
 
         btn:click()
+    end
+
+    --todo: check here again for traps and other unsopported job types
+    if istrue(rep) then
+        --todo: check that there's indeed a new job added
+        if #bld.jobs > 0 then
+            bld.jobs[#bld.jobs-1].flags['repeat'] = true
+        end
     end
 
     return true
