@@ -17,8 +17,26 @@ function build(idx)
 
     lastbldcmd = idx
 
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
+
     df.global.ui.main.mode = 16
     btn:click()
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        local ws = screen_main()
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function build_get_errors()
