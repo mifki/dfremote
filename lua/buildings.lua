@@ -1359,6 +1359,39 @@ function link_targets_get()
     return ret
 end
 
+function link_target_confirm(fast)
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    if not bld or bld._type ~= df.building_trapst then
+        return
+    end
+    
+    local ws = screen_main()
+    gui.simulateInput(ws, 'SELECT')    
+    
+    -- Automatically select first two mechanisms
+    if istrue(fast) then
+        local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
+
+        -- If the mode is right, the same building is still selected, linkmode is right, and we have enough mechanisms to select
+        if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding and df.global.ui_workshop_in_add
+           and bld == df.global.world.selected_building
+           and linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2 then
+
+            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, 'SELECT')
+            
+            return false
+        end
+    end
+
+    --todo: return link_targets_get() as when placing buildings
+    return true
+end
+
 function link_targets_zoom(idx)
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
         return

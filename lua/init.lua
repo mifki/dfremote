@@ -1676,6 +1676,7 @@ local handlers = {
         [3] = link_mechanisms_cancel,
         [4] = link_targets_get,
         [5] = link_targets_zoom,
+        [6] = link_target_confirm,
     },
 
     [237] = {

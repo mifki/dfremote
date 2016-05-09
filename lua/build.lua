@@ -55,6 +55,7 @@ function build_confirm(fast)
 
     gui.simulateInput(ws, 'SELECT')
     
+    -- Automatically select first (closest) item(s); break if wrong mode or nothing to select
     if istrue(fast) then
         if df.global.ui.main.mode == 16 and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
             local continue
