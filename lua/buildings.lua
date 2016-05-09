@@ -1384,6 +1384,11 @@ function link_target_confirm(fast)
             gui.simulateInput(ws, 'SELECT')
             gui.simulateInput(ws, 'SELECT')
             
+            df.global.cursor.x = bld.centerx
+            df.global.cursor.y = bld.centery
+            df.global.cursor.z = bld.z
+            recenter_view (bld.centerx, bld.centery, bld.z)            
+            
             return false
         end
     end
