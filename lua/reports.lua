@@ -73,7 +73,7 @@ function announcements_get_log()
         end
     end
 
-    return ret
+    return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
 function reports_get_groups()
@@ -101,7 +101,7 @@ function reports_get_groups()
 
     df.global.world.status.flags.whole = bit32.band(df.global.world.status.flags.whole, bit32.bnot(7))
 
-    return ret
+    return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
 function reports_get(unitid, rtype)
@@ -141,7 +141,7 @@ function reports_get(unitid, rtype)
         end
     end
 
-    return ret
+    return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
 function popup_dismiss_all()

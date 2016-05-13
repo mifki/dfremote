@@ -17,8 +17,26 @@ function build(idx)
 
     lastbldcmd = idx
 
+    local x = df.global.cursor.x
+    local y = df.global.cursor.y
+    local z = df.global.window_z
+
     df.global.ui.main.mode = 16
     btn:click()
+
+    if x ~= -30000 then
+        df.global.cursor.x = x
+        df.global.cursor.y = y
+
+        local ws = screen_main()
+        if z > 0 then
+            df.global.cursor.z = z - 1
+            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        else
+            df.global.cursor.z = z + 1
+            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        end
+    end
 end
 
 function build_get_errors()
@@ -31,11 +49,39 @@ function build_get_errors()
     return ret
 end
 
-function build_confirm()
+function build_confirm(fast)
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
 
     gui.simulateInput(ws, 'SELECT')
+    
+    -- Automatically select first (closest) item(s); break if wrong mode or nothing to select
+    if istrue(fast) then
+        if df.global.ui.main.mode == 16 and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
+            local continue
+            repeat
+                continue = false
+                for i,choice in ipairs(df.global.ui_build_selector.choices) do
+                    if choice:getNumCandidates() > 0 then
+                        df.global.ui_build_selector.sel_index = i
+                        gui.simulateInput(ws, 'SELECT')
+                        
+                        if df.global.ui_build_selector.building_type == -1 then
+                            if lastbldcmd ~= -1 then
+                                build(lastbldcmd)
+                            else
+                                df.global.ui.main.mode = 0
+                            end
+                            
+                            return {}
+                        else
+                            continue = true
+                        end
+                    end
+                end
+            until not continue
+        end
+    end
 
     return build_req_get(true) or {} --todo: or nil ?
 end
@@ -140,10 +186,10 @@ local track_stop_friction_values = { 10, 50, 500, 10000, 50000 }
 function build_options_get()
     if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
          local zonemode = df.global.ui_sidebar_menus.zone.mode
-         local selzone = df.global.ui_sidebar_menus.zone.selected
-         local selzone_name = selzone and ('Activity Zone #'..tostring(selzone.zone_num)) or  mp.NIL
-         local selzone_id = selzone and selzone.id or mp.NIL
-         return { df.building_type.Civzone, zonemode, selzone_name, selzone_id }
+         --local selzone = df.global.ui_sidebar_menus.zone.selected
+         --local selzone_name = selzone and ('Activity Zone #'..tostring(selzone.zone_num)) or  mp.NIL
+         --local selzone_id = selzone and selzone.id or mp.NIL
+         return { df.building_type.Civzone, zonemode --[[, selzone_name, selzone_id]] }
     end
 
     if df.global.ui.main.mode ~= 16 or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then

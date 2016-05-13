@@ -151,7 +151,7 @@ function building_query_selected(bldid)
     local bname = bldname(bld)
     local ret = nil
 
-    local removing = (#bld.jobs == 1 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
+    local removing = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
     local actual = df.building_actual:is_instance(bld)
     local forbidden = actual and #bld.contained_items > 0 and bld.contained_items[0].item.flags.forbid
 
@@ -243,7 +243,13 @@ function building_query_selected(bldid)
             profile_info = { #bld.profile.permitted_workers, min, max }
         end
 
-        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info }
+        local clt = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and bld:getClutterLevel() or 0
+        local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0
+
+        --TODO: how to determine this properly?
+        local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bldid) == 0 or false
+
+        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info, clt, num_items, millstone_needs_power }
 
     elseif btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
         or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
@@ -661,7 +667,7 @@ local jobs_kennels = { 'HOTKEY_KENNEL_CATCH_VERMIN', 'HOTKEY_KENNEL_TAME_VERMIN'
 local jobs_dyers = { 'HOTKEY_DYER_THREAD', 'HOTKEY_DYER_CLOTH' }
 local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP_CAGE', 'HOTKEY_TRAP_CHAIN', 'HOTKEY_TRAP_DOOR', 'HOTKEY_TRAP_FLOODGATE', 'HOTKEY_TRAP_HATCH', 'HOTKEY_TRAP_GRATE_WALL', 'HOTKEY_TRAP_GRATE_FLOOR', 'HOTKEY_TRAP_BARS_VERTICAL', 'HOTKEY_TRAP_BARS_FLOOR', 'HOTKEY_TRAP_SUPPORT', 'HOTKEY_TRAP_SPIKE', 'HOTKEY_TRAP_GEAR_ASSEMBLY', 'HOTKEY_TRAP_TRACK_STOP' }
 
-function building_workshop_addjob(bldid, idx)
+function building_workshop_addjob(bldid, idx, rep)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
@@ -750,6 +756,14 @@ function building_workshop_addjob(bldid, idx)
         btn.building = bld
 
         btn:click()
+    end
+
+    --todo: check here again for traps and other unsopported job types
+    if istrue(rep) then
+        --todo: check that there's indeed a new job added
+        if #bld.jobs > 0 then
+            bld.jobs[#bld.jobs-1].flags['repeat'] = true
+        end
     end
 
     return true
@@ -1343,6 +1357,44 @@ function link_targets_get()
     end
 
     return ret
+end
+
+function link_target_confirm(fast)
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    if not bld or bld._type ~= df.building_trapst then
+        return
+    end
+    
+    local ws = screen_main()
+    gui.simulateInput(ws, 'SELECT')    
+    
+    -- Automatically select first two mechanisms
+    if istrue(fast) then
+        local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
+
+        -- If the mode is right, the same building is still selected, linkmode is right, and we have enough mechanisms to select
+        if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding and df.global.ui_workshop_in_add
+           and bld == df.global.world.selected_building
+           and linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2 then
+
+            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, 'SELECT')
+            
+            df.global.cursor.x = bld.centerx
+            df.global.cursor.y = bld.centery
+            df.global.cursor.z = bld.z
+            recenter_view (bld.centerx, bld.centery, bld.z)            
+            
+            return false
+        end
+    end
+
+    --todo: return link_targets_get() as when placing buildings
+    return true
 end
 
 function link_targets_zoom(idx)

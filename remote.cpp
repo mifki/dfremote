@@ -82,24 +82,22 @@ static int gwindow_x, gwindow_y, gwindow_z;
 static int gmenu_w;
 
 // Buffers for map rendering
-static uint8_t *_gscreen[2];
-static int32_t *_gscreentexpos[2];
-static int8_t *_gscreentexpos_addcolor[2];
-static uint8_t *_gscreentexpos_grayscale[2];
-static uint8_t *_gscreentexpos_cf[2];
-static uint8_t *_gscreentexpos_cbr[2];
-
-// Current buffers
 static uint8_t *gscreen;
-static int32_t *gscreentexpos;
-static int8_t *gscreentexpos_addcolor;
-static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
+// static int32_t *gscreentexpos;
+// static int8_t *gscreentexpos_addcolor;
+// static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
 
-// Previous buffers to determine changed tiles
-static uint8_t *gscreen_old;
-static int32_t *gscreentexpos_old;
-static int8_t *gscreentexpos_addcolor_old;
-static uint8_t *gscreentexpos_grayscale_old, *gscreentexpos_cf_old, *gscreentexpos_cbr_old;
+
+// Buffers for rendering lower levels before merging    
+static uint8_t *mscreen;
+// static int32_t *mscreentexpos;
+// static int8_t *mscreentexpos_addcolor;
+// static uint8_t *mscreentexpos_grayscale;
+// static uint8_t *mscreentexpos_cf;
+// static uint8_t *mscreentexpos_cbr;
+
+// We don't support creature graphics yet, but still screentexpos* should point to big enough buffers or one buffer
+static int32_t *gscreendummy;
 
 #include "patches.hpp"
 
@@ -128,7 +126,9 @@ struct rendered_block {
     unsigned int data[16*16];
 };
 
-rendered_block *sent_blocks_idx[16][16][200];
+rendered_block *sent_blocks_idx[16][16][256];
+
+bool rendered_tiles[256*256*256];
 
 static lua_State *L;
 
@@ -164,6 +164,33 @@ std::string client_addr;
 
 static int timer_timeout = -1;
 static string timer_fn;
+
+static int maxlevels = 3;
+
+static void patch_rendering(bool enable_lower_levels)
+{
+#ifndef NO_RENDERING_PATCH
+    static bool ready = false;
+    static unsigned char orig[MAX_PATCH_LEN];
+
+    long addr = p_render_lower_levels.addr;
+    #ifdef WIN32
+        addr += Core::getInstance().vinfo->getRebaseDelta();
+    #endif
+
+    if (!ready)
+    {
+        (new MemoryPatcher(Core::getInstance().p))->makeWritable((void*)addr, sizeof(p_render_lower_levels.len));
+        memcpy(orig, (void*)addr, p_render_lower_levels.len);
+        ready = true;
+    }
+
+    if (enable_lower_levels)
+        memcpy((void*)addr, orig, p_render_lower_levels.len);
+    else
+        apply_patch(NULL, p_render_lower_levels);
+#endif
+}
 
 #include "dwarfmode.hpp"
 #include "itemcache.hpp"
@@ -280,10 +307,12 @@ void empty_map_cache()
 {
     for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
-            for (int z = 0; z < 200; z++)
+            for (int z = 0; z < 256; z++)
                 free(sent_blocks_idx[i][j][z]);
 
     memset(sent_blocks_idx, 0, sizeof(sent_blocks_idx));
+
+    memset(rendered_tiles, 0, sizeof(rendered_tiles));
 }
 
 bool block_is_unmined(int bx, int by, int zlevel)
@@ -368,12 +397,11 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     *(b++) = 0;
 
     int cnt = 0;
+    int lastdz = 0;
 
     //XXX: for example, if the game has already ended, we're on end announcement screen
     if (!world->map.block_index)
-    {
         goto enough;
-    }
 
     for (int by = 0; by < blk_h; by++)
     {
@@ -414,13 +442,27 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
                     *(b++) = s[0]; //ch
 
-                    int bg = s[2];
-                    int bold = (s[3] != 0) * 8;
+                    int dz = (s[3] & 0xfe) >> 1;                    
+
+                    int bg = s[2] & 7;
+                    int bold = (s[3] & 1) * 8;
                     int fg   = (s[1] + bold) % 16;
 
                     *(b++) = fg + (bg << 4);
 
+                    if (lastdz != dz) {
+                        *(b-1) |= 128;
+                        *(b++) = dz - lastdz;
+                        lastdz = dz;
+                    }                    
+
                     rblk->data[i + j * 16] = *is;
+
+                    if (dz)
+                    {
+                        for (int z = zlevel-dz+1;z<=zlevel;z++)
+                            rendered_tiles[z*256*256 + x+y*256] = true;
+                    }                    
                 }
             }
         }
@@ -519,6 +561,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
         int maxx = std::min(newwidth, world->map.x_count - gwindow_x);
         int maxy = std::min(newheight, world->map.y_count - gwindow_y);
         int cnt = 0;
+        int lastdz = 0;
         for (int y = 0; y < maxy; y++)
         {
             for (int x = 0; x < maxx; x++)
@@ -532,20 +575,36 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 if (!rblk)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
-                unsigned int *is = (unsigned int*)gscreen + tile;
-                if (*is != rblk->data[xx%16 + (yy%16) * 16])
+                unsigned int is = *((unsigned int*)gscreen + tile);
+                is &= 0x01ffffff; // Ignore depth information
+
+                if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
                     *(b++) = s[0]; //ch
 
-                    unsigned char bg   = s[2];
-                    unsigned char bold = ((s[3]&0x0f) != 0) * 8;
+                    int dz = (s[3] & 0xfe) >> 1;
+
+                    unsigned char bg   = s[2] & 7;
+                    unsigned char bold = (s[3] & 1) * 8;
                     unsigned char fg   = (s[1] + bold) % 16;
 
                     *(b++) = fg | (bg << 4);
 
-                    rblk->data[xx%16 + (yy%16) * 16] = *is;
+                    if (lastdz != dz) {
+                        *(b-1) |= 128;
+                        *(b++) = dz - lastdz;
+                        lastdz = dz;
+                    }
+
+                    rblk->data[xx%16 + (yy%16) * 16] = is;
+                    
+                    if (dz)
+                    {
+                        for (int z = zlevel-dz+1;z<=zlevel;z++)
+                            rendered_tiles[z*256*256 + xx+yy*256] = true;
+                    }
 
                     //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
                     if (++cnt >= 5000)
@@ -627,7 +686,18 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         {
             send_initial_map(seq, mdata[3], sendfunc, conn);
             return;
-        }    
+        }
+
+        if (cmd == 18)
+        {
+            while(map_render_enabled && waiting_render);
+
+            maxlevels = (int)mdata[3];
+
+            //empty_map_cache();
+            waiting_render = true;
+            return;
+        }
 
         if (cmd == 90)
         {
@@ -1001,7 +1071,15 @@ void remote_start()
         std::vector <std::string> args;
         args.push_back("0");
         if (Core::getInstance().runCommand(*out2, "multilevel", args) == CR_OK)
-            *out2 << "Disabled multilevel rendering, which is not supported" << std::endl;
+            *out2 << "Disabled multilevel rendering to improve performance" << std::endl;
+    }
+
+    {
+        if (df::global::init->display.flag.is_set(df::init_display_flags::USE_GRAPHICS))
+        {
+            df::global::init->display.flag.set(df::init_display_flags::USE_GRAPHICS, true);
+            *out2 << "Disabled creature graphics as it is not supported" << std::endl;
+        }
     }
 
     {

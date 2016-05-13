@@ -149,6 +149,10 @@ function uniformname(uniform)
     return (#uniform.name > 0) and uniform.name or ('Uniform ' .. tostring(uniform.id+1))
 end
 
+function zonename(zone)
+    return 'Activity Zone #' .. tostring(zone.zone_num)
+end
+
 function pos2table(pos)
     return (pos.x ~= -30000) and { pos.x, pos.y, pos.z } or mp.NIL
 end
