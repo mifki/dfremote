@@ -41,7 +41,7 @@ local function populate_order_templates()
 			btn.mat_index = o.mat_index
 			btn.item_category.whole = o.item_category.whole
 			btn.material_category.whole = o.material_category.whole
-			table.insert(order_template_names, utils.call_with_string(btn, 'getLabel'))
+			table.insert(order_template_names, dfhack.df2utf(utils.call_with_string(btn, 'getLabel')))
 
 			local ot = {}
 			ot.reaction_name = o.reaction_name
