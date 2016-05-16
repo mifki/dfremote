@@ -64,6 +64,15 @@
 
 #include "sha256.h"
 
+/*unsigned long long enet_time_get2 (void)
+{
+    struct timeval timeVal;
+
+    gettimeofday (& timeVal, NULL);
+
+    return timeVal.tv_sec*1000*1000+timeVal.tv_usec;
+}*/
+
 using df::global::world;
 using std::string;
 using std::vector;
@@ -358,7 +367,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                 waiting_render = true;
                 render_initial = true;
             }
-
+*out2 << "WILL RENDER INITIAL" << std::endl;
             while(waiting_render);
         }
         /**out2 << "aa" << std::endl;
@@ -486,10 +495,10 @@ bool send_map_updates(send_func sendfunc, void *conn)
     *(b++) = 0;
 
     {
-        long t1 = enet_time_get();
+        // long t1 = enet_time_get2();
         FastCoreSuspender suspend;
-        long t2 = enet_time_get();
-        //*out2 << (t2-t1) << std::endl;
+        // long t2 = enet_time_get2();
+        // *out2 << (t2-t1) << std::endl;
 
         Lua::PushModulePublic(*out2, L, "remote", "get_status_ext");
         lua_pushinteger(L, needs_sync);
@@ -918,12 +927,13 @@ void enthreadmain(ENetHost *server)
                     {
                         process_client_cmd(mdata, msz, (send_func)send_enet, event.peer);
                         
-                        if (!df::global::ui->main.autosave_request)
+                        //TODO: only if moved, zlevel changed, cursor moved, etc.
+                        if (map_render_enabled && !df::global::ui->main.autosave_request && !df::global::gview->view.child->child)
                         {
-                            //TODO: only on the game screen
                             force_send_map = true;
-                            //TODO: only if moved, zlevel changed, cursor moved, etc.
+                            // *out2 << "forcing render" << std::endl;
                             core_force_render();
+                            // *out2 << "forced render done" << std::endl;
                             //df::global::gview->view.child->render();
                             enet_host_flush(server);
                         }
