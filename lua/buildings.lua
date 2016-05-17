@@ -1428,7 +1428,7 @@ function link_mechanisms_get()
         return
     end
 
-    local enough = #df.global.ui_building_assign_items >= 2
+    local enough = #df.global.ui_building_assign_items >= 1
     if not enough then
         return { linkmode, false, {} }
     end
