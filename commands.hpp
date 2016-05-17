@@ -72,7 +72,7 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
         }
         else if (cmd == "reload")
         {
-            remote_unload();
+            remote_unload_lua();
         }
         else if (cmd == "v" || cmd == "ver" || cmd == "version")
         {

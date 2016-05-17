@@ -1780,8 +1780,33 @@ function handle_command(cmd, subcmd, seq, data, foreign)
     return true, generrseqstr(seq) .. err
 end
 
+local first_time_setup_done = false
 function matching_version(clientver, apply)
     -- In the future we may support different client versions and will return the best possible match
+    
+    -- Also, we will configure some DF flags we require and unload incompatible plugins here, because
+    if apply and not first_time_setup_done then
+        print ('DF Remote will now adjust certain settings and disable several plugins that are incompatible with the server.\nYou may want to restart DF before playing locally again.')
+        
+        df.global.init.display.flag.USE_GRAPHICS = false
+        df.global.init.font.use_ttf = df.init_font.T_use_ttf.TTF_OFF
+        
+        df.global.d_init.flags4.PAUSE_ON_LOAD = true
+        df.global.d_init.flags4.INITIAL_SAVE = false
+        df.global.d_init.flags4.EMBARK_WARNING_ALWAYS = false
+        df.global.d_init.post_prepare_embark_confirmation = 2 -- 'no'
+        df.global.d_init.idlers = df.d_init_idlers.OFF
+        
+        --todo: don't use _silent if debug is on
+        dfhack.run_command_silent('multilevel 0')
+        dfhack.run_command_silent('unload workflow menu-mouse dwarfmonitor')
+        
+        -- disabled for now because it's not strictly required and the setting persists
+        --dfhack.run_command_silent('gui/load-screen disable') 
+        
+        first_time_setup_done = true
+    end
+    
     --todo: print this in debug mode
     --print('using version ' .. remote_version .. ' for client version ' .. clientver, apply)
     return remote_version
@@ -1803,6 +1828,8 @@ local remote = {
     end,
     
     unload = function()
+        --todo: restore modified settings and load unloaded plugins here?
+        
         for n,p in pairs(package.loaded) do
             if n:sub(1,#'remote') == 'remote' then
                 package.loaded[n] = nil

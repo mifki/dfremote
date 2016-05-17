@@ -1080,64 +1080,6 @@ void remote_start()
         return;
     }
 
-    //TODO: move all this to Lua
-    //TODO: this (especially disabling multilevel) should be done upon client connection
-    //TODO: unload plugins instead of disabling them (workflow, dwarfmonitor)
-    {
-        {
-            std::vector <std::string> args;
-            args.push_back("0");
-            if (Core::getInstance().runCommand(*out2, "multilevel", args) == CR_OK)
-                *out2 << "Disabled multilevel rendering to improve performance" << std::endl;
-        }
-
-        {
-            if (df::global::init->display.flag.is_set(df::init_display_flags::USE_GRAPHICS))
-            {
-                df::global::init->display.flag.set(df::init_display_flags::USE_GRAPHICS, true);
-                *out2 << "Disabled creature graphics as it is not supported" << std::endl;
-            }
-        }
-
-        {
-            std::vector <std::string> args;
-            args.push_back("disable");
-            if (Core::getInstance().runCommand(*out2, "workflow", args) == CR_OK)
-                *out2 << "Disabled workflow plugin, which is interfering with Remote" << std::endl;
-        }
-
-        {
-            std::vector <std::string> args;
-            args.push_back("disable");
-            if (Core::getInstance().runCommand(*out2, "menu-mouse", args) == CR_OK)
-                *out2 << "Disabled menu-mouse plugin, which is potentially interfering with Remote" << std::endl;
-        }
-
-        {
-            if (df::global::init->font.use_ttf != df::init_font::T_use_ttf::TTF_OFF)
-            {
-                df::global::init->font.use_ttf = df::init_font::T_use_ttf::TTF_OFF;
-                *out2 << "Disabled TTF fonts because some of the Remote functionality require tile fonts" << std::endl;
-            }
-        }
-
-        {
-            if (df::global::d_init->idlers != df::d_init_idlers::OFF)
-            {
-                df::global::d_init->idlers = df::d_init_idlers::OFF;
-                *out2 << "Disabled idlers display so that they are not counted twice" << std::endl;
-            }
-        }    
-
-        df::global::d_init->flags4.set(df::d_init_flags4::PAUSE_ON_LOAD, true);
-
-        /*{
-            std::vector <std::string> args;
-            args.push_back("disable");
-            Core::getInstance().runCommand(*out2, "gui/load-screen", args);
-        }*/
-    }
-
     *out2 << COLOR_LIGHTGREEN << "Dwarf Fortress Remote server listening on port " << enet_port << std::endl;
     *out2 << COLOR_RESET;
 
@@ -1152,6 +1094,12 @@ void remote_start()
     remote_on = true;
 
     enthread = new tthread::thread((void (*)(void *))enthreadmain, server);
+}
+
+void remote_unload_lua()
+{
+    Lua::PushModulePublic(*out2, L, "remote", "unload");
+    Lua::SafeCall(*out2, L, 0, 0, true);
 }
 
 void remote_stop()
@@ -1172,6 +1120,8 @@ void remote_stop()
     enthread = NULL;
 
     enabler->gfps = 50;
+    
+    remote_unload_lua();
 }
 
 void remote_publish(string &name)
@@ -1220,12 +1170,6 @@ void remote_setpwd(string &pwd)
 
     // Force re-publish right now
     remote_publish(publish_name);
-}
-
-void remote_unload()
-{
-    Lua::PushModulePublic(*out2, L, "remote", "unload");
-    Lua::SafeCall(*out2, L, 0, 0, true);
 }
 
 bool remote_print_version()

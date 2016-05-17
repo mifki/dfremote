@@ -132,12 +132,6 @@ function setup_get_server_info(clientver, pwd)
         ws = parent
     end
 
-    --todo: should be a better place to do this
-    df.global.d_init.flags4.PAUSE_ON_LOAD = true
-    df.global.d_init.flags4.INITIAL_SAVE = false
-    df.global.d_init.flags4.EMBARK_WARNING_ALWAYS = false
-    df.global.d_init.post_prepare_embark_confirmation = 2 -- 'no'    
-
     -- Busy loading game
     if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then
         return { ver, 'busy-loading-game' }
