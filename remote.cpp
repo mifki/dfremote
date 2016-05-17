@@ -86,6 +86,9 @@ using df::global::gview;
 static bool enabled;
 static color_ostream *out2;
 
+static unsigned short advflags;
+#define ADVFLAG_NO_FASTRENDER (1 << 0)
+
 static int gwindow_x, gwindow_y, gwindow_z;
 
 static int gmenu_w;
@@ -928,7 +931,8 @@ void enthreadmain(ENetHost *server)
                         process_client_cmd(mdata, msz, (send_func)send_enet, event.peer);
                         
                         //TODO: only if moved, zlevel changed, cursor moved, etc.
-                        if (map_render_enabled && !df::global::ui->main.autosave_request && !df::global::gview->view.child->child)
+                        if (!(advflags & ADVFLAG_NO_FASTRENDER) && map_render_enabled &&
+                            !df::global::ui->main.autosave_request && !df::global::gview->view.child->child)
                         {
                             force_send_map = true;
                             // *out2 << "forcing render" << std::endl;

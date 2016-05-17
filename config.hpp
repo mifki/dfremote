@@ -99,6 +99,15 @@ static bool load_config()
             pwd_hash = tokens[1];
             continue;
         }
+        
+        if (tokens[0] == "ADVFLAGS" && tokens.size() == 2)
+        {
+            int val;
+            if (parse_int(tokens[1], val))
+                advflags = val;
+
+            continue;
+        }
     }
 
     return enabled;
@@ -116,4 +125,7 @@ void save_config()
     ofs << "[PORT:" << enet_port << "]" << std::endl;
     ofs << "[PUBLISH_NAME:" << publish_name << "]" << std::endl;
     ofs << "[PWD:" << pwd_hash << "]" << std::endl;
+    
+    if (advflags)
+        ofs << "[ADVFLAGS:" << advflags << "]" << std::endl;
 }

@@ -14,7 +14,7 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
             remote_stop();    		
             save_config();
     	}
-        else if (cmd == "publish" && args.size() > 1)
+        else if (cmd == "publish" && args.size() == 2)
         {
             remote_publish(args[1]);
             save_config();
@@ -26,12 +26,12 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
         }
         else if (cmd == "password" || cmd == "pwd" || cmd == "pass")
         {
-            if (args.size() > 1)
+            if (args.size() == 2)
             {
                 remote_setpwd(args[1]);
                 save_config();
             }
-            else
+            else if (args.size() == 1)
             {
                 DFHack::CommandHistory hist;
                 std::string ret;
@@ -43,8 +43,10 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
                     save_config();
                 }
             }
+            else
+                return CR_WRONG_USAGE;
         }
-        else if (cmd == "port" && args.size() > 1)
+        else if (cmd == "port" && args.size() == 2)
         {
             if (remote_on)
             {
@@ -60,7 +62,7 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
 
             save_config();            
         }
-        else if (cmd == "debug" && args.size() > 1)
+        else if (cmd == "debug" && args.size() == 2)
         {
             string &arg1 = args[1];
             if (arg1 == "on" || arg1 == "1")
@@ -83,6 +85,26 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
         else if (cmd == "unhideui")
         {
             force_render_ui = true;
+        }
+        else if (cmd == "advflags")
+        {
+            if (args.size() == 3)
+            {
+                int bit, val;
+                if (parse_int(args[1], bit) && parse_int(args[2], val) && bit >= 0 && bit <= 15)
+                {
+                    if (val)
+                        advflags |= (1<<bit);
+                    else
+                        advflags &= ~(1<<bit);
+                }
+            }
+
+            for (int i = 15; i >= 0; i--)
+                *out2 << (advflags&(1<<i) ? 1 : 0);
+            *out2 << "=" << advflags << std::endl;
+            
+            save_config();                        
         }
         else if (cmd == "noop")
         {

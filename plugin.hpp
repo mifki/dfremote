@@ -70,7 +70,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCom
         remote_cmd, false,
         "  on | off           - Enable or disable remote server\n"
         "  publish <name>     - Publish server to be accessible outside of local network\n"
-        "  unpublish          - Stop publishing server"
+        "  unpublish          - Stop publishing \n"
         "  port <number>      - Change port number (default is 1235)\n"
         "  pwd                - Set password required to connect\n"
         "  reload             - Reload Lua code (for developers)"
