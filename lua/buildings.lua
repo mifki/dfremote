@@ -530,7 +530,7 @@ function get_job_choices(ws, level)
         end
 
         local subchoices = false
-        if btn._type == df.interface_button_building_material_selectorst or btn._type == df.interface_button_building_category_selectorst then
+        if btn._type == df.interface_button_buildingst or btn._type == df.interface_button_building_material_selectorst or btn._type == df.interface_button_building_category_selectorst then
             if level == 0 then
                 df.global.ui_workshop_in_add = true
                 ws:logic() --to initialize / switch to add job menu
@@ -1616,3 +1616,4 @@ end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))
 --print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))
+--print(pcall(function() return json:encode(building_workshop_get_jobchoices(0)) end))
