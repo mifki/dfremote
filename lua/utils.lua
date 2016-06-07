@@ -89,6 +89,11 @@ function bldname(bld)
     return string.utf8capitalize(name)
 end
 
+function locname(loc)
+    local name = dfhack.df2utf(dfhack.TranslateName(loc:getName(), true))
+    return string.utf8capitalize(name)
+end
+
 --todo: this should add {} for forbidden items
 function itemname(item, type, decorate)
     local name = dfhack.items.getDescription(item, type, decorate):gsub('`', '\'')

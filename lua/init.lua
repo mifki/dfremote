@@ -41,6 +41,13 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 
+df_40 = dfhack.DF_VERSION:sub(1,4) == '0.40'
+df_42 = dfhack.DF_VERSION:sub(1,4) == '0.42'
+
+if df_42 then
+    require 'remote.locations'
+end
+
 native = {}
 --dfhack.open_plugin(native, 'remote')
 
@@ -528,7 +535,7 @@ function get_status()
     
     --if ws._type == df.viewscreen_dwarfmodest then
     local mainmode = df.global.ui.main.mode
-    local modestr = df.ui_sidebar_mode[mainmode]
+    local modestr = df.ui_sidebar_mode[mainmode] or ''
 
     if mainmode ~= df.ui_sidebar_mode.LookAround then
         last_look_list = nil
@@ -1474,6 +1481,14 @@ local handlers = {
 
         --xxx: temporary due to a typo in the app
         [10] = setup_get_settings,
+    },
+
+    [139] = {
+        [1] = locations_get_list,
+        [2] = location_get_info,
+        
+        [10] = location_occupation_get_candidates,
+        [11] = location_occupation_assign,
     },
 
     [140] = {

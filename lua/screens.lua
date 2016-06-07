@@ -156,3 +156,19 @@ function execute_with_manager_orders_screen(fn)
 		return ret
 	end)
 end
+
+function execute_with_locations_screen(fn)
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, 'D_LOCATIONS')
+		local locsws = dfhack.gui.getCurViewscreen()
+
+		local ok,ret = pcall(fn, locsws)
+
+		locsws.breakdown_level = 2
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end
