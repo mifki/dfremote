@@ -24,7 +24,7 @@ function animals_get()
 
 			local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 			local adoptable = not caste.flags.ADOPTS_OWNER
-			local available = unit.flags3.unk27
+			local available = unit.flags3[27]
 			local slaughter = unit.flags2.slaughter
 
 			local geld = unit.flags3[29]
@@ -90,7 +90,7 @@ function animals_get2()
 
 				local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 				local adoptable = not caste.flags.ADOPTS_OWNER
-				local available = unit.flags3.unk27
+				local available = unit.flags3[27]
 				local slaughter = unit.flags2.slaughter
 
 				local geld = unit.flags3[29]
@@ -173,7 +173,8 @@ function animals_set_available(unitid, val, is_vermin)
 		error('no unit '..tostring(unitid))
 	end
 
-	unit.flags3.unk27 = val
+	unit.flags3[27] = val
+
 	return true
 end
 
