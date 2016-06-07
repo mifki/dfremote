@@ -46,6 +46,7 @@ df_42 = dfhack.DF_VERSION:sub(1,4) == '0.42'
 
 if df_42 then
     require 'remote.locations'
+    require 'remote.petitions'
 end
 
 native = {}
@@ -1498,6 +1499,11 @@ local handlers = {
         [4] = building_stockpile_setflag,
         [5] = building_stockpile_create,
         [6] = building_stockpile_getsettings_level3,
+    },
+
+    [141] = {
+        [1] = petitions_get_list,
+        [2] = petition_respond,
     },
 
     [144] = {
