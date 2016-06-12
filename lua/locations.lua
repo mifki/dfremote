@@ -20,10 +20,20 @@ function locations_get_list()
 		if ltype == df.abstract_building_type.TEMPLE or ltype == df.abstract_building_type.INN_TAVERN or
 		   ltype == df.abstract_building_type.LIBRARY then
 
-		   local name = locname(loc)
-		   local allow_residents = loc.flags[5]
-		   local allow_outsiders = loc.flags[4]
-		   table.insert(ret, { name, loc.id, ltype, packbits(allow_residents, allow_outsiders) })
+			local allow_residents = loc.flags[5]
+			local allow_outsiders = loc.flags[4]
+			local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
+
+			local item = { locname(loc), loc.id, ltype, mode }
+
+			if ltype == df.abstract_building_type.TEMPLE then
+				local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)
+				local deity_name = deity and hfname(deity, true) or mp.NIL
+
+				table.insert(item, deity_name)
+			end
+
+			table.insert(ret, item)
 		end
 	end
 
@@ -71,19 +81,24 @@ function location_get_info(id)
 
 	local ltype = loc:getType()
 
-	local counts
+	local info
+	local params
 	if ltype == df.abstract_building_type.LIBRARY then
+		local count_written = 99 --todo: this
 		local count_paper = loc.contents.unk_100
 
-		counts = {
-			count_buildings(loc, df.building_type.Bookcase), count_written, loc.contents.desired_copies,
-			count_buildings(loc, df.building_type.Box), count_paper, loc.contents.desired_paper,
+		info = {
+			count_buildings(loc, df.building_type.Bookcase), count_written,
+			count_buildings(loc, df.building_type.Box), count_paper,
 			count_buildings(loc, df.building_type.Table), count_buildings(loc, df.building_type.Chair)
 		}
+
+		params = { loc.contents.desired_copies, loc.contents.desired_paper }
 
 	elseif ltype == df.abstract_building_type.INN_TAVERN then
 		local count_goblets = loc.contents.unk_f8
 		local count_instruments = loc.contents.unk_fc
+		local dance_area = { 1,1 } --todo: this
 
 		local rented_rooms = 0
 		local total_rooms = 0
@@ -102,18 +117,28 @@ function location_get_info(id)
 			end
 		end		
 
-		counts = {
+		info = {
 			count_buildings(loc, df.building_type.Box),
-			count_goblets, loc.contents.desired_goblets, count_instruments, loc.contents.desired_instruments,
+			count_goblets, count_instruments,
 			rented_rooms, total_rooms,
 			dance_area,
 		}
 
+		params = { loc.contents.desired_goblets, loc.contents.desired_instruments }
+
 	elseif ltype == df.abstract_building_type.TEMPLE then
-		counts = {
-			count_buildings(loc, df.building_type.Box), count_instruments, desired_instruments,
-			dance_area,
+		local count_instruments = loc.contents.unk_fc
+		local dance_area = { 1,1 } --todo: this
+
+		local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)
+		local deity_name = deity and hfname(deity, true) or mp.NIL
+
+		info = {
+			count_buildings(loc, df.building_type.Box), count_instruments,
+			dance_area, deity_name,
 		}
+
+		params = { loc.contents.desired_instruments }
 	end
 
 	local occupations = {}
@@ -141,8 +166,9 @@ function location_get_info(id)
 
 	local allow_residents = loc.flags[5]
 	local allow_outsiders = loc.flags[4]
+	local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
 
-	return { locname(loc), loc.id, ltype, packbits(allow_residents, allow_outsiders), counts, occupations }
+	return { locname(loc), loc.id, ltype, mode, info, occupations, params }
 end
 
 function location_occupation_get_candidates(locid, occid)
@@ -209,6 +235,52 @@ function location_occupation_assign(locid, occid, unitid)
 
 		error('no location ' .. tostring(locid))
 	end)
+end
+
+function location_set_restriction(id, mode)
+	local loc = location_find_by_id(id)
+	if not loc then
+		error('no location '..tostring(id))
+	end
+
+	local allow_residents = mode > 0
+	local allow_outsiders = mode == 2
+
+	loc.flags[5] = allow_residents
+	loc.flags[4] = allow_outsiders
+
+	return true	
+end
+
+function location_set_parameter(id, idx, val)
+	local loc = location_find_by_id(id)
+	if not loc then
+		error('no location '..tostring(id))
+	end
+
+	local ltype = loc:getType()
+
+	if ltype == df.abstract_building_type.INN_TAVERN then
+		if idx == 0 then
+			loc.contents.desired_goblets = val
+		elseif idx == 1 then
+			loc.contents.desired_instruments = val
+		end
+
+	elseif ltype == df.abstract_building_type.LIBRARY then
+		if idx == 0 then
+			loc.contents.desired_copies = val
+		elseif idx == 1 then
+			loc.contents.desired_paper = val
+		end
+
+	elseif ltype == df.abstract_building_type.TEMPLE then
+		if idx == 0 then
+			loc.contents.desired_instruments = val
+		end
+	end	
+
+	return true
 end
 
 -- print(pcall(function() return json:encode(locations_get_list()) end))

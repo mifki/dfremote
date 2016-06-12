@@ -21,4 +21,4 @@ end
 function petition_respond(id, approve)
 end
 
-print(pcall(function() return json:encode(petitions_get_list()) end))
+--print(pcall(function() return json:encode(petitions_get_list()) end))
