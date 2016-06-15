@@ -337,24 +337,26 @@ function unit_jobtitle(unit, norepeatsuffix)
     local jobcolor = 11
     local onbreak = is_onbreak(unit)
 
-    if #unit.anon_1 > 0 then
-        local _,actid = df.sizeof(unit.anon_1[0]) --todo: use 0 or last ?
+    if df_ver >= 42 then
+        if #unit.anon_1 > 0 then
+            local _,actid = df.sizeof(unit.anon_1[0]) --todo: use 0 or last ?
 
-        local act = df.activity_entry.find(actid)
-        for i,ev in ripairs(act.events) do
-            for j,v in ipairs(ev.participants.units) do
-                if v == unit.id then
-                    local s = df.new 'string'
-                    ev:getName(unit.id, s)
-                    local jobtitle = s.value
-                    s:delete()
+            local act = df.activity_entry.find(actid)
+            for i,ev in ripairs(act.events) do
+                for j,v in ipairs(ev.participants.units) do
+                    if v == unit.id then
+                        local s = df.new 'string'
+                        ev:getName(unit.id, s)
+                        local jobtitle = s.value
+                        s:delete()
 
-                    --[[if #unit.anon_4 > 0 then
-                        local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
-                        jobtitle = jobtitle .. '!'
-                    end]]
+                        --[[if #unit.anon_4 > 0 then
+                            local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
+                            jobtitle = jobtitle .. '!'
+                        end]]
 
-                    return jobtitle, 3
+                        return dfhack.df2utf(jobtitle), 10, 2
+                    end
                 end
             end
         end
@@ -367,7 +369,7 @@ function unit_jobtitle(unit, norepeatsuffix)
 
     if not unit.job.current_job then
         if unit.profession == df.profession.CHILD or unit.profession == df.profession.BABY then
-            return '', 0
+            return '', 0, 0
         end
 
         jobcolor = onbreak and 3 or 14
@@ -385,10 +387,10 @@ function unit_jobtitle(unit, norepeatsuffix)
                     jobtitle = 'Soldier (' .. reason_titles[rc+1] .. ')'
                     jobcolor = 6
                 else
-                    jobtitle = utils.call_with_string(o, 'getDescription')
+                    jobtitle = dfhack.df2utf(utils.call_with_string(o, 'getDescription'))
     
                     if o._type ~= df.squad_order_trainst then
-                        return jobtitle, jobcolor
+                        return jobtitle, jobcolor, 1
                     end
                 end
 
@@ -437,7 +439,7 @@ function unit_jobtitle(unit, norepeatsuffix)
         end
     end
     
-    return jobtitle, jobcolor
+    return jobtitle, jobcolor, unit.job.current_job and 1 or 0
 end
 
 -- df.viewscreen_unitlist_page.Citizens, Livestock, Others, Dead
@@ -450,7 +452,7 @@ end
 local function unitlist_process_citizen(unit)
     local fullname = unit_fulltitle(unit)
 
-    local jobtitle,jobcolor = unit_jobtitle(unit, true)
+    local jobtitle,jobcolor,jobkind  = unit_jobtitle(unit, true)
 
     local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER)
     local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
@@ -489,7 +491,7 @@ local function unitlist_process_citizen(unit)
 
     local profcolor = dfhack.units.getProfessionColor(unit)
 
-    return { fullname, unit.id, jobtitle, flags, pos2table(unit.pos), bldpos, profcolor, jobcolor, unit.profession }
+    return { fullname, unit.id, jobtitle, flags, pos2table(unit.pos), bldpos, profcolor, jobcolor, jobkind }
 end
 
 function units_list_dwarves()

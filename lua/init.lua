@@ -7,8 +7,7 @@ _ = require 'remote.underscore'
 gui = require 'gui'
 utils = require 'utils'
 
-df_40 = dfhack.DF_VERSION:sub(1,4) == '0.40'
-df_42 = dfhack.DF_VERSION:sub(1,4) == '0.42'
+df_ver = tonumber(dfhack.DF_VERSION:sub(3,4))
 
 require 'remote.utf8.utf8data'
 require 'remote.utf8.utf8'
@@ -45,7 +44,7 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 
-if df_42 then
+if df_ver >= 42 then
     require 'remote.locations'
     require 'remote.petitions'
 end
@@ -1507,6 +1506,11 @@ local handlers = {
     [141] = {
         [1] = petitions_get_list,
         [2] = petition_respond,
+    },
+
+    [142] = {
+        [1] = jobs_get_list,
+        [2] = job_get_description,
     },
 
     [144] = {

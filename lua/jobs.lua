@@ -1,4 +1,7 @@
-function activity_get_description(unitid)
+function jobs_get_list()
+end
+
+function job_get_description(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
         error('no unit '..tostring(unitid))
@@ -21,8 +24,13 @@ function activity_get_description(unitid)
     if ws._type == df.viewscreen_textviewerst then
         local text = ''
         for i,v in ipairs(ws.formatted_text) do
-            text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+            if not v.text then
+                text = text .. '[P]'
+            else
+                text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+            end
         end
+
         text = text:gsub('%s+', ' ')
 
         local title = ws.title

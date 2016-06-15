@@ -53,10 +53,10 @@ function augment(o)
 	return o
 end
 
-local A = augment
+return augment
 
 --print(A(dfhack.gui.getCurViewscreen().locations[0].contents).count_goblets)
 
 --print(A(df.global.world.raws.creatures.all[22].caste[0].body_info.body_parts[8].flags).GELDABLE)
 
-print(A(dfhack.gui.getSelectedUnit()).social_activities[0])
+--print(A(dfhack.gui.getSelectedUnit()).social_activities[0])

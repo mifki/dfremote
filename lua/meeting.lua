@@ -1,5 +1,9 @@
 --todo: do this in C
 function charptr_to_string(charptr)
+	--[[if not charptr then
+		return ''
+	end]]
+
 	local ret = ''
 
 	while true do
