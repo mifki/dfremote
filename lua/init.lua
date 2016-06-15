@@ -2,10 +2,13 @@ remote_version = require 'remote.version'
 
 json = require 'remote.JSON'
 mp = require 'remote.MessagePack'
+_ = require 'remote.underscore'
 
 gui = require 'gui'
 utils = require 'utils'
-_ = require 'remote.underscore'
+
+df_40 = dfhack.DF_VERSION:sub(1,4) == '0.40'
+df_42 = dfhack.DF_VERSION:sub(1,4) == '0.42'
 
 require 'remote.utf8.utf8data'
 require 'remote.utf8.utf8'
@@ -21,6 +24,7 @@ require 'remote.depot'
 require 'remote.buildings'
 require 'remote.stockpile'
 require 'remote.units'
+require 'remote.jobs'
 require 'remote.items'
 require 'remote.manager'
 require 'remote.orders'
@@ -40,9 +44,6 @@ require 'remote.waypoints'
 require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
-
-df_40 = dfhack.DF_VERSION:sub(1,4) == '0.40'
-df_42 = dfhack.DF_VERSION:sub(1,4) == '0.42'
 
 if df_42 then
     require 'remote.locations'

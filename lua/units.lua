@@ -337,6 +337,29 @@ function unit_jobtitle(unit, norepeatsuffix)
     local jobcolor = 11
     local onbreak = is_onbreak(unit)
 
+    if #unit.anon_1 > 0 then
+        local _,actid = df.sizeof(unit.anon_1[0]) --todo: use 0 or last ?
+
+        local act = df.activity_entry.find(actid)
+        for i,ev in ripairs(act.events) do
+            for j,v in ipairs(ev.participants.units) do
+                if v == unit.id then
+                    local s = df.new 'string'
+                    ev:getName(unit.id, s)
+                    local jobtitle = s.value
+                    s:delete()
+
+                    --[[if #unit.anon_4 > 0 then
+                        local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
+                        jobtitle = jobtitle .. '!'
+                    end]]
+
+                    return jobtitle, 3
+                end
+            end
+        end
+    end
+
     local jobtitle = unit.job.current_job and dfhack.job.getName(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
     if unit.job.current_job and unit.job.current_job.flags['repeat'] and not norepeatsuffix then
         jobtitle = jobtitle .. '/R'
@@ -1331,4 +1354,6 @@ function unit_assign_animals(unitid, animalids)
     end
 end
 
---print(pcall(function() return json:encode(unit_get_assign_animal_choices()) end))
+if screen_main()._type == df.viewscreen_dwarfmodest then
+    print(pcall(function() return json:encode(units_list_dwarves()) end))
+end
