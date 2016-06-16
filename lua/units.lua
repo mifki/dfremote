@@ -114,7 +114,6 @@ function unit_query_selected(unitid)
     local uname = unitname(unit, false)
     local uname_en = unitname(unit, true)
 
-    --todo: use unit_jobtitle instead
     local prof = unit_fullprof(unit)
     local profcolor = dfhack.units.getProfessionColor(unit)
 
@@ -1356,6 +1355,6 @@ function unit_assign_animals(unitid, animalids)
     end
 end
 
-if screen_main()._type == df.viewscreen_dwarfmodest then
-    print(pcall(function() return json:encode(units_list_dwarves()) end))
-end
+-- if screen_main()._type == df.viewscreen_dwarfmodest then
+--     print(pcall(function() return json:encode(units_list_dwarves()) end))
+-- end

@@ -1,10 +1,77 @@
 function jobs_get_list()
+    return execute_with_jobs_screen(function(ws)
+        local ret = {}
+
+        for i,job in ipairs(ws.jobs) do
+            if job then
+                local title = dfhack.job.getName(job)
+                if job.flags['repeat'] then
+                    title = title .. '/R'
+                end
+
+                local worker = dfhack.job.getWorker(job)
+                if not worker then
+                    if job.flags.suspend then
+                        worker = 'Suspended'
+                    else
+                        worker = 'Inactive'
+                    end
+                else
+                    worker = unit_fulltitle(worker)
+                end
+
+                print(title, worker)
+            end
+        end
+
+        return ret
+    end)    
 end
 
 function job_get_description(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
         error('no unit '..tostring(unitid))
+    end
+
+    if unit.job.current_job then
+        local job = unit.job.current_job
+
+        local title = dfhack.job.getName(job)
+        local worker = dfhack.job.getWorker(job)
+        local profcolor = dfhack.units.getProfessionColor(unit)
+
+        local text = '[C:7:0:1]Worker: '
+        if worker then
+            text = text .. '[C:' .. tostring(profcolor) .. ':0:0]' .. unit_fulltitle(worker)
+        else
+            text = text .. '[C:0:0:1]Inactive' --todo: check color
+        end
+
+        local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER)
+        local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
+        if jobbld then
+            text = text .. '[P][C:7:0:1]Location: [C:3:0:1]' .. bldname(jobbld)
+        end        
+
+        if job.flags['repeat'] or job.flags.suspend then
+            text = text .. '[P][C:7:0:1]'
+            if job.flags['repeat'] then
+                text = text .. 'Repeating    ' --todo: color
+            end
+            if job.flagssuspend then
+                text = text .. 'Suspended    ' --todo: color
+            end
+        end
+
+        if #job.items > 0 then
+            text = text .. '[P][C:7:0:1]Items:'
+            for i,v in ipairs(job.items) do
+                text = text .. '[B][C:6:0:1]' .. itemname(v.item, 3, true)
+            end
+        end
+
+        return { title, text }
     end
 
     local oldws = dfhack.gui.getCurViewscreen()
@@ -42,6 +109,6 @@ function job_get_description(unitid)
 	return nil
 end
 
-if screen_main()._type == df.viewscreen_dwarfmodest then
-    print(pcall(function() return json:encode(activity_get_description(1244)) end))
-end
+-- if screen_main()._type == df.viewscreen_dwarfmodest then
+--     print(pcall(function() return json:encode(jobs_get_list()) end))
+-- end

@@ -95,6 +95,7 @@ function locname(loc)
 end
 
 --todo: this should add {} for forbidden items
+--todo: add info what different type values do
 function itemname(item, type, decorate)
     local name = dfhack.items.getDescription(item, type, decorate):gsub('`', '\'')
 

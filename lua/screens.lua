@@ -89,6 +89,22 @@ function execute_with_units_screen(fn)
 	end)
 end
 
+function execute_with_jobs_screen(fn)
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, 'D_JOBLIST')
+		local jobsws = dfhack.gui.getCurViewscreen()
+
+		local ok,ret = pcall(fn, jobsws)
+
+		jobsws.breakdown_level = 2
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end
+
 status_pages = {
 	Overview = -1,
 	Animals = 0,
