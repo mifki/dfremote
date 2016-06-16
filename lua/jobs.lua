@@ -57,10 +57,10 @@ function job_get_description(unitid)
         if job.flags['repeat'] or job.flags.suspend then
             text = text .. '[P][C:7:0:1]'
             if job.flags['repeat'] then
-                text = text .. 'Repeating    ' --todo: color
+                text = text .. '[C:1:0:0]Repeating    ' --todo: color
             end
-            if job.flagssuspend then
-                text = text .. 'Suspended    ' --todo: color
+            if job.flags.suspend then
+                text = text .. '[C:4:0:0]Suspended    ' --todo: color
             end
         end
 
@@ -100,7 +100,7 @@ function job_get_description(unitid)
 
         text = text:gsub('%s+', ' ')
 
-        local title = ws.title
+        local title = dfhack.df2utf(ws.title)
         title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
         return { title, text }
