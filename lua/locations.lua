@@ -12,7 +12,7 @@ end
 function locations_get_list()
 	local site = df.world_site.find(df.global.ui.site_id)
 
-	local ret = {}
+	local list = {}
 
 	for i,loc in ipairs(site.buildings) do
 		local ltype = loc:getType()
@@ -33,11 +33,19 @@ function locations_get_list()
 				table.insert(item, deity_name)
 			end
 
-			table.insert(ret, item)
+			table.insert(list, item)
 		end
 	end
 
-	return ret
+	local site_occupations_count = 0
+	local group_id = df.global.ui.group_id
+	for i,v in ipairs(df.global.world.occupations.all) do
+		if v.anon_1 == group_id and v.unit_id ~= -1 then
+			site_occupations_count = site_occupations_count + 1
+		end
+	end
+
+	return { list, { translatename(site.name), site_occupations_count } }
 end
 
 local function count_buildings(loc, count_type)

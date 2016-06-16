@@ -98,7 +98,7 @@ function status_get_overview()
 
     local site = df.world_site.find(df.global.ui.site_id)
     local is_mountainhome = have_noble('MONARCH') --todo: what if monarch dies? there should be more correct way
-    local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. string.utf8capitalize(dfhack.df2utf(dfhack.TranslateName(site.name))) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
+    local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. translatename(site.name) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
 
     local month = math.floor(df.global.cur_year_tick / TU_PER_MONTH)
     local datestr = format_date(df.global.cur_year, df.global.cur_year_tick) .. ', ' .. seasonparts[month%3+1] .. seasons[math.floor(month/3)+1]
