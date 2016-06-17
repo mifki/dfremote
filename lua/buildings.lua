@@ -529,6 +529,7 @@ function get_job_choices(ws, level)
             key = ''
         end
 
+        local descr = mp.NIL
         local subchoices = false
         if btn._type == df.interface_button_buildingst or btn._type == df.interface_button_building_material_selectorst or btn._type == df.interface_button_building_category_selectorst then
             if level == 0 then
@@ -546,11 +547,31 @@ function get_job_choices(ws, level)
                 gui.simulateInput(ws, 'CURSOR_DOWN_Z')
                 gui.simulateInput(ws, 'CURSOR_UP_Z')
             end
+        elseif df_ver >= 42 then
+            if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
+                local rid = btn.reaction_name:sub(6)
+                local found = false
+                for i,v in ipairs(df.global.world.raws.itemdefs.instruments) do
+                    if v.id == rid then
+                        descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    for i,v in ipairs(df.global.world.raws.itemdefs.tools) do
+                        if v.id == rid then
+                            descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
+                            found = true
+                            break
+                        end
+                    end
+                end
+            end
         end
 
         local flags = packbits(unavailable, slab, memorialized)
-
-        table.insert(ret, { dfhack.df2utf(title), key, subchoices, #jobchoices, flags })
+        table.insert(ret, { dfhack.df2utf(title), key, subchoices, #jobchoices, flags, descr })
 
         ::continue::
     end    

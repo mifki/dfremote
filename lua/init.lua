@@ -62,7 +62,7 @@ local lastextdata = nil
 building_btns = {}
 designate_cmds = {}
 
---xxx: makeing it possible to access a global with the currently being linked building type
+--xxx: making it possible to access a global with the currently being linked building type
 --xxx: this is a hack until the required global is added to dfhack !!
 if dfhack.getOSType() == 'windows' then
     dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807+dfhack.internal.getRebaseDelta())

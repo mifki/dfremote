@@ -104,7 +104,7 @@ function meeting_get()
     	if #ws.text > 0 then
     		text = '<p align=justify>'
     		for i,v in ipairs(ws.text) do
-    			local line = dfhack.df2utf(v.value:gsub('  ', ' '))
+    			local line = dfhack.df2utf(v.value:gsub('%s+', ' '))
 				
 				if text:sub(#text,#text) == '.' and line:find('^[A-Z]') then
 					text = text .. '</p><p align=justify>'
