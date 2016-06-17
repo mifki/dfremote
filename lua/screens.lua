@@ -188,3 +188,22 @@ function execute_with_locations_screen(fn)
 		return ret
 	end)
 end
+
+function execute_with_petitions_screen(fn)
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, 'D_PETITIONS')
+		local petitionsws = dfhack.gui.getCurViewscreen()
+		if petitionsws._type ~= df.viewscreen_petitionsst then
+			error('wrong screen '..tostring(petitionsws._type))
+		end
+
+		local ok,ret = pcall(fn, petitionsws)
+
+		petitionsws.breakdown_level = 2
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end

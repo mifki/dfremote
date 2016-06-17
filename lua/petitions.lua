@@ -1,3 +1,5 @@
+--todo: access to .anon_1 will crash on Windows !!
+
 function petitions_get_list()
 	local ret = {}
 
@@ -19,6 +21,20 @@ function petitions_get_list()
 end
 
 function petition_respond(id, approve)
+	return execute_with_petitions_screen(function(ws)
+		for i,v in ipairs(ws.anon_1) do
+			local p = df.reinterpret_cast(df.agreement, v)
+
+			if p.anon_1 == id then
+				ws.cursor = i
+				gui.simulateInput(ws, istrue(approve) and 'OPTION1' or 'OPTION2')
+
+				return true
+			end
+		end
+
+        error('no petition '..tostring(id))		
+	end)
 end
 
---print(pcall(function() return json:encode(petitions_get_list()) end))
+--print(pcall(function() return json:encode(petition_respond(1,false)) end))
