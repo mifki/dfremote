@@ -1489,6 +1489,7 @@ local handlers = {
         [2] = location_get_info,
         [3] = location_set_restriction,
         [4] = location_set_parameter,
+        [5] = location_retire,
         
         [10] = location_occupation_get_candidates,
         [11] = location_occupation_assign,

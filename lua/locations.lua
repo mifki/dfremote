@@ -9,6 +9,7 @@ local function location_find_by_id(id)
 	return nil
 end
 
+--todo: use list from the locations screen
 function locations_get_list()
 	local site = df.world_site.find(df.global.ui.site_id)
 
@@ -17,8 +18,10 @@ function locations_get_list()
 	for i,loc in ipairs(site.buildings) do
 		local ltype = loc:getType()
 
-		if ltype == df.abstract_building_type.TEMPLE or ltype == df.abstract_building_type.INN_TAVERN or
-		   ltype == df.abstract_building_type.LIBRARY then
+		-- if not retired
+		if not loc.flags[1] and
+		   (ltype == df.abstract_building_type.TEMPLE or ltype == df.abstract_building_type.INN_TAVERN or
+		   ltype == df.abstract_building_type.LIBRARY) then
 
 			local allow_residents = loc.flags[5]
 			local allow_outsiders = loc.flags[4]
@@ -82,6 +85,36 @@ local occupation_names = {
 }
 
 function location_get_info(id)
+	if id == -1 then
+		local site = df.world_site.find(df.global.ui.site_id)
+		local group_id = df.global.ui.group_id
+
+		local occupations = {}
+
+		for i,occ in ipairs(df.global.world.occupations.all) do
+			if occ.anon_1 == group_id and occ.unit_id ~= -1 then
+				local unit = df.unit.find(occ.unit_id)
+				local unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
+
+				local pos = #occupations + 1
+				for j,v in ipairs(occupations) do
+					--[[if v[5] == -1 and occ.type == v[3] then
+						pos = occ.unit_id == -1 and 0 or j
+						break
+					end]]
+					if v[3] > occ.type then
+						pos = j
+						break
+					end
+				end				
+
+				table.insert(occupations, pos, { occupation_names[occ.type+1], occ.id, occ.type, unitname, occ.unit_id })
+			end
+		end
+
+		return { translatename(site.name), -1, occupations }
+	end
+
 	return execute_with_locations_screen(function(ws)
 		for j,loc in ipairs(ws.locations) do
 			if loc and loc.id == id then
@@ -248,6 +281,20 @@ function location_occupation_assign(locid, occid, unitid)
 	end)
 end
 
+function location_retire(id)
+	return execute_with_locations_screen(function(ws)
+		for i,loc in ipairs(ws.locations) do
+			if loc and loc.id == id then
+				gui.simulateInput(ws, 'LOCATION_RETIRE')
+			end
+
+			gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+		end
+
+		error('no location ' .. tostring(locid))
+	end)
+end
+
 function location_set_restriction(id, mode)
 	local loc = location_find_by_id(id)
 	if not loc then
@@ -295,6 +342,6 @@ function location_set_parameter(id, idx, val)
 end
 
 -- print(pcall(function() return json:encode(locations_get_list()) end))
---print(pcall(function() return json:encode(location_get_info(0)) end))
+-- print(pcall(function() return json:encode(location_get_info(-1)) end))
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
 -- print(pcall(function() return json:encode(location_occupation_assign(2,108,1701)) end))
