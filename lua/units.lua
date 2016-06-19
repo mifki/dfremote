@@ -602,7 +602,7 @@ function units_list_other()
                 right = right .. ' (Chained)'
             end
 
-            local activity,actcolor = unit.flags3[31] and unit_jobtitle(unit, false, true)
+            local activity,actcolor = unit_jobtitle(unit, false, true)
             table.insert(ret, { fullname, unit.id, right, 0, pos2table(unit.pos), mp.NIL, profcolor, rightcolor, activity or mp.NIL, actcolor or 0 })
         end
     
