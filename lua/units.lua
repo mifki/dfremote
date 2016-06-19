@@ -332,7 +332,7 @@ function unit_fulltitle(unit)
     return fullname
 end
 
-function unit_jobtitle(unit, norepeatsuffix)
+function unit_jobtitle(unit, norepeatsuffix, activityonly)
     local jobcolor = 11
     local onbreak = is_onbreak(unit)
 
@@ -342,7 +342,8 @@ function unit_jobtitle(unit, norepeatsuffix)
 
             local act = df.activity_entry.find(actid)
             for i,ev in ripairs(act.events) do
-                for j,v in ipairs(ev.participants.units) do
+                --todo: what is free_units and are all of free_units also in units ?
+                for j,v in ipairs(ev.participants.free_units) do
                     if v == unit.id then
                         local s = df.new 'string'
                         ev:getName(unit.id, s)
@@ -358,6 +359,8 @@ function unit_jobtitle(unit, norepeatsuffix)
                     end
                 end
             end
+        elseif activityonly then
+            return nil
         end
     end
 
@@ -559,12 +562,15 @@ function units_list_other()
                 right = 'Friendly'
                 rightcolor = 2+8                
 
-            elseif unit.civ_id ~= -1 then
-                right = 'Hostile'
-                rightcolor = 4
+            -- elseif unit.civ_id ~= -1 then
+            --     right = 'Hostile'
+            --     rightcolor = 4
 
             else
-                if unit.flags2.visitor then
+                if unit.flags3[31] then
+                    right = 'Guest'
+                    rightcolor = 2+8
+                elseif unit.flags2.visitor then
                     right = 'Visitor'
                     rightcolor = 2+8
 
@@ -594,9 +600,10 @@ function units_list_other()
                 right = right .. ' (Caged)'
             elseif unit.flags1.chained then
                 right = right .. ' (Chained)'
-            end            
+            end
 
-            table.insert(ret, { fullname, unit.id, right, 0, pos2table(unit.pos), mp.NIL, profcolor, rightcolor })
+            local activity,actcolor = unit.flags3[31] and unit_jobtitle(unit, false, true)
+            table.insert(ret, { fullname, unit.id, right, 0, pos2table(unit.pos), mp.NIL, profcolor, rightcolor, activity or mp.NIL, actcolor or 0 })
         end
     
         return { ret, { #ws.units[0], #ws.units[1], #ws.units[2], #ws.units[3] } }

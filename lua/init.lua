@@ -219,7 +219,7 @@ function get_look_list(detailed)
             color = 15 --dfhack.units.getProfessionColor(v.unit)
             if detailed then
                 local unit = v.unit
-                local job, jobcolor = unit_jobtitle(unit)
+                local job, jobcolor = unit_jobtitle(unit, false)
                 data = { unit.id, job, jobcolor }
             end
 
@@ -819,7 +819,7 @@ function get_status()
     if last_follow_unit then
         ext = ext or {}
         --todo: both unit and job colours
-        table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit) })
+        table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit, false) })
     end
 
     local hasnewidlers = false
