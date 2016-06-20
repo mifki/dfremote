@@ -357,14 +357,41 @@ function location_assign_get_list(bldid)
     	local list = {}
     	
     	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
-    		table.insert(list, { locname(loc), loc.id, ltype })
+    		if loc then
+	    		table.insert(list, { locname(loc), loc.id, ltype })
+	    	end
     	end
 
     	return { list, zone.location_id }
     end)
 end
 
+function location_assign(bldid, locid)
+    local zone = df.building.find(bldid)
+    if not zone or zone:getType() ~= df.building_type.Civzone then
+        error('no zone or not a zone'..tostring(bldid))
+    end
+
+    if not zone.zone_flags.meeting_area then
+    	error('not a meeting area'..tostring(zone.zone_flags.whole))
+    end
+
+    return execute_with_selected_zone(bldid, function(ws)
+    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+
+    	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
+    		if (locid == -1 and not loc) or (loc and loc.id == locid) then
+    			df.global.ui_sidebar_menus.location.cursor = i
+    			gui.simulateInput(ws, 'SELECT')
+    			return true
+    		end
+    	end
+
+    	error('no location '..tostring(locid))
+    end)
+end
+
 -- print(pcall(function() return json:encode(locations_get_list()) end))
 -- print(pcall(function() return json:encode(location_get_info(-1)) end))
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
-print(pcall(function() return json:encode(location_assign_get_list(670)) end))
+-- print(pcall(function() return json:encode(location_assign(670,-1)) end))

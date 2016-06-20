@@ -1495,6 +1495,7 @@ local handlers = {
         [11] = location_occupation_assign,
 
         [20] = location_assign_get_list,
+        [21] = location_assign,
     },
 
     [140] = {
