@@ -1493,6 +1493,8 @@ local handlers = {
         
         [10] = location_occupation_get_candidates,
         [11] = location_occupation_assign,
+
+        [20] = location_assign_get_list,
     },
 
     [140] = {

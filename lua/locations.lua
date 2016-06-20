@@ -341,7 +341,30 @@ function location_set_parameter(id, idx, val)
 	return true
 end
 
+function location_assign_get_list(bldid)
+    local zone = df.building.find(bldid)
+    if not zone or zone:getType() ~= df.building_type.Civzone then
+        error('no zone or not a zone'..tostring(bldid))
+    end
+
+    if not zone.zone_flags.meeting_area then
+    	error('not a meeting area'..tostring(zone.zone_flags.whole))
+    end
+
+    return execute_with_selected_zone(bldid, function(ws)
+    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+
+    	local list = {}
+    	
+    	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
+    		table.insert(list, { locname(loc), loc.id, ltype })
+    	end
+
+    	return { list, zone.location_id }
+    end)
+end
+
 -- print(pcall(function() return json:encode(locations_get_list()) end))
 -- print(pcall(function() return json:encode(location_get_info(-1)) end))
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
--- print(pcall(function() return json:encode(location_occupation_assign(2,108,1701)) end))
+print(pcall(function() return json:encode(location_assign_get_list(670)) end))
