@@ -1,5 +1,7 @@
-local function location_find_by_id(id)
+function location_find_by_id(id)
 	local site = df.world_site.find(df.global.ui.site_id)
+
+	--todo: use binsearch if it's sorted
 	for i,loc in ipairs(site.buildings) do
 		if loc.id == id then
 			return loc
@@ -358,7 +360,7 @@ function location_assign_get_list(bldid)
     	
     	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
     		if loc then
-	    		table.insert(list, { locname(loc), loc.id, ltype })
+	    		table.insert(list, { locname(loc), loc.id, loc:getType() })
 	    	end
     	end
 

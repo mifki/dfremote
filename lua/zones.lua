@@ -11,7 +11,12 @@ function zone_settings_get(bldid)
         error('no zone found for id '..tostring(bldid))
     end
 
-    return { zonename(zone), zone.id, zone.zone_flags.whole }
+    local loc
+    if df_ver >= 42 and zone.zone_flags.meeting_area and zone.location_id ~= -1 then
+        loc = location_find_by_id(zone.location_id)
+    end
+
+    return { zonename(zone), zone.id, zone.zone_flags.whole, loc and locname(loc) or mp.NIL }
 end
 
 function zone_settings_set(bldid, option, value)
