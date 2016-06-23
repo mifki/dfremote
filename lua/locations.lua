@@ -210,6 +210,9 @@ function location_get_info(id)
 				local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
 
 				return { locname(loc), loc.id, ltype, mode, info, occupations, params }
+			
+			else
+				gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
 			end
 		end
 
@@ -447,7 +450,7 @@ function locations_add(bldid, tp, deityid)
 			gui.simulateInput(ws, 'LOCATION_LIBRARY')
 		elseif tp == 3 then
 			gui.simulateInput(ws, 'LOCATION_TEMPLE')
-			
+
 	    	for i,hf in ipairs(df.global.ui_sidebar_menus.location.deities) do
 	    		if (deityid == -1 and not hf) or (hf and hf.id == deityid) then
 	    			df.global.ui_sidebar_menus.location.cursor_deity = i
