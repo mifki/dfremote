@@ -51,7 +51,8 @@ function ripairs_tbl(t)
 end
 
 function capitalize(str)
-    return str:gsub("(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
+    local ret = str:gsub("(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
+    return ret
 end
 
 function unitname(unit, eng)

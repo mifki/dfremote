@@ -1490,6 +1490,8 @@ local handlers = {
         [3] = location_set_restriction,
         [4] = location_set_parameter,
         [5] = location_retire,
+        [6] = locations_add,
+        [7] = locations_add_get_deity_choices,
         
         [10] = location_occupation_get_candidates,
         [11] = location_occupation_assign,

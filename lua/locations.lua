@@ -378,6 +378,10 @@ function location_assign(bldid, locid)
     	error('not a meeting area'..tostring(zone.zone_flags.whole))
     end
 
+    if zone.location_id == locid then
+    	return
+    end
+
     return execute_with_selected_zone(bldid, function(ws)
     	gui.simulateInput(ws, 'ASSIGN_LOCATION')
 
@@ -393,7 +397,72 @@ function location_assign(bldid, locid)
     end)
 end
 
+function locations_add_get_deity_choices(bldid)
+    return execute_with_selected_zone(bldid, function(ws)
+    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+		gui.simulateInput(ws, 'LOCATION_NEW')
+		gui.simulateInput(ws, 'LOCATION_TEMPLE')
+
+		local ret = {}
+
+    	for i,hf in ipairs(df.global.ui_sidebar_menus.location.deities) do
+    		if hf ~= nil then
+    			local worshippers = 0
+    			for j,unit in ipairs(df.global.world.units.active) do
+    				--todo: I'm not completely sure these conditions are correct
+    				if not unit.flags1.dead and not unit.flags3[31] and dfhack.units.isOwnCiv(unit) then
+    					local uhf = df.historical_figure.find(unit.hist_figure_id)
+    					if uhf then
+    						for k,l in ipairs(uhf.histfig_links) do
+    							if l:getType() == df.histfig_hf_link_type.DEITY and l.target_hf == hf.id then
+    								worshippers = worshippers + 1
+    								break
+    							end
+    						end
+    					end
+    				end
+    			end
+
+    			local spheres = {}
+    			for j,v in ipairs(hf.info.spheres) do
+    				table.insert(spheres, capitalize(df.sphere_type[v]:lower()))
+    			end
+
+    			table.insert(ret, { hfname(hf, true), hf.id, worshippers, spheres })
+    		end
+    	end
+
+    	return ret
+    end)	
+end
+
+function locations_add(bldid, tp, deityid)
+    return execute_with_selected_zone(bldid, function(ws)
+    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+		gui.simulateInput(ws, 'LOCATION_NEW')
+
+		if tp == 1 then
+			gui.simulateInput(ws, 'LOCATION_INN_TAVERN')
+		elseif tp == 2 then
+			gui.simulateInput(ws, 'LOCATION_LIBRARY')
+		elseif tp == 3 then
+			gui.simulateInput(ws, 'LOCATION_TEMPLE')
+			
+	    	for i,hf in ipairs(df.global.ui_sidebar_menus.location.deities) do
+	    		if (deityid == -1 and not hf) or (hf and hf.id == deityid) then
+	    			df.global.ui_sidebar_menus.location.cursor_deity = i
+	    			gui.simulateInput(ws, 'SELECT')
+	    			return true
+	    		end
+	    	end		
+
+	    	error('no deity '..tostring(deityid))
+		end
+    end)	
+end
+
 -- print(pcall(function() return json:encode(locations_get_list()) end))
 -- print(pcall(function() return json:encode(location_get_info(-1)) end))
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
 -- print(pcall(function() return json:encode(location_assign(670,-1)) end))
+-- print(pcall(function() return json:encode(locations_add_get_deity_choices(670)) end))
