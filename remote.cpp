@@ -370,7 +370,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                 waiting_render = true;
                 render_initial = true;
             }
-*out2 << "WILL RENDER INITIAL" << std::endl;
+
             while(waiting_render);
         }
         /**out2 << "aa" << std::endl;
