@@ -104,8 +104,7 @@ function justice_get_crime_details(crimeid)
 		local event_str = format_date(w.event_year, w.event_time)
 		local report_str = format_date(w.report_year, w.report_time)
 
-		--xxxdfhack: until found_body is in dfhack
-		local found_body = istrue(w.unk1)
+		local found_body = C_crime_report_found_body(w)
 
 		table.insert(witnesses, { witness_name, witness and witness.id or -1, accused_name, accused and accused.id or -1, event_str, report_str, found_body })
 	end
@@ -174,7 +173,6 @@ local function focus_crime(ws, crimeid)
 		return nil
 	end
 
-	--xxxdfhack: until it's renamed to sel_idx_current
 	C_ws_set_sel_idx_current(ws, idx)
 
 	return C_ws_cases(ws)[idx]
