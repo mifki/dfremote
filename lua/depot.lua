@@ -30,6 +30,7 @@ function depot_can_movegoods()
     return false
 end
 
+--2luacheck: in=
 function depot_movegoods_get()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -64,6 +65,7 @@ function depot_movegoods_get()
     return ret
 end
 
+--2luacheck: in=
 function depot_movegoods_get2()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -98,8 +100,9 @@ function depot_movegoods_get2()
     return ret
 end
 
+--luacheck: in=number,number
 function depot_movegoods_set(idx, status)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
 
     if ws._type ~= df.viewscreen_layer_assigntradest then
         return
@@ -197,7 +200,7 @@ function item_value_for_caravan(item, caravan, entity, creature, qty)
         --todo: why 7 ?
         if creature.adultsize >= 7 then
             if item_type == df.item_type.ARMOR or item_type == df.item_type.GLOVES or item_type == df.item_type.SHOES or item_type == df.item_type.HELM or item_type == df.item_type.PANTS then
-                local def = item.subtype --df.global.world.raws.itemdefs.gloves[item_subtype]
+                local def = item.subtype --hint:df.item_armorst
                 if def.armorlevel > 0 or def.flags.METAL_ARMOR_LEVELS then
                     value = value * 2
                 end
@@ -206,7 +209,7 @@ function item_value_for_caravan(item, caravan, entity, creature, qty)
 
         -- shields
         if item_type == df.item_type.SHIELD then
-            local def = item.subtype --df.global.world.raws.itemdefs.gloves[item_subtype]
+            local def = item.subtype --hint:df.item_shieldst
             if def.armorlevel > 0 then
                 value = value * 2
             end
@@ -317,10 +320,12 @@ function item_or_container_price_for_caravan(item, caravan, entity, creature, qt
 
     for i,ref in ipairs(item.general_refs) do
         if ref:getType() == df.general_ref_type.CONTAINS_ITEM then
+            local ref = ref --as:df.general_ref_contains_itemst
             local item2 = df.item.find(ref.item_id)
             value = value + item_price_for_caravan(item2, caravan, entity, creature, nil, pricetable)
         
         elseif ref:getType() == df.general_ref_type.CONTAINS_UNIT then
+            local ref = ref --as:df.general_ref_contains_unitst
             local unit2 = df.unit.find(ref.unit_id)
             local creature_raw = df.creature_raw.find(unit2.race)
             local caste_raw = creature_raw.caste[unit2.caste]
@@ -331,8 +336,9 @@ function item_or_container_price_for_caravan(item, caravan, entity, creature, qt
     return value
 end
 
+--luacheck: in=
 function depot_calculate_profit()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         error('wrong screen '..tostring(ws._type))
     end
@@ -355,8 +361,10 @@ function depot_calculate_profit()
 end
 
 local counteroffer
+
+--luacheck: in=
 function depot_trade_overview()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
             error('no selected building')
@@ -425,8 +433,9 @@ function is_contained(item)
     return false
 end
 
+--luacheck: in=bool
 function depot_trade_get_items(their)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         error('wrong screen '..tostring(ws._type))
     end
@@ -446,7 +455,7 @@ function depot_trade_get_items(their)
         local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
 
         local inner = is_contained(item)
-        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN)
+        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN) --as:df.general_ref_entity_stolenst
         local stolen = entity_stolen and (df.historical_entity.find(entity_stolen.entity_id) ~= nil)
         local flags = packbits(inner, stolen, item.flags.foreign)
 
@@ -457,8 +466,9 @@ function depot_trade_get_items(their)
     return ret
 end
 
+--luacheck: in=bool
 function depot_trade_get_items2(their)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         error('wrong screen '..tostring(ws._type))
     end
@@ -478,7 +488,7 @@ function depot_trade_get_items2(their)
         local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
 
         local inner = is_contained(item)
-        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN)
+        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN) --as:df.general_ref_entity_stolenst
         local stolen = entity_stolen and (df.historical_entity.find(entity_stolen.entity_id) ~= nil)
         local flags = packbits(inner, stolen, item.flags.foreign)
 
@@ -490,8 +500,9 @@ function depot_trade_get_items2(their)
 end
 
 --todo: support passing many items at once
+--luacheck: in=bool,number,bool,number
 function depot_trade_set(their, idx, trade, qty)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         return
     end
@@ -533,6 +544,7 @@ function depot_trade_set(their, idx, trade, qty)
     return depot_calculate_profit()
 end
 
+--luacheck: in=
 function depot_trade_dotrade()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
@@ -549,6 +561,7 @@ function depot_trade_dotrade()
     return true
 end
 
+--luacheck: in=
 function depot_trade_seize()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
@@ -565,6 +578,7 @@ function depot_trade_seize()
     return true    
 end
 
+--luacheck: in=
 function depot_trade_offer()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
@@ -581,6 +595,7 @@ function depot_trade_offer()
     return true    
 end
 
+--luacheck: in=
 function depot_access()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then

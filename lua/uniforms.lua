@@ -18,6 +18,7 @@ function uniform_find_by_id(id)
 	return nil
 end
 
+--luacheck: in=
 function uniforms_get_list()
 	local ret = {}
 
@@ -28,6 +29,7 @@ function uniforms_get_list()
 	return ret
 end
 
+--luacheck: in=
 function uniforms_add()
     execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -43,13 +45,14 @@ function uniform_delete(id)
 
     execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
-        ws.layer_objects[0].cursor = idx
+        ws.layer_objects[0].cursor = idx --hint:df.layer_object_listst
         gui.simulateInput(ws, 'D_MILITARY_DELETE_UNIFORM')
     end)
 
     return true
 end
 
+--luacheck: in=number
 function uniform_get_info(id)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
@@ -102,6 +105,7 @@ function uniform_get_info(id)
 	return { uniformname(uniform), uniform.id, uniform.name, items, uniform.flags.whole }
 end
 
+--luacheck: in=number,string
 function uniform_set_name(id, name)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
@@ -113,6 +117,7 @@ function uniform_set_name(id, name)
 	return true
 end
 
+--luacheck: in=number,number
 function uniform_set_flags(id, flags)
 	local uniform = uniform_find_by_id(id)
 	if not uniform then
@@ -134,6 +139,7 @@ uniform_additem_keys = {
 	'D_MILITARY_ADD_WEAPON',
 }
 
+--luacheck: in=number
 function uniform_get_additem(cat)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -166,6 +172,7 @@ function uniform_get_additem(cat)
     end)
 end
 
+--luacheck: in=number,number,number
 function uniform_item_add(uniformid, cat, itemspec)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -180,12 +187,13 @@ function uniform_item_add(uniformid, cat, itemspec)
         	return
         end
 
-        ws.layer_objects[2].cursor = itemspec
+        ws.layer_objects[2].cursor = itemspec --hint:df.layer_object_listst
         gui.simulateInput(ws, 'SELECT')
         return true
     end)
 end
 
+--luacheck: in=number,number
 function uniform_item_get_matchoices(uniformid, itemidx)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -194,7 +202,7 @@ function uniform_item_get_matchoices(uniformid, itemidx)
 
         ws.layer_objects[0].active = false
         ws.layer_objects[1].active = true
-        ws.layer_objects[1].cursor = itemidx		
+        ws.layer_objects[1].cursor = itemidx --hint:df.layer_object_listst
 
         gui.simulateInput(ws, 'D_MILITARY_ADD_MATERIAL')
 
@@ -223,6 +231,7 @@ function uniform_item_get_matchoices(uniformid, itemidx)
 	end)
 end
 
+--luacheck: in=number,number,table
 function uniform_item_set_material(uniformid, itemidx, matspec)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -243,12 +252,15 @@ function uniform_item_set_material(uniformid, itemidx, matspec)
     end)	
 end
 
+--luacheck: in=number,number
 function uniform_item_get_colorchoices(uniformid, itemidx)
 end
 
+--luacheck: in=number,number,number
 function uniform_item_set_color(uniformid, itemidx, color)
 end
 
+--luacheck: in=number,number
 function uniform_item_delete(uniformid, itemidx)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')
@@ -261,13 +273,14 @@ function uniform_item_delete(uniformid, itemidx)
 
         ws.layer_objects[0].active = false
         ws.layer_objects[1].active = true
-        ws.layer_objects[1].cursor = itemidx
+        ws.layer_objects[1].cursor = itemidx --hint:df.layer_object_listst
 
         gui.simulateInput(ws, 'SELECT')
         return true
     end)	
 end
 
+--luacheck: in=number,number,number
 function uniform_apply(squadid, unitid, uniid)
 	local uniidx = uniform_id2index(uniid)
 	if not uniidx then
@@ -294,7 +307,7 @@ function uniform_apply(squadid, unitid, uniid)
 	    end
 
         ws.layer_objects[2].active = true
-        ws.layer_objects[2].cursor = uniidx
+        ws.layer_objects[2].cursor = uniidx --hint:df.layer_object_listst
 		gui.simulateInput(ws, unitid == -1 and 'SEC_SELECT' or 'SELECT')
 
         return ret

@@ -51,7 +51,7 @@ function ripairs_tbl(t)
 end
 
 function capitalize(str)
-    local ret = str:gsub("(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
+    local ret = string.gsub(str, "(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
     return ret
 end
 
@@ -106,10 +106,14 @@ function itemname(item, type, decorate)
         local wear = item:getWear()
         if wear > 0 then
             local x
-            if wear == 1 then x = 'x'
-            elseif wear == 2 then x = 'X'
-            elseif wear == 3 then x = 'xX'
-            else wear = 'XX'
+            if wear == 1 then
+                x = 'x'
+            elseif wear == 2 then
+                x = 'X'
+            elseif wear == 3 then
+                x = 'xX'
+            else
+                x = 'XX'
             end
 
             name = x .. name .. x
@@ -117,7 +121,7 @@ function itemname(item, type, decorate)
     end
 
     local artname = nil
-    local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT)
+    local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT) --as:df.general_ref_artifact
     if ref then
         local art = df.artifact_record.find(ref.artifact_id)
         artname = translatename(art.name) .. ' "' .. translatename(art.name, true) .. '"'
@@ -184,7 +188,7 @@ function list_select_item_by_id(ws, listidx, array, id)
     end
 
     if idx > 0 then
-        ws.layer_objects[listidx].cursor = idx - 1
+        ws.layer_objects[listidx].cursor = idx - 1 --hint:df.layer_object_listst
         gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
     end 
 

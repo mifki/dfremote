@@ -18,6 +18,7 @@ function alert_find_by_id(id)
     return nil
 end
 
+--luacheck: in=
 function alerts_get_list()
     local list = {}
 
@@ -37,6 +38,7 @@ function alerts_get_list()
     return { list, df.global.ui.alerts.civ_alert_idx }
 end
 
+--luacheck: in=number
 function alerts_set_civ(id)
     local idx = alert_id2index(id)
     if idx == -1 then
@@ -48,6 +50,7 @@ function alerts_set_civ(id)
     return true
 end
 
+--luacheck: in=
 function alerts_add()
     execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_ALERTS')
@@ -55,6 +58,7 @@ function alerts_add()
     end)
 end
 
+--luacheck: in=number
 function alert_delete(id)
     -- disallow to delete Inactive alert
     if id == 0 then
@@ -68,7 +72,7 @@ function alert_delete(id)
 
     execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_ALERTS')
-        ws.layer_objects[0].cursor = idx
+        ws.layer_objects[0].cursor = idx --hint:df.layer_object_listst
         gui.simulateInput(ws, 'D_MILITARY_ALERTS_DELETE')
         gui.simulateInput(ws, 'MENU_CONFIRM')
     end)
@@ -76,6 +80,7 @@ function alert_delete(id)
     return true
 end
 
+--luacheck: in=number
 function alert_get_info(id)
     local idx = alert_id2index(id)
     if idx == -1 then
@@ -103,6 +108,7 @@ function alert_get_info(id)
     return { alertname(alert), alert.id, alert.name, squads, burrows }
 end
 
+--luacheck: in=number,number,bool
 function alert_set_burrow(id, burrowid, enabled)
     local alert = alert_find_by_id(id)
     if not alert then
@@ -116,6 +122,7 @@ function alert_set_burrow(id, burrowid, enabled)
     end    
 end
 
+--luacheck: in=number,string
 function alert_set_name(id, name)
     local alert = alert_find_by_id(id)
     if not alert then

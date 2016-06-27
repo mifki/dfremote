@@ -1,5 +1,6 @@
 --todo: access to .anon_1 will crash on Windows !!
 
+--luacheck: in=
 function petitions_get_list()
 	local ret = {}
 
@@ -20,6 +21,7 @@ function petitions_get_list()
 	return ret
 end
 
+--luacheck: in=number,bool
 function petition_respond(id, approve)
 	return execute_with_petitions_screen(function(ws)
 		for i,v in ipairs(ws.anon_1) do

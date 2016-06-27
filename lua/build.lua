@@ -12,8 +12,10 @@ function clone_build_button(orig)
 end
 
 local lastbldcmd = -1
+
+--luacheck: in=number
 function build(idx)
-    local btn = building_btns[idx]
+    local btn = building_btns[idx] --as:df.interface_button_construction_building_selectorst
 
     lastbldcmd = idx
 
@@ -21,7 +23,7 @@ function build(idx)
     local y = df.global.cursor.y
     local z = df.global.window_z
 
-    df.global.ui.main.mode = 16
+    df.global.ui.main.mode = df.ui_sidebar_mode.Build
     btn:click()
 
     if x ~= -30000 then
@@ -49,6 +51,7 @@ function build_get_errors()
     return ret
 end
 
+--luacheck: in=bool
 function build_confirm(fast)
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
@@ -57,7 +60,7 @@ function build_confirm(fast)
     
     -- Automatically select first (closest) item(s); break if wrong mode or nothing to select
     if istrue(fast) then
-        if df.global.ui.main.mode == 16 and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
+        if df.global.ui.main.mode == df.ui_sidebar_mode.Build and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
             local continue
             repeat
                 continue = false
@@ -86,8 +89,9 @@ function build_confirm(fast)
     return build_req_get(true) or {} --todo: or nil ?
 end
 
+--luacheck: in=bool
 function build_req_get(grouped)
-    if df.global.ui.main.mode == 16 and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
+    if df.global.ui.main.mode == df.ui_sidebar_mode.Build and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
         if istrue(grouped) ~= istrue(df.global.ui_build_selector.is_grouped) then
             gui.simulateInput(screen_main(), 'BUILDING_EXPAND_CONTRACT')
         end
@@ -108,6 +112,7 @@ function build_req_get(grouped)
     return nil
 end
 
+--luacheck: in=number,bool,bool
 function build_req_choose(idx, on, all)
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -130,7 +135,7 @@ function build_req_choose(idx, on, all)
         if lastbldcmd ~= -1 then
             build(lastbldcmd)
         else
-            df.global.ui.main.mode = 0
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
         end
 
         return mp.NIL
@@ -139,6 +144,7 @@ function build_req_choose(idx, on, all)
     end
 end
 
+--luacheck: in=
 function build_req_cancel()
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
@@ -148,10 +154,11 @@ function build_req_cancel()
     if lastbldcmd ~= -1 then
         build(lastbldcmd)
     else
-        df.global.ui.main.mode = 0
+        df.global.ui.main.mode = df.ui_sidebar_mode.Default
     end
 end
 
+--luacheck: in=
 function build_req_done()
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
@@ -163,7 +170,7 @@ function build_req_done()
         if lastbldcmd ~= -1 then
             build(lastbldcmd)
         else
-            df.global.ui.main.mode = 0
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
         end
 
         return mp.NIL
@@ -172,6 +179,7 @@ function build_req_done()
     end
 end
 
+--luacheck: in=
 function build_has_options()
     local btype = df.global.ui_build_selector.building_type
     local bsub = df.global.ui_build_selector.building_subtype
@@ -183,6 +191,7 @@ end
 
 local track_stop_friction_values = { 10, 50, 500, 10000, 50000 }
 
+--luacheck: in=
 function build_options_get()
     if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
          local zonemode = df.global.ui_sidebar_menus.zone.mode
@@ -192,7 +201,7 @@ function build_options_get()
          return { df.building_type.Civzone, zonemode --[[, selzone_name, selzone_id]] }
     end
 
-    if df.global.ui.main.mode ~= 16 or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
         return
     end
 
@@ -249,6 +258,7 @@ function fix_build_size(vertical)
     end
 end
 
+--luacheck: in=number,number
 function build_options_set(option, value)
     if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
          local oldzonemode = df.global.ui_sidebar_menus.zone.mode
@@ -282,7 +292,7 @@ function build_options_set(option, value)
          return
     end
 
-    if df.global.ui.main.mode ~= 16 or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
         return
     end
 
@@ -346,6 +356,7 @@ function build_options_set(option, value)
     return true
 end
 
+--luacheck: in=table
 function build_set_trap_options(info)
     local btype = df.global.ui_build_selector.building_type
     if btype == df.building_type.Trap and df.global.ui_build_selector.building_subtype == 1 then --pressure plate

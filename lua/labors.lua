@@ -246,6 +246,7 @@ function labors_get_labors()
 end
 
 --todo: don't count common labors like hauling
+--luacheck: in=
 function labors_get_counts()
     local ret = {}
 
@@ -279,6 +280,7 @@ function find_labor_obj(laboridx)
     end
 end
 
+--luacheck: in=number
 function labors_get_dwarves_with_labor(laboridx)
 	local labor = find_labor_obj(laboridx)
 
@@ -326,6 +328,7 @@ function labors_get_dwarves_with_labor(laboridx)
     return { enabled, disabled }
 end
 
+--luacheck: in=
 function labors_get_all_dwarves()
     local allowed = {}
     local disallowed = {}
@@ -355,6 +358,7 @@ function labors_get_all_dwarves()
     return { allowed, disallowed }
 end
 
+--luacheck: in=number
 function labors_get_dwarf_labors(unitid)
 	local unit = df.unit.find(unitid)
     if not unit then
@@ -394,6 +398,7 @@ function labors_get_dwarf_labors(unitid)
 end
 
 --todo: allow to pass changes as an array in second argument (?) array of 2-value arrays ?
+--luacheck: in=number
 function labors_set(unitid, ...)
 	local unit = df.unit.find(unitid)
 	local ulabors = unit.status.labors

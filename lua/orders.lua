@@ -175,8 +175,8 @@ local function parse_orders_zone(t, ret)
 	ret['standing_orders_zoneonly_fish'] = t(1, 3, 'Z')
 end
 
-function simulate_orders_globals()
-	return execute_with_main_mode(18, function(ws)
+local function simulate_orders_globals()
+	return execute_with_main_mode(df.ui_sidebar_mode.Orders, function(ws)
         ws:render()
 
         local x = df.global.gps.dimx - 2 - 30 + 1
@@ -195,19 +195,19 @@ function simulate_orders_globals()
         local ret = {}
         parse_orders_main(t, ret)
 
-        df.global.ui.main.mode = 19
+        df.global.ui.main.mode = df.ui_sidebar_mode.OrdersForbid
         ws:render()
         parse_orders_forbid(t, ret)
 
-        df.global.ui.main.mode = 20
+        df.global.ui.main.mode = df.ui_sidebar_mode.OrdersRefuse
         ws:render()
         parse_orders_refuse(t, ret, ws)
 
-		df.global.ui.main.mode = 21
+		df.global.ui.main.mode = df.ui_sidebar_mode.OrdersWorkshop
 		ws:render()
 		parse_orders_workshop(t, ret)
 
-		df.global.ui.main.mode = 22
+		df.global.ui.main.mode = df.ui_sidebar_mode.OrdersZone
 		ws:render()
 		parse_orders_zone(t, ret)
 
@@ -215,6 +215,7 @@ function simulate_orders_globals()
 	end)	
 end
 
+--luacheck: in=
 function orders_get()
 	--local check = df.global.standing_orders_gather_animals
 	local globals = simulate_orders_globals()

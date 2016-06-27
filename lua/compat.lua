@@ -1,62 +1,35 @@
-local augments = {
-	['<type: abstract_building_contents>'] = {
-		count_goblets='unk_f8',
-		count_instruments='unk_fc',
-		count_paper='unk_100',
-	},
-
-	['BitArray<>'] = {
-		GELDABLE=38,
-	},
-
-	['<type: unit>'] = {
-		['social_activities'] = function(o)
-			local v = { val=o.anon_1 }
-			setmetatable(v, {
-				__index = function(a, b)
-					local _,actid = df.sizeof(a.val[b])
-					return actid
-				end
-			})
-
-			return v
-		end,
-	},
-}
-
-local augmeta = {
-	__index = function(q,t)
-		local r = q.aug[t]
-		if r then
-			if type(r) == 'function' then
-				return r(q)
-			else
-				return q.val[r]
-			end
-		end
-		
-		return q.val[t]
-	end
-}
-
-function augment(o)
-	if not o then return o end
-
-	local as = augments[tostring(o._type)]
-	if as then
-		local v = { aug=as, val=o }
-		setmetatable(v, augmeta)
-
-		return v	
-	end
-
-	return o
+if df_ver <= 40 then
+	require 'remote.compat_40'
 end
 
-return augment
+if df_ver <= 42 then
+	require 'remote.compat_42'
+end
 
---print(A(dfhack.gui.getCurViewscreen().locations[0].contents).count_goblets)
+if df_ver <= 43 then
+	require 'remote.compat_43'
+end
 
---print(A(df.global.world.raws.creatures.all[22].caste[0].body_info.body_parts[8].flags).GELDABLE)
 
---print(A(dfhack.gui.getSelectedUnit()).social_activities[0])
+
+
+
+function C_ws_cases(ws)
+	return ws.cases --recent_cases before 0.42
+end
+
+function C_ws_set_sel_idx_current(ws, idx)
+	ws.sel_idx_current = idx --anon_1 before 0.42
+end
+
+function C_pet_set_available(item, val)
+	item.pet_flags.available_for_adoption = val --anon_2 before 0.42 and use "val and 1 or 0"
+end
+
+function C_pet_available(item)
+	return item.pet_flags.available_for_adoption --anon_2 before 0.42 and use istrue()
+end
+
+function C_pet_ownerid(item)
+	return item.owner_id --item['item_petst.anon_1'] before 0.42
+end

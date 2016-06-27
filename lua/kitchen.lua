@@ -38,8 +38,10 @@ function set_restriction(item_type, item_subtype, mat_type, mat_index, restricte
     k.exc_types:insert(#k.exc_types, restricted)
 end
 
+--luacheck: in=
 function kitchen_get_data()
     return execute_with_status_page(status_pages.Kitchen, function(ws)
+        local ws = ws --as:df.viewscreen_kitchenprefst
         local ret = { { 'Plants', {} }, { 'Seeds', {} }, { 'Drinks', {} }, { 'Meat', {} } }
 
         for i,cat in ipairs(ret) do
@@ -58,6 +60,7 @@ function kitchen_get_data()
     end)    
 end
 
+--luacheck: in=table,bool
 function kitchen_set(id, restricted)
     set_restriction(id[1], id[2], id[3], id[4], restricted)
     return true

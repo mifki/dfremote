@@ -28,6 +28,7 @@ function jobs_get_list()
     end)    
 end
 
+--luacheck: in=number
 function job_get_description(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -48,7 +49,7 @@ function job_get_description(unitid)
             text = text .. '[C:0:0:1]Inactive' --todo: check color
         end
 
-        local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER)
+        local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building
         local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
         if jobbld then
             text = text .. '[P][C:7:0:1]Location: [C:3:0:1]' .. bldname(jobbld)
@@ -83,9 +84,9 @@ function job_get_description(unitid)
     gui.simulateInput(unitlistws, 'UNITJOB_VIEW_JOB')
     df.delete(unitlistws)
 
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
     if ws ~= oldws then
-        ws.breakdown_level = 2
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
     end
 
     if ws._type == df.viewscreen_textviewerst then

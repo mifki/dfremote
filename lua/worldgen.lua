@@ -1,5 +1,6 @@
+--luacheck: in=
 function worldgen_status()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type == df.viewscreen_export_regionst or ws.parent._type == df.viewscreen_export_regionst then
         return { 'saving' }
@@ -54,8 +55,9 @@ function worldgen_status()
     return { 'processing', year, world_name or mp.NIL, world_name_eng or mp.NIL, state }
 end
 
+--luacheck: in=
 function worldgen_accept()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
         error('wrong screen '..tostring(ws._type))
@@ -70,8 +72,9 @@ function worldgen_accept()
     return true
 end
 
+--luacheck: in=
 function worldgen_cancel()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
         error('wrong screen '..tostring(ws._type))
@@ -97,8 +100,9 @@ function worldgen_cancel()
     gui.simulateInput(ws, 'WORLD_GEN_ABORT')
 end
 
+--luacheck: in=
 function worldgen_continue()
-    local ws = dfhack.gui.getCurViewscreen()    
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst    
 
     if ws._type ~= df.viewscreen_new_regionst or not istrue(ws.worldgen_paused) then
         return
@@ -107,8 +111,9 @@ function worldgen_continue()
     gui.simulateInput(ws, 'WORLD_GEN_CONTINUE')
 end
 
+--luacheck: in=number
 function worldgen_resolve_rejected(action)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if action == 1 then
         gui.simulateInput(ws, 'WORLD_PARAM_REJECT_CONTINUE')
@@ -159,6 +164,7 @@ local function site_type_name(site)
 end
 
 --todo: conditions for reclaimable are wrong
+--luacheck: in=
 function worldgen_get_world_info()
     local races = { ['DWARF']=0, ['GOBLIN']=0, ['ELF']=0, ['HUMAN']=0, ['KOBOLD']=0 }
     local pops = {}

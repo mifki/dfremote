@@ -245,6 +245,7 @@ local function noble_unit_reqs_level(unit)
     return level
 end
 
+--luacheck: in=
 function nobles_get_positions()
     return execute_with_nobles_screen(true, function(ws)
         local ret = {}
@@ -288,7 +289,7 @@ function nobles_get_positions()
         gui.simulateInput(ws, 'NOBLELIST_CAPITAL')
         local cws = dfhack.gui.getCurViewscreen()
         if cws._type == df.viewscreen_noblest then
-            cws.breakdown_level = 2
+            cws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
             becoming_capital = { true,
                 df.global.ui.becoming_capital.desired_architecture, df.global.ui.tasks.wealth.architecture,
                 df.global.ui.becoming_capital.desired_offerings, cws.become_capital_offerings}
@@ -300,6 +301,7 @@ function nobles_get_positions()
     end)
 end
 
+--luacheck: in=string
 function nobles_get_candidates(code)
     return execute_with_nobles_screen(true, function(ws)
         local posidx = -1
@@ -328,6 +330,7 @@ function nobles_get_candidates(code)
     end)
 end
 
+--luacheck: in=string,number
 function nobles_replace(code, candidx)
     return execute_with_nobles_screen(true, function(ws)
         local posidx = -1
@@ -349,10 +352,12 @@ function nobles_replace(code, candidx)
     end)
 end
 
+--luacheck: in=number
 function bookkeeper_set_precision(precision)
     df.global.ui.bookkeeper_settings = precision
 end
 
+--luacheck: in=string,number
 function noble_get_reqs(code, unitid)
     local unit = unitid and unitid ~= -1 and df.unit.find(unitid) or find_noble(code)
     if not unit then
@@ -500,6 +505,7 @@ function noble_get_reqs(code, unitid)
     return { unitname(unit), unit.id, reqinfo, demands, mandates }
 end
 
+--luacheck: in=number
 function noble_get_mandates(unitid)
     local ret = {}
 
@@ -527,6 +533,7 @@ function noble_get_mandates(unitid)
     return ret
 end
 
+--luacheck: in=number
 function noble_get_demands(unitid)
     local ret = {}
 

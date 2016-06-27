@@ -1,3 +1,4 @@
+--luacheck: in=
 function burrows_get_list()
 	local ret = {}
 
@@ -11,17 +12,19 @@ function burrows_get_list()
 	return ret
 end
 
+--luacheck: in=
 function burrows_add()
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	execute_with_main_mode(0, function(ws)
+	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, 'D_BURROWS')
 		gui.simulateInput(ws, 'D_BURROWS_ADD')
 	end)
 end
 
+--luacheck: in=number
 function burrow_delete(id)
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	execute_with_main_mode(0, function(ws)
+	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, 'D_BURROWS')
 
 		local idx = -1
@@ -38,12 +41,13 @@ function burrow_delete(id)
 
 		df.global.ui.burrows.sel_index = idx
 		df.global.ui.burrows.sel_id = id
-		df.global.ui.burrows.in_confirm_delete = 1
+		df.global.ui.burrows.in_confirm_delete = true
 
 		gui.simulateInput(ws, 'MENU_CONFIRM')
 	end)	
 end
 
+--luacheck: in=number
 function burrow_get_info(id)
 	if id == -1 then
 		--todo: ideally must check for mode but this is called after editining has ended and mode is 0
@@ -62,6 +66,7 @@ function burrow_get_info(id)
 	return { burrowname(burrow), id, #burrow.units, burrow.limit_workshops, burrow.name }
 end
 
+--luacheck: in=number,bool
 function burrow_limit_workshops(id, limit)
 	local burrow = df.burrow.find(id)
 	if not burrow then
@@ -73,6 +78,7 @@ function burrow_limit_workshops(id, limit)
 	return true
 end
 
+--luacheck: in=number
 function burrow_start_edit(id)
 	local idx = -1
 	for i,v in ipairs(df.global.ui.burrows.list) do
@@ -98,19 +104,22 @@ function burrow_start_edit(id)
 	gui.simulateInput(ws, 'D_BURROWS_DEFINE')
 end
 
+--luacheck: in=
 function burrow_end_edit()
 	reset_main()
 end
 
+--luacheck: in=bool
 function burrow_set_brush_mode(erase)
 	df.global.ui.burrows.sym_selector = istrue(erase) and 1 or 0
 
-    _,addr1 = df.global.ui.burrows:_field('in_define_mode'):sizeof()
-	_,addr2 = df.global.ui.burrows:_field('sym_selector'):sizeof()
+    local _,addr1 = df.global.ui.burrows:_field('in_define_mode'):sizeof()
+	local _,addr2 = df.global.ui.burrows:_field('sym_selector'):sizeof()
 	dfhack.internal.memmove(addr1+1, addr2, 1)
 end
 
 --todo: convert to screen_ functions
+--luacheck: in=number
 function burrow_get_units(id)
 	local burrow = df.burrow.find(id)
 	if not burrow then
@@ -138,6 +147,7 @@ function burrow_get_units(id)
 	return ret --{ added, others }
 end
 
+--luacheck: in=number,number,bool
 function burrow_set_unit(id, unitid, enable)
 	local burrow = df.burrow.find(id)
 	if not burrow then
@@ -154,6 +164,7 @@ function burrow_set_unit(id, unitid, enable)
 	return true
 end
 
+--luacheck: in=number,string
 function burrow_set_name(id, name)
 	local burrow = df.burrow.find(id)
 	if not burrow then
@@ -165,6 +176,7 @@ function burrow_set_name(id, name)
 	return true
 end
 
+--luacheck: in=number
 function burrow_zoom(id)
 	local b = df.burrow.find(id)
 	if not b then

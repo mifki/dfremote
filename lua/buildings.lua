@@ -402,6 +402,7 @@ function building_query_selected(bldid)
     return ret
 end
 
+--luacheck: in=number,number,bool
 function building_workshop_set_repeat(bldid, idx, value)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -419,6 +420,7 @@ function building_workshop_set_repeat(bldid, idx, value)
     return true
 end
 
+--luacheck: in=number,number,bool
 function building_workshop_set_suspend(bldid, idx, value)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -439,6 +441,7 @@ function building_workshop_set_suspend(bldid, idx, value)
     return true    
 end
 
+--luacheck: in=number,number
 function building_workshop_cancel(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -457,6 +460,7 @@ function building_workshop_cancel(bldid, idx)
     return true    
 end
 
+--luacheck: in=number,number,number
 function building_workshop_reorder(bldid, fromidx, toidx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -688,6 +692,7 @@ local jobs_kennels = { 'HOTKEY_KENNEL_CATCH_VERMIN', 'HOTKEY_KENNEL_TAME_VERMIN'
 local jobs_dyers = { 'HOTKEY_DYER_THREAD', 'HOTKEY_DYER_CLOTH' }
 local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP_CAGE', 'HOTKEY_TRAP_CHAIN', 'HOTKEY_TRAP_DOOR', 'HOTKEY_TRAP_FLOODGATE', 'HOTKEY_TRAP_HATCH', 'HOTKEY_TRAP_GRATE_WALL', 'HOTKEY_TRAP_GRATE_FLOOR', 'HOTKEY_TRAP_BARS_VERTICAL', 'HOTKEY_TRAP_BARS_FLOOR', 'HOTKEY_TRAP_SUPPORT', 'HOTKEY_TRAP_SPIKE', 'HOTKEY_TRAP_GEAR_ASSEMBLY', 'HOTKEY_TRAP_TRACK_STOP' }
 
+--luacheck: in=number,number,bool
 function building_workshop_addjob(bldid, idx, rep)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -698,7 +703,10 @@ function building_workshop_addjob(bldid, idx, rep)
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
+    local bld = df.global.world.selected_building --as:df.building_workshopst
+    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+        error('not a workshop or furnace '..tostring(bld._type))
+    end
 
     if #bld.jobs >= 10 then
         return --error('too many jobs')
@@ -773,7 +781,7 @@ function building_workshop_addjob(bldid, idx, rep)
         end
     
     else    
-        local btn = jobchoices[idx]
+        local btn = jobchoices[idx] --as:df.interface_button_building_new_jobst
         btn.building = bld
 
         btn:click()
@@ -790,6 +798,7 @@ function building_workshop_addjob(bldid, idx, rep)
     return true
 end
 
+--luacheck: in=number
 function building_workshop_profile_get(bldid)
     --[[local bld = df.building.find(bldid)
     if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
@@ -805,7 +814,10 @@ function building_workshop_profile_get(bldid)
         return
     end
 
-    local bld = df.global.world.selected_building
+    local bld = df.global.world.selected_building --as:df.building_workshopst
+    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+        error('not a workshop or furnace '..tostring(bld._type))
+    end
 
     local profile = bld.profile
     local workers = {}
@@ -832,6 +844,7 @@ function building_workshop_profile_get(bldid)
     return { workers, permitted_workers, min, max }
 end
 
+--luacheck: in=number,number,number
 function building_workshop_profile_set_minmax(bldid, min, max)
     --[[local bld = df.building.find(bldid)
     if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
@@ -847,7 +860,11 @@ function building_workshop_profile_set_minmax(bldid, min, max)
         return
     end
 
-    local bld = df.global.world.selected_building
+    local bld = df.global.world.selected_building --as:df.building_workshopst
+    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+        error('not a workshop or furnace '..tostring(bld._type))
+    end
+
     local profile = bld.profile
 
     if min == 15 then
@@ -863,6 +880,7 @@ function building_workshop_profile_set_minmax(bldid, min, max)
     return true
 end
 
+--luacheck: in=number,number,bool
 function building_workshop_profile_set_unit(bldid, unitid, on)
     --[[local bld = df.building.find(bldid)
     if not bld or (bld._type ~= df.building_furnacest and bld._type ~= df.building_workshopst) then
@@ -878,9 +896,12 @@ function building_workshop_profile_set_unit(bldid, unitid, on)
         return
     end
 
-    local bld = df.global.world.selected_building
-    local profile = bld.profile
+    local bld = df.global.world.selected_building --as:df.building_workshopst
+    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+        error('not a workshop or furnace '..tostring(bld._type))
+    end
 
+    local profile = bld.profile
     on = istrue(on)
 
     if unitid == -1 then
@@ -905,6 +926,7 @@ function building_workshop_profile_set_unit(bldid, unitid, on)
     return true
 end
 
+--luacheck: in=number
 function building_room_free(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -944,6 +966,7 @@ function building_room_free(bldid)
 end
 
 local room_candidate_ids = {}
+--luacheck: in=number
 function building_room_owner_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -998,6 +1021,7 @@ function building_room_owner_get_candidates(bldid)
     return ret
 end
 
+--luacheck: in=number,number
 function building_room_owner_set(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1044,6 +1068,7 @@ function building_room_owner_set(bldid, idx)
 
         -- reset additional flags for beds
         if btype == df.building_type.Bed then
+            local bld = bld --as:df.building_bedst
             bld.bed_flags.barracks = false
             bld.bed_flags.dormitory = false
         end
@@ -1054,6 +1079,7 @@ function building_room_owner_set(bldid, idx)
     return true
 end
 
+--luacheck: in=number,number,number
 function building_set_flag(bldid, flag, value)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1068,6 +1094,7 @@ function building_set_flag(bldid, flag, value)
     local btype = bld:getType()
 
     if btype == df.building_type.Table then
+        local bld = bld --as:df.building_tablest
         if not df.global.world.selected_building.is_room then
             return
         end
@@ -1077,6 +1104,7 @@ function building_set_flag(bldid, flag, value)
         end
     
     elseif btype == df.building_type.Bed then
+        local bld = bld --as:df.building_bedst
         if not df.global.world.selected_building.is_room then
             return
         end
@@ -1093,6 +1121,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.FarmPlot then
+        local bld = bld --as:df.building_farmplotst
         if flag == 1 then
             local fert = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.FertilizeField)
             if fert ~= istrue(value) then
@@ -1104,6 +1133,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.Door then
+        local bld = bld --as:df.building_doorst
         if flag == 1 then
             bld.door_flags.forbidden = istrue(value)
         elseif flag == 2 then
@@ -1113,11 +1143,13 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.ArcheryTarget then
+        local bld = bld --as:df.building_archerytargetst
         if flag == 1 then
             bld.archery_direction = value
         end
 
     elseif btype == df.building_type.SiegeEngine then
+        local bld = bld --as:df.building_siegeenginest
         if flag == 1 then
             bld.action = value
         elseif flag == 2 then
@@ -1125,6 +1157,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.Coffin then
+        local bld = bld --as:df.building_coffinst
         if flag == 1 then
             bld.burial_mode.allow_burial = istrue(value)
         elseif flag == 2 then
@@ -1134,6 +1167,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.Hive then
+        local bld = bld --as:df.building_hivest
         --todo: does this require any other changes, like creating jobs?
         if flag == 1 then
             bld.hive_flags.do_install = istrue(value)
@@ -1142,11 +1176,13 @@ function building_set_flag(bldid, flag, value)
         end
     
     elseif btype == df.building_type.AnimalTrap then
+        local bld = bld --as:df.building_animaltrapst
         if flag == 1 then
             bld.bait_type = (value > 0 and value <= #bait_types) and bait_types[value] or -1
         end
 
     elseif btype == df.building_type.TradeDepot then
+        local bld = bld --as:df.building_tradedepotst
         if flag == 1 then
             if bld.trade_flags.trader_requested ~= istrue(value) then
                 gui.simulateInput(ws, 'BUILDJOB_DEPOT_REQUEST_TRADER')
@@ -1158,6 +1194,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.Chain then
+        local bld = bld --as:df.building_chainst
         if flag == 1 then
             if bld.flags.justice ~= istrue(value) then
                 gui.simulateInput(ws, 'BUILDJOB_CHAIN_JUSTICE')
@@ -1165,6 +1202,7 @@ function building_set_flag(bldid, flag, value)
         end
 
     elseif btype == df.building_type.ScrewPump then
+        local bld = bld --as:df.building_screw_pumpst
         if flag == 1 then
             bld.pump_manually = istrue(value)
         end
@@ -1173,6 +1211,7 @@ function building_set_flag(bldid, flag, value)
     return true
 end
 
+--luacheck: in=number,number,number
 function building_room_set_squaduse(bldid, squadid, mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1261,6 +1300,7 @@ function building_room_set_squaduse(bldid, squadid, mode)
 end
 
 
+--luacheck: in=number
 function building_remove(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1277,6 +1317,7 @@ function building_remove(bldid)
     return true
 end
 
+--luacheck: in=number
 function building_stopremoval(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1291,6 +1332,7 @@ function building_stopremoval(bldid)
     return true    
 end
 
+--luacheck: in=number
 function building_suspend(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1305,6 +1347,7 @@ function building_suspend(bldid)
     return true    
 end
 
+--luacheck: in=number,number,number
 function building_farm_set_crop(bldid, season, plantid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1325,6 +1368,7 @@ function building_farm_set_crop(bldid, season, plantid)
     return true
 end
 
+--luacheck: in=number
 function building_start_resize(bldid)
     --todo: some checks here
     
@@ -1334,12 +1378,13 @@ function building_start_resize(bldid)
     return true
 end
 
+--luacheck: in=
 function link_targets_get()
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
         return
     end
 
-    local bld = df.global.world.selected_building
+    local bld = df.global.world.selected_building --as:df.building_trapst
     if not bld or bld._type ~= df.building_trapst then
         return
     end
@@ -1380,6 +1425,7 @@ function link_targets_get()
     return ret
 end
 
+--luacheck: in=bool
 function link_target_confirm(fast)
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
         return
@@ -1418,6 +1464,7 @@ function link_target_confirm(fast)
     return true
 end
 
+--luacheck: in=number
 function link_targets_zoom(idx)
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
         return
@@ -1434,6 +1481,7 @@ function link_targets_zoom(idx)
     recenter_view(df.global.cursor.x, df.global.cursor.y, df.global.cursor.z)
 end
 
+--luacheck: in=
 function link_mechanisms_get()
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or not df.global.ui_workshop_in_add then
         return
@@ -1463,6 +1511,7 @@ function link_mechanisms_get()
     return { linkmode, true, list }
 end
 
+--luacheck: in=number
 function link_mechanisms_choose(idx)
     local ws = screen_main()
 
@@ -1481,6 +1530,7 @@ function link_mechanisms_choose(idx)
     end
 end
 
+--luacheck: in=
 function link_mechanisms_cancel()
     local ws = screen_main()
     gui.simulateInput(ws, 'LEAVESCREEN')
@@ -1491,6 +1541,7 @@ local assign_animal_keys = {
     [df.building_type.Chain] = 'BUILDJOB_CHAIN_ASSIGN_OCC',
 }
 
+--luacheck: in=number
 function building_assign_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1520,23 +1571,25 @@ function building_assign_get_candidates(bldid)
         end
 
         local title = '?something?'
-        local obj = nil
+        local id = -1
         local is_assigned = not single and istrue(df.global.ui_building_assign_is_marked[i]) or false
         local status = 0
 
         --todo: should include unit sex for units, don't forger about gelded
         if v == 0 then
-            obj = df.global.ui_building_assign_units[i]
-            title = unit_fulltitle(obj)
-            status = unit_assigned_status(obj, zone)
+            local unit = df.global.ui_building_assign_units[i]
+            id = unit.id
+            title = unit_fulltitle(unit)
+            status = unit_assigned_status(unit, zone)
         elseif v == 1 then
-            obj = df.global.ui_building_assign_items[i]
-            title = itemname(obj, 0, true)
+            local item = df.global.ui_building_assign_items[i]
+            id = item.id
+            title = itemname(item, 0, true)
             status = 0
         end
 
         if obj then
-            table.insert(ret, { title, obj and obj.id or -1, is_assigned, v, status })
+            table.insert(ret, { title, id, is_assigned, v, status })
         end
     end
     --[[for i,unit in ipairs(df.global.ui_building_assign_units) do
@@ -1555,6 +1608,7 @@ function building_assign_get_candidates(bldid)
 end
 
 
+--luacheck: in=number,number,number,bool
 function building_assign(bldid, objid, objtype, on)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1614,6 +1668,7 @@ function building_assign(bldid, objid, objtype, on)
 end
 
 --todo: make this work not only for the currently selected building
+--luacheck: in=
 function building_well_is_active()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then

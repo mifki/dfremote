@@ -98,7 +98,7 @@ function unit_query_selected(unitid)
             error('wrong screen '..tostring(ws._type))
         end
 
-        if df.global.ui.main.mode ~= 24 or df.global.ui_selected_unit == -1 then
+        if df.global.ui.main.mode ~= df.interface_breakdown_types.ViewUnits or df.global.ui_selected_unit == -1 then
             error('no selected unit')
         end
 
@@ -182,16 +182,16 @@ function unit_get_order(unit)
 end
 
 local TRAINING_LEVELS = {
- [0] = 'Semi-Wild',    -- Semi-wild
-  'Trained',            -- Trained
-  '-Trained-',            -- Well-trained
-  '+Trained+',            -- Skillfully trained
-  '*Trained*',            -- Expertly trained
-  dfhack.df2utf(string.char(240))..'Trained'..dfhack.df2utf(string.char(240)),    -- Exceptionally trained
-  dfhack.df2utf(string.char(15))..'Trained'..dfhack.df2utf(string.char(15)),        -- Masterully Trained
-  'Tame',                -- Domesticated
-  '',                        -- undefined
-  '',                        -- wild/untameable
+    'Semi-Wild',    -- Semi-wild
+    'Trained',            -- Trained
+    '-Trained-',            -- Well-trained
+    '+Trained+',            -- Skillfully trained
+    '*Trained*',            -- Expertly trained
+    dfhack.df2utf(string.char(240))..'Trained'..dfhack.df2utf(string.char(240)),    -- Exceptionally trained
+    dfhack.df2utf(string.char(15))..'Trained'..dfhack.df2utf(string.char(15)),        -- Masterully Trained
+    'Tame',                -- Domesticated
+    '',                        -- undefined
+    '',                        -- wild/untameable
 }
 
 local reason_titles = {
@@ -313,7 +313,7 @@ function unit_fullprof(unit)
     end
 
     if unit.flags1.tame then
-        prof = prof .. ' (' .. TRAINING_LEVELS[unit.training_level] .. ')'
+        prof = prof .. ' (' .. TRAINING_LEVELS[unit.training_level+1] .. ')'
     end
 
     return prof    
@@ -456,7 +456,7 @@ local function unitlist_process_citizen(unit)
 
     local jobtitle,jobcolor,jobkind  = unit_jobtitle(unit, true)
 
-    local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER)
+    local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building_holderst
     local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
     local can_goto_bld = jobbld and true or false
     local bldpos = jobbld and { jobbld.centerx, jobbld.centery, jobbld.z } or mp.NIL
@@ -496,6 +496,7 @@ local function unitlist_process_citizen(unit)
     return { fullname, unit.id, jobtitle, flags, pos2table(unit.pos), bldpos, profcolor, jobcolor, jobkind }
 end
 
+--luacheck: in=
 function units_list_dwarves()
     return execute_with_units_screen(function(ws)
         local ret = {}
@@ -508,13 +509,14 @@ function units_list_dwarves()
     end)
 end
 
+--luacheck: in=
 function units_list_livestock()
     return execute_with_units_screen(function(ws)
         local ret = {}
         
         for i,unit in ipairs(ws.units[1]) do
             local fullname = unit_fulltitle(unit)
-            local right = TRAINING_LEVELS[unit.training_level]
+            local right = TRAINING_LEVELS[unit.training_level+1]
 
             if unit.flags1.caged then
                 right = right .. ' (Caged)'
@@ -531,6 +533,7 @@ function units_list_livestock()
     end)
 end
 
+--luacheck: in=
 function units_list_other()
     return execute_with_units_screen(function(ws)
         local ret = {}
@@ -610,6 +613,7 @@ function units_list_other()
     end)
 end
 
+--luacheck: in=
 function units_list_dead()
     return execute_with_units_screen(function(ws)
         local ret = {}
@@ -628,12 +632,13 @@ function units_list_dead()
             table.insert(ret, { fullname, unit.id, missing and "Missing" or "Deceased", 0, mp.NIL, mp.NIL, profcolor, stcolor })
         end
 
-        ws.breakdown_level = 2
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         return { ret, { #ws.units[0], #ws.units[1], #ws.units[2], #ws.units[3] } }
     end)
 end
 
+--luacheck: in=number
 function unit_goto(unitid)
     local unit = df.unit.find(unitid)
 
@@ -643,7 +648,7 @@ function unit_goto(unitid)
 
     local x,y,z = dfhack.units.getPosition(unit)
 
-    df.global.ui.main.mode = 24
+    df.global.ui.main.mode = df.interface_breakdown_types.ViewUnits
 
     df.global.cursor.x = x
     df.global.cursor.y = y
@@ -656,6 +661,7 @@ function unit_goto(unitid)
     recenter_view(x, y, z)
 end
 
+--luacheck: in=number
 function unit_goto_bld(unitid)
     local unit = df.unit.find(unitid)
 
@@ -663,7 +669,7 @@ function unit_goto_bld(unitid)
         return
     end
 
-    local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER)
+    local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building_holderst
     local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
 
     if not jobbld then
@@ -684,10 +690,12 @@ function unit_goto_bld(unitid)
     --return {jobbld.centerx,jobbld.centery,jobbld.z}
 end
 
+--luacheck: in=number
 function unit_follow(unitid)
     df.global.ui.follow_unit = unitid
 end
 
+--luacheck: in=number
 function unit_job_removeworker(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -701,6 +709,7 @@ function unit_job_removeworker(unitid)
     return dfhack.job.removeWorker(unit.job.current_job, 100)
 end
 
+--luacheck: in=number
 function unit_job_suspend(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -724,6 +733,7 @@ function unit_job_suspend(unitid)
     return true
 end
 
+--luacheck: in=number,bool
 function unit_job_set_repeat(unitid, value)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -739,7 +749,8 @@ function unit_job_set_repeat(unitid, value)
     return true
 end
 
-function unit_job_cancel(unitid, value)
+--luacheck: in=number,
+function unit_job_cancel(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
         return false
@@ -755,7 +766,7 @@ function unit_job_cancel(unitid, value)
     unit.job.current_job = nil
 
     -- remove from building
-    local jobbldref = job and dfhack.job.getGeneralRef(job, df.general_ref_type.BUILDING_HOLDER)
+    local jobbldref = job and dfhack.job.getGeneralRef(job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building_holderst
     local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
 
     if jobbld then
@@ -797,6 +808,7 @@ function unit_job_cancel(unitid, value)
     return true
 end
 
+--luacheck: in=number,bool
 function unit_get_thoughts(unitid, is_histfig)
     if istrue(is_histfig) then
         local hf = df.historical_figure.find(unitid)
@@ -817,7 +829,7 @@ function unit_get_thoughts(unitid, is_histfig)
         gui.simulateInput(unitws, 'UNITVIEW_RELATIONSHIPS')
         df.delete(unitws)
 
-        local relws = dfhack.gui.getCurViewscreen()
+        local relws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_unit_relationshipst
         relws.parent.child = nil
         relws.parent = nil
         relws.relation_unit:insert(0, nil)
@@ -845,7 +857,7 @@ function unit_get_thoughts(unitid, is_histfig)
         local ws = dfhack.gui.getCurViewscreen()
         if ws._type == df.viewscreen_unitst then
             gui.simulateInput(ws, 'SELECT')
-            ws.breakdown_level = 2
+            ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         end
 
         df.delete(unitlistws)
@@ -868,9 +880,8 @@ function unit_get_thoughts(unitid, is_histfig)
         end]]
     end
 
-    local ws = dfhack.gui.getCurViewscreen()
-
-    ws.breakdown_level = 2
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     if ws._type ~= df.viewscreen_textviewerst then
         error('can not switch to thoughts screen')
@@ -996,6 +1007,7 @@ local relations_hf = {
     { 'Grandchild', 3 },
 }
 
+--luacheck: in=number
 function unit_get_relationships(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1007,7 +1019,7 @@ function unit_get_relationships(unitid)
     gui.simulateInput(unitws, 'UNITVIEW_RELATIONSHIPS')
     df.delete(unitws)    
 
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_unit_relationshipst
     if ws._type ~= df.viewscreen_layer_unit_relationshipst then
         error('can not switch to relationships screen')
     end
@@ -1068,7 +1080,7 @@ function unit_get_relationships(unitid)
         table.insert(ret, { name, id, namecolor, rel[1], rel[2], flags, can_zoom and pos2table(v.pos) or mp.NIL })
     end
 
-    ws.breakdown_level = 2
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     return ret
 end
@@ -1099,6 +1111,7 @@ local inventory_item_modes = {
     'strapped to ##'
 }
 
+--luacheck: in=number
 function unit_get_inventory(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1122,6 +1135,7 @@ function unit_get_inventory(unitid)
     return ret
 end
 
+--luacheck: in=number
 function unit_get_inventory_and_spatters(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1183,6 +1197,7 @@ local skill_class_names = {
     'Other Mil.',
 }
 
+--luacheck: in=number
 function unit_get_skills(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1212,6 +1227,7 @@ function unit_get_skills(unitid)
     return ret
 end
 
+--luacheck: in=number
 function unit_get_health(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1260,11 +1276,12 @@ function unit_get_health(unitid)
         table.insert(ret, { page_names[j+1], text })
     end
 
-    ws.breakdown_level = 2
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     return { true, ret }
 end
 
+--luacheck: in=number,string,string
 function unit_customize(unitid, nickname, profname)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1282,6 +1299,7 @@ function unit_customize(unitid, nickname, profname)
     return true
 end
 
+--luacheck: in=number,number
 function unit_assigned_status(unit, bld)
     local x,y,z = dfhack.units.getPosition(unit)
 
@@ -1291,14 +1309,14 @@ function unit_assigned_status(unit, bld)
         local rtype = ref:getType()
 
         if rtype == df.general_ref_type.BUILDING_CIVZONE_ASSIGNED then
-            local bld = ref:getBuilding()
+            local bld = ref:getBuilding() --as:df.building_civzonest
             local in_building = z == bld.z and x >= bld.x1 and x <= bld.x2 and y >= bld.y1 and y <= bld.y2
             local bit = bld.zone_flags.pit_pond and 2 or 1
             return bit32.lshift(1, bit) + (in_building and 1 or 0)
         end
 
         if rtype == df.general_ref_type.BUILDING_CHAIN then
-            local bld = ref:getBuilding()
+            local bld = ref:getBuilding() --as:df.building_chainst
             local in_building = z == bld.z and x >= bld.room.x and x <= bld.room.x+bld.room.width and y >= bld.room.y and y <= bld.room.y+bld.room.height
             return bit32.lshift(1, 4) + (in_building and 1 or 0)
         end
@@ -1311,12 +1329,13 @@ function unit_assigned_status(unit, bld)
     return 0
 end
 
+--luacheck: in=number
 function unit_get_assigned_animals(unitid)
     local ret = {}
 
     for i,unit in ipairs(df.global.world.units.active) do
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
-            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
             if work and unit.relations.pet_owner_id == unitid then
                 local name = unit_fulltitle(unit)
@@ -1329,12 +1348,13 @@ function unit_get_assigned_animals(unitid)
     return ret
 end
 
+--luacheck: in=number
 function unit_get_assign_animal_choices(unitid)
     local ret = {}
 
     for i,unit in ipairs(df.global.world.units.active) do
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
-            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+            local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
             if work and unit.relations.pet_owner_id == -1 then
                 local name = unit_fulltitle(unit)
@@ -1347,6 +1367,7 @@ function unit_get_assign_animal_choices(unitid)
     return ret
 end
 
+--luacheck: in=number,table
 function unit_assign_animals(unitid, animalids)
     local unit = df.unit.find(unitid)
     if not unit then

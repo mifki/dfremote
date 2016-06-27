@@ -1,4 +1,5 @@
 -- get new announcements to show at the bottom (oldest first!)
+--luacheck: in=
 function announcements_get_new()
     local anns = {}
     local popups = {}
@@ -45,6 +46,7 @@ function announcements_get_new()
 end
 
 -- get all announcements for the announcements screen
+--luacheck: in=
 function announcements_get_log()
     local ret = {}
     local j = 0
@@ -76,6 +78,7 @@ function announcements_get_log()
     return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
+--luacheck: in=
 function reports_get_groups()
 	local ret = {}
 
@@ -104,6 +107,7 @@ function reports_get_groups()
     return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
+--luacheck: in=number,number
 function reports_get(unitid, rtype)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -144,10 +148,12 @@ function reports_get(unitid, rtype)
     return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
+--luacheck: in=
 function popup_dismiss_all()
     df.global.world.status.popups:resize(0)
 end
 
+--luacheck: in=
 function popup_dismiss()
     if #df.global.world.status.popups == 0 then
         return {}

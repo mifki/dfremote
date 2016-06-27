@@ -10,6 +10,7 @@ local function animal_is_geldable(unit)
 	return false
 end
 
+--luacheck: in=
 function animals_get()
 	local ret = {}
 
@@ -17,7 +18,7 @@ function animals_get()
 		if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
 
 			local prof = dfhack.units.getProfessionName(unit) --xxx: no nobles, so always capitalized, no need to use unitprof()
-			local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+			local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 			local ownerid = unit.relations.pet_owner_id
 			local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 			local ownername = owner and (unitname(owner) .. ', ' .. unitprof(owner)) or false
@@ -58,23 +59,25 @@ function animals_get()
 	return ret
 end
 
+--luacheck: in=
 function animals_get2()
     return execute_with_status_page(status_pages.Animals, function(ws)
+    	local ws = ws --as:df.viewscreen_petst
 		local ret = {}
 
 		for i,v in ipairs(ws.is_vermin) do
 			if istrue(v) then
-				local item = ws.animal[i].item
+				local item = ws.animal[i].item --as:df.item_petst
 
 				if item._type == df.item_petst then -- just in case
 					local title = itemname(item, 0, true)
 
-					local ownerid = item['item_petst.anon_1'] --xxxdfhack: until the field is named in dfhack
+					local ownerid = C_pet_ownerid(item)
 					local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 					local ownername = owner and unit_fulltitle(owner) or mp.NIL
 
 					--xxxdfhack: until the field is named in dfhack
-					local flags = bit(1,true) + bit(2,istrue(item.anon_2)) + bit(12,true)
+					local flags = bit(1,true) + bit(2,C_pet_available(item)) + bit(12,true)
 
 					table.insert(ret, { title, item.id, 0, ownername, flags, mp.NIL, 0 })
 				end
@@ -83,7 +86,7 @@ function animals_get2()
 				local unit = ws.animal[i].unit
 
 				local prof = unitprof(unit)
-				local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNT)
+				local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 				local ownerid = unit.relations.pet_owner_id
 				local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 				local ownername = owner and unit_fulltitle(owner) or mp.NIL
@@ -125,6 +128,7 @@ function animals_get2()
 	end)
 end
 
+--luacheck: in=number,bool
 function animals_set_slaughter(unitid, val)
 	--xxx: should check if it's a valid action here?
 
@@ -138,6 +142,7 @@ function animals_set_slaughter(unitid, val)
 	return true
 end
 
+--luacheck: in=number,bool
 function animals_set_geld(unitid, val)
 	--xxx: should check if it's a valid action here?
 
@@ -152,17 +157,18 @@ function animals_set_geld(unitid, val)
 end
 
 --xxx: should check if it's a valid action here?
+--luacheck: in=number,bool,bool
 function animals_set_available(unitid, val, is_vermin)
 	val = istrue(val)
 
 	if istrue(is_vermin) then
-		local item = df.item.find(unitid)
+		local item = df.item.find(unitid) --as:df.item_petst
 		if not item or item._type ~= df.item_petst then
 			error('no item or wrong item type ' .. (item and tostring(item) or tostring(unitid)))
 		end
 
 		-- xxxdfhack: until the field is named in dfhack
-		item.anon_2 = val and 1 or 0
+		C_pet_set_available(item, val)
 
 		return true
 	end
@@ -178,6 +184,7 @@ function animals_set_available(unitid, val, is_vermin)
 	return true
 end
 
+--luacheck: in=number,bool
 function animals_train_war(unitid, val)
 	local unit = df.unit.find(unitid)
 
@@ -202,6 +209,7 @@ function animals_train_war(unitid, val)
 	return true
 end
 
+--luacheck: in=number,val
 function animals_train_hunting(unitid, val)
 	local unit = df.unit.find(unitid)
 
@@ -226,6 +234,7 @@ function animals_train_hunting(unitid, val)
 	return true
 end
 
+--luacheck: in=
 function animals_trainer_get_choices()
 	local ret = {}
 
@@ -244,6 +253,7 @@ function animals_trainer_get_choices()
 	return ret
 end
 
+--luacheck: in=number,number
 function animals_trainer_set(animalid, trainerid)
 	local animal = df.unit.find(animalid)
 	local trainer = df.unit.find(trainerid)

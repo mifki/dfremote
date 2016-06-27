@@ -52,6 +52,7 @@ function squad_order_title(squad)
     return ordertitle
 end
 
+--luacheck: in=number
 function squads_get_list()
     local squads = {}
     local leaders = {}
@@ -83,6 +84,7 @@ function squads_get_list()
     return { squads, leaders }
 end
 
+--luacheck: in=
 function squads_get_info()
     local ws = screen_main() --dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -90,7 +92,7 @@ function squads_get_info()
     end
 
     if df.global.ui.main.mode ~= 1 then
-        df.global.ui.main.mode = 0
+        df.global.ui.main.mode = df.ui_sidebar_mode.Default
         gui.simulateInput(ws, 'D_SQUADS')
         --return nil
     end
@@ -107,11 +109,13 @@ function squads_get_info()
         --todo: handle other order types
     	local ordertitle = ''
     	if #squad.orders > 0 then
-    		local ordertype = squad.orders[0]:getType()
+    	    local order = squad.orders[0]
+    		local ordertype = order:getType()
     		if ordertype == df.squad_order_type.MOVE then
     			ordertitle = 'Station'
 			elseif ordertype == df.squad_order_type.KILL_LIST then
-    			ordertitle = squad.orders[0].title
+			    local order = order --as:df.squad_order_kill_listst
+    			ordertitle = order.title
     		end
     	end
 
@@ -136,6 +140,7 @@ function squads_get_info()
 end
 
 --todo: support multiple squads in the following commands
+--luacheck: in=number
 function squads_cancel_order(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -156,6 +161,7 @@ function squads_cancel_order(idx)
     return true
 end
 
+--luacheck: in=number
 function squads_order_move(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -176,6 +182,7 @@ function squads_order_move(idx)
     return true
 end
 
+--luacheck: in=number
 function squads_order_attack_list(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -198,6 +205,7 @@ function squads_order_attack_list(idx)
     return true
 end
 
+--luacheck: in=number
 function squads_order_attack_rect(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -220,7 +228,7 @@ function squads_order_attack_rect(idx)
     return true
 end
 
-
+--luacheck: in=number
 function squads_order_attack_map(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -241,7 +249,7 @@ function squads_order_attack_map(idx)
     return true
 end
 
-
+--luacheck: in=number
 function squads_attack_list_get(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -297,6 +305,7 @@ function squads_attack_list_confirm(idxs)
     return true
 end
 
+--luacheck: in=number,number,bool
 function squad_set_alert(id, alertid, retain)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
@@ -310,9 +319,9 @@ function squad_set_alert(id, alertid, retain)
 
     execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_ALERTS')
-        ws.layer_objects[0].cursor = idx
+        ws.layer_objects[0].cursor = idx   --hint:df.layer_object_listst
         ws.layer_objects[0].active = false
-        ws.layer_objects[1].cursor = sqidx
+        ws.layer_objects[1].cursor = sqidx --hint:df.layer_object_listst
         ws.layer_objects[1].active = true
         gui.simulateInput(ws, istrue(retain) and 'D_MILITARY_ALERTS_SET_RETAIN' or 'D_MILITARY_ALERTS_SET')
     end)
@@ -320,6 +329,7 @@ function squad_set_alert(id, alertid, retain)
     return true
 end
 
+--luacheck: in=
 function squads_reset()
     local squadsui = df.global.ui.squads
 
@@ -330,6 +340,7 @@ function squads_reset()
     squadsui.rect_start.x = -30000 -- probably not req.
 end
 
+--luacheck: in=number
 function squad_disband(id)
     return execute_with_military_screen(function(ws)
         local sqidx = -1
@@ -345,7 +356,7 @@ function squad_disband(id)
         end
 
         if sqidx > 0 then
-            ws.layer_objects[0].cursor = sqidx-1
+            ws.layer_objects[0].cursor = sqidx-1 --hint:df.layer_object_listst
             gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
         end
 
@@ -354,6 +365,7 @@ function squad_disband(id)
     end)
 end
 
+--luacheck: in=number,number,number
 function squad_set_supplies(id, water, food)
     local squad = df.squad.find(id)
     if not squad then
@@ -369,6 +381,7 @@ function squad_set_supplies(id, water, food)
     return true
 end
 
+--luacheck: in=number,string
 function squad_set_name(id, name)
     local squad = df.squad.find(id)
     if not squad then
@@ -380,6 +393,7 @@ function squad_set_name(id, name)
     return true
 end
 
+--luacheck: in=number
 function squad_get_info(id)
     local squad = df.squad.find(id)
     if not squad then
@@ -409,6 +423,7 @@ function squad_get_info(id)
     return { name, squad.id, origname, alert_name, members, squad.carry_water, squad.carry_food, squad.cur_alert_idx }    
 end
 
+--luacheck: in=number,number
 function squad_remove_member(id, posidx)
     return execute_with_military_screen(function(ws)
         local sqidx = -1
@@ -424,13 +439,13 @@ function squad_remove_member(id, posidx)
         end
 
         if sqidx > 0 then
-            ws.layer_objects[0].cursor = sqidx-1
+            ws.layer_objects[0].cursor = sqidx-1 --hint:df.layer_object_listst
             gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
         end
 
         ws.layer_objects[0].active = false
         ws.layer_objects[1].active = true
-        ws.layer_objects[1].cursor = posidx
+        ws.layer_objects[1].cursor = posidx --hint:df.layer_object_listst
         gui.simulateInput(ws, 'SELECT')
         return true
     end)
@@ -439,7 +454,7 @@ end
 local function confirm_uniform(ws, uniformid)
     local uniidx
     if uniformid == -1 then
-        uniidx = ws.layer_objects[57].num_entries - 1
+        uniidx = ws.layer_objects[57].num_entries - 1 --hint:df.layer_object_listst
     else
         uniidx = uniform_id2index(uniformid)
         if uniidx == -1 then
@@ -447,11 +462,12 @@ local function confirm_uniform(ws, uniformid)
         end
     end
 
-    ws.layer_objects[57].cursor = uniidx
+    ws.layer_objects[57].cursor = uniidx --hint:df.layer_object_listst
     gui.simulateInput(ws, 'SELECT')
     return true    
 end
 
+--luacheck: in=number,number
 function squad_create_with_leader(assid, uniformid)
     return execute_with_military_screen(function(ws)
         if assid == -1 then
@@ -472,7 +488,7 @@ function squad_create_with_leader(assid, uniformid)
             for i,ass in ipairs(ws.squads.leader_assignments) do
                 if ass.id == assid and not ws.squads.list[i] then
                     if i > 0 then
-                        ws.layer_objects[0].cursor = i-1
+                        ws.layer_objects[0].cursor = i-1 --hint:df.layer_object_listst
                         gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
                     end
 
@@ -484,6 +500,7 @@ function squad_create_with_leader(assid, uniformid)
     end)
 end
 
+--luacheck: in=number
 function squad_get_candidates(id)
     return execute_with_military_screen(function(ws)
         local sqidx = -1
@@ -499,7 +516,7 @@ function squad_get_candidates(id)
         end
 
         if sqidx > 0 then
-            ws.layer_objects[0].cursor = sqidx-1
+            ws.layer_objects[0].cursor = sqidx-1 --hint:df.layer_object_listst
             gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
         end
 

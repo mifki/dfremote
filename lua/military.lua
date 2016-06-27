@@ -86,7 +86,6 @@ end
 uniform_material_classes[16] = 'metal'
 
 function uniform_item_name(type, subtype, info)
-    
     --printall(info)
     local pts = {}
 
@@ -129,7 +128,6 @@ function uniform_item_name(type, subtype, info)
 end
 
 function get_uniform_details(idx)
-
     local ret = {}
 
     local uni = df.global.ui.main.fortress_entity.uniforms[idx]

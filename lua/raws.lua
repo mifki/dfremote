@@ -1,4 +1,5 @@
 -- we don't support compression for incoming commands globally, so json data here is compressed and then msgpacked as a parameter
+--luacheck: in=string
 function raws_apply_tileset(zjsondata)
     local jsondata = ''
     local function appenddata(ch)

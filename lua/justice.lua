@@ -12,14 +12,17 @@ local crime_type_names = {
 	'Blood-drinking'
 }
 
+--luacheck: in=
 function justice_get_data()	
     if not have_noble('SHERIFF') and not have_noble('CAPTAIN_OF_THE_GUARD') then
         return { false }
     end
 
     return execute_with_status_page(status_pages.Justice, function(ws)
+    	local ws = ws --as:df.viewscreen_justicest
+    	
 		local function process_crimes(ret, cases)
-			for i,v in ipairs(ws.recent_cases) do
+			for i,v in ipairs(C_ws_cases(ws)) do
 				local victim = df.unit.find(v.victim)
 				local victim_name = victim and unit_fulltitle(victim) or mp.NIL
 
@@ -77,6 +80,7 @@ function justice_get_data()
 	end)
 end
 
+--luacheck: in=number
 function justice_get_crime_details(crimeid)
 	local v = df.crime.find(crimeid)
 	if not v then
@@ -112,6 +116,7 @@ function justice_get_crime_details(crimeid)
 			 witnesses, v.flags.needs_trial }
 end
 
+--luacheck: in=number
 function justice_get_convict_info(unitid)
 	local unit = df.unit.find(unitid)
 	if not unit then
@@ -148,7 +153,7 @@ end
 
 local function focus_crime(ws, crimeid)
 	local idx = -1
-	for i,v in ipairs(ws.recent_cases) do
+	for i,v in ipairs(C_ws_cases(ws)) do
 		if v.id == crimeid then
 			idx = i
 			break
@@ -157,7 +162,7 @@ local function focus_crime(ws, crimeid)
 
 	if idx == -1 then
 		gui.simulateInput(ws, 'CHANGETAB')
-		for i,v in ipairs(ws.recent_cases) do
+		for i,v in ipairs(C_ws_cases(ws)) do
 			if v.id == crimeid then
 				idx = i
 				break
@@ -170,16 +175,18 @@ local function focus_crime(ws, crimeid)
 	end
 
 	--xxxdfhack: until it's renamed to sel_idx_current
-	ws.anon_1 = idx
+	C_ws_set_sel_idx_current(ws, idx)
 
-	return ws.recent_cases[idx]
+	return C_ws_cases(ws)[idx]
 end
 
+--luacheck: in=number,bool,bool
 function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 	show_innocent = istrue(show_innocent)
 	show_dead = istrue(show_dead)
 
     return execute_with_status_page(status_pages.Justice, function(ws)
+    	local ws = ws --as:df.viewscreen_justicest
     	local crime = focus_crime(ws, crimeid)
 
     	if not crime or crime.convicted ~= -1 or not crime.flags.needs_trial then
@@ -214,8 +221,10 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 	end)
 end
 
+--luacheck: in=number,number
 function justice_convict(crimeid, unitid)
     return execute_with_status_page(status_pages.Justice, function(ws)
+    	local ws = ws --as:df.viewscreen_justicest
     	local crime = focus_crime(ws, crimeid)
 
     	if not crime or crime.convicted ~= -1 or not crime.flags.needs_trial then

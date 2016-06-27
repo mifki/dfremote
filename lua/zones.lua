@@ -1,12 +1,14 @@
+--luacheck: in=
 function zone_create()
-    df.global.ui.main.mode = 0
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_CIVZONE')
 end
 
+--luacheck: in=number
 function zone_settings_get(bldid)
-    local zone = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected
+    local zone = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected --as:df.building_civzonest
     if not zone then
         error('no zone found for id '..tostring(bldid))
     end
@@ -19,8 +21,9 @@ function zone_settings_get(bldid)
     return { zonename(zone), zone.id, zone.zone_flags.whole, loc and locname(loc) or mp.NIL }
 end
 
+--luacheck: in=number,number,number
 function zone_settings_set(bldid, option, value)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
 
     if option >= 0 and option <= 31 then
         zone.zone_flags[option] = istrue(value)
@@ -34,8 +37,9 @@ function zone_settings_set(bldid, option, value)
     end
 end
 
+--luacheck: in=number,number
 function zone_information_get(bldid, mode)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
 
     if mode == df.building_civzonest.T_zone_flags.gather then
         return { zone.gather_flags.whole }
@@ -96,22 +100,24 @@ function zone_information_get(bldid, mode)
                 end
 
                 local title = '?something?'
-                local obj = nil
+                local id = -1
                 local is_assigned = istrue(df.global.ui_building_assign_is_marked[i])
                 local status = 0
 
                 --todo: should include unit sex for units
                 if v == 0 then
-                    obj = df.global.ui_building_assign_units[i]
-                    title = unit_fulltitle(obj)
-                    status = unit_assigned_status(obj, zone)
+                    local unit = df.global.ui_building_assign_units[i]
+                    id = unit.id
+                    title = unit_fulltitle(unit)
+                    status = unit_assigned_status(unit, zone)
                 elseif v == 1 then
-                    obj = df.global.ui_building_assign_items[i]
-                    title = itemname(obj, 0, true)
+                    local item = df.global.ui_building_assign_items[i]
+                    id = item.id
+                    title = itemname(item, 0, true)
                     status = 0
                 end
 
-                table.insert(list, { title, obj and obj.id or -1, is_assigned, v, status })
+                table.insert(list, { title, id, is_assigned, v, status })
             end
         end)
 
@@ -121,8 +127,9 @@ function zone_information_get(bldid, mode)
     return nil   
 end
 
+--luacheck: in=number,number,number,number
 function zone_information_set(bldid, mode, option, value)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
     if not zone or zone:getType() ~= df.building_type.Civzone then
         error('no zone or not a zone'..tostring(bldid))
     end
@@ -156,6 +163,7 @@ function zone_information_set(bldid, mode, option, value)
     end
 end
 
+--luacheck: in=number,number,number,number,bool
 function zone_assign(bldid, mode, objid, objtype, on)
     on = istrue(on)
 
@@ -186,6 +194,7 @@ function zone_assign(bldid, mode, objid, objtype, on)
     end)
 end
 
+--luacheck: in=number
 function zone_remove(bldid)
     execute_with_selected_zone(bldid, function(ws)
         df.global.ui_sidebar_menus.zone.remove = true

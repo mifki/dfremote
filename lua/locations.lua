@@ -12,6 +12,7 @@ function location_find_by_id(id)
 end
 
 --todo: use list from the locations screen
+--luacheck: in=
 function locations_get_list()
 	local site = df.world_site.find(df.global.ui.site_id)
 
@@ -32,6 +33,7 @@ function locations_get_list()
 			local item = { locname(loc), loc.id, ltype, mode }
 
 			if ltype == df.abstract_building_type.TEMPLE then
+				local loc = loc --as:df.abstract_building_templest
 				local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)
 				local deity_name = deity and hfname(deity, true) or mp.NIL
 
@@ -86,6 +88,7 @@ local occupation_names = {
     'Scribe'	
 }
 
+--luacheck: in=number
 function location_get_info(id)
 	if id == -1 then
 		local site = df.world_site.find(df.global.ui.site_id)
@@ -125,6 +128,7 @@ function location_get_info(id)
 				local info
 				local params
 				if ltype == df.abstract_building_type.LIBRARY then
+					local loc = loc --as:df.abstract_building_inn_tavernst
 					local count_written = ws.anon_1[j]
 					local count_paper = loc.contents.unk_100
 
@@ -137,6 +141,7 @@ function location_get_info(id)
 					params = { loc.contents.desired_copies, loc.contents.desired_paper }
 
 				elseif ltype == df.abstract_building_type.INN_TAVERN then
+					local loc = loc --as:df.abstract_building_libraryst
 					local count_goblets = loc.contents.unk_f8
 					local count_instruments = loc.contents.unk_fc
 					local dance_area = { ws.dance_floor_x[j], ws.dance_floor_y[j] }
@@ -168,6 +173,7 @@ function location_get_info(id)
 					params = { loc.contents.desired_goblets, loc.contents.desired_instruments }
 
 				elseif ltype == df.abstract_building_type.TEMPLE then
+					local loc = loc --as:df.abstract_building_templest
 					local count_instruments = loc.contents.unk_fc
 					local dance_area = { ws.dance_floor_x[j], ws.dance_floor_y[j] }
 
@@ -220,13 +226,14 @@ function location_get_info(id)
 	end)
 end
 
+--luacheck: in=number,number
 function location_occupation_get_candidates(locid, occid)
 	return execute_with_locations_screen(function(ws)
 		for i,loc in ipairs(ws.locations) do
 			if loc and loc.id == locid then
 				for j,occ in ipairs(ws.occupations) do
 					if occ.id == occid then
-						ws.menu = 1
+						ws.menu = df.viewscreen_locationsst.T_menu.Occupations
 						ws.occupation_idx = j
 						gui.simulateInput(ws, 'SELECT')
 
@@ -253,13 +260,14 @@ function location_occupation_get_candidates(locid, occid)
 	end)
 end
 
+--luacheck: in=number,number,number
 function location_occupation_assign(locid, occid, unitid)
 	return execute_with_locations_screen(function(ws)
 		for i,loc in ipairs(ws.locations) do
 			if loc and loc.id == locid then
 				for j,occ in ipairs(ws.occupations) do
 					if occ.id == occid then
-						ws.menu = 1
+						ws.menu = df.viewscreen_locationsst.T_menu.Occupations
 						ws.occupation_idx = j
 						gui.simulateInput(ws, 'SELECT')
 
@@ -286,6 +294,7 @@ function location_occupation_assign(locid, occid, unitid)
 	end)
 end
 
+--luacheck: in=number
 function location_retire(id)
 	return execute_with_locations_screen(function(ws)
 		for i,loc in ipairs(ws.locations) do
@@ -300,6 +309,7 @@ function location_retire(id)
 	end)
 end
 
+--luacheck: in=number,number
 function location_set_restriction(id, mode)
 	local loc = location_find_by_id(id)
 	if not loc then
@@ -315,6 +325,7 @@ function location_set_restriction(id, mode)
 	return true	
 end
 
+--luacheck: in=number,number,number
 function location_set_parameter(id, idx, val)
 	local loc = location_find_by_id(id)
 	if not loc then
@@ -324,6 +335,7 @@ function location_set_parameter(id, idx, val)
 	local ltype = loc:getType()
 
 	if ltype == df.abstract_building_type.INN_TAVERN then
+		local loc = loc --as:df.abstract_building_inn_tavernst
 		if idx == 0 then
 			loc.contents.desired_goblets = val
 		elseif idx == 1 then
@@ -331,6 +343,7 @@ function location_set_parameter(id, idx, val)
 		end
 
 	elseif ltype == df.abstract_building_type.LIBRARY then
+		local loc = loc --as:df.abstract_building_libraryst
 		if idx == 0 then
 			loc.contents.desired_copies = val
 		elseif idx == 1 then
@@ -338,6 +351,7 @@ function location_set_parameter(id, idx, val)
 		end
 
 	elseif ltype == df.abstract_building_type.TEMPLE then
+		local loc = loc --as:df.abstract_building_templest
 		if idx == 0 then
 			loc.contents.desired_instruments = val
 		end
@@ -346,8 +360,9 @@ function location_set_parameter(id, idx, val)
 	return true
 end
 
+--luacheck: in=number
 function location_assign_get_list(bldid)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
     if not zone or zone:getType() ~= df.building_type.Civzone then
         error('no zone or not a zone'..tostring(bldid))
     end
@@ -371,8 +386,9 @@ function location_assign_get_list(bldid)
     end)
 end
 
+--luacheck: in=number,number
 function location_assign(bldid, locid)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
     if not zone or zone:getType() ~= df.building_type.Civzone then
         error('no zone or not a zone'..tostring(bldid))
     end
@@ -400,6 +416,7 @@ function location_assign(bldid, locid)
     end)
 end
 
+--luacheck: in=number
 function locations_add_get_deity_choices(bldid)
     return execute_with_selected_zone(bldid, function(ws)
     	gui.simulateInput(ws, 'ASSIGN_LOCATION')
@@ -439,6 +456,7 @@ function locations_add_get_deity_choices(bldid)
     end)	
 end
 
+--luacheck: in=number,number,number
 function locations_add(bldid, tp, deityid)
     return execute_with_selected_zone(bldid, function(ws)
     	gui.simulateInput(ws, 'ASSIGN_LOCATION')

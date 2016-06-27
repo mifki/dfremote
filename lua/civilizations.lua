@@ -1,3 +1,4 @@
+--luacheck: in=
 function civilizations_get_list()
     local ret = {}
 
@@ -15,6 +16,7 @@ function civilizations_get_list()
     return ret
 end
 
+--luacheck: in=number
 function civilization_get_info(civid)
     local civ = df.historical_entity.find(civid)
     if not civ then
@@ -26,8 +28,8 @@ function civilization_get_info(civid)
     gui.simulateInput(civsws, 'SELECT')
     df.delete(civsws)
 
-    local ws = dfhack.gui.getCurViewscreen()
-    ws.breakdown_level = 2
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_entityst
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     local leaders = {}
     for i,v in ipairs(ws.important_leader_nemesis) do
@@ -41,6 +43,7 @@ function civilization_get_info(civid)
         -- that's where game gets the position to display from
         for j,w in ipairs(fig.entity_links) do
             if w._type == df.histfig_entity_link_positionst then
+                local w = w --as:df.histfig_entity_link_positionst
                 for m,ass in ipairs(ws.entity.positions.assignments) do
                     if ass.id == w.assignment_id then
                         for k,p in ipairs(ws.entity.positions.own) do
@@ -96,6 +99,7 @@ function civilization_get_info(civid)
     return { leaders, agreements }
 end
 
+--luacheck: in=number,number
 function civilization_get_agreement(civid, idx)
     local civ = df.historical_entity.find(civid)
     if not civ then
@@ -107,8 +111,8 @@ function civilization_get_agreement(civid, idx)
     gui.simulateInput(civsws, 'SELECT')
     df.delete(civsws)
 
-    local ws = dfhack.gui.getCurViewscreen()
-    ws.breakdown_level = 2
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_entityst
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     local agreement = ws.agreements[idx]
     local ret = nil

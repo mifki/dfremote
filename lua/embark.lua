@@ -24,14 +24,14 @@ local finder_params = {
     return false
 end]]
 
+--luacheck: in=string
 function embark_newgame(folder)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_titlest
 
     -- Check that we're on title screen or its subscreens
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
-
     if ws._type ~= df.viewscreen_titlest then
         return
     end
@@ -44,7 +44,7 @@ function embark_newgame(folder)
         ws:delete()
         ws = parent
     end
-    ws.breakdown_level = 0
+    ws.breakdown_level = df.interface_breakdown_types.NONE
 
     local idx = -1
     for i,v in ipairs(ws.start_savegames) do
@@ -58,7 +58,7 @@ function embark_newgame(folder)
 		return
 	end
 
-    ws.sel_subpage = 0
+    ws.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' menu item
     ws.sel_menu_line = (#ws.arena_savegames-#ws.start_savegames > 1 and 1 or 0)
     gui.simulateInput(ws, 'SELECT')
@@ -83,6 +83,7 @@ function embark_newgame(folder)
     gui.simulateInput(ws, 'SELECT')
 end
 
+--luacheck: in=
 function embark_get_overview()
 	local ws = dfhack.gui.getCurViewscreen()
 
@@ -127,8 +128,9 @@ function embark_get_overview()
 	return nil
 end
 
+--luacheck: in=
 function embark_get_reclaim_sites()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		error('wrong screen '..tostring(ws._type))
 	end
@@ -178,6 +180,7 @@ end
 
 --print(pcall(function() print(json:encode(embark_get_reclaim_sites())) end))
 
+--luacheck: in=number
 function embark_set_civ(idx)
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
@@ -207,8 +210,9 @@ local function read_region_info_line(y)
 	return {line,color}
 end
 
+--luacheck: in=
 local function embark_site_info()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		error('wrong screen '..tostring(ws._type))
 	end
@@ -253,8 +257,9 @@ local function embark_site_info()
 end
 
 local matches = {}
+--luacheck: in=number,number,table
 function embark_finder_find(w, h, params)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -279,8 +284,9 @@ function embark_finder_find(w, h, params)
 	matches = {}
 end
 
+--luacheck: in=
 function embark_finder_status()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		error('wrong screen '..tostring(ws._type))
 	end
@@ -320,8 +326,9 @@ function embark_finder_status()
 	return { 'ready' }
 end
 
+--luacheck: in=
 function embark_finder_next()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		error('wrong screen '..tostring(ws._type))
 	end
@@ -368,8 +375,9 @@ function embark_finder_next()
 	return embark_finder_status()
 end
 
+--luacheck: in=
 function embark_finder_clear()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -378,8 +386,9 @@ function embark_finder_clear()
 	ws.finder.finder_state = -1
 end
 
+--luacheck: in=
 function embark_finder_stop()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -389,8 +398,9 @@ function embark_finder_stop()
 	return embark_finder_status()
 end
 
+--luacheck: in=
 function embark_cancel()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -406,6 +416,7 @@ function embark_cancel()
 	ws = dfhack.gui.getCurViewscreen()
 end
 
+--luacheck: in=
 function embark_embark()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
@@ -425,6 +436,7 @@ function embark_embark()
 	end
 end
 
+--luacheck: in=number
 function embark_reclaim(idx)
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
@@ -440,8 +452,8 @@ function embark_reclaim(idx)
 	gui.simulateInput(ws, 'SETUP_EMBARK')
 
 	local ws = dfhack.gui.getCurViewscreen()
-	printall (ws)
-	if ws._type == df.viewscreen_setupdwarfgamest and ws.breakdown_level == 2 then
+
+	if ws._type == df.viewscreen_setupdwarfgamest and ws.breakdown_level == df.interface_breakdown_types.STOPSCREEN then
         local parent = ws.parent
         parent.child = nil
         ws:delete()
@@ -464,8 +476,9 @@ function embark_reclaim(idx)
 	return { '' }
 end
 
+--luacheck: in=number
 function embark_play(idx)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_setupdwarfgamest
 	if ws._type ~= df.viewscreen_setupdwarfgamest then
 		return
 	end
@@ -510,13 +523,14 @@ function embark_play(idx)
 	return { '' }
 end
 
+--luacheck: in=
 function embark_back_to_map()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_setupdwarfgamest
 	if ws._type ~= df.viewscreen_setupdwarfgamest then
 		error('wrong screen '..tostring(ws._type))
 	end
 
-	ws.parent.breakdown_level = 0
-	ws.breakdown_level = 2
+	ws.parent.breakdown_level = df.interface_breakdown_types.NONE
+	ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 end
 

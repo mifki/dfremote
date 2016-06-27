@@ -1,3 +1,4 @@
+--luacheck: in=
 function manager_get_orders()
     local have_manager = have_noble('MANAGER')
 
@@ -58,6 +59,7 @@ local function populate_order_templates()
 	end)
 end
 
+--luacheck: in=number
 function manager_get_ordertemplates(fromidx) 
 	if not order_templates or #order_templates == nil or fromidx == 0 then
 		populate_order_templates()
@@ -70,6 +72,7 @@ function manager_get_ordertemplates(fromidx)
 	return { ret, fromidx+300 < #order_template_names }
 end
 
+--luacheck: in=number,number
 function manager_new_order(idx, amount)
 	--xxx: this temporary fixes the bug in the app where templates are not reloaded when connected to another server
 	if not order_templates or #order_templates == nil then
@@ -95,10 +98,12 @@ function manager_new_order(idx, amount)
 	df.global.world.manager_orders:insert(#df.global.world.manager_orders, o)
 end
 
+--luacheck: in=number
 function manager_delete_order(idx)
 	df.global.world.manager_orders:erase(idx)
 end
 
+--luacheck: in=numeber,number
 function manager_reorder(fromidx, toidx)
     local j = df.global.world.manager_orders[fromidx]
     df.global.world.manager_orders:erase(fromidx)
