@@ -92,6 +92,10 @@ function manager_new_order(idx, amount)
 	o.item_category.whole = ot.item_category_whole
 	o.material_category.whole = ot.material_category_whole
 
+	if df_ver < 42 then
+		amount = math.min(amount, 30)
+	end
+
 	o.amount_left = amount
 	o.amount_total = amount
 

@@ -2,7 +2,7 @@ local function animal_is_geldable(unit)
 	local bparts = df.global.world.raws.creatures.all[unit.race].caste[unit.caste].body_info.body_parts
 
 	for i,v in ipairs(bparts) do
-		if v.flags[38] then --xxxdfhack: .GELDABLE in 0.42
+		if C_body_part_geldable(v) then
 			return true
 		end
 	end
@@ -25,10 +25,10 @@ function animals_get()
 
 			local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 			local adoptable = not caste.flags.ADOPTS_OWNER
-			local available = unit.flags3[27]
+			local available = C_unit_available_for_adoption(unit)
 			local slaughter = unit.flags2.slaughter
 
-			local geld = unit.flags3[29]
+			local geld = C_unit_geld(unit)
 			local gelded = unit.flags3.gelded
 			local can_geld = not gelded and unit.sex == 1 and animal_is_geldable(unit)
 			
@@ -76,7 +76,6 @@ function animals_get2()
 					local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 					local ownername = owner and unit_fulltitle(owner) or mp.NIL
 
-					--xxxdfhack: until the field is named in dfhack
 					local flags = bit(1,true) + bit(2,C_pet_available(item)) + bit(12,true)
 
 					table.insert(ret, { title, item.id, 0, ownername, flags, mp.NIL, 0 })
@@ -93,10 +92,10 @@ function animals_get2()
 
 				local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 				local adoptable = not caste.flags.ADOPTS_OWNER
-				local available = unit.flags3[27]
+				local available = C_unit_available_for_adoption(unit)
 				local slaughter = unit.flags2.slaughter
 
-				local geld = unit.flags3[29]
+				local geld = C_unit_geld(unit)
 				local gelded = unit.flags3.gelded
 				local can_geld = not gelded and unit.sex == 1 and animal_is_geldable(unit)
 				
@@ -152,7 +151,7 @@ function animals_set_geld(unitid, val)
 		return false
 	end
 
-	unit.flags3[29] = istrue(val)
+	C_unit_set_geld(unit, istrue(val))
 	return true
 end
 
@@ -167,7 +166,6 @@ function animals_set_available(unitid, val, is_vermin)
 			error('no item or wrong item type ' .. (item and tostring(item) or tostring(unitid)))
 		end
 
-		-- xxxdfhack: until the field is named in dfhack
 		C_pet_set_available(item, val)
 
 		return true
@@ -179,7 +177,7 @@ function animals_set_available(unitid, val, is_vermin)
 		error('no unit '..tostring(unitid))
 	end
 
-	unit.flags3[27] = val
+	C_unit_set_available_for_adoption(unit, val)
 
 	return true
 end
