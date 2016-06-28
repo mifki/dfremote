@@ -88,6 +88,7 @@ function embark_get_overview()
 	local ws = dfhack.gui.getCurViewscreen()
 
 	if ws._type == df.viewscreen_choose_start_sitest then
+		local ws = ws --as:df.viewscreen_choose_start_sitest
 		local civs = {}
 		for i,civ in ipairs(ws.available_civs) do
 			local name = dfhack.df2utf(dfhack.TranslateName(civ.name, true))
@@ -104,6 +105,7 @@ function embark_get_overview()
 	end
 
 	if ws._type == df.viewscreen_setupdwarfgamest then
+		local ws = ws --as:df.viewscreen_setupdwarfgamest
 		--todo: handle (set to 1) ws.show_play_now ~= 1
 
 		local profiles = {}
