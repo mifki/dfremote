@@ -356,7 +356,7 @@ function build_options_set(option, value)
     return true
 end
 
---luacheck: in=table
+--luacheck: in=number[]
 function build_set_trap_options(info)
     local btype = df.global.ui_build_selector.building_type
     if btype == df.building_type.Trap and df.global.ui_build_selector.building_subtype == 1 then --pressure plate

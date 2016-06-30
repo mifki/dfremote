@@ -116,7 +116,7 @@ function raws_apply_tileset(zjsondata)
 
                 -- growths
                 if v.g then
-                    for gid,w in pairs(v.g) do
+                    for gid,w in pairs(v.g) do --as:number[][]
                         local gf = false
                         for k,graw in ipairs(raw.growths) do
                             if graw.id == gid then

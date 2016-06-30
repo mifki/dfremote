@@ -252,7 +252,7 @@ function worldgen_get_world_info()
     local ret = ''
 
     --todo: no-civ sites must go last
-    for i,v in ipairs({'DWARF', 'HUMAN', 'ELF', 'GOBLIN', 'KOBOLD' }) do
+    for i,v in ipairs({'DWARF', 'HUMAN', 'ELF', 'GOBLIN', 'KOBOLD'}) do
         local race_id = races[v]
         local race = df.global.world.raws.creatures.all[race_id]
         local t = pops[race_id]
@@ -263,6 +263,7 @@ function worldgen_get_world_info()
         for j,civ in pairs(t.civs) do
             ret = ret .. '[P][C:7:0:0]' .. (civ.name and ('    civ. [C:6:0:1]' .. civ.name) or '    [C:6:0:1]---')
             for k,site in ipairs(civ.sites) do 
+                local site = size --as:df.world_site
                 local name = dfhack.df2utf(dfhack.TranslateName(site.name, false))
                 local name_eng = dfhack.df2utf(dfhack.TranslateName(site.name, true))
                 local type_name = site_type_name(site)

@@ -226,8 +226,8 @@ function is_special_labor(laboridx)
     return false
 end
 
+--luacheck: in=
 function labors_get_labors()
-
     local labor_counts = labors_get_counts()
 
     local groups = {}

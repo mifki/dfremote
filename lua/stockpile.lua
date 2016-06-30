@@ -1259,6 +1259,7 @@ function stockpile_settings_schema()
 }
 end
 
+--luacheck: in=
 function building_stockpile_getsettings()
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1329,6 +1330,7 @@ function building_stockpile_getsettings()
     return ret
 end
 
+--luacheck: in=number,number
 function building_stockpile_getsettings_level3(l1, l2)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1366,6 +1368,7 @@ function building_stockpile_getsettings_level3(l1, l2)
 end
 
 --todo: support passing path as the first param
+--luacheck: in=
 function building_stockpile_setenabled(...)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1461,6 +1464,7 @@ function building_stockpile_setenabled(...)
     return true
 end
 
+--luacheck: in=number,number,bool
 function building_stockpile_setflag(group, flag, enabled)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1502,6 +1506,7 @@ function building_stockpile_setflag(group, flag, enabled)
     return true
 end
 
+--luacheck: in=number,number,number
 function building_stockpile_setmax(barrels, bins, wheelbarrows)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1524,6 +1529,7 @@ function building_stockpile_setmax(barrels, bins, wheelbarrows)
     return true
 end
 
+--luacheck: in=
 function building_stockpile_create()
     df.global.ui.main.mode = 0
 

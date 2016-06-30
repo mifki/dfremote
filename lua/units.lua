@@ -90,6 +90,7 @@ function unit_get_effects(unit)
     return ret
 end
 
+--luacheck: in=number
 function unit_query_selected(unitid)
     local unit
     if not unitid or unitid == -1 or unitid == 0 then
@@ -336,7 +337,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
     local jobcolor = 11
     local onbreak = is_onbreak(unit)
 
-    if df_ver >= 42 then
+    if df_ver >= 4200 then
         if #unit.anon_1 > 0 then
             local _,actid = df.sizeof(unit.anon_1[0]) --todo: use 0 or last ?
 
@@ -648,7 +649,7 @@ function unit_goto(unitid)
 
     local x,y,z = dfhack.units.getPosition(unit)
 
-    df.global.ui.main.mode = df.interface_breakdown_types.ViewUnits
+    df.global.ui.main.mode = df.ui_sidebar_mode.ViewUnits
 
     df.global.cursor.x = x
     df.global.cursor.y = y
@@ -676,7 +677,7 @@ function unit_goto_bld(unitid)
         return
     end
 
-    df.global.ui.main.mode = 17
+    df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
 
     df.global.cursor.x = jobbld.centerx
     df.global.cursor.y = jobbld.centery
@@ -1299,7 +1300,6 @@ function unit_customize(unitid, nickname, profname)
     return true
 end
 
---luacheck: in=number,number
 function unit_assigned_status(unit, bld)
     local x,y,z = dfhack.units.getPosition(unit)
 
@@ -1367,7 +1367,7 @@ function unit_get_assign_animal_choices(unitid)
     return ret
 end
 
---luacheck: in=number,table
+--luacheck: in=number,number[]
 function unit_assign_animals(unitid, animalids)
     local unit = df.unit.find(unitid)
     if not unit then

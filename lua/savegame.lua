@@ -129,6 +129,7 @@ end
 
 worldgen_params = nil
 
+--luacheck: in=number[]
 function create_new_world(params)
     if #params ~= 7 then
         return
@@ -168,11 +169,12 @@ function create_new_world(params)
     native.set_timer(2, 'progress_worldgen')
 end
 
+--luacheck: in=
 function progress_worldgen()
-    local ws = dfhack.gui.getCurViewscreen()
-    print('check', ws._type)
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
+        print('check', ws._type)
         worldgen_params = nil
         return
     end    

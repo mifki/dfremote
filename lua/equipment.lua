@@ -165,7 +165,7 @@ function equipment_item_get_matchoices(squadid, unitid, idx)
     end)  		
 end
 
---luacheck: in=number,number,number,table
+--luacheck: in=number,number,number,number[]
 function equipment_item_set_material(squadid, unitid, idx, matspec)
     return execute_with_military_screen(function(ws)
     	gui.simulateInput(ws, 'D_MILITARY_EQUIP')

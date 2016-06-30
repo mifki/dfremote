@@ -30,7 +30,7 @@ function depot_can_movegoods()
     return false
 end
 
---2luacheck: in=
+--luacheck: in=
 function depot_movegoods_get()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -65,7 +65,7 @@ function depot_movegoods_get()
     return ret
 end
 
---2luacheck: in=
+--luacheck: in=
 function depot_movegoods_get2()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then

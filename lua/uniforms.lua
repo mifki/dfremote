@@ -37,6 +37,7 @@ function uniforms_add()
     end)
 end
 
+--luacheck: in=number
 function uniform_delete(id)
     local idx = uniform_id2index(id)
     if idx == -1 then
@@ -231,7 +232,7 @@ function uniform_item_get_matchoices(uniformid, itemidx)
 	end)
 end
 
---luacheck: in=number,number,table
+--luacheck: in=number,number,number[]
 function uniform_item_set_material(uniformid, itemidx, matspec)
     return execute_with_military_screen(function(ws)
         gui.simulateInput(ws, 'D_MILITARY_UNIFORMS')

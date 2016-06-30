@@ -1,16 +1,3 @@
-function get_restriction(item_type, item_subtype, mat_type, mat_index)
-    local k = df.global.ui.kitchen
-
-    for i,v in ipairs(k.item_types) do
-        if v == item_type and k.item_subtypes[i] == item_subtype and
-           k.mat_types[i] == mat_type and k.mat_indices[i] == mat_index then
-            return k.exc_types[i]
-        end
-    end
-
-    return 0
-end
-
 function set_restriction(item_type, item_subtype, mat_type, mat_index, restricted)
     local k = df.global.ui.kitchen
     
@@ -60,7 +47,7 @@ function kitchen_get_data()
     end)    
 end
 
---luacheck: in=table,bool
+--luacheck: in=number[],bool
 function kitchen_set(id, restricted)
     set_restriction(id[1], id[2], id[3], id[4], restricted)
     return true

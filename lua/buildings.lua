@@ -1,22 +1,3 @@
-function jeweler_get_choices()
-    local ws = dfhack.gui.getCurViewscreen()
-    local ret = {}
-
-    for mat_idx,count in ipairs(ws.jeweler_cutgem) do
-        local cut = count > 0
-        local encrust = ws.jeweler_encrust[mat_idx] > 0
-
-        if cut or encrust then
-            local mat = dfhack.matinfo.decode(0,mat_idx).material
-            local title = mat.state_name[0]
-
-            table.insert(ret, { title, cut, encrust })
-        end
-    end
-
-    return ret
-end
-
 function get_squads_use(bld)
     local squads = {}
     local eid = df.global.ui.main.fortress_entity.id
@@ -121,6 +102,7 @@ end
 --xxx: most of the functions below can operate on the currently selected building only
 --xxx: this function will try to transition to [q]uery mode and select the passed building
 --xxx: currently this is used only to transition from loo[k] mode
+--luacheck: in=number
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -499,17 +481,16 @@ end
 
 local jobchoices = {}
 
+--todo: refactor this to have two separate paths for interface_button_building_new_jobst and subcategories
 function get_job_choices(ws, level)
     local ret = {}
     for i,btn in ipairs(df.global.ui_sidebar_menus.workshop_job.choices_visible) do
+        local btn = btn --as:df.interface_button_building_new_jobst
         local unavailable = false
         local memorialized = false
         local slab = false
 
         if btn._type == df.interface_button_building_new_jobst then
-            --[[if btn.is_custom then --XXX: this field also means that job is unavailable (red)
-                goto continue
-            end]]
             unavailable = btn.is_custom
             table.insert(jobchoices, clone_job_button(btn))
         end
@@ -551,7 +532,7 @@ function get_job_choices(ws, level)
                 gui.simulateInput(ws, 'CURSOR_DOWN_Z')
                 gui.simulateInput(ws, 'CURSOR_UP_Z')
             end
-        elseif df_ver >= 42 then
+        elseif df_ver >= 4200 then
             if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
                 local rid = btn.reaction_name:sub(6)
                 local found = false
@@ -703,16 +684,16 @@ function building_workshop_addjob(bldid, idx, rep)
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building --as:df.building_workshopst
-    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
-        error('not a workshop or furnace '..tostring(bld._type))
+    local bld = df.global.world.selected_building
+    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest and bld._type ~= df.building_trapst then
+        error('not workshop or furnace or trap '..tostring(bld._type))
     end
 
     if #bld.jobs >= 10 then
         return --error('too many jobs')
     end
 
-    if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then
+    if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then --hint:df.building_trapst
         if idx < #jobs_trap then
             gui.simulateInput(ws, 'BUILDJOB_ADD')
             ws:logic() --to initialize / switch to add job menu
@@ -1257,7 +1238,7 @@ function building_room_set_squaduse(bldid, squadid, mode)
         end
 
         -- update squad
-        found = false
+        local found = false
         for j,roomuse in ipairs(squad.rooms) do
             if roomuse.building_id == bld.id then
                 roomuse.mode.whole = mode
@@ -1416,7 +1397,7 @@ function link_targets_get()
 
     --todo: pass coords so that client can zoom straight away ?
     for i,bld in ipairs(df.global.world.buildings.other[id]) do
-        if not (linkmode == string.byte'T' and bld.trap_type ~= df.trap_type.TrackStop) then
+        if not (linkmode == string.byte'T' and bld.trap_type ~= df.trap_type.TrackStop) then --hint:df.building_trapst
             local title = bldname(bld)
             table.insert(ret, { title, bld.z - df.global.window_z })
         end

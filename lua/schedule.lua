@@ -1,3 +1,4 @@
+--luacheck: in=
 function schedule_get_overview()
 	local squads = {}
 	for i,squad in ipairs(find_fortress_squads()) do
@@ -277,7 +278,7 @@ function schedule_order_get_choices(type)
 	end
 end
 
---luacheck: in=number,number,number,number,table
+--luacheck: in=number,number,number,number,number[]
 function schedule_order_add(squadid, alertid, month, type, targets)
 	local alertidx = alert_id2index(alertid)
 	if alertidx == -1 then

@@ -184,7 +184,7 @@ end
 
 --luacheck: in=number
 function embark_set_civ(idx)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -259,7 +259,7 @@ local function embark_site_info()
 end
 
 local matches = {}
---luacheck: in=number,number,table
+--luacheck: in=number,number,number[]
 function embark_finder_find(w, h, params)
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
@@ -361,7 +361,7 @@ function embark_finder_next()
 
 	if #matches > 0 then
 		local idx = math.floor(math.random() * #matches) + 1
-		local match = matches[idx]
+		local match = matches[idx] --as:number[]
 
 		local dx = match[1] - ws.location.region_pos.x
 		local dy = match[2] - ws.location.region_pos.y
@@ -414,8 +414,6 @@ function embark_cancel()
     ws.child = optsws
 
     gui.simulateInput(optsws, 'SELECT')
-
-	ws = dfhack.gui.getCurViewscreen()
 end
 
 --luacheck: in=
@@ -430,7 +428,7 @@ function embark_embark()
 
 	-- We're still on the embark map screen, likely a message box is displayed
 	if ws._type == df.viewscreen_choose_start_sitest then
-		if ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal then
+		if ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal then --hint:df.viewscreen_choose_start_sitest
 			--todo: should return this message to the app instead of accepting silently
 			gui.simulateInput(ws, 'SELECT')
 			ws = dfhack.gui.getCurViewscreen()
@@ -440,7 +438,7 @@ end
 
 --luacheck: in=number
 function embark_reclaim(idx)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		return
 	end
@@ -453,23 +451,23 @@ function embark_reclaim(idx)
 	ws:render()
 	gui.simulateInput(ws, 'SETUP_EMBARK')
 
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws2 = dfhack.gui.getCurViewscreen()
 
-	if ws._type == df.viewscreen_setupdwarfgamest and ws.breakdown_level == df.interface_breakdown_types.STOPSCREEN then
-        local parent = ws.parent
+	if ws2._type == df.viewscreen_setupdwarfgamest and ws2.breakdown_level == df.interface_breakdown_types.STOPSCREEN then
+        local parent = ws2.parent
         parent.child = nil
-        ws:delete()
-        ws = parent
+        ws2:delete()
+        ws2 = parent
 	end
 
-    if ws._type == df.viewscreen_textviewerst then
+    if ws2._type == df.viewscreen_textviewerst then
     	local text = ''
-    	for i,v in ipairs(ws.formatted_text) do
+    	for i,v in ipairs(ws2.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
 	    end
 	    text = text:gsub('%s+', ' ')
 
-        local title = ws.title
+        local title = ws2.title
         title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
 	    return { title, text }

@@ -7,7 +7,7 @@ _ = require 'remote.underscore'
 gui = require 'gui'
 utils = require 'utils'
 
-df_ver = tonumber(dfhack.DF_VERSION:sub(3,4))
+df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4206, etc.
 
 require 'remote.compat'
 
@@ -46,7 +46,7 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 
-if df_ver >= 42 then
+if df_ver >= 4200 then
     require 'remote.locations'
     require 'remote.petitions'
 end
@@ -89,6 +89,7 @@ function close_all()
     end
 
     if ws._type == df.viewscreen_textviewerst then
+        local ws = ws --as:df.viewscreen_textviewerst
         --todo: need to properly handle these screens
         if ws.page_filename == 'data/announcement/fortressintro' or ws.page_filename == 'data/announcement/unretire' then
             gui.simulateInput(ws, 'LEAVESCREEN')
@@ -904,6 +905,7 @@ function recenter_view(x,y,z)
     --end
 end
 
+--luacheck: in=bool
 function get_status_ext(needs_sync)
     needs_sync = istrue(needs_sync)
 
@@ -955,6 +957,7 @@ function generrseqstr(seq)
     return string.char(130, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
 end
 
+--luacheck: in=number,number,number,number
 function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_high = high
     df.global.ui.main.traffic_cost_normal = normal
@@ -1333,7 +1336,7 @@ function close_legends()
         ws = parent
     end
 
-    ws.cur_page = 0
+    ws.cur_page = df.viewscreen_legendsst.T_cur_page.Main --hint:df.viewscreen_legendsst
     gui.simulateInput(ws, 'LEAVESCREEN')
 end
 
@@ -1553,7 +1556,7 @@ local handlers = {
     },
 
     [142] = {
-        [1] = jobs_get_list,
+        --[1] = jobs_get_list,
         [2] = job_get_description,
     },
 

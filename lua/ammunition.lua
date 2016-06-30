@@ -113,7 +113,7 @@ function ammunition_get_additem()
     end)
 end
 
---luacheck: in=number,table,table
+--luacheck: in=number,number[],number[]
 function ammunition_item_add(squadid, itemspec, matspec)
 	local specs
 

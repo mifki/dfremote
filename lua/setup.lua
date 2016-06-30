@@ -36,6 +36,7 @@ local designations = {
     } }
 }
 
+--luacheck: in=
 function setup_get_designations()
     local choices = {}
 
@@ -105,6 +106,7 @@ local function get_choices_build()
     return choices            
 end
 
+--luacheck: in=
 function setup_get_buildings()
     return execute_with_main_mode(0, function(ws)
         gui.simulateInput(ws, 'D_BUILDING')
@@ -114,6 +116,7 @@ function setup_get_buildings()
 end
 
 --todo: add a flag to return gamelist/worldgen detailed info straight away
+--luacheck: in=string,string
 function setup_get_server_info(clientver, pwd)
     --todo: no need to check pwd and match version if not foreign
     local ver = matching_version(clientver)
@@ -154,7 +157,7 @@ function setup_get_server_info(clientver, pwd)
 
     -- Worldgen in progress (unlike other screens below, this screen is a child of the title screen)
     if ws._type == df.viewscreen_new_regionst then
-        if worldgen_params or (not istrue(ws.simple_mode) and not istrue(ws.in_worldgen)) then
+        if worldgen_params or (not istrue(ws.simple_mode) and not istrue(ws.in_worldgen)) then --hint:df.viewscreen_new_regionst
             return { ver, 'worldgen' }
         end
     end
@@ -210,6 +213,7 @@ function setup_get_server_info(clientver, pwd)
     return { ver, 'unknown' }
 end
 
+--luacheck: in=number
 function setup_get_mapinfo(wtoken)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -243,10 +247,12 @@ function setup_get_mapinfo(wtoken)
     return mapinfo
 end
 
+--luacheck: in=
 function setup_get_settings()
     return { df.global.enabler.fps, df.global.enabler.calculated_fps }
 end
 
+--luacheck: in=number,number
 function setup_set_setting(idx, value)
     if idx == 1 then
         if value < 10 then value = 10 end

@@ -81,6 +81,7 @@ function read_meeting_screen()
 	return text, reply, actions
 end
 
+--luacheck: in=
 function meeting_get()
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -140,6 +141,7 @@ function meeting_get()
 	return { text, actions, actor_fullname, noble_fullname, reply }
 end
 
+--luacheck: in=number
 function meeting_action(idx)
 	local ws = dfhack.gui.getCurViewscreen()
 
@@ -478,6 +480,7 @@ function get_sell_items(civ_id)
 	return cats
 end
 
+--luacheck: in=
 function import_req_get_items()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
@@ -514,6 +517,7 @@ function import_req_get_items()
 	return ret
 end
 
+--luacheck: in=number[],bool
 function import_req_set(changes, close)
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
@@ -564,6 +568,7 @@ function process_sell_agreement(civ_id, reqs)
 	return ret	
 end
 
+--luacheck: in=
 function import_agreement_get()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_tradeagreementst then
@@ -749,6 +754,7 @@ function process_buy_agreement(reqs)
 	return ret	
 end
 
+--luacheck: in=
 function export_agreement_get()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_requestagreementst then
@@ -761,6 +767,7 @@ function export_agreement_get()
 	return { ret, translatename(ws.civ.name) }
 end
 
+--luacheck: in=
 function landholders_get()
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then
@@ -779,6 +786,7 @@ function landholders_get()
 	return { candidates, 'A Barony' }
 end
 
+--luacheck: in=number,bool
 function landholders_set(hfid, close)
 	local ws = dfhack.gui.getCurViewscreen()
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then

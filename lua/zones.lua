@@ -14,7 +14,7 @@ function zone_settings_get(bldid)
     end
 
     local loc
-    if df_ver >= 42 and zone.zone_flags.meeting_area and zone.location_id ~= -1 then
+    if df_ver >= 4200 and zone.zone_flags.meeting_area and zone.location_id ~= -1 then
         loc = location_find_by_id(zone.location_id)
     end
 

@@ -61,7 +61,7 @@ end
 
 --todo: output for stockpiles should be improved before used in app (currently containers and items inside are mixed)
 --todo: make this use bldid too
---2luacheck: in=number
+--luacheck: in=number
 function building_get_contained_items(bldid)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -97,9 +97,9 @@ function building_get_contained_items(bldid)
     return ret
 end
 
---2luacheck: in=number,number,number
+--luacheck: in=number,number,bool
 function item_action(itemid, action, value)
-    local item = df.item:is_instance(itemid) and itemid or df.item.find(itemid)
+    local item = df.item:is_instance(itemid) and itemid or df.item.find(itemid) --as:df.item
 
     if not item then
         error('no item '..tostring(itemid))

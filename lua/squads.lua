@@ -276,6 +276,7 @@ function squads_attack_list_get(idx)
     return ret
 end
 
+--luacheck: in=number[]
 function squads_attack_list_confirm(idxs)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -547,6 +548,7 @@ function squad_get_candidates(id)
     end)    
 end
 
+--luacheck: in=number,number[]
 function squad_add_members(id, unitids)
     return execute_with_military_screen(function(ws)
         local sqidx = -1

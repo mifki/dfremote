@@ -8,6 +8,7 @@ function stone_is_other(raw)
 		and raw.id ~= 'RAW_ADAMANTINE'
 end
 
+--luacheck: in=
 function stone_get()
 	local economic = {}
 	local other = {}
@@ -25,6 +26,7 @@ function stone_get()
 	return { economic, other }
 end
 
+--luacheck: in=number,bool
 function stone_set(idx, eco)
 	df.global.ui.economic_stone[idx] = istrue(eco) and 1 or 0
 
