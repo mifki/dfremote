@@ -863,6 +863,7 @@ void enthreadmain(ENetHost *server)
                                 *(unsigned int*)b = 0; // 4-7
                                 b += 4;
                                 *(b++) = 0;
+                                *(b++) = 0;
 
                                 ENetPacket * packet = enet_packet_create (buf, b-buf, ENET_PACKET_FLAG_RELIABLE);
                                 enet_peer_send (event.peer, 0, packet);
@@ -913,6 +914,8 @@ void enthreadmain(ENetHost *server)
                                 b += 4;
                                 strcpy((char*)b, server_ver);
                                 b += strlen(server_ver) + 1;
+                                strcpy((char*)b, DFHack::Version::dfhack_version());
+                                b += strlen(DFHack::Version::dfhack_version()) + 1;
 
                                 ENetPacket * packet = enet_packet_create (buf, b-buf, ENET_PACKET_FLAG_RELIABLE);
                                 enet_peer_send (event.peer, 0, packet);
