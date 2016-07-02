@@ -44,7 +44,7 @@ local function populate_order_templates()
 			btn.material_category.whole = o.material_category.whole
 			table.insert(order_template_names, dfhack.df2utf(utils.call_with_string(btn, 'getLabel')))
 
-			local ot = {}
+			local ot = {} --as:{reaction_name:string,hist_figure_id:number,job_type:'df.job_type',item_type:'df.item_type',item_subtype:number,mat_type:number,mat_index:number,item_category_whole:number,material_category_whole:number}
 			ot.reaction_name = o.reaction_name
 			ot.hist_figure_id = o.hist_figure_id
 			ot.job_type = o.job_type
@@ -79,7 +79,7 @@ function manager_new_order(idx, amount)
 		populate_order_templates()
 	end
 
-	local ot = order_templates[idx + 1]
+	local ot = order_templates[idx + 1] --as:{reaction_name:string,hist_figure_id:number,job_type:'df.job_type',item_type:'df.item_type',item_subtype:number,mat_type:number,mat_index:number,item_category_whole:number,material_category_whole:number}
 	local o = df.manager_order:new()
 
 	o.reaction_name = ot.reaction_name

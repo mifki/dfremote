@@ -86,7 +86,7 @@ function building_get_contained_items(bldid)
         end
 
     else
-        for i,citem in ipairs(bld.contained_items) do
+        for i,citem in ipairs(bld.contained_items) do --hint:df.building_actual
             local item = citem.item
             local title = itemname(item, 0, true)
 

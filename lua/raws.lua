@@ -7,9 +7,9 @@ function raws_apply_tileset(zjsondata)
     end
 
     require'remote.deflatelua'.inflate_zlib{input=zjsondata,output=appenddata}    
-    local data = json:decode(jsondata)
+    local data = json:decode(jsondata) --as:{sky:'number[]',chasm:'number[]',pillar:'number',track:'number[]',ramp:'number[]',tracki:'number[]',rampi:'number[]',tree:'number[]'}
 
-    for id,v in pairs(data.creatures or {}) do
+    for id,v in pairs(data.creatures or {}) do --as:{t:number,s:number,a:number,o:number,g:number}
         local f = false
         for j,raw in ipairs(df.global.world.raws.creatures.all) do
             if raw.creature_id == id then
@@ -25,7 +25,7 @@ function raws_apply_tileset(zjsondata)
         if not f then print('not found '..id) end
     end
 
-    for id,v in pairs(data.tools or {}) do
+    for id,v in pairs(data.tools or {}) do --as:{t:number}
         local f = false
         for j,raw in ipairs(df.global.world.raws.itemdefs.tools) do
             if raw.id == id then
@@ -42,7 +42,7 @@ function raws_apply_tileset(zjsondata)
         raw.material.item_symbol = 7
     end
 
-    for id,v in pairs(data.inorganics or {}) do
+    for id,v in pairs(data.inorganics or {}) do --as:{t:number,s:number}
         local f = false
         for j,raw in ipairs(df.global.world.raws.inorganics) do
             if raw.id == id then
@@ -81,7 +81,7 @@ function raws_apply_tileset(zjsondata)
         end
     end
 
-    for id,v in pairs(data.plants or {}) do
+    for id,v in pairs(data.plants or {}) do --as:{p:number,dp:number,s:number,ds:number,t:number,dt:number,a:number,da:number,r:'number[]',ar:'number[]',ap:'number[]'}
         local f = false
         for j,raw in ipairs(df.global.world.raws.plants.all) do
             if raw.id == id then

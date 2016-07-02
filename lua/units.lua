@@ -99,7 +99,7 @@ function unit_query_selected(unitid)
             error('wrong screen '..tostring(ws._type))
         end
 
-        if df.global.ui.main.mode ~= df.interface_breakdown_types.ViewUnits or df.global.ui_selected_unit == -1 then
+        if df.global.ui.main.mode ~= df.ui_sidebar_mode.ViewUnits or df.global.ui_selected_unit == -1 then
             error('no selected unit')
         end
 
