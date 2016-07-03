@@ -18,7 +18,7 @@ function get_squads_use(bld)
 end
 
 --todo:  They may also say "Leave me. I need... things... certain things", in which case they want special items such as skulls or vermin remains.
-local mood_items = {
+local mood_items = { --as:string[][]
     [df.item_type.WOOD] = { 'logs', 'a forest', 'tree... life' }, --'wood logs'?
     [df.item_type.CLOTH] = { 'cloth', 'stacked cloth', 'cloth... thread' },
     [df.item_type.SMALLGEM] = { 'cut gems', 'cut gems', 'gems... shining' },
@@ -40,7 +40,7 @@ function building_workshop_get_mood(bld)
         return nil
     end
 
-    local unitid = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER).unit_id
+    local unitid = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER).unit_id --hint:df.general_ref_unit_workerst
     local unit = df.unit.find(unitid)
 
     if not unit then
@@ -120,8 +120,8 @@ function building_query_selected(bldid)
         error('no building '..tostring(bldid))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building ~= bld then
-        df.global.ui.main.mode = 17
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building ~= bld then
+        df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
         df.global.cursor.x = bld.x1
         df.global.cursor.y = bld.y1
         df.global.cursor.z = bld.z-1
@@ -135,7 +135,7 @@ function building_query_selected(bldid)
 
     local removing = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
     local actual = df.building_actual:is_instance(bld)
-    local forbidden = actual and #bld.contained_items > 0 and bld.contained_items[0].item.flags.forbid
+    local forbidden = actual and #bld.contained_items > 0 and bld.contained_items[0].item.flags.forbid --hint:df.building_actual
 
     local curstage = bld:getBuildStage()
     local maxstage = bld:getMaxBuildStage()
@@ -146,7 +146,7 @@ function building_query_selected(bldid)
     local genflags = packbits(removing, forbidden, actual, constructed, workshop)
 
     if not constructed then
-        local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed)
+        local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed) --hint:df.building_actual
 
         local cjob = bld.jobs[0]
         local active = cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working
@@ -169,6 +169,7 @@ function building_query_selected(bldid)
         ret = { btype, genflags, bname, stagename, active, suspended }
 
     elseif btype == df.building_type.TradeDepot then
+        local bld = bld --as:df.building_tradedepotst
         --todo: return broker name, current job, accessibility
 
         local caravan_state = #df.global.ui.caravans > 0 and df.global.ui.caravans[0].trade_state or 0
@@ -181,6 +182,7 @@ function building_query_selected(bldid)
         ret = { btype, genflags, bname, bld.trade_flags.whole, avail_flags }
 
     elseif btype == df.building_type.Door or btype == df.building_type.Hatch then
+        local bld = bld --as:df.building_doorst
         ret = { btype, genflags, bname, bld.door_flags.whole }
 
     elseif btype == df.building_type.Windmill or btype == df.building_type.WaterWheel or btype == df.building_type.AxleVertical
@@ -193,10 +195,12 @@ function building_query_selected(bldid)
         ret = { btype, genflags, bname, machine.cur_power, machine.min_power, machine.flags.whole, stable_foundation }
 
         if btype == df.building_type.Rollers or btype == df.building_type.ScrewPump then
+            local bld = bld --as:df.building_rollersst
             table.insert(ret, bld.direction)
         end
 
         if btype == df.building_type.ScrewPump then
+            local bld = bld --as:df.building_screw_pumpst
             table.insert(ret, bld.pump_manually)
         end
     
@@ -226,7 +230,7 @@ function building_query_selected(bldid)
         end
 
         local clt = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and bld:getClutterLevel() or 0
-        local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0
+        local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0 --hint:df.building_actual
 
         --TODO: how to determine this properly?
         local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bldid) == 0 or false
@@ -245,13 +249,16 @@ function building_query_selected(bldid)
         ret = { btype, genflags, bname, bld.is_room, ownername, ownerprof }
 
         if btype == df.building_type.Table then
+            local bld = bld --as:df.building_tablest
             table.insert(ret, bld.table_flags.meeting_hall)
 
         elseif btype == df.building_type.Bed then
+            local bld = bld --as:df.building_bedst
             table.insert(ret, bld.bed_flags.whole)
             table.insert(ret, get_squads_use(bld))
 
         elseif btype == df.building_type.ArcheryTarget then
+            local bld = bld --as:df.building_archerytargetst
             table.insert(ret, bld.archery_direction)
             table.insert(ret, get_squads_use(bld))
 
@@ -260,29 +267,32 @@ function building_query_selected(bldid)
             table.insert(ret, get_squads_use(bld))
         
         elseif btype == df.building_type.Coffin then
+            local bld = bld --as:df.building_coffinst
             local buried = owner and owner.flags1.dead or false
             local mode = bld.burial_mode
             local flags = packbits(mode.allow_burial, not mode.no_citizens, not mode.no_pets, buried)
             table.insert(ret, flags)
 
         elseif btype == df.building_type.Slab then
-            local slabitem = bld.contained_items[0].item
+            local bld = bld --as:df.building_slabst
+            local slabitem = bld.contained_items[0].item --as:df.item_slabst
             local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and hfname(df.historical_figure.find(slabitem.topic)) or mp.NIL
             --todo: show full description and not just the name
             table.insert(ret, inmemory)
 
         elseif btype == df.building_type.Cage then
+            local bld = bld --as:df.building_cagest
             local occupants = {}
 
             for i,v in ipairs(bld.contained_items[0].item.general_refs) do
                 if v._type == df.general_ref_contains_unitst then
-                    local unit = df.unit.find(v.unit_id)
+                    local unit = df.unit.find(v.unit_id) --hint:df.general_ref_contains_unitst
                     if unit then
                         local title = unit_fulltitle(unit)
                         table.insert(occupants, { title, unit.id, 0 })
                     end
                 elseif v._type == df.general_ref_contains_itemst then
-                    local item = df.item.find(v.item_id)
+                    local item = df.item.find(v.item_id) --hint:df.general_ref_contains_itemst
                     if item then
                         local title = itemname(item, 0, true)
                         table.insert(occupants, { title, item.id, 1 })
@@ -293,6 +303,7 @@ function building_query_selected(bldid)
             table.insert(ret, occupants)
 
         elseif btype == df.building_type.Chain then
+            local bld = bld --as:df.building_chainst
             local assigned = bld.assigned and unit_fulltitle(bld.assigned) or mp.NIL
             local chained = bld.chained and unit_fulltitle(bld.chained) or mp.NIL
             table.insert(ret, bld.flags.justice)
@@ -302,6 +313,7 @@ function building_query_selected(bldid)
             table.insert(ret, bld.chained and bld.chained.id or -1)
 
         elseif btype == df.building_type.Well then
+            local bld = bld --as:df.building_wellst
             local is_active = building_well_is_active()
 
             -- find bucket and check if liquid amount is 10
@@ -310,9 +322,9 @@ function building_query_selected(bldid)
                 if w.item._type == df.item_bucketst then
                     for i,v in ipairs(w.item.general_refs) do
                         if v._type == df.general_ref_contains_itemst then
-                            local item = df.item.find(v.item_id)
+                            local item = df.item.find(v.item_id) --hint:df.general_ref_item
                             if item and item._type == df.item_liquid_miscst then
-                                liquid = liquid + item.stack_size
+                                liquid = liquid + item.stack_size --hint:df.item_liquid_miscst
                             end
                         end
                     end
@@ -327,6 +339,7 @@ function building_query_selected(bldid)
         end
 
     elseif btype == df.building_type.FarmPlot then
+        local bld = bld --as:df.building_farmplotst
         local keys = { 'BUILDJOB_FARM_SPRING', 'BUILDJOB_FARM_SUMMER', 'BUILDJOB_FARM_AUTUMN', 'BUILDJOB_FARM_WINTER' }
 
         local crops = {}
@@ -354,23 +367,28 @@ function building_query_selected(bldid)
         ret = { btype, genflags, bname, seasons, crops, fertinfo, bld.seasonal_fertilize }
 
     elseif btype == df.building_type.Stockpile then
+        local bld = bld --as:df.building_stockpilest
         local area = (bld.x2-bld.x1+1)*(bld.y2-bld.y1+1)
 
         ret = { btype, genflags, bname, area, bld.max_barrels, bld.max_bins, bld.max_wheelbarrows }
 
     elseif btype == df.building_type.SiegeEngine then
+        local bld = bld --as:df.building_siegeenginest
         ret = { btype, genflags, bname, bld.type, bld.action, bld.facing }
 
     elseif btype == df.building_type.NestBox then
+        local bld = bld --as:df.building_nest_boxst
         local unit = bld.claimed_by ~= -1 and df.unit.find(bld.claimed_by)
         local unitname = unit and unit_fulltitle(unit) or mp.NIL
         ret = { btype, genflags, bname, unitname }
 
     elseif btype == df.building_type.Hive then
+        local bld = bld --as:df.building_hivest
         local hiveflags = bld.hive_flags.whole
         ret = { btype, genflags, bname, hiveflags }
 
     elseif btype == df.building_type.AnimalTrap then
+        local bld = bld --as:df.building_animaltrapst
         local baitidx = bait_idx(bld.bait_type)
         local bait = #bld.contained_items > 1 and bld.contained_items[1].item --todo: is this correct?
         local itemname = bait and itemname(bait, 0, true) or mp.NIL
@@ -501,8 +519,8 @@ function get_job_choices(ws, level)
             title = title:gsub(' %(Engrave Memorial%)', '')
             local hfid = btn.hist_figure_id
 
-            for j,w in ipairs(df.global.world.buildings.other.SLAB) do
-                if #w.contained_items > 0 and w.contained_items[0].item.topic == hfid then
+            for j,w in ipairs(df.global.world.buildings.other.SLAB) do --as:df.building_slabst
+                if #w.contained_items > 0 and w.contained_items[0].item.topic == hfid then --hint:df.item_slabst
                     memorialized = true
                     break
                 end
@@ -532,23 +550,26 @@ function get_job_choices(ws, level)
                 gui.simulateInput(ws, 'CURSOR_DOWN_Z')
                 gui.simulateInput(ws, 'CURSOR_UP_Z')
             end
-        elseif df_ver >= 4200 then
-            if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
-                local rid = btn.reaction_name:sub(6)
-                local found = false
-                for i,v in ipairs(df.global.world.raws.itemdefs.instruments) do
-                    if v.id == rid then
-                        descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
-                        found = true
-                        break
-                    end
-                end
-                if not found then
-                    for i,v in ipairs(df.global.world.raws.itemdefs.tools) do
+            
+        else
+            if df_ver >= 4200 then --dfver:4200-
+                if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
+                    local rid = btn.reaction_name:sub(6)
+                    local found = false
+                    for i,v in ipairs(df.global.world.raws.itemdefs.instruments) do
                         if v.id == rid then
                             descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
                             found = true
                             break
+                        end
+                    end
+                    if not found then
+                        for i,v in ipairs(df.global.world.raws.itemdefs.tools) do
+                            if v.id == rid then
+                                descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
+                                found = true
+                                break
+                            end
                         end
                     end
                 end
@@ -580,10 +601,13 @@ function building_workshop_get_jobchoices(bldid)
     local ret = {}
     local bld = df.global.world.selected_building
 
-    if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then
+    if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then --hint:df.building_trapst
+        local bld = bld --as:df.building_trapst
+
         if bld.trap_type == df.trap_type.Lever then
             table.insert(ret, { 'Pull the Lever', 'P', 0, 0, false })
         end
+
         table.insert(ret, { 'Link up a Bridge', 'b', 0, 1, false })
         table.insert(ret, { 'Link up a Cage', 'j', 0, 2, false })
         table.insert(ret, { 'Link up a Chain', 'c', 0, 3, false })
@@ -599,67 +623,73 @@ function building_workshop_get_jobchoices(bldid)
         table.insert(ret, { 'Link up a Gear Assembly', 'a', 0, 13, false })
         table.insert(ret, { 'Link up a Track Stop', 'T', 0, 14, false })
 
-    elseif bld.type == df.workshop_type.Mechanics then
-        table.insert(ret, { 'Make Rock Mechanisms', 't', 0, 0, false })
-        table.insert(ret, { 'Make Traction Bench', 'R', 0, 1, false })
-
-    elseif bld.type == df.workshop_type.Butchers then
-        table.insert(ret, { 'Butcher a dead animal', 'b', 0, 0, false })
-        table.insert(ret, { 'Extract from a dead animal', 'e', 0, 1, false })
-        table.insert(ret, { 'Capture a live land animal', 'a', 0, 2, false })
-
-    elseif bld.type == df.workshop_type.Fishery then
-        table.insert(ret, { 'Process a Raw Fish', 'p', 0, 0, false })
-        table.insert(ret, { 'Extract from a Raw Fish', 'e', 0, 1, false })
-        table.insert(ret, { 'Capture a Live Fish', 'f', 0, 2, false })
-
-    elseif bld.type == df.workshop_type.Loom then
-        table.insert(ret, { 'Collect Webs', 'c', 0, 0, false })
-        table.insert(ret, { 'Weave Cloth (Plant Thread)', 'w', 0, 1, false })
-        table.insert(ret, { 'Weave Silk Cloth', 's', 0, 2, false })
-        table.insert(ret, { 'Weave Cloth (Wool/Hair Yarn)', 'y', 0, 3, false })
-        table.insert(ret, { 'Weave Metal Cloth', 'a', 0, 4, false })
-
-    elseif bld.type == df.workshop_type.Kennels then
-        table.insert(ret, { 'Capture a Live Land Animal', 'a', 0, 0, false })
-        table.insert(ret, { 'Tame a Small Animal', 't', 0, 1, false })
-
-    elseif bld.type == df.workshop_type.Dyers then
-        table.insert(ret, { 'Dye Thread', 't', 0, 0, false })
-        table.insert(ret, { 'Dye Cloth', 'c', 0, 1, false })
-
-    elseif bld.type == df.workshop_type.Jewelers then
-        for i=0,#ws.jeweler_cutgem-1 do
-            local matname
-            local cut = ws.jeweler_cutgem[i] > 0
-            local enc = ws.jeweler_encrust[i] > 0
-            if cut or enc then
-                if i < #df.global.world.raws.inorganics then
-                    local matinfo = dfhack.matinfo.decode(0,i)
-                    matname = matinfo and matinfo.material.state_name[0] or '#unknown material#'
-                elseif i - #df.global.world.raws.inorganics < 3 then
-                    matname = glasses[i - #df.global.world.raws.inorganics + 1]
-                else
-                    matname = '#unknown material#'
+    else
+        local bld = bld --as:df.building_workshopst
+        local wtype = bld.type
+        
+        if wtype == df.workshop_type.Mechanics then
+            table.insert(ret, { 'Make Rock Mechanisms', 't', 0, 0, false })
+            table.insert(ret, { 'Make Traction Bench', 'R', 0, 1, false })
+    
+        elseif wtype == df.workshop_type.Butchers then
+            table.insert(ret, { 'Butcher a dead animal', 'b', 0, 0, false })
+            table.insert(ret, { 'Extract from a dead animal', 'e', 0, 1, false })
+            table.insert(ret, { 'Capture a live land animal', 'a', 0, 2, false })
+    
+        elseif wtype == df.workshop_type.Fishery then
+            table.insert(ret, { 'Process a Raw Fish', 'p', 0, 0, false })
+            table.insert(ret, { 'Extract from a Raw Fish', 'e', 0, 1, false })
+            table.insert(ret, { 'Capture a Live Fish', 'f', 0, 2, false })
+    
+        elseif wtype == df.workshop_type.Loom then
+            table.insert(ret, { 'Collect Webs', 'c', 0, 0, false })
+            table.insert(ret, { 'Weave Cloth (Plant Thread)', 'w', 0, 1, false })
+            table.insert(ret, { 'Weave Silk Cloth', 's', 0, 2, false })
+            table.insert(ret, { 'Weave Cloth (Wool/Hair Yarn)', 'y', 0, 3, false })
+            table.insert(ret, { 'Weave Metal Cloth', 'a', 0, 4, false })
+    
+        elseif wtype == df.workshop_type.Kennels then
+            table.insert(ret, { 'Capture a Live Land Animal', 'a', 0, 0, false })
+            table.insert(ret, { 'Tame a Small Animal', 't', 0, 1, false })
+    
+        elseif wtype == df.workshop_type.Dyers then
+            table.insert(ret, { 'Dye Thread', 't', 0, 0, false })
+            table.insert(ret, { 'Dye Cloth', 'c', 0, 1, false })
+    
+        elseif wtype == df.workshop_type.Jewelers then
+            for i=0,#ws.jeweler_cutgem-1 do
+                local matname
+                local cut = ws.jeweler_cutgem[i] > 0
+                local enc = ws.jeweler_encrust[i] > 0
+                if cut or enc then
+                    if i < #df.global.world.raws.inorganics then
+                        local matinfo = dfhack.matinfo.decode(0,i)
+                        matname = matinfo and matinfo.material.state_name[0] or '#unknown material#'
+                    elseif i - #df.global.world.raws.inorganics < 3 then
+                        matname = glasses[i - #df.global.world.raws.inorganics + 1]
+                    else
+                        matname = '#unknown material#'
+                    end
+                end
+    
+                local opts = {}
+                if cut then
+                    table.insert(opts, { 'Cut '..matname, '', 0, #ret*4+0, false })
+                end
+                if enc then
+                    table.insert(opts, { 'Encrust Finished Goods with '..matname, '', 0, #ret*4+1, false })
+                    table.insert(opts, { 'Encrust Furniture with '..matname, '', 0, #ret*4+2, false })
+                    table.insert(opts, { 'Encrust Ammo with '..matname, '', 0, #ret*4+3, false })
+                end
+                if #opts > 0 then
+                    table.insert(ret, { matname, '', opts, (cut and 1 or 0) + (enc and 2 or 0), false })
                 end
             end
-
-            local opts = {}
-            if cut then
-                table.insert(opts, { 'Cut '..matname, '', 0, #ret*4+0, false })
-            end
-            if enc then
-                table.insert(opts, { 'Encrust Finished Goods with '..matname, '', 0, #ret*4+1, false })
-                table.insert(opts, { 'Encrust Furniture with '..matname, '', 0, #ret*4+2, false })
-                table.insert(opts, { 'Encrust Ammo with '..matname, '', 0, #ret*4+3, false })
-            end
-            if #opts > 0 then
-                table.insert(ret, { matname, '', opts, (cut and 1 or 0) + (enc and 2 or 0), false })
-            end
+        
+        else
+            jobchoices = {}
+            ret = get_job_choices(ws, 0)
         end
-    else
-        jobchoices = {}
-        ret = get_job_choices(ws, 0)
     end
 
     return ret
@@ -694,6 +724,8 @@ function building_workshop_addjob(bldid, idx, rep)
     end
 
     if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then --hint:df.building_trapst
+        local bld = bld --as:df.building_trapst
+
         if idx < #jobs_trap then
             gui.simulateInput(ws, 'BUILDJOB_ADD')
             ws:logic() --to initialize / switch to add job menu
@@ -704,68 +736,73 @@ function building_workshop_addjob(bldid, idx, rep)
             end
         end
 
-    elseif bld.type == df.workshop_type.Mechanics then
-        if idx < #jobs_mechanics then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_mechanics[idx+1])
-        end
+    else
+        local bld = bld --as:df.building_workshopst
+        local wtype = bld.type
 
-    elseif bld.type == df.workshop_type.Butchers then
-        if idx < #jobs_butchers then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_butchers[idx+1])
-        end
-
-    elseif bld.type == df.workshop_type.Fishery then
-        if idx < #jobs_fishery then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_fishery[idx+1])
-        end
-
-    elseif bld.type == df.workshop_type.Loom then
-        if idx < #jobs_loom then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_loom[idx+1])
-        end
-
-    elseif bld.type == df.workshop_type.Kennels then
-        if idx < #jobs_kennels then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_kennels[idx+1])
-        end
-
-    elseif bld.type == df.workshop_type.Dyers then
-        if idx < #jobs_dyers then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
-            ws:logic() --to initialize / switch to add job menu
-            gui.simulateInput(ws, jobs_dyers[idx+1])
-        end
-
-    elseif bld.type == df.workshop_type.Jewelers then
-        gui.simulateInput(ws, 'BUILDJOB_ADD')
-        ws:logic() --to initialize / switch to add job menu
-        local m = math.floor(idx / 4)
-        local t = idx % 4
-        df.global.ui_building_item_cursor = m
-        if t == 0 then
-            gui.simulateInput(ws, 'HOTKEY_JEWELER_CUT')
-        else
-            local w = { 'HOTKEY_JEWELER_FINISHED', 'HOTKEY_JEWELER_FURNITURE', 'HOTKEY_JEWELER_AMMO' }
-            ws:logic() --to initialize / switch to menu
-            gui.simulateInput(ws, 'HOTKEY_JEWELER_ENCRUST')
-            gui.simulateInput(ws, w[t])
-        end
+        if wtype == df.workshop_type.Mechanics then
+            if idx < #jobs_mechanics then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_mechanics[idx+1])
+            end
     
-    else    
-        local btn = jobchoices[idx] --as:df.interface_button_building_new_jobst
-        btn.building = bld
-
-        btn:click()
+        elseif wtype == df.workshop_type.Butchers then
+            if idx < #jobs_butchers then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_butchers[idx+1])
+            end
+    
+        elseif wtype == df.workshop_type.Fishery then
+            if idx < #jobs_fishery then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_fishery[idx+1])
+            end
+    
+        elseif wtype == df.workshop_type.Loom then
+            if idx < #jobs_loom then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_loom[idx+1])
+            end
+    
+        elseif wtype == df.workshop_type.Kennels then
+            if idx < #jobs_kennels then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_kennels[idx+1])
+            end
+    
+        elseif wtype == df.workshop_type.Dyers then
+            if idx < #jobs_dyers then
+                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                ws:logic() --to initialize / switch to add job menu
+                gui.simulateInput(ws, jobs_dyers[idx+1])
+            end
+    
+        elseif wtype == df.workshop_type.Jewelers then
+            gui.simulateInput(ws, 'BUILDJOB_ADD')
+            ws:logic() --to initialize / switch to add job menu
+            local m = math.floor(idx / 4)
+            local t = idx % 4
+            df.global.ui_building_item_cursor = m
+            if t == 0 then
+                gui.simulateInput(ws, 'HOTKEY_JEWELER_CUT')
+            else
+                local w = { 'HOTKEY_JEWELER_FINISHED', 'HOTKEY_JEWELER_FURNITURE', 'HOTKEY_JEWELER_AMMO' }
+                ws:logic() --to initialize / switch to menu
+                gui.simulateInput(ws, 'HOTKEY_JEWELER_ENCRUST')
+                gui.simulateInput(ws, w[t])
+            end
+        
+        else    
+            local btn = jobchoices[idx] --as:df.interface_button_building_new_jobst
+            btn.building = bld
+    
+            btn:click()
+        end
     end
 
     --todo: check here again for traps and other unsopported job types
@@ -796,9 +833,9 @@ function building_workshop_profile_get(bldid)
     end
 
     local bld = df.global.world.selected_building --as:df.building_workshopst
-    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+    --[[if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
         error('not a workshop or furnace '..tostring(bld._type))
-    end
+    end]]
 
     local profile = bld.profile
     local workers = {}
@@ -842,9 +879,9 @@ function building_workshop_profile_set_minmax(bldid, min, max)
     end
 
     local bld = df.global.world.selected_building --as:df.building_workshopst
-    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+    --[[if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
         error('not a workshop or furnace '..tostring(bld._type))
-    end
+    end]]
 
     local profile = bld.profile
 

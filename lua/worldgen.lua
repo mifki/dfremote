@@ -167,7 +167,7 @@ end
 --luacheck: in=
 function worldgen_get_world_info()
     local races = { ['DWARF']=0, ['GOBLIN']=0, ['ELF']=0, ['HUMAN']=0, ['KOBOLD']=0 }
-    local pops = {}
+    local pops = {} --as:{pop:number,civs:{_array:{name:string,sites:'df.world_site[]'}}}[]
     local reclaimable = {}
 
     -- Find race idx for the races we're interested in; don't know how to do this properly
@@ -262,8 +262,7 @@ function worldgen_get_world_info()
 
         for j,civ in pairs(t.civs) do
             ret = ret .. '[P][C:7:0:0]' .. (civ.name and ('    civ. [C:6:0:1]' .. civ.name) or '    [C:6:0:1]---')
-            for k,site in ipairs(civ.sites) do 
-                local site = size --as:df.world_site
+            for k,site in ipairs(civ.sites) do --as:df.world_site
                 local name = dfhack.df2utf(dfhack.TranslateName(site.name, false))
                 local name_eng = dfhack.df2utf(dfhack.TranslateName(site.name, true))
                 local type_name = site_type_name(site)

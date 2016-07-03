@@ -46,7 +46,7 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 
-if df_ver >= 4200 then
+if df_ver >= 4200 then --dfver:4200-
     require 'remote.locations'
     require 'remote.petitions'
 end
@@ -1004,7 +1004,7 @@ function save_and_close()
     ws.child = optsws
 
     --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
+    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
     dfhack.internal.memmove(addr+1, addr, 1)
 
     gui.simulateInput(optsws, 'SELECT')
@@ -1019,7 +1019,7 @@ function end_game_retire()
     ws.child = optsws
 
     --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
+    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
     dfhack.internal.memmove(addr+1, addr, 1)
 
     optsws.in_retire_dwf_abandon_adv = 1
@@ -1036,7 +1036,7 @@ function end_game_abandon()
     ws.child = optsws
 
     --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
+    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
     dfhack.internal.memmove(addr+1, addr, 1)
 
     optsws.in_abandon_dwf = 1
@@ -1180,7 +1180,7 @@ function zlevel_down()
     gui.simulateInput(ws, 'CURSOR_DOWN_Z')    
 end
 
---luacheck: in=
+--luacheck: in=string
 function zlevel_set(data)
     local z = data:byte(1)
     local ws = screen_main()
@@ -1233,7 +1233,7 @@ function dim_y_less()
 end
 
 
---luacheck: in=
+--luacheck: in=string
 function set_cursor_pos(data)
     local mx = data:byte(1)
     local my = data:byte(2)
@@ -1272,7 +1272,7 @@ function set_cursor_pos(data)
     end
 end
 
---luacheck: in=
+--luacheck: in=string
 function set_cursor_pos_relative(data)
     local dx = data:byte(1) - 127
     local dy = data:byte(2) - 127
@@ -1286,7 +1286,7 @@ function set_cursor_pos_relative(data)
     gui.simulateInput(ws, 'CURSOR_UP_Z')
 end
 
---luacheck: in=
+--luacheck: in=number
 function designate(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then

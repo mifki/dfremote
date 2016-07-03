@@ -26,7 +26,7 @@ end]]
 
 --luacheck: in=string
 function embark_newgame(folder)
-    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_titlest
+    local ws = dfhack.gui.getCurViewscreen()
 
     -- Check that we're on title screen or its subscreens
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
@@ -45,9 +45,11 @@ function embark_newgame(folder)
         ws = parent
     end
     ws.breakdown_level = df.interface_breakdown_types.NONE
-
+    
+    local titlews = ws --as:df.viewscreen_titlest
+    
     local idx = -1
-    for i,v in ipairs(ws.start_savegames) do
+    for i,v in ipairs(titlews.start_savegames) do
         if folder == v.save_dir then
         	idx = i
         	break
@@ -58,37 +60,36 @@ function embark_newgame(folder)
 		return
 	end
 
-    ws.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
+    titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' menu item
-    ws.sel_menu_line = (#ws.arena_savegames-#ws.start_savegames > 1 and 1 or 0)
-    gui.simulateInput(ws, 'SELECT')
-    ws:logic()
-    ws:render()
+    titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0)
+    gui.simulateInput(titlews, 'SELECT')
+    titlews:logic()
+    titlews:render()
 
-    if ws.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectWorld then
-    	ws.sel_submenu_line = idx
-	    gui.simulateInput(ws, 'SELECT')
-	    ws:logic()
-	    ws:render()
+    if titlews.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectWorld then
+    	titlews.sel_submenu_line = idx
+	    gui.simulateInput(titlews, 'SELECT')
+	    titlews:logic()
+	    titlews:render()
 
-	elseif not (ws.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectMode and #ws.start_savegames == 1) then
+	elseif not (titlews.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectMode and #titlews.start_savegames == 1) then
 		return
     end
 
-    if ws.sel_subpage ~= df.viewscreen_titlest.T_sel_subpage.StartSelectMode then
+    if titlews.sel_subpage ~= df.viewscreen_titlest.T_sel_subpage.StartSelectMode then
     	return
     end
 
-	ws.sel_menu_line = 0
-    gui.simulateInput(ws, 'SELECT')
+	titlews.sel_menu_line = 0
+    gui.simulateInput(titlews, 'SELECT')
 end
 
 --luacheck: in=
 function embark_get_overview()
 	local ws = dfhack.gui.getCurViewscreen()
 
-	if ws._type == df.viewscreen_choose_start_sitest then
-		local ws = ws --as:df.viewscreen_choose_start_sitest
+	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
 		local civs = {}
 		for i,civ in ipairs(ws.available_civs) do
 			local name = dfhack.df2utf(dfhack.TranslateName(civ.name, true))
@@ -104,8 +105,7 @@ function embark_get_overview()
 		return { 'loc', civs, ws.civ_idx, fparams, #df.global.world.world_data.old_sites }
 	end
 
-	if ws._type == df.viewscreen_setupdwarfgamest then
-		local ws = ws --as:df.viewscreen_setupdwarfgamest
+	if ws._type == df.viewscreen_setupdwarfgamest then --as:ws=df.viewscreen_setupdwarfgamest
 		--todo: handle (set to 1) ws.show_play_now ~= 1
 
 		local profiles = {}
@@ -461,6 +461,7 @@ function embark_reclaim(idx)
 	end
 
     if ws2._type == df.viewscreen_textviewerst then
+    	local ws2 = ws2 --as:df.viewscreen_textviewerst
     	local text = ''
     	for i,v in ipairs(ws2.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
@@ -500,14 +501,14 @@ function embark_play(idx)
 	local ws = dfhack.gui.getCurViewscreen()
 
 	--todo: should send these issues to the app, should not just accept as is !!
-	if ws._type == df.viewscreen_setupdwarfgamest and (istrue(ws.in_problems) or ws.points_remaining > 0) then
+	if ws._type == df.viewscreen_setupdwarfgamest and (istrue(ws.in_problems) or ws.points_remaining > 0) then --as:ws=df.viewscreen_setupdwarfgamest
 		ws.in_problems = 0
 		ws.points_remaining = 0
 		gui.simulateInput(ws, 'SETUP_EMBARK')
 		ws = dfhack.gui.getCurViewscreen()
 	end
 
-    if ws._type == df.viewscreen_textviewerst then
+    if ws._type == df.viewscreen_textviewerst then --as:ws=df.viewscreen_textviewerst
     	local text = ''
     	for i,v in ipairs(ws.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '

@@ -128,7 +128,7 @@ function setup_get_server_info(clientver, pwd)
     local ws = dfhack.gui.getCurViewscreen()
 
     -- Get rid of help and options screens
-    if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then
+    if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then --hint:df.viewscreen_textviewerst
         local parent = ws.parent
         parent.child = nil
         ws:delete()
@@ -136,7 +136,7 @@ function setup_get_server_info(clientver, pwd)
     end
 
     -- Busy loading game
-    if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then
+    if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then --hint:df.viewscreen_loadgamest
         return { ver, 'busy-loading-game' }
     end
 

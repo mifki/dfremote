@@ -141,7 +141,6 @@ function create_new_world(params)
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
-
     if ws._type ~= df.viewscreen_titlest then
         return
     end
@@ -154,12 +153,14 @@ function create_new_world(params)
         ws:delete()
         ws = parent
     end
-    ws.breakdown_level = 0
+    ws.breakdown_level = df.interface_breakdown_types.NONE
+    
+    local titlews = ws --as:df.viewscreen_titlest
 
-    ws.sel_subpage = 0
+    titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' and/or 'start playing' menu items
-    ws.sel_menu_line = (#ws.arena_savegames-#ws.start_savegames > 1 and 1 or 0) + (#ws.start_savegames > 0 and 1 or 0)
-    gui.simulateInput(ws, 'SELECT')
+    titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0) + (#titlews.start_savegames > 0 and 1 or 0)
+    gui.simulateInput(titlews, 'SELECT')
 
     worldgen_params = params
 

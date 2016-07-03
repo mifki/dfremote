@@ -45,7 +45,7 @@ function squad_order_title(squad)
         if ordertype == df.squad_order_type.MOVE then
             ordertitle = 'Station'
         elseif ordertype == df.squad_order_type.KILL_LIST then
-            ordertitle = squad.orders[0].title
+            ordertitle = squad.orders[0].title --hint:df.squad_order_kill_listst
         end
     end
 
@@ -575,7 +575,7 @@ function squad_add_members(id, unitids)
         end
 
         if sqidx > 0 then
-            ws.layer_objects[0].cursor = sqidx-1
+            ws.layer_objects[0].cursor = sqidx-1 --hint:df.layer_object_listst
             gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
         end
 

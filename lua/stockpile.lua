@@ -1266,12 +1266,12 @@ function building_stockpile_getsettings()
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.Stockpile then
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
         error('not a stockpile '..tostring(bld))
     end
 
@@ -1295,7 +1295,7 @@ function building_stockpile_getsettings()
                 local num_enabled, num_all
 
                 if type(group[4]) == 'function' then
-                    local idx_fn = group[4]
+                    local idx_fn = group[4] --as:{_type:'function',_node:'number[]'}
                     local idxs = idx_fn()
                     num_enabled = toplevel_enabled and count_enabled(list, idxs) or 0
                     num_all = #idxs
@@ -1337,12 +1337,12 @@ function building_stockpile_getsettings_level3(l1, l2)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.Stockpile then
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
         error('not a stockpile '..tostring(bld))
     end
 
@@ -1375,16 +1375,16 @@ function building_stockpile_setenabled(...)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.Stockpile then
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
         error('not a stockpile '..tostring(bld))
     end
 
-    local path = table.pack(...)
+    local path = table.pack(...) --as:number[]
     local enabled = istrue(path[#path])
     path[#path] = nil
 
@@ -1428,7 +1428,7 @@ function building_stockpile_setenabled(...)
 
         local v = enabled and 1 or 0
         if type(group[4]) == 'function' then
-            local idx_fn = group[4]
+            local idx_fn = group[4] --as:{_type:'function',_node:'number[]'}
             local idxs = idx_fn()
             for i,idx in ipairs(idxs) do
                 list[idx] = v
@@ -1451,7 +1451,7 @@ function building_stockpile_setenabled(...)
 
         local p3 = path[3]
         if type(group[4]) == 'function' then
-            local idx_fn = group[4]
+            local idx_fn = group[4] --as:{_type:'function',_node:'number'}
             local idx = idx_fn(p3 + 1)
             list[idx] = enabled and 1 or 0
         else
@@ -1471,12 +1471,12 @@ function building_stockpile_setflag(group, flag, enabled)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.Stockpile then
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
         error('not a stockpile '..tostring(bld))
     end
 
@@ -1513,12 +1513,12 @@ function building_stockpile_setmax(barrels, bins, wheelbarrows)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.Stockpile then
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
         error('not a stockpile '..tostring(bld))
     end
 
@@ -1531,7 +1531,7 @@ end
 
 --luacheck: in=
 function building_stockpile_create()
-    df.global.ui.main.mode = 0
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, 'D_STOCKPILES')    

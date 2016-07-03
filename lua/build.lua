@@ -1,5 +1,6 @@
 function clone_build_button(orig)
     if orig._type == df.interface_button_construction_building_selectorst then
+        local orig = orig --as:df.interface_button_construction_building_selectorst
         local btn = df.interface_button_construction_building_selectorst:new()
 
         --btn.building=bld

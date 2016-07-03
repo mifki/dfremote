@@ -295,7 +295,7 @@ function artifacts_list()
     return ret
 end
 
-mat_category_names = {
+mat_category_names = { --as:string[]
     [df.entity_material_category.None] = 'any material',
     [df.entity_material_category.Leather] = 'leather',
     [df.entity_material_category.Cloth] = 'cloth',

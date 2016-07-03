@@ -92,7 +92,7 @@ function have_broker_appraisal()
 end
 
 --todo: use numeric bld type
-local room_type_table = {
+local room_type_table = { --as:{qidx:number,no:string}[]
     [df.building_bedst] = { qidx = 2, no='No Bedroom' },
     [df.building_tablest] = { qidx = 3, no='No Dining Room'},
     [df.building_chairst] = { qidx = 4, no='No Office' },
@@ -287,7 +287,7 @@ function nobles_get_positions()
 
         local becoming_capital
         gui.simulateInput(ws, 'NOBLELIST_CAPITAL')
-        local cws = dfhack.gui.getCurViewscreen()
+        local cws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_noblest
         if cws._type == df.viewscreen_noblest then
             cws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
             becoming_capital = { true,

@@ -3,7 +3,7 @@ function depot_can_trade(bld)
         if v.trade_state == 2 and v.time_remaining > 0 then
             for i,job in ipairs(bld.jobs) do
                 if job.job_type == df.job_type.TradeAtDepot then
-                    local worker_ref = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER)
+                    local worker_ref = dfhack.job.getGeneralRef(job, df.general_ref_type.UNIT_WORKER) --as:df.general_ref_unit_workerst
                     local worker = worker_ref and df.unit.find(worker_ref.unit_id)
                     return worker
                         and worker.pos.z == bld.z
@@ -48,16 +48,16 @@ function depot_movegoods_get()
 
     gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
 
-    ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_layer_assigntradest then
+    local movegoodsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
+    if movegoodsws._type ~= df.viewscreen_layer_assigntradest then
         error('can not switch to move goods screen')
     end
 
-    gui.simulateInput(ws, 'ASSIGNTRADE_SORT')
+    gui.simulateInput(movegoodsws, 'ASSIGNTRADE_SORT')
 
     local ret = {}
     
-    for i,info in ipairs(ws.info) do
+    for i,info in ipairs(movegoodsws.info) do
         local title = itemname(info.item, 0, true)
         table.insert(ret, { title, info.distance, info.status })
     end
@@ -83,16 +83,16 @@ function depot_movegoods_get2()
 
     gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
 
-    ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_layer_assigntradest then
+    local movegoodsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
+    if movegoodsws._type ~= df.viewscreen_layer_assigntradest then
         error('can not switch to move goods screen')
     end
 
-    gui.simulateInput(ws, 'ASSIGNTRADE_SORT')
+    gui.simulateInput(movegoodsws, 'ASSIGNTRADE_SORT')
 
     local ret = {}
     
-    for i,info in ipairs(ws.info) do
+    for i,info in ipairs(movegoodsws.info) do
         local title = itemname(info.item, 0, true)
         table.insert(ret, { title, info.item.id, info.status, info.status }) -- .distance
     end
@@ -364,9 +364,9 @@ local counteroffer
 
 --luacheck: in=
 function depot_trade_overview()
-    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
+    local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_tradegoodsst then
-        if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
             error('no selected building')
         end
 
@@ -388,15 +388,17 @@ function depot_trade_overview()
         end        
     end
 
+    local tradews = ws --as:df.viewscreen_tradegoodsst
+
     --todo: include whether can seize/offer
     local trader_profit = depot_calculate_profit()
     local reply, mood = read_trader_reply()
     
-    local can_seize = (ws.caravan.entity ~= df.global.ui.civ_id)
-    local can_trade = not ws.is_unloading and not ws.caravan.flags.offended
+    local can_seize = (tradews.caravan.entity ~= df.global.ui.civ_id)
+    local can_trade = not tradews.is_unloading and not tradews.caravan.flags.offended
 
     local have_appraisal = false
-    for i,v in ipairs(ws.broker.status.current_soul.skills) do
+    for i,v in ipairs(tradews.broker.status.current_soul.skills) do
         if v.id == df.job_skill.APPRAISAL then
             have_appraisal = true
             break
@@ -406,19 +408,19 @@ function depot_trade_overview()
     local flags = packbits(can_trade, can_seize, have_appraisal)
 
     --local counteroffer = mp.NIL
-    if #ws.counteroffer > 0 then
+    if #tradews.counteroffer > 0 then
         counteroffer = {}
-        for i,item in ipairs(ws.counteroffer) do
+        for i,item in ipairs(tradews.counteroffer) do
             local title = itemname(item, 0, true)
             table.insert(counteroffer, { title })
         end
 
-        gui.simulateInput(ws, 'SELECT')
-    elseif not istrue(ws.has_offer) then
+        gui.simulateInput(tradews, 'SELECT')
+    elseif not istrue(tradews.has_offer) then
         counteroffer = mp.NIL
     end
 
-    local ret = { dfhack.df2utf(ws.merchant_name), dfhack.df2utf(ws.merchant_entity), reply, mood, trader_profit, flags, counteroffer }
+    local ret = { dfhack.df2utf(tradews.merchant_name), dfhack.df2utf(tradews.merchant_entity), reply, mood, trader_profit, flags, counteroffer }
 
     return ret
 end
@@ -442,7 +444,7 @@ function depot_trade_get_items(their)
 
     their = istrue(their)
 
-    local items = their and ws.trader_items or ws.broker_items
+    local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
     local sel = their and ws.trader_selected or ws.broker_selected
     local counts = their and ws.trader_count or ws.broker_count
     local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
@@ -475,7 +477,7 @@ function depot_trade_get_items2(their)
 
     their = istrue(their)
 
-    local items = their and ws.trader_items or ws.broker_items
+    local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
     local sel = their and ws.trader_selected or ws.broker_selected
     local counts = their and ws.trader_count or ws.broker_count
     local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
@@ -509,7 +511,7 @@ function depot_trade_set(their, idx, trade, qty)
 
     their = istrue(their)
 
-    local items = their and ws.trader_items or ws.broker_items
+    local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
     local sel = their and ws.trader_selected or ws.broker_selected    
     local counts = their and ws.trader_count or ws.broker_count
 

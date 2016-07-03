@@ -89,16 +89,18 @@ function meeting_get()
     local reply = false
 
     if ws._type == df.viewscreen_textviewerst and ws.parent._type == df.viewscreen_meetingst then
+    	local ws = ws --as:df.viewscreen_textviewerst
     	text = ''
     	for i,v in ipairs(ws.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
 	    end
 
-    	activity = ws.parent.dipscript_popup.activity
+    	activity = ws.parent.dipscript_popup.activity --hint:df.viewscreen_meetingst
     	actions = { 'Done' }
     end
 
     if ws._type == df.viewscreen_topicmeetingst then
+    	local ws = ws --as:df.viewscreen_topicmeetingst
     	activity = ws.popup.activity
 
     	--todo: include all lines here! :)
@@ -482,7 +484,7 @@ end
 
 --luacheck: in=
 function import_req_get_items()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_takerequestsst
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
 		return
 	end
@@ -519,7 +521,7 @@ end
 
 --luacheck: in=number[],bool
 function import_req_set(changes, close)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_takerequestsst
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
 		return
 	end
@@ -570,7 +572,7 @@ end
 
 --luacheck: in=
 function import_agreement_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradeagreementst
 	if ws._type ~= df.viewscreen_tradeagreementst then
 		return
 	end
@@ -694,7 +696,7 @@ local item_type_names_pl = {
     'BOOK'
 }
 
-local mat_cat_names = {
+local mat_cat_names = { --as:string[]
 	[shft(df.dfhack_material_category.plant)] = 'plant',
 	[shft(df.dfhack_material_category.wood)] = 'wooden',
 	[shft(df.dfhack_material_category.cloth)] = 'cloth',
@@ -756,7 +758,7 @@ end
 
 --luacheck: in=
 function export_agreement_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_requestagreementst
 	if ws._type ~= df.viewscreen_requestagreementst then
 		return
 	end
@@ -769,7 +771,7 @@ end
 
 --luacheck: in=
 function landholders_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_fill_land_holder_positionsst
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then
 		return
 	end
@@ -788,7 +790,7 @@ end
 
 --luacheck: in=number,bool
 function landholders_set(hfid, close)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_fill_land_holder_positionsst
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then
 		return
 	end
@@ -800,7 +802,7 @@ function landholders_set(hfid, close)
 	if #ws.selected_histfig_ids > 0 then
 		ws.selected_histfig_ids[0] = hfid
 	else
-		ws:insert(0, hfid)
+		ws.selected_histfig_ids:insert(0, hfid)
 	end
 
 	if istrue(close) then

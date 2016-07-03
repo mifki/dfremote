@@ -14,8 +14,10 @@ function zone_settings_get(bldid)
     end
 
     local loc
-    if df_ver >= 4200 and zone.zone_flags.meeting_area and zone.location_id ~= -1 then
-        loc = location_find_by_id(zone.location_id)
+    if df_ver >= 4200 then --dfver:4200-
+        if zone.zone_flags.meeting_area and zone.location_id ~= -1 then
+            loc = location_find_by_id(zone.location_id)
+        end
     end
 
     return { zonename(zone), zone.id, zone.zone_flags.whole, loc and locname(loc) or mp.NIL }
@@ -46,7 +48,7 @@ function zone_information_get(bldid, mode)
     end 
 
     if mode == df.building_civzonest.T_zone_flags.hospital then
-        local counts = { [df.building_type.Bed]=0, [df.building_type.Table]=0, [df.building_type.TractionBench]=0, [df.building_type.Box]=0 }
+        local counts = { [df.building_type.Bed]=0, [df.building_type.Table]=0, [df.building_type.TractionBench]=0, [df.building_type.Box]=0 } --as:number[]
 
         for i,bld in ipairs(df.global.world.buildings.all) do
             if bld.z == zone.z and not bld.is_room then
