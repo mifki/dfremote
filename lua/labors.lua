@@ -1,4 +1,4 @@
-local labor_groups = {
+local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:number,4:number,5:bool}}}[]
     { "Mining", 7, {
         { "Miner", df.profession.MINER, df.unit_labor.MINE, df.job_skill.MINING, true }
     } },
@@ -402,7 +402,7 @@ end
 function labors_set(unitid, ...)
 	local unit = df.unit.find(unitid)
 	local ulabors = unit.status.labors
-    local changes = {...}
+    local changes = {...} --as:number[]
 
     for i=1,#changes,2 do
         local idx = changes[i]

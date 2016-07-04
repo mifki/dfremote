@@ -16,7 +16,7 @@ local lastbldcmd = -1
 
 --luacheck: in=number
 function build(idx)
-    local btn = building_btns[idx] --as:df.interface_button_construction_building_selectorst
+    local btn = building_btns[idx]
 
     lastbldcmd = idx
 

@@ -777,7 +777,7 @@ function shield_titles()
     return itemdef_titles(df.global.world.raws.itemdefs.shields)
 end
 
-
+--luacheck: in=number,number,string
 function organic_titles_prefixstate(group, state, suffix)
     local types = df.global.world.raws.mat_table.organic_types[group]
     local indexes = df.global.world.raws.mat_table.organic_indexes[group]
@@ -1288,14 +1288,14 @@ function building_stockpile_getsettings()
         local grps = {}
         local flgs = {}
         if #groups > 0 or #flags > 0 then
-            local toplevel_obj = ss[toplevel_field]
+            local toplevel_obj = ss[toplevel_field] --as:bool[][]
             for j,group in ipairs(groups) do
                 local list = toplevel_obj[group[2]]
                 local group_name = group[1]
                 local num_enabled, num_all
 
                 if type(group[4]) == 'function' then
-                    local idx_fn = group[4] --as:{_type:'function',_node:'number[]'}
+                    local idx_fn = group[4]
                     local idxs = idx_fn()
                     num_enabled = toplevel_enabled and count_enabled(list, idxs) or 0
                     num_all = #idxs
@@ -1350,7 +1350,7 @@ function building_stockpile_getsettings_level3(l1, l2)
 
     local toplevel = stockpile_settings_schema()[l1+1]
     local toplevel_field = toplevel[2]
-    local toplevel_obj = ss[toplevel_field]
+    local toplevel_obj = ss[toplevel_field] --as:bool[][]
 
     local group = toplevel[3][l2+1]
     local list = toplevel_obj[group[2]]
@@ -1398,7 +1398,7 @@ function building_stockpile_setenabled(...)
         ss.flags[toplevel_field] = enabled
 
         if #toplevel[3] > 0 or #toplevel[4] > 0 then
-            local toplevel_obj = ss[toplevel_field]
+            local toplevel_obj = ss[toplevel_field] --as:bool[][]
 
             for i,group in ipairs(toplevel[3]) do
                 local list = toplevel_obj[group[2]]
@@ -1420,7 +1420,7 @@ function building_stockpile_setenabled(...)
         local p1 = path[1] + 1
         local toplevel = stockpile_settings_schema()[p1]
         local toplevel_field = toplevel[2]
-        local toplevel_obj = ss[toplevel_field]
+        local toplevel_obj = ss[toplevel_field] --as:bool[][]
 
         local p2 = path[2] + 1
         local group = toplevel[3][p2]
@@ -1428,7 +1428,7 @@ function building_stockpile_setenabled(...)
 
         local v = enabled and 1 or 0
         if type(group[4]) == 'function' then
-            local idx_fn = group[4] --as:{_type:'function',_node:'number[]'}
+            local idx_fn = group[4]
             local idxs = idx_fn()
             for i,idx in ipairs(idxs) do
                 list[idx] = v
@@ -1443,7 +1443,7 @@ function building_stockpile_setenabled(...)
         local p1 = path[1] + 1
         local toplevel = stockpile_settings_schema()[p1]
         local toplevel_field = toplevel[2]
-        local toplevel_obj = ss[toplevel_field]
+        local toplevel_obj = ss[toplevel_field] --as:bool[][]
 
         local p2 = path[2] + 1
         local group = toplevel[3][p2]
@@ -1451,7 +1451,7 @@ function building_stockpile_setenabled(...)
 
         local p3 = path[3]
         if type(group[4]) == 'function' then
-            local idx_fn = group[4] --as:{_type:'function',_node:'number'}
+            local idx_fn = group[4]
             local idx = idx_fn(p3 + 1)
             list[idx] = enabled and 1 or 0
         else
@@ -1496,7 +1496,7 @@ function building_stockpile_setflag(group, flag, enabled)
 
     local toplevel = stockpile_settings_schema()[group + 1]
     local toplevel_field = toplevel[2]
-    local toplevel_obj = ss[toplevel_field]
+    local toplevel_obj = ss[toplevel_field] --as:bool[][]
 
     local flags = toplevel[4]
     local flag_field = flags[flag + 1][2]

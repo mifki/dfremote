@@ -24,6 +24,10 @@ function worldgen_status()
     if istrue(ws.worldgen_paused) then
         local can_use_world = state >= 9
         
+        --todo: why are these not set?
+        local world_name = nil
+        local world_name_eng = nil  
+        
         return { 'paused', year, world_name or mp.NIL, world_name_eng or mp.NIL, can_use_world }
     end
 

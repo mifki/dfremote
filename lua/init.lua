@@ -61,7 +61,7 @@ lastann = 0
 lastannrep = 0
 local lastextdata = nil
 
-building_btns = {}
+building_btns = {} --as:df.interface_button_construction_building_selectorst[]
 designate_cmds = {}
 
 --xxx: making it possible to access a global with the currently being linked building type
@@ -616,7 +616,7 @@ function get_status()
 
             last_nearest_point = waypoints_nearest_point()
         end        
-
+local q = last_nearest_point[4][8]
         local can_place = not last_nearest_point or last_nearest_point[4][1] ~= 0 or last_nearest_point[4][2] ~= 0 or last_nearest_point[4][3] ~= 0
         return 26, can_place and 1 or 0, last_nearest_point and { last_nearest_point[1], last_nearest_point[4] } or nil
     end
@@ -965,7 +965,7 @@ function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_restricted = restricted
 end
 
---luacheck: in=
+--luacheck: in=bool
 function pause_game(pause)
     df.global.pause_state = istrue(pause)
 end
@@ -1869,7 +1869,7 @@ function matching_version(clientver, apply)
         df.global.d_init.flags4.PAUSE_ON_LOAD = true
         df.global.d_init.flags4.INITIAL_SAVE = false
         df.global.d_init.flags4.EMBARK_WARNING_ALWAYS = false
-        df.global.d_init.post_prepare_embark_confirmation = 2 -- 'no'
+        df.global.d_init.post_prepare_embark_confirmation = df.d_init_embark_confirm.NO
         df.global.d_init.idlers = df.d_init_idlers.OFF
         
         --todo: don't use _silent if debug is on

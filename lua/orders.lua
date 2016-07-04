@@ -127,14 +127,14 @@ local function parse_orders_refuse(t, ret, ws)
 	local s2 = false
 
 	ret['standing_orders_gather_refuse'] = t(0, 11, 'G')
-	if ws and not ret['standing_orders_gather_refuse'] then
+	if ws and not ret['standing_orders_gather_refuse'] then --as:ws=df.viewscreen
 		gui.simulateInput(ws, 'ORDERS_REFUSE_GATHER')
 		ws:render()
 		s1 = true
 	end
 
 	ret['standing_orders_gather_refuse_outside'] = t(1, 11, 'G')
-	if ws and not ret['standing_orders_gather_refuse_outside'] then
+	if ws and not ret['standing_orders_gather_refuse_outside'] then --as:ws=df.viewscreen
 		gui.simulateInput(ws, 'ORDERS_REFUSE_OUTSIDE')
 		ws:render()
 		s2 = true

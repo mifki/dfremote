@@ -1598,7 +1598,7 @@ function building_assign_get_candidates(bldid)
             local unit = df.global.ui_building_assign_units[i]
             id = unit.id
             title = unit_fulltitle(unit)
-            status = unit_assigned_status(unit, zone)
+            status = unit_assigned_status(unit, bld)
         elseif v == 1 then
             local item = df.global.ui_building_assign_items[i]
             id = item.id

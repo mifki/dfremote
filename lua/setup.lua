@@ -1,4 +1,4 @@
-local designations = {
+local designations = { --as:{1:string,2:string,3:string,4:"{1:string,2:string,3:number}[]"}[]
     { 'Mine', 'd', df.interface_key.DESIGNATE_DIG },
     { 'Channel', 'h', df.interface_key.DESIGNATE_CHANNEL },
     { 'Up Stair', 'u', df.interface_key.DESIGNATE_STAIR_UP },
