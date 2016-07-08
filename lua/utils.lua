@@ -18,7 +18,7 @@ function bit(f, v)
 end
 
 function packbits(...)
-    local args = table.pack(...)
+    local args = table.pack(...) --as:number[]
     local v = 0
     
     for i=0,7 do

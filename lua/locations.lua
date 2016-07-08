@@ -102,7 +102,7 @@ function location_get_info(id)
 				local unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
 
 				local pos = #occupations + 1
-				for j,v in ipairs(occupations) do
+				for j,v in ipairs(occupations) do --as:{1:string,2:number,3:number,4:string,5:number}
 					--[[if v[5] == -1 and occ.type == v[3] then
 						pos = occ.unit_id == -1 and 0 or j
 						break
@@ -195,7 +195,7 @@ function location_get_info(id)
 
 					-- grouping by occupation type, and not allowing >1 unassigned occupation of one type
 					local pos = #occupations + 1
-					for j,v in ipairs(occupations) do
+					for j,v in ipairs(occupations) do --as:{1:string,2:number,3:number,4:string,5:number}
 						if v[5] == -1 and occ.type == v[3] then
 							pos = occ.unit_id == -1 and 0 or j
 							break

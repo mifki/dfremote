@@ -17,7 +17,7 @@ function manager_get_orders()
 		btn.material_category.whole = o.material_category.whole
 		local title = utils.call_with_string(btn, 'getLabel')
 
-		table.insert(orders, { title, o.amount_left, o.amount_total, o.is_validated })
+		table.insert(orders, { title, o.amount_left, o.amount_total, C_manager_order_is_validated(o) })
 	end
 
 	return { orders, have_manager }

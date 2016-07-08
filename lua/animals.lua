@@ -38,18 +38,26 @@ function animals_get()
 
 			local fullname = unit_fulltitle(unit)
 
+			--xxx: I'm quite sure there will be no units with id 0,1,2, so let's use these values for our special cases
 			local training = (trainable_war or trainable_hunting) and df.training_assignment.find(unit.id)
 			local trainer = (training and training.trainer_id ~= -1) and df.unit.find(training.trainer_id) or nil
 			local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or mp.NIL
+			local training_flags = training and C_training_assignment_get_flags(training)
+			local trainerid = 0
 
-			--xxx: I'm quite sure there will be no units with id 0,1,2, so let's use these values for our special cases
-			local trainerid = training and (trainer and trainer.id or bit32.band(training.auto_mode, 3)) or 0
-
-			local training_war = training and bit32.band(training.auto_mode, 4) ~= 0
-			local training_hunting = training and bit32.band(training.auto_mode, 8) ~= 0
+			if trainer then
+				trainerid = trainer.id
+			elseif training_flags and training_flags.any_trainer then
+				trainerid = 1
+			elseif training_flags and training_flags.any_unassigned_trainer then
+				trainerid = 2
+			end
+				
+			local train_war = training_flags and training_flags.train_war
+			local train_hunt = training_flags and training_flags.train_hunt
 
 			local flags = bit(0,work) + bit(1,adoptable) + bit(2,available) + bit(3,trainable_war) + bit(4,trainable_hunting)
-						+ bit(5,slaughter) + bit(6,training_war) + bit(7,training_hunting)
+						+ bit(5,slaughter) + bit(6,train_war) + bit(7,train_hunt)
 						+ bit(8,geld) + bit(9,can_geld) + bit(10,gelded)
 
 			table.insert(ret, { fullname, unit.id, unit.sex, ownername, flags, trainername, trainerid })
@@ -105,18 +113,26 @@ function animals_get2()
 
 				local fullname = unit_fulltitle(unit)
 
+				--xxx: I'm quite sure there will be no units with id 0,1,2, so let's use these values for our special cases
 				local training = (trainable_war or trainable_hunting) and df.training_assignment.find(unit.id)
 				local trainer = (training and training.trainer_id ~= -1) and df.unit.find(training.trainer_id) or nil
 				local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or mp.NIL
-
-				--xxx: I'm quite sure there will be no units with id 0,1,2, so let's use these values for our special cases
-				local trainerid = training and (trainer and trainer.id or bit32.band(training.auto_mode, 3)) or 0
-
-				local training_war = training and bit32.band(training.auto_mode, 4) ~= 0
-				local training_hunting = training and bit32.band(training.auto_mode, 8) ~= 0
+				local training_flags = training and C_training_assignment_get_flags(training)
+				local trainerid = 0
+	
+				if trainer then
+					trainerid = trainer.id
+				elseif training_flags and training_flags.any_trainer then
+					trainerid = 1
+				elseif training_flags and training_flags.any_unassigned_trainer then
+					trainerid = 2
+				end
+					
+				local train_war = training_flags and training_flags.train_war
+				local train_hunt = training_flags and training_flags.train_hunt
 
 				local flags = bit(0,work) + bit(1,adoptable) + bit(2,available) + bit(3,trainable_war) + bit(4,trainable_hunting)
-							+ bit(5,slaughter) + bit(6,training_war) + bit(7,training_hunting)
+							+ bit(5,slaughter) + bit(6,train_war) + bit(7,train_hunt)
 							+ bit(8,geld) + bit(9,can_geld) + bit(10,gelded) + bit(11,unit.flags1.tame) + bit(12,false)
 
 				table.insert(ret, { fullname, unit.id, unit.sex, ownername, flags, trainername, trainerid })
@@ -191,19 +207,18 @@ function animals_train_war(unitid, val)
 	end
 
 	local training = df.training_assignment.find(unit.id)
-
 	if not training then
 		training = df.training_assignment:new()
 		training.animal_id = unit.id
-		training.auto_mode = 1 -- any
-
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
 
-	local mode = training.auto_mode
-	mode = bit32.band(mode, 3) + (istrue(val) and 4 or 0)
-	training.auto_mode = mode
-
+	local training_flags = C_training_assignment_get_flags(training)
+	
+	training_flags.train_war = true
+	training_flags.train_hunt = false
+	
+	C_training_assignment_set_flags(training, training_flags)
 	return true
 end
 
@@ -216,19 +231,18 @@ function animals_train_hunting(unitid, val)
 	end
 
 	local training = df.training_assignment.find(unit.id)
-
 	if not training then
 		training = df.training_assignment:new()
 		training.animal_id = unit.id
-		training.auto_mode = 1 -- any
-
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
 
-	local mode = training.auto_mode
-	mode = bit32.band(mode, 3) + (istrue(val) and 8 or 0)
-	training.auto_mode = mode
-
+	local training_flags = C_training_assignment_get_flags(training)
+	
+	training_flags.train_war = false
+	training_flags.train_hunt = true
+	
+	C_training_assignment_set_flags(training, training_flags)
 	return true
 end
 
@@ -262,22 +276,32 @@ function animals_trainer_set(animalid, trainerid)
 
 	if trainerid == 0 then
 		utils.erase_sorted_key(df.global.ui.equipment.training_assignments, animalid, 'animal_id')
+		return true
 	end
 
-	local mode = trainerid <= 2 and trainerid or 0
-	trainerid = trainerid > 2 and trainerid or -1
-
 	local training = df.training_assignment.find(animalid)
-
 	if not training then
 		training = df.training_assignment:new()
 		training.animal_id = animalid
-
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
+	
+	local training_flags = C_training_assignment_get_flags(training)
 
-	training.trainer_id = trainerid
-	training.auto_mode = bit32.band(training.auto_mode, 12) + mode
+	if trainerid == 1 then
+		training_flags.any_trainer = true
+		training_flags.any_unassigned_trainer = false
+		training.trainer_id = -1
+	elseif trainerid == 2 then
+		training_flags.any_trainer = false
+		training_flags.any_unassigned_trainer = true
+		training.trainer_id = -1
+	else
+		training_flags.any_trainer = false
+		training_flags.any_unassigned_trainer = false
+		training.trainer_id = trainerid
+	end
 
+	C_training_assignment_set_flags(training, training_flags)
 	return true
 end

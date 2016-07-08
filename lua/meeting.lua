@@ -519,7 +519,7 @@ function import_req_get_items()
 	return ret
 end
 
---luacheck: in=number[],bool
+--luacheck: in=number[][],bool
 function import_req_set(changes, close)
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_takerequestsst
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
@@ -740,7 +740,7 @@ function process_buy_agreement(reqs)
 		local subtype = reqs.items.item_subtype[i]
 		if subtype == -1 then
 			name = item_type_names_pl[v+1]
-			if type(name) == 'table' then
+			if type(name) == 'table' then --as:name=number[]
 				name = name[mat_cat.whole] or name[0]
 			end
 		

@@ -41,3 +41,7 @@ end
 function C_unit_set_geld(unit, val)
 	unit.flags3[29] = val
 end
+
+function C_manager_order_is_validated(o)
+	return o.is_validated
+end

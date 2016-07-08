@@ -1,7 +1,7 @@
 function count_enabled(list, subset)
     local ret = 0
 
-    if subset then
+    if subset then --as:subset=number[]
         for i,v in ipairs(subset) do
             if --[[v < #list and]] istrue(list[v]) then
                 ret = ret + 1

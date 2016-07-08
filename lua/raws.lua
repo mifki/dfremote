@@ -1,3 +1,5 @@
+local deflatelua = require 'remote.deflatelua'
+
 -- we don't support compression for incoming commands globally, so json data here is compressed and then msgpacked as a parameter
 --luacheck: in=string
 function raws_apply_tileset(zjsondata)
@@ -6,7 +8,7 @@ function raws_apply_tileset(zjsondata)
         jsondata = jsondata .. string.char(ch)
     end
 
-    require'remote.deflatelua'.inflate_zlib{input=zjsondata,output=appenddata}    
+    deflatelua.inflate_zlib{input=zjsondata,output=appenddata}    
     local data = json:decode(jsondata) --as:{sky:'number[]',chasm:'number[]',pillar:'number',track:'number[]',ramp:'number[]',tracki:'number[]',rampi:'number[]',tree:'number[]',creatures:'{t:number,s:number,a:number,o:number,g:number}[]',tools:'{t:number}[]',inorganics:'{t:number,s:number}[]',plants:"{p:number,dp:number,s:number,ds:number,t:number,dt:number,a:number,da:number,r:'number[]',ar:'number[]',ap:'number[]',g:'number[][][]'}[]"}
 
     for id,v in pairs(data.creatures or {}) do
