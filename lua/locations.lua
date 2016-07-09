@@ -58,7 +58,7 @@ end
 local function count_buildings(loc, count_type)
 	local cnt = 0
 	
-	for i,v in ipairs(loc.contents.unk_108) do
+	for i,v in ipairs(loc.contents.building_ids) do
 		local bld = df.building.find(v)
 
 		if bld then
@@ -130,7 +130,7 @@ function location_get_info(id)
 				if ltype == df.abstract_building_type.LIBRARY then
 					local loc = loc --as:df.abstract_building_inn_tavernst
 					local count_written = ws.anon_1[j]
-					local count_paper = loc.contents.unk_100
+					local count_paper = loc.contents.count_paper
 
 					info = {
 						count_buildings(loc, df.building_type.Bookcase), count_written,
@@ -142,14 +142,14 @@ function location_get_info(id)
 
 				elseif ltype == df.abstract_building_type.INN_TAVERN then
 					local loc = loc --as:df.abstract_building_libraryst
-					local count_goblets = loc.contents.unk_f8
-					local count_instruments = loc.contents.unk_fc
+					local count_goblets = loc.contents.count_goblets
+					local count_instruments = loc.contents.count_instruments
 					local dance_area = { ws.dance_floor_x[j], ws.dance_floor_y[j] }
 
 					local rented_rooms = 0
 					local total_rooms = 0
 					
-					for i,v in ipairs(loc.contents.unk_108) do
+					for i,v in ipairs(loc.contents.building_ids) do
 						local bld = df.building.find(v)
 
 						if bld then
@@ -174,7 +174,7 @@ function location_get_info(id)
 
 				elseif ltype == df.abstract_building_type.TEMPLE then
 					local loc = loc --as:df.abstract_building_templest
-					local count_instruments = loc.contents.unk_fc
+					local count_instruments = loc.contents.count_instruments
 					local dance_area = { ws.dance_floor_x[j], ws.dance_floor_y[j] }
 
 					local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)

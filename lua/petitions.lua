@@ -3,10 +3,10 @@ function petitions_get_list()
 	local ret = {}
 
 	for i,v in ipairs(df.global.ui.petitions) do
-		local agreement = utils.binsearch(df.global.world.agreements.all, v, 'anon_1')
-		if agreement and #agreement.anon_2 == 2 and #agreement.anon_4 == 1 and agreement.anon_4[0].type == 2 then
-			local reason = agreement.anon_4[0].data.data1.anon_1
-			local hf_id = agreement.anon_2[0].anon_2[0]
+		local agreement = df.agreement.find(v)
+		if agreement and #agreement.parties == 2 and #agreement.details == 1 and agreement.details[0].type == 2 then
+			local reason = agreement.details[0].data.data1.anon_1
+			local hf_id = agreement.parties[0].histfig_ids[0]
 			local hf = df.historical_figure.find(hf_id)
 			local unit_id = hf and hf.unit_id or -1
 			local unit = df.unit.find(unit_id)
@@ -19,14 +19,11 @@ function petitions_get_list()
 	return ret
 end
 
---todo: --xxxdfhack: access to .anon_1 will crash on Windows !!
 --luacheck: in=number,bool
 function petition_respond(id, approve)
 	return execute_with_petitions_screen(function(ws)
-		for i,v in ipairs(ws.anon_1) do
-			local p = df.reinterpret_cast(df.agreement, v)
-
-			if p.anon_1 == id then
+		for i,v in ipairs(ws.list) do
+			if v.id == id then
 				ws.cursor = i
 				gui.simulateInput(ws, istrue(approve) and 'OPTION1' or 'OPTION2')
 
