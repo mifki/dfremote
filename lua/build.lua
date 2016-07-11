@@ -103,11 +103,13 @@ function build_req_get(grouped)
             table.insert(choices, { title, choice:getUsedCount(), choice:getNumCandidates(), choice.distance })
         end
 
-        local req = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index].count_required
-        local max = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index].count_max
-        local provided = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index].count_provided
+        local req = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index]
 
-        return { choices, req, max, provided }
+        local required = C_build_req_get_required(req)
+        local max      = C_build_req_get_max(req)
+        local provided = C_build_req_get_provided(req)
+
+        return { choices, required, max, provided }
     end
 
     return nil

@@ -533,7 +533,7 @@ function get_job_choices(ws, level)
         end
 
         local descr = mp.NIL
-        local subchoices = false
+        local subchoices = mp.NIL
         if btn._type == df.interface_button_buildingst or btn._type == df.interface_button_building_material_selectorst or btn._type == df.interface_button_building_category_selectorst then
             if level == 0 then
                 df.global.ui_workshop_in_add = true
@@ -605,56 +605,56 @@ function building_workshop_get_jobchoices(bldid)
         local bld = bld --as:df.building_trapst
 
         if bld.trap_type == df.trap_type.Lever then
-            table.insert(ret, { 'Pull the Lever', 'P', 0, 0, false })
+            table.insert(ret, { 'Pull the Lever', 'P', mp.NIL, 0, 0 })
         end
 
-        table.insert(ret, { 'Link up a Bridge', 'b', 0, 1, false })
-        table.insert(ret, { 'Link up a Cage', 'j', 0, 2, false })
-        table.insert(ret, { 'Link up a Chain', 'c', 0, 3, false })
-        table.insert(ret, { 'Link up a Door', 'd', 0, 4, false })
-        table.insert(ret, { 'Link up a Floodgate', 'f', 0, 5, false })
-        table.insert(ret, { 'Link up a Hatch', 'h', 0, 6, false })
-        table.insert(ret, { 'Link up a Wall Grate', 'w', 0, 7, false })
-        table.insert(ret, { 'Link up a Floor Grate', 'g', 0, 8, false })
-        table.insert(ret, { 'Link up Vertical Bars', 'B', 0, 9, false })
-        table.insert(ret, { 'Link up a Floor Bars', 'Alt+b', 0, 10, false })
-        table.insert(ret, { 'Link up a Support', 's', 0, 11, false })
-        table.insert(ret, { 'Link up Spears / Spikes', 'S', 0, 12, false })
-        table.insert(ret, { 'Link up a Gear Assembly', 'a', 0, 13, false })
-        table.insert(ret, { 'Link up a Track Stop', 'T', 0, 14, false })
+        table.insert(ret, { 'Link up a Bridge', 'b', mp.NIL, 1, 0 })
+        table.insert(ret, { 'Link up a Cage', 'j', mp.NIL, 2, 0 })
+        table.insert(ret, { 'Link up a Chain', 'c', mp.NIL, 3, 0 })
+        table.insert(ret, { 'Link up a Door', 'd', mp.NIL, 4, 0 })
+        table.insert(ret, { 'Link up a Floodgate', 'f', mp.NIL, 5, 0 })
+        table.insert(ret, { 'Link up a Hatch', 'h', mp.NIL, 6, 0 })
+        table.insert(ret, { 'Link up a Wall Grate', 'w', mp.NIL, 7, 0 })
+        table.insert(ret, { 'Link up a Floor Grate', 'g', mp.NIL, 8, 0 })
+        table.insert(ret, { 'Link up Vertical Bars', 'B', mp.NIL, 9, 0 })
+        table.insert(ret, { 'Link up a Floor Bars', 'Alt+b', mp.NIL, 10, 0 })
+        table.insert(ret, { 'Link up a Support', 's', mp.NIL, 11, 0 })
+        table.insert(ret, { 'Link up Spears / Spikes', 'S', mp.NIL, 12, 0 })
+        table.insert(ret, { 'Link up a Gear Assembly', 'a', mp.NIL, 13, 0 })
+        table.insert(ret, { 'Link up a Track Stop', 'T', mp.NIL, 14, 0 })
 
     else
         local bld = bld --as:df.building_workshopst
         local wtype = bld.type
         
         if wtype == df.workshop_type.Mechanics then
-            table.insert(ret, { 'Make Rock Mechanisms', 't', 0, 0, false })
-            table.insert(ret, { 'Make Traction Bench', 'R', 0, 1, false })
+            table.insert(ret, { 'Make Rock Mechanisms', 't', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Make Traction Bench', 'R', mp.NIL, 1, 0 })
     
         elseif wtype == df.workshop_type.Butchers then
-            table.insert(ret, { 'Butcher a dead animal', 'b', 0, 0, false })
-            table.insert(ret, { 'Extract from a dead animal', 'e', 0, 1, false })
-            table.insert(ret, { 'Capture a live land animal', 'a', 0, 2, false })
+            table.insert(ret, { 'Butcher a dead animal', 'b', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Extract from a dead animal', 'e', mp.NIL, 1, 0 })
+            table.insert(ret, { 'Capture a live land animal', 'a', mp.NIL, 2, 0 })
     
         elseif wtype == df.workshop_type.Fishery then
-            table.insert(ret, { 'Process a Raw Fish', 'p', 0, 0, false })
-            table.insert(ret, { 'Extract from a Raw Fish', 'e', 0, 1, false })
-            table.insert(ret, { 'Capture a Live Fish', 'f', 0, 2, false })
+            table.insert(ret, { 'Process a Raw Fish', 'p', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Extract from a Raw Fish', 'e', mp.NIL, 1, 0 })
+            table.insert(ret, { 'Capture a Live Fish', 'f', mp.NIL, 2, 0 })
     
         elseif wtype == df.workshop_type.Loom then
-            table.insert(ret, { 'Collect Webs', 'c', 0, 0, false })
-            table.insert(ret, { 'Weave Cloth (Plant Thread)', 'w', 0, 1, false })
-            table.insert(ret, { 'Weave Silk Cloth', 's', 0, 2, false })
-            table.insert(ret, { 'Weave Cloth (Wool/Hair Yarn)', 'y', 0, 3, false })
-            table.insert(ret, { 'Weave Metal Cloth', 'a', 0, 4, false })
+            table.insert(ret, { 'Collect Webs', 'c', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Weave Cloth (Plant Thread)', 'w', mp.NIL, 1, 0 })
+            table.insert(ret, { 'Weave Silk Cloth', 's', mp.NIL, 2, 0 })
+            table.insert(ret, { 'Weave Cloth (Wool/Hair Yarn)', 'y', mp.NIL, 3, 0 })
+            table.insert(ret, { 'Weave Metal Cloth', 'a', mp.NIL, 4, 0 })
     
         elseif wtype == df.workshop_type.Kennels then
-            table.insert(ret, { 'Capture a Live Land Animal', 'a', 0, 0, false })
-            table.insert(ret, { 'Tame a Small Animal', 't', 0, 1, false })
+            table.insert(ret, { 'Capture a Live Land Animal', 'a', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Tame a Small Animal', 't', mp.NIL, 1, 0 })
     
         elseif wtype == df.workshop_type.Dyers then
-            table.insert(ret, { 'Dye Thread', 't', 0, 0, false })
-            table.insert(ret, { 'Dye Cloth', 'c', 0, 1, false })
+            table.insert(ret, { 'Dye Thread', 't', mp.NIL, 0, 0 })
+            table.insert(ret, { 'Dye Cloth', 'c', mp.NIL, 1, 0 })
     
         elseif wtype == df.workshop_type.Jewelers then
             for i=0,#ws.jeweler_cutgem-1 do
@@ -674,15 +674,15 @@ function building_workshop_get_jobchoices(bldid)
     
                 local opts = {}
                 if cut then
-                    table.insert(opts, { 'Cut '..matname, '', 0, #ret*4+0, false })
+                    table.insert(opts, { 'Cut '..matname, '', mp.NIL, #ret*4+0, 0 })
                 end
                 if enc then
-                    table.insert(opts, { 'Encrust Finished Goods with '..matname, '', 0, #ret*4+1, false })
-                    table.insert(opts, { 'Encrust Furniture with '..matname, '', 0, #ret*4+2, false })
-                    table.insert(opts, { 'Encrust Ammo with '..matname, '', 0, #ret*4+3, false })
+                    table.insert(opts, { 'Encrust Finished Goods with '..matname, '', mp.NIL, #ret*4+1, 0 })
+                    table.insert(opts, { 'Encrust Furniture with '..matname, '', mp.NIL, #ret*4+2, 0 })
+                    table.insert(opts, { 'Encrust Ammo with '..matname, '', mp.NIL, #ret*4+3, 0 })
                 end
                 if #opts > 0 then
-                    table.insert(ret, { matname, '', opts, (cut and 1 or 0) + (enc and 2 or 0), false })
+                    table.insert(ret, { matname, '', opts, (cut and 1 or 0) + (enc and 2 or 0), 0 })
                 end
             end
         

@@ -7,7 +7,7 @@ _ = require 'remote.underscore'
 gui = require 'gui'
 utils = require 'utils'
 
-df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4206, etc.
+df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4303, etc.
 
 require 'remote.compat'
 

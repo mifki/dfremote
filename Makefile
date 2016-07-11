@@ -1,9 +1,9 @@
-DFHACKVER ?= 0.42.06-r1
+DFHACKVER ?= 0.43.03-r1
 
 DFVERNUM = `echo $(DFHACKVER) | sed -e s/-.*// -e s/\\\\.//g`
 
-DF ?= /Users/vit/Downloads/df_42_06_osx
-DH ?= /Users/vit/Downloads/buildagent-2/workspace/root/dfhack/0.42
+DF ?= /Users/vit/Downloads/df_43_03_osx
+DH ?= /Users/vit/Downloads/buildagent-2/workspace/root/dfhack/0.43.03
 
 SRC = remote.cpp sha256.cpp
 DEP = dwarfmode.hpp commands.hpp plugin.hpp patches.hpp itemcache.hpp config.hpp corehacks.hpp sha256.h Makefile

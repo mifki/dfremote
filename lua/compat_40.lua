@@ -45,3 +45,27 @@ end
 function C_manager_order_is_validated(o)
 	return o.is_validated
 end
+
+function C_training_assignment_get_flags(training_assignment)
+	local flags = training_assignment.flags
+	return { any_trainer=flags.any_trainer, any_unassigned_trainer=flags.any_unassigned_trainer, train_war=flags.train_war, train_hunt=flags.train_hunt }
+end
+
+function C_training_assignment_set_flags(training_assignment, flags)
+	training_assignment.flags.any_trainer 			 = istrue(flags.any_trainer)
+	training_assignment.flags.any_unassigned_trainer = istrue(flags.any_unassigned_trainer)
+	training_assignment.flags.train_war 			 = istrue(flags.train_war)
+	training_assignment.flags.train_hunt 			 = istrue(flags.train_hunt)
+end
+
+function C_build_req_get_required(req)
+	return req.count_required
+end
+
+function C_build_req_get_max(req)
+	return req.count_max
+end
+
+function C_build_req_get_provided(req)
+	return req.count_provided
+end

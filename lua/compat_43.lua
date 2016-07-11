@@ -57,3 +57,25 @@ function C_training_assignment_set_flags(training_assignment, flags)
 	training_assignment.flags.train_war 			 = istrue(flags.train_war)
 	training_assignment.flags.train_hunt 			 = istrue(flags.train_hunt)
 end
+
+--xxx: one extra field in ui_build_item_req in 0.43 which hasn't been added to dfhack
+function C_build_req_get_required(req)
+	local _,addr = req:sizeof()
+	req = df.reinterpret_cast(df.ui_build_item_req, addr+4)
+
+	return req.count_required
+end
+
+function C_build_req_get_max(req)
+	local _,addr = req:sizeof()
+	req = df.reinterpret_cast(df.ui_build_item_req, addr+4)
+
+	return req.count_max
+end
+
+function C_build_req_get_provided(req)
+	local _,addr = req:sizeof()
+	req = df.reinterpret_cast(df.ui_build_item_req, addr+4)
+
+	return req.count_provided
+end

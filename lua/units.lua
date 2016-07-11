@@ -338,8 +338,8 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
     local onbreak = is_onbreak(unit)
 
     if df_ver >= 4200 then
-        if #unit.anon_1 > 0 then
-            local _,actid = df.sizeof(unit.anon_1[0]) --todo: use 0 or last ?
+        if #unit.social_activities > 0 then
+            local actid = unit.social_activities[0] --todo: use 0 or last ?
 
             local act = df.activity_entry.find(actid)
             for i,ev in ripairs(act.events) do
