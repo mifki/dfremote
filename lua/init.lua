@@ -1571,6 +1571,7 @@ local handlers = {
         [3] = manager_new_order,
         [4] = manager_delete_order,
         [5] = manager_reorder,
+        [6] = manager_order_set_max_workshops,
     },
 
     [148] = {

@@ -17,7 +17,12 @@ function manager_get_orders()
 		btn.material_category.whole = o.material_category.whole
 		local title = utils.call_with_string(btn, 'getLabel')
 
-		table.insert(orders, { title, o.amount_left, o.amount_total, C_manager_order_is_validated(o) })
+		local maxw = 0
+		if df_ver >= 4200 then
+			maxw = o.max_workshops
+		end
+
+		table.insert(orders, { title, o.amount_left, o.amount_total, C_manager_order_is_validated(o), maxw })
 	end
 
 	return { orders, have_manager }
@@ -109,7 +114,15 @@ end
 
 --luacheck: in=numeber,number
 function manager_reorder(fromidx, toidx)
-    local j = df.global.world.manager_orders[fromidx]
+    local o = df.global.world.manager_orders[fromidx]
     df.global.world.manager_orders:erase(fromidx)
-    df.global.world.manager_orders:insert(toidx, j)
+    df.global.world.manager_orders:insert(toidx, o)
+end
+
+--luacheck: in=number,number
+function manager_order_set_max_workshops(idx, maxw)
+	maxw = math.max(0, maxw)
+
+    local o = df.global.world.manager_orders[idx]
+    o.max_workshops = maxw
 end
