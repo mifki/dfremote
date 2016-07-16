@@ -99,6 +99,17 @@ local function bait_idx(t)
     return 0
 end
 
+--[[local function building_location_name(bld)
+    local loc
+    if df_ver >= 4200 then --dfver:4200-
+        if bld.is_room and bld.location_id ~= -1 then
+            loc = location_find_by_id(bld.location_id)
+        end
+    end
+
+    return loc and locname(loc) or mp.NIL    
+end]]
+
 --xxx: most of the functions below can operate on the currently selected building only
 --xxx: this function will try to transition to [q]uery mode and select the passed building
 --xxx: currently this is used only to transition from loo[k] mode
@@ -251,11 +262,27 @@ function building_query_selected(bldid)
         if btype == df.building_type.Table then
             local bld = bld --as:df.building_tablest
             table.insert(ret, bld.table_flags.meeting_hall)
+            local loc
+            if df_ver >= 4200 then --dfver:4200-
+                if bld.is_room and bld.location_id ~= -1 then
+                    loc = location_find_by_id(bld.location_id)
+                end
+            end
+            table.insert(ret, loc and locname(loc) or mp.NIL)
 
         elseif btype == df.building_type.Bed then
             local bld = bld --as:df.building_bedst
             table.insert(ret, bld.bed_flags.whole)
             table.insert(ret, get_squads_use(bld))
+
+            local loc
+            if df_ver >= 4200 then --dfver:4200-
+                if bld.is_room and bld.location_id ~= -1 then
+                    loc = location_find_by_id(bld.location_id)
+                end
+            end
+            table.insert(ret, loc and locname(loc) or mp.NIL)
+            table.insert(ret, loc and (loc._type == df.abstract_building_inn_tavernst) or false)
 
         elseif btype == df.building_type.ArcheryTarget then
             local bld = bld --as:df.building_archerytargetst

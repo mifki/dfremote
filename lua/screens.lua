@@ -20,10 +20,24 @@ function execute_with_main_mode(mode, fn)
 end
 
 function execute_with_selected_zone(bldid, fn)
+	if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and
+	   df.global.ui_sidebar_menus.zone.selected and df.global.ui_sidebar_menus.zone.selected.id == bldid then
+		return fn(screen_main(), zone)
+	end
+
 	return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws)
 		local zone = df.building.find(bldid)
 
-		df.global.cursor.x = zone.x1
+		-- we assume there will be a tile belonging to the zone on y1
+		local x = zone.x1
+		while x < zone.x2 do
+			if zone.room.extents[x-zone.x1] > 0 then
+				break
+			end
+			x = x + 1
+		end
+
+		df.global.cursor.x = x
 	    df.global.cursor.y = zone.y1
 	    df.global.cursor.z = zone.z-1
 	    gui.simulateInput(ws, 'CURSOR_UP_Z')
@@ -206,4 +220,55 @@ function execute_with_petitions_screen(fn)
 		end
 		return ret
 	end)
+end
+
+function execute_with_locations_for_building(bldid, fn)
+    local bld = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.world.selected_building
+    if not bld then
+        error('no building/zone '..tostring(bldid))
+    end
+
+    if bld._type ~= df.building_civzonest and bld._type ~= df.building_bedst and bld._type ~= df.building_tablest then
+	    error('wrong building type '..tostring(bldid)..' '..tostring(bld._type))
+    end
+
+    if not bld.is_room then
+        error('not a room '..tostring(bldid))
+    end
+
+    if bld._type == df.building_civzonest then
+	    if not bld.zone_flags.meeting_area then
+	    	error('not a meeting area '..tostring(bld.zone_flags.whole))
+	    end
+
+	    return execute_with_selected_zone(bldid, function(ws)
+			gui.simulateInput(ws, 'ASSIGN_LOCATION')
+			local ok,ret = pcall(fn, ws, bld)
+			df.global.ui.main.mode = df.ui_sidebar_mode.Zones
+
+			if not ok then
+				error (ret)
+			end
+			return ret
+	    end)
+	end
+
+	--todo: convert this to execute_with_selected
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end    
+
+	gui.simulateInput(ws, 'ASSIGN_LOCATION')    
+	local ok,ret = pcall(fn, ws, bld)
+	df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
+
+	if not ok then
+		error (ret)
+	end
+	return ret
 end

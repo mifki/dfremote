@@ -360,113 +360,42 @@ function location_set_parameter(id, idx, val)
 	return true
 end
 
-local function process_get_locations(ws, zone)
-	gui.simulateInput(ws, 'ASSIGN_LOCATION')
-
-	local list = {}
-	
-	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
-		if loc then
-    		table.insert(list, { locname(loc), loc.id, loc:getType() })
-    	end
-	end
-
-	return { list, zone.location_id }
-end
-
 --luacheck: in=number
 function location_assign_get_list(bldid)
-    local zone
-    if bldid and bldid ~= -1 and bldid ~= 0 then
-        zone = df.building.find(bldid)
-    else
-        zone = df.global.world.selected_building
-    end
-
-    if not zone then
-        error('no building/zone '..tostring(bldid))
-    end
-
-    if zone:getType() == df.building_type.Civzone then
-	    if not zone.zone_flags.meeting_area then
-	    	error('not a meeting area '..tostring(zone.zone_flags.whole))
-	    end
-
-	    return execute_with_selected_zone(bldid, function(ws)
-	    	return process_get_locations(ws, zone)
-	    end)
-	end
-
-    if zone:getType() == df.building_type.Bed or zone:getType() == df.building_type.Table then
-    	--todo: convert this to execute_with_selected or at least add some checks
-	    local ws = dfhack.gui.getCurViewscreen()
-	    if ws._type ~= df.viewscreen_dwarfmodest then
-	        error('wrong screen '..tostring(ws._type))
-	    end
-
-	    return process_get_locations(ws, zone)
-    end	
-
-    error('wrong building type '..tostring(bldid)..' '..tostring(zone._type))
-end
-
-local function process_assign_location(ws, locid)
-	gui.simulateInput(ws, 'ASSIGN_LOCATION')
-
-	for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
-		if (locid == -1 and not loc) or (loc and loc.id == locid) then
-			df.global.ui_sidebar_menus.location.cursor = i
-			gui.simulateInput(ws, 'SELECT')
-			return true
+	return execute_with_locations_for_building(bldid, function(ws, bld)
+		local list = {}
+		
+		for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
+			if loc then
+	    		table.insert(list, { locname(loc), loc.id, loc:getType() })
+	    	end
 		end
-	end
+
+		return { list, bld.location_id }
+	end)
 end
 
 --luacheck: in=number,number
 function location_assign(bldid, locid)
-    local zone
-    if bldid and bldid ~= -1 and bldid ~= 0 then
-        zone = df.building.find(bldid)
-    else
-        zone = df.global.world.selected_building
-    end
+	return execute_with_locations_for_building(bldid, function(ws, bld)
+		if bld.location_id == locid then
+			return true
+		end
 
-    if not zone then
-        error('no building/zone '..tostring(bldid))
-    end
-
-    if zone.location_id == locid then
-    	return
-    end
-
-    if zone:getType() == df.building_type.Civzone then
-	    if not zone.zone_flags.meeting_area then
-	    	error('not a meeting area '..tostring(zone.zone_flags.whole))
-	    end
-
-	    return execute_with_selected_zone(bldid, function(ws)
-	    	return process_assign_location(ws, locid)
-	    end)
-	end
-
-    if zone:getType() == df.building_type.Bed or zone:getType() == df.building_type.Table then
-    	--todo: convert this to execute_with_selected or at least add some checks
-	    local ws = dfhack.gui.getCurViewscreen()
-	    if ws._type ~= df.viewscreen_dwarfmodest then
-	        error('wrong screen '..tostring(ws._type))
-	    end
-
-    	return process_assign_location(ws, locid)
-    end	
-
-    error('wrong building type '..tostring(bldid)..' '..tostring(zone._type))
+		for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
+			if (locid == -1 and not loc) or (loc and loc.id == locid) then
+				df.global.ui_sidebar_menus.location.cursor = i
+				gui.simulateInput(ws, 'SELECT')
+				return true
+			end
+		end
+	end)
 end
 
 --todo: fix for bed/table
 --luacheck: in=number
 function locations_add_get_deity_choices(bldid)
-    return execute_with_selected_zone(bldid, function(ws)
-    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+	return execute_with_locations_for_building(bldid, function(ws, bld)
 		gui.simulateInput(ws, 'LOCATION_NEW')
 		gui.simulateInput(ws, 'LOCATION_TEMPLE')
 
@@ -506,8 +435,7 @@ end
 --todo: fix for bed/table
 --luacheck: in=number,number,number
 function locations_add(bldid, tp, deityid)
-    return execute_with_selected_zone(bldid, function(ws)
-    	gui.simulateInput(ws, 'ASSIGN_LOCATION')
+	return execute_with_locations_for_building(bldid, function(ws, bld)
 		gui.simulateInput(ws, 'LOCATION_NEW')
 
 		if tp == 1 then
