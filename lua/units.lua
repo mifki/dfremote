@@ -442,7 +442,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         end
     end
     
-    return jobtitle, jobcolor, unit.job.current_job and 1 or 0
+    return dfhack.df2utf(jobtitle), jobcolor, unit.job.current_job and 1 or 0
 end
 
 -- df.viewscreen_unitlist_page.Citizens, Livestock, Others, Dead
