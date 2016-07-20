@@ -508,7 +508,7 @@ function import_req_get_items()
 
 		local items = {}
 		for j=0,n-1 do
-			local name = capitalize(nf(sf(s,j)))
+			local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
 			--print (name)
 			table.insert(items, { name })
 		end
@@ -560,7 +560,7 @@ function process_sell_agreement(civ_id, reqs)
 
 		local items = {}
 		for j=0,n-1 do
-			local name = capitalize(nf(sf(s,j)))
+			local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
 			table.insert(items, { name, reqs.items.priority[cat[2]][j], math.floor(reqs.price[cat[2]][j]/128*100) })
 		end
 
@@ -750,7 +750,8 @@ function process_buy_agreement(reqs)
 
 		--todo: for bars + material the game shows only material eg. 'ash', but 'bars' if no material
 		title = title .. name
-		table.insert(ret, { capitalize(title), reqs.items.priority[i], math.floor(reqs.price[i]/128*100) })
+		title = dfhack.df2utf(title):utf8capitalize()
+		table.insert(ret, { title, reqs.items.priority[i], math.floor(reqs.price[i]/128*100) })
 	end
 
 	return ret	
