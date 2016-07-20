@@ -59,7 +59,7 @@ function justice_get_data()
 		process_crimes(recent_cases)
 
 		local cold_cases = {}
-		gui.simulateInput(ws, 'CHANGETAB')
+		gui.simulateInput(ws, K'CHANGETAB')
 		process_crimes(cold_cases)
 
 		local convicts = {}
@@ -160,7 +160,7 @@ local function focus_crime(ws, crimeid)
 	end
 
 	if idx == -1 then
-		gui.simulateInput(ws, 'CHANGETAB')
+		gui.simulateInput(ws, K'CHANGETAB')
 		for i,v in ipairs(C_ws_cases(ws)) do
 			if v.id == crimeid then
 				idx = i
@@ -191,7 +191,7 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
     		error('no crime or convicted or no trial '..tostring(crimeid))
     	end
 
-		gui.simulateInput(ws, 'SELECT')	
+		gui.simulateInput(ws, K'SELECT')	
 
 		if ws.cur_column ~= 2 then
 			error('can not switch to choices list')
@@ -229,7 +229,7 @@ function justice_convict(crimeid, unitid)
     		error('no crime or convicted or no trial '..tostring(crimeid))
     	end
 
-		gui.simulateInput(ws, 'SELECT')	
+		gui.simulateInput(ws, K'SELECT')	
 
 		if ws.cur_column ~= 2 then
 			error('can not switch to choices list')
@@ -238,7 +238,7 @@ function justice_convict(crimeid, unitid)
 		for i,unit in ipairs(ws.convict_choices) do
 			if unit.id == unitid then
 				ws.cursor_right = i
-				gui.simulateInput(ws, 'SELECT')
+				gui.simulateInput(ws, K'SELECT')
 
 				return true
 			end

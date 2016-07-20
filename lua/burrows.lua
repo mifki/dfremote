@@ -16,8 +16,8 @@ end
 function burrows_add()
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
 	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_BURROWS')
-		gui.simulateInput(ws, 'D_BURROWS_ADD')
+		gui.simulateInput(ws, K'D_BURROWS')
+		gui.simulateInput(ws, K'D_BURROWS_ADD')
 	end)
 end
 
@@ -25,7 +25,7 @@ end
 function burrow_delete(id)
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
 	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_BURROWS')
+		gui.simulateInput(ws, K'D_BURROWS')
 
 		local idx = -1
 		for i,v in ipairs(df.global.ui.burrows.list) do
@@ -43,7 +43,7 @@ function burrow_delete(id)
 		df.global.ui.burrows.sel_id = id
 		df.global.ui.burrows.in_confirm_delete = true
 
-		gui.simulateInput(ws, 'MENU_CONFIRM')
+		gui.simulateInput(ws, K'MENU_CONFIRM')
 	end)	
 end
 
@@ -96,12 +96,12 @@ function burrow_start_edit(id)
 
 	reset_main()
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	gui.simulateInput(ws, 'D_BURROWS')
+	gui.simulateInput(ws, K'D_BURROWS')
 
 	df.global.ui.burrows.sel_index = idx
 	df.global.ui.burrows.sel_id = id
 
-	gui.simulateInput(ws, 'D_BURROWS_DEFINE')
+	gui.simulateInput(ws, K'D_BURROWS_DEFINE')
 end
 
 --luacheck: in=
@@ -203,7 +203,7 @@ function burrow_zoom(id)
 
 	reset_main()
 	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	gui.simulateInput(ws, 'D_BURROWS')
+	gui.simulateInput(ws, K'D_BURROWS')
 
 	df.global.ui.burrows.sel_index = idx
 	df.global.ui.burrows.sel_id = id	

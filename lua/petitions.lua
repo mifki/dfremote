@@ -74,7 +74,7 @@ function petition_respond(id, approve)
 		for i,v in ipairs(ws.list) do
 			if v.id == id then
 				ws.cursor = i
-				gui.simulateInput(ws, istrue(approve) and 'OPTION1' or 'OPTION2')
+				gui.simulateInput(ws, istrue(approve) and K'OPTION1' or K'OPTION2')
 
 				return true
 			end

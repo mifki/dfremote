@@ -218,7 +218,7 @@ function location_get_info(id)
 				return { locname(loc), loc.id, ltype, mode, info, occupations, params }
 			
 			else
-				gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+				gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 			end
 		end
 
@@ -235,7 +235,7 @@ function location_occupation_get_candidates(locid, occid)
 					if occ.id == occid then
 						ws.menu = df.viewscreen_locationsst.T_menu.Occupations
 						ws.occupation_idx = j
-						gui.simulateInput(ws, 'SELECT')
+						gui.simulateInput(ws, K'SELECT')
 
 						local ret = {}
 						for k,unit in ipairs(ws.units) do
@@ -253,7 +253,7 @@ function location_occupation_get_candidates(locid, occid)
 				error('no occupation ' .. tostring(occid))
 			end
 
-			gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+			gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 		end
 
 		error('no location ' .. tostring(locid))
@@ -269,12 +269,12 @@ function location_occupation_assign(locid, occid, unitid)
 					if occ.id == occid then
 						ws.menu = df.viewscreen_locationsst.T_menu.Occupations
 						ws.occupation_idx = j
-						gui.simulateInput(ws, 'SELECT')
+						gui.simulateInput(ws, K'SELECT')
 
 						for k,unit in ipairs(ws.units) do
 							if (unit and unit.id == unitid) or (not unit and unitid == -1) then
 								ws.unit_idx = k
-								gui.simulateInput(ws, 'SELECT')
+								gui.simulateInput(ws, K'SELECT')
 
 								return true
 							end
@@ -287,7 +287,7 @@ function location_occupation_assign(locid, occid, unitid)
 				error('no occupation ' .. tostring(occid))
 			end
 
-			gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+			gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 		end
 
 		error('no location ' .. tostring(locid))
@@ -299,10 +299,10 @@ function location_retire(id)
 	return execute_with_locations_screen(function(ws)
 		for i,loc in ipairs(ws.locations) do
 			if loc and loc.id == id then
-				gui.simulateInput(ws, 'LOCATION_RETIRE')
+				gui.simulateInput(ws, K'LOCATION_RETIRE')
 			end
 
-			gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+			gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 		end
 
 		error('no location ' .. tostring(locid))
@@ -385,7 +385,7 @@ function location_assign(bldid, locid)
 		for i,loc in ipairs(df.global.ui_sidebar_menus.location.list) do
 			if (locid == -1 and not loc) or (loc and loc.id == locid) then
 				df.global.ui_sidebar_menus.location.cursor = i
-				gui.simulateInput(ws, 'SELECT')
+				gui.simulateInput(ws, K'SELECT')
 				return true
 			end
 		end
@@ -396,8 +396,8 @@ end
 --luacheck: in=number
 function locations_add_get_deity_choices(bldid)
 	return execute_with_locations_for_building(bldid, function(ws, bld)
-		gui.simulateInput(ws, 'LOCATION_NEW')
-		gui.simulateInput(ws, 'LOCATION_TEMPLE')
+		gui.simulateInput(ws, K'LOCATION_NEW')
+		gui.simulateInput(ws, K'LOCATION_TEMPLE')
 
 		local ret = {}
 
@@ -436,19 +436,19 @@ end
 --luacheck: in=number,number,number
 function locations_add(bldid, tp, deityid)
 	return execute_with_locations_for_building(bldid, function(ws, bld)
-		gui.simulateInput(ws, 'LOCATION_NEW')
+		gui.simulateInput(ws, K'LOCATION_NEW')
 
 		if tp == 1 then
-			gui.simulateInput(ws, 'LOCATION_INN_TAVERN')
+			gui.simulateInput(ws, K'LOCATION_INN_TAVERN')
 		elseif tp == 2 then
-			gui.simulateInput(ws, 'LOCATION_LIBRARY')
+			gui.simulateInput(ws, K'LOCATION_LIBRARY')
 		elseif tp == 3 then
-			gui.simulateInput(ws, 'LOCATION_TEMPLE')
+			gui.simulateInput(ws, K'LOCATION_TEMPLE')
 
 	    	for i,hf in ipairs(df.global.ui_sidebar_menus.location.deities) do
 	    		if (deityid == -1 and not hf) or (hf and hf.id == deityid) then
 	    			df.global.ui_sidebar_menus.location.cursor_deity = i
-	    			gui.simulateInput(ws, 'SELECT')
+	    			gui.simulateInput(ws, K'SELECT')
 	    			return true
 	    		end
 	    	end		

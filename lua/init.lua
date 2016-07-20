@@ -92,12 +92,12 @@ function close_all()
         local ws = ws --as:df.viewscreen_textviewerst
         --todo: need to properly handle these screens
         if ws.page_filename == 'data/announcement/fortressintro' or ws.page_filename == 'data/announcement/unretire' then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
             return
         end
 
         if ws.page_filename == 'data/help/' then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
             return
         end
 
@@ -887,8 +887,13 @@ local q = last_nearest_point[4][8]
         ext = ext or {}
         table.insert(ext, report_alert)
     end
+    
+    local haspetitions = false
+    if df_ver >= 4200 then --dfver:4200-
+        haspetitions = #df.global.ui.petitions > 0
+    end
 
-    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert), ext
+    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert, haspetitions), ext
 end
 
 local send_center = false
@@ -1007,7 +1012,7 @@ function save_and_close()
     local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
     dfhack.internal.memmove(addr+1, addr, 1)
 
-    gui.simulateInput(optsws, 'SELECT')
+    gui.simulateInput(optsws, K'SELECT')
 end
 
 --luacheck: in=
@@ -1024,7 +1029,7 @@ function end_game_retire()
 
     optsws.in_retire_dwf_abandon_adv = 1
 
-    gui.simulateInput(optsws, 'MENU_CONFIRM')
+    gui.simulateInput(optsws, K'MENU_CONFIRM')
 end
 
 --luacheck: in=
@@ -1041,7 +1046,7 @@ function end_game_abandon()
 
     optsws.in_abandon_dwf = 1
 
-    gui.simulateInput(optsws, 'MENU_CONFIRM')
+    gui.simulateInput(optsws, K'MENU_CONFIRM')
 end
 
 --todo: need to preserve cursor pos when switching between these modes
@@ -1054,7 +1059,7 @@ function query_building()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_BUILDJOB')    
+    gui.simulateInput(ws, K'D_BUILDJOB')    
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1062,10 +1067,10 @@ function query_building()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
@@ -1079,7 +1084,7 @@ function query_unit()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_VIEWUNIT') 
+    gui.simulateInput(ws, K'D_VIEWUNIT') 
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1087,10 +1092,10 @@ function query_unit()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
@@ -1104,7 +1109,7 @@ function query_look()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_LOOK')
+    gui.simulateInput(ws, K'D_LOOK')
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1112,10 +1117,10 @@ function query_look()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
@@ -1146,14 +1151,14 @@ function select_confirm()
     local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'SELECT')
+    gui.simulateInput(ws, K'SELECT')
 
     if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
        oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
         df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
         local ws = screen_main()
-        gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-        gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+        gui.simulateInput(ws, K'CURSOR_UP_Z')        
     end
 
     --[[if zoombacktobld then
@@ -1164,20 +1169,20 @@ end
 --luacheck: in=
 function leavescreen()
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'LEAVESCREEN')    
+    gui.simulateInput(ws, K'LEAVESCREEN')    
 end
 
 
 --luacheck: in=
 function zlevel_up()
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_UP_Z')    
+    gui.simulateInput(ws, K'CURSOR_UP_Z')    
 end
 
 --luacheck: in=
 function zlevel_down()
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')    
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')    
 end
 
 --luacheck: in=string
@@ -1188,48 +1193,48 @@ function zlevel_set(data)
     if z > 0 then
         df.global.window_z = z - 1
         df.global.cursor.z = z - 1
-        gui.simulateInput(ws, 'CURSOR_UP_Z')
+        gui.simulateInput(ws, K'CURSOR_UP_Z')
     else
         df.global.window_z = z + 1
         df.global.cursor.z = z + 1
-        gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        gui.simulateInput(ws, K'CURSOR_DOWN_Z')
     end
 end
 
 --luacheck: in=
 function dim_bigger()
     local ws = screen_main()
-    gui.simulateInput(ws, 'SECONDSCROLL_DOWN')    
+    gui.simulateInput(ws, K'SECONDSCROLL_DOWN')    
 end
 
 --luacheck: in=
 function dim_smaller()
     local ws = screen_main()
-    gui.simulateInput(ws, 'SECONDSCROLL_UP')    
+    gui.simulateInput(ws, K'SECONDSCROLL_UP')    
 end
 
 --luacheck: in=
 function dim_x_more()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_X_UP')    
+    gui.simulateInput(ws, K'BUILDING_DIM_X_UP')    
 end
 
 --luacheck: in=
 function dim_x_less()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_X_DOWN')    
+    gui.simulateInput(ws, K'BUILDING_DIM_X_DOWN')    
 end
 
 --luacheck: in=
 function dim_y_more()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_Y_UP')    
+    gui.simulateInput(ws, K'BUILDING_DIM_Y_UP')    
 end
 
 --luacheck: in=
 function dim_y_less()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_Y_DOWN')    
+    gui.simulateInput(ws, K'BUILDING_DIM_Y_DOWN')    
 end
 
 
@@ -1243,8 +1248,8 @@ function set_cursor_pos(data)
     df.global.cursor.z = df.global.window_z
 
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     if data:byte(3) ~= 0 then
         -- limit zones to 31x31 max
@@ -1260,14 +1265,14 @@ function set_cursor_pos(data)
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
         local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE 
 
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
         if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
             oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
             df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
             local ws = screen_main()
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         end
     end
 end
@@ -1282,8 +1287,8 @@ function set_cursor_pos_relative(data)
     df.global.cursor.z = df.global.window_z
 
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 end
 
 --luacheck: in=number
@@ -1299,7 +1304,7 @@ function designate(idx)
 
     reset_main()
 
-    gui.simulateInput(ws, 'D_DESIGNATE')
+    gui.simulateInput(ws, K'D_DESIGNATE')
 
     local cmd = designate_cmds[idx]
     for i,v in ipairs(cmd) do
@@ -1312,10 +1317,10 @@ function designate(idx)
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 
@@ -1337,7 +1342,7 @@ function close_legends()
     end
 
     ws.cur_page = df.viewscreen_legendsst.T_cur_page.Main --hint:df.viewscreen_legendsst
-    gui.simulateInput(ws, 'LEAVESCREEN')
+    gui.simulateInput(ws, K'LEAVESCREEN')
 end
 
 function ensure_native()

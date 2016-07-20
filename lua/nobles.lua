@@ -286,7 +286,7 @@ function nobles_get_positions()
         local alldemands = noble_get_demands()
 
         local becoming_capital
-        gui.simulateInput(ws, 'NOBLELIST_CAPITAL')
+        gui.simulateInput(ws, K'NOBLELIST_CAPITAL')
         local cws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_noblest
         if cws._type == df.viewscreen_noblest then
             cws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
@@ -316,7 +316,7 @@ function nobles_get_candidates(code)
         end    
 
         ws.layer_objects[0]:setListCursor(posidx)
-        gui.simulateInput(ws, 'NOBLELIST_REPLACE')
+        gui.simulateInput(ws, K'NOBLELIST_REPLACE')
 
         local ret = {}
         for i,c in ipairs(ws.candidates) do
@@ -345,10 +345,10 @@ function nobles_replace(code, candidx)
         end    
 
         ws.layer_objects[0]:setListCursor(posidx)
-        gui.simulateInput(ws, 'NOBLELIST_REPLACE')
+        gui.simulateInput(ws, K'NOBLELIST_REPLACE')
 
         ws.layer_objects[1]:setListCursor(candidx)
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
     end)
 end
 

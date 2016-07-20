@@ -68,9 +68,9 @@ function worldgen_accept()
     end
 
     if istrue(ws.worldgen_paused) then
-        gui.simulateInput(ws, 'WORLD_GEN_USE')
+        gui.simulateInput(ws, K'WORLD_GEN_USE')
     elseif df.global.world.worldgen_status.state == 10 then
-        gui.simulateInput(ws, 'SELECT')        
+        gui.simulateInput(ws, K'SELECT')        
     end
 
     return true
@@ -98,10 +98,10 @@ function worldgen_cancel()
     end
 
     if not istrue(ws.worldgen_paused) and df.global.world.worldgen_status.state ~= 10 then
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
     end
 
-    gui.simulateInput(ws, 'WORLD_GEN_ABORT')
+    gui.simulateInput(ws, K'WORLD_GEN_ABORT')
 end
 
 --luacheck: in=
@@ -112,7 +112,7 @@ function worldgen_continue()
         return
     end
 
-    gui.simulateInput(ws, 'WORLD_GEN_CONTINUE')
+    gui.simulateInput(ws, K'WORLD_GEN_CONTINUE')
 end
 
 --luacheck: in=number
@@ -120,13 +120,13 @@ function worldgen_resolve_rejected(action)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if action == 1 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_CONTINUE')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_CONTINUE')
     elseif action == 2 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ABORT')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ABORT')
     elseif action == 3 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ALLOW_THIS')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ALLOW_THIS')
     elseif action == 4 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ALLOW_ALL')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ALLOW_ALL')
     end
 end
 

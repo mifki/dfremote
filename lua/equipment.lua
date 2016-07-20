@@ -16,7 +16,7 @@ end
 --luacheck: in=number,number
 function equipment_get(squadid, unitid)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	local sqidx = list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -100,7 +100,7 @@ end
 --luacheck: in=number,number,number
 function equipment_item_delete(squadid, unitid, idx)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -112,7 +112,7 @@ function equipment_item_delete(squadid, unitid, idx)
         ws.layer_objects[1].active = false
         ws.layer_objects[2].active = true
         ws.layer_objects[2].cursor = idx --hint:df.layer_object_listst
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
 		return true
     end)  		
@@ -121,7 +121,7 @@ end
 --luacheck: in=number,number,number
 function equipment_item_get_matchoices(squadid, unitid, idx)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -135,10 +135,10 @@ function equipment_item_get_matchoices(squadid, unitid, idx)
 
         if idx > 0 then
             ws.layer_objects[2].cursor = idx-1 --hint:df.layer_object_listst
-            gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
+            gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
         end
 
-        gui.simulateInput(ws, 'D_MILITARY_ADD_MATERIAL')
+        gui.simulateInput(ws, K'D_MILITARY_ADD_MATERIAL')
 
         local mats = {}
         for i,v in ipairs(ws.equip.material.specific.mat_type) do
@@ -168,7 +168,7 @@ end
 --luacheck: in=number,number,number,number[]
 function equipment_item_set_material(squadid, unitid, idx, matspec)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -204,7 +204,7 @@ end
 --luacheck: in=number,number,number
 function equipment_get_additem(squadid, unitid, cat)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -250,7 +250,7 @@ end
 --luacheck: in=number,number,number,number
 function equipment_item_add(squadid, unitid, cat, itemspec)
     return execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+        gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -268,7 +268,7 @@ function equipment_item_add(squadid, unitid, cat, itemspec)
         end
 
         ws.layer_objects[2].cursor = itemspec --hint:df.layer_object_listst
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
         return true
     end)
 end
@@ -276,7 +276,7 @@ end
 --luacheck: in=number,number,number
 function equipment_get_additem_specific(squadid, unitid, cat)
     return execute_with_military_screen(function(ws)
-    	gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+    	gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -286,7 +286,7 @@ function equipment_get_additem_specific(squadid, unitid, cat)
     	list_select_item_by_id(ws, 1, ws.equip.units, unitid)
 
         gui.simulateInput(ws, uniform_additem_keys[cat+1])
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
 		local items = {}
         for i,item in ipairs(ws.equip.specific_items) do
@@ -301,7 +301,7 @@ end
 --luacheck: in=number,number,number,number
 function equipment_item_add_specific(squadid, unitid, cat, itemid)
     return execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_EQUIP')
+        gui.simulateInput(ws, K'D_MILITARY_EQUIP')
 
     	list_select_item_by_id(ws, 0, ws.equip.squads, squadid)
 
@@ -314,10 +314,10 @@ function equipment_item_add_specific(squadid, unitid, cat, itemid)
         ws.layer_objects[0].active = false
         ws.layer_objects[2].active = true
 
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
     	list_select_item_by_id(ws, 2, ws.equip.specific_items, itemid)
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
         return true
     end)

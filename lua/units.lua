@@ -656,8 +656,8 @@ function unit_goto(unitid)
     df.global.cursor.z = z - 1
 
     local ws = dfhack.gui.getCurViewscreen()
-    --gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     recenter_view(x, y, z)
 end
@@ -684,8 +684,8 @@ function unit_goto_bld(unitid)
     df.global.cursor.z = jobbld.z-1
 
     local ws = dfhack.gui.getCurViewscreen()
-    --gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     recenter_view(jobbld.centerx,jobbld.centery, jobbld.z)
     --return {jobbld.centerx,jobbld.centery,jobbld.z}
@@ -827,7 +827,7 @@ function unit_get_thoughts(unitid, is_histfig)
 
         local unitws = df.viewscreen_unitst:new()
         unitws.unit = dummyunit
-        gui.simulateInput(unitws, 'UNITVIEW_RELATIONSHIPS')
+        gui.simulateInput(unitws, K'UNITVIEW_RELATIONSHIPS')
         df.delete(unitws)
 
         local relws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_unit_relationshipst
@@ -838,7 +838,7 @@ function unit_get_thoughts(unitid, is_histfig)
         relws.relation_unit_type:insert(0, 0)
         relws.relation_histfig_type:insert(0, 0)
         --relws.relation_textline:insert(0, '')
-        gui.simulateInput(relws, 'UNITVIEW_RELATIONSHIPS_VIEW')
+        gui.simulateInput(relws, K'UNITVIEW_RELATIONSHIPS_VIEW')
         df.delete(relws)
 
     else
@@ -853,11 +853,11 @@ function unit_get_thoughts(unitid, is_histfig)
         unitlistws.cursor_pos[0] = 0
         unitlistws.units[0]:insert(0, unit)
         unitlistws.jobs[0]:insert(0, nil)
-        gui.simulateInput(unitlistws, 'UNITJOB_VIEW')
+        gui.simulateInput(unitlistws, K'UNITJOB_VIEW')
 
         local ws = dfhack.gui.getCurViewscreen()
         if ws._type == df.viewscreen_unitst then
-            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, K'SELECT')
             ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         end
 
@@ -866,7 +866,7 @@ function unit_get_thoughts(unitid, is_histfig)
         --[[if not unit.flags1.dead and dfhack.units.isCitizen(unit) then
             local unitws = df.viewscreen_unitst:new()
             unitws.unit = unit
-            gui.simulateInput(unitws, 'SELECT')
+            gui.simulateInput(unitws, K'SELECT')
 
             df.delete(unitws)
         else
@@ -875,7 +875,7 @@ function unit_get_thoughts(unitid, is_histfig)
             unitlistws.cursor_pos[1] = 0
             unitlistws.units[1]:insert(0, unit)
             unitlistws.jobs[1]:insert(0, nil)
-            gui.simulateInput(unitlistws, 'UNITJOB_VIEW')
+            gui.simulateInput(unitlistws, K'UNITJOB_VIEW')
 
             df.delete(unitlistws)
         end]]
@@ -1017,7 +1017,7 @@ function unit_get_relationships(unitid)
 
     local unitws = df.viewscreen_unitst:new()
     unitws.unit = unit
-    gui.simulateInput(unitws, 'UNITVIEW_RELATIONSHIPS')
+    gui.simulateInput(unitws, K'UNITVIEW_RELATIONSHIPS')
     df.delete(unitws)    
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_unit_relationshipst
@@ -1241,7 +1241,7 @@ function unit_get_health(unitid)
 
     local unitws = df.viewscreen_unitst:new()
     unitws.unit = unit
-    gui.simulateInput(unitws, 'UNITVIEW_HEALTH')
+    gui.simulateInput(unitws, K'UNITVIEW_HEALTH')
     df.delete(unitws)
 
     local ws = dfhack.gui.getCurViewscreen()

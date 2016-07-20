@@ -109,7 +109,7 @@ end
 --luacheck: in=
 function setup_get_buildings()
     return execute_with_main_mode(0, function(ws)
-        gui.simulateInput(ws, 'D_BUILDING')
+        gui.simulateInput(ws, K'D_BUILDING')
         building_btns = {}
         return get_choices_build()
     end)

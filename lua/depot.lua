@@ -46,14 +46,14 @@ function depot_movegoods_get()
         error('not a depot')
     end
 
-    gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
+    gui.simulateInput(ws, K'BUILDJOB_DEPOT_BRING')
 
     local movegoodsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
     if movegoodsws._type ~= df.viewscreen_layer_assigntradest then
         error('can not switch to move goods screen')
     end
 
-    gui.simulateInput(movegoodsws, 'ASSIGNTRADE_SORT')
+    gui.simulateInput(movegoodsws, K'ASSIGNTRADE_SORT')
 
     local ret = {}
     
@@ -81,14 +81,14 @@ function depot_movegoods_get2()
         error('not a depot')
     end
 
-    gui.simulateInput(ws, 'BUILDJOB_DEPOT_BRING')
+    gui.simulateInput(ws, K'BUILDJOB_DEPOT_BRING')
 
     local movegoodsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
     if movegoodsws._type ~= df.viewscreen_layer_assigntradest then
         error('can not switch to move goods screen')
     end
 
-    gui.simulateInput(movegoodsws, 'ASSIGNTRADE_SORT')
+    gui.simulateInput(movegoodsws, K'ASSIGNTRADE_SORT')
 
     local ret = {}
     
@@ -375,7 +375,7 @@ function depot_trade_overview()
             error('not a depot')
         end
     
-        gui.simulateInput(ws, 'BUILDJOB_DEPOT_TRADE')
+        gui.simulateInput(ws, K'BUILDJOB_DEPOT_TRADE')
 
         ws = dfhack.gui.getCurViewscreen()
         ws:logic()
@@ -415,7 +415,7 @@ function depot_trade_overview()
             table.insert(counteroffer, { title })
         end
 
-        gui.simulateInput(tradews, 'SELECT')
+        gui.simulateInput(tradews, K'SELECT')
     elseif not istrue(tradews.has_offer) then
         counteroffer = mp.NIL
     end
@@ -553,7 +553,7 @@ function depot_trade_dotrade()
         return
     end
 
-    gui.simulateInput(ws, 'TRADE_TRADE')
+    gui.simulateInput(ws, K'TRADE_TRADE')
 
     --not sure these are needed
     ws:logic()
@@ -570,7 +570,7 @@ function depot_trade_seize()
         return
     end
 
-    gui.simulateInput(ws, 'TRADE_SEIZE')
+    gui.simulateInput(ws, K'TRADE_SEIZE')
 
     --not sure these are needed
     ws:logic()
@@ -587,7 +587,7 @@ function depot_trade_offer()
         return
     end
 
-    gui.simulateInput(ws, 'TRADE_OFFER')
+    gui.simulateInput(ws, K'TRADE_OFFER')
 
     --not sure these are needed
     ws:logic()
@@ -606,7 +606,7 @@ function depot_access()
 
     reset_main()
 
-    gui.simulateInput(ws, 'D_DEPOT')
+    gui.simulateInput(ws, K'D_DEPOT')
 
     return df.global.ui.main.mode == df.ui_sidebar_mode.DepotAccess
 end

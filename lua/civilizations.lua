@@ -25,7 +25,7 @@ function civilization_get_info(civid)
 
     local civsws = df.viewscreen_civlistst:new()
     civsws.entities:insert(0, civ)
-    gui.simulateInput(civsws, 'SELECT')
+    gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_entityst
@@ -108,7 +108,7 @@ function civilization_get_agreement(civid, idx)
 
     local civsws = df.viewscreen_civlistst:new()
     civsws.entities:insert(0, civ)
-    gui.simulateInput(civsws, 'SELECT')
+    gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_entityst

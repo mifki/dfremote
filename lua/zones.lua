@@ -3,7 +3,7 @@ function zone_create()
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_CIVZONE')
+    gui.simulateInput(ws, K'D_CIVZONE')
 end
 
 --luacheck: in=number
@@ -77,7 +77,7 @@ function zone_information_get(bldid, mode)
     if mode == df.building_civzonest.T_zone_flags.pen_pasture then
         local list = {}
         execute_with_selected_zone(bldid, function(ws)
-            gui.simulateInput(ws, 'CIVZONE_PEN_OPTIONS')
+            gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
 
             for i,unit in ipairs(df.global.ui_building_assign_units) do
                 local title = unit_fulltitle(unit)
@@ -93,7 +93,7 @@ function zone_information_get(bldid, mode)
     if mode == df.building_civzonest.T_zone_flags.pit_pond then
         local list = {}
         execute_with_selected_zone(bldid, function(ws)
-            gui.simulateInput(ws, 'CIVZONE_POND_OPTIONS')
+            gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
 
             for i,v in ipairs(df.global.ui_building_assign_type) do
                 --xxx: this shouldn't happen, but was reported. bug in game? 
@@ -170,7 +170,7 @@ function zone_assign(bldid, mode, objid, objtype, on)
     on = istrue(on)
 
     execute_with_selected_zone(bldid, function(ws)
-        gui.simulateInput(ws, (mode == df.building_civzonest.T_zone_flags.pit_pond and 'CIVZONE_POND_OPTIONS' or 'CIVZONE_PEN_OPTIONS'))
+        gui.simulateInput(ws, (mode == df.building_civzonest.T_zone_flags.pit_pond and K'CIVZONE_POND_OPTIONS' or K'CIVZONE_PEN_OPTIONS'))
 
         local vect = nil
         if objtype == 0 then
@@ -185,7 +185,7 @@ function zone_assign(bldid, mode, objid, objtype, on)
                     if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
                         df.global.ui_building_item_cursor = i
                         local ws = dfhack.gui.getCurViewscreen()
-                        gui.simulateInput(ws, 'SELECT')
+                        gui.simulateInput(ws, K'SELECT')
                     end
 
                     break            
@@ -200,7 +200,7 @@ end
 function zone_remove(bldid)
     execute_with_selected_zone(bldid, function(ws)
         df.global.ui_sidebar_menus.zone.remove = true
-        gui.simulateInput(ws, 'CIVZONE_REMOVE_ZONE')
+        gui.simulateInput(ws, K'CIVZONE_REMOVE_ZONE')
         df.global.ui_sidebar_menus.zone.remove = false
     end)
 end

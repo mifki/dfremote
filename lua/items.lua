@@ -207,7 +207,7 @@ function item_get_description(itemid)
 
     local itemws = df.viewscreen_itemst:new()
     itemws.item = item
-    gui.simulateInput(itemws, 'ITEM_DESCRIPTION')
+    gui.simulateInput(itemws, K'ITEM_DESCRIPTION')
 
     df.delete(itemws)
 
@@ -360,17 +360,17 @@ function item_zoom(itemid)
         recenter_view(x, y, z)
 
         local ws = dfhack.gui.getCurViewscreen()
-        gui.simulateInput(ws, 'D_LOOK')
+        gui.simulateInput(ws, K'D_LOOK')
 
         df.global.cursor.x = x
         df.global.cursor.y = y
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
 
         return true

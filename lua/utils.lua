@@ -174,6 +174,10 @@ function sleep(n)  -- seconds
   while clock() - t0 <= n do end
 end
 
+function K(k)
+    return df.interface_key[k]
+end
+
 function list_select_item_by_id(ws, listidx, array, id)
     local idx = -1
     for i,v in ipairs(array) do
@@ -189,7 +193,7 @@ function list_select_item_by_id(ws, listidx, array, id)
 
     if idx > 0 then
         ws.layer_objects[listidx].cursor = idx - 1 --hint:df.layer_object_listst
-        gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
+        gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
     end 
 
     return idx

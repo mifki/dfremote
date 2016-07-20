@@ -150,11 +150,11 @@ function meeting_action(idx)
 	local key
 
 	if ws._type == df.viewscreen_textviewerst and ws.parent._type == df.viewscreen_meetingst then
-		key = 'LEAVESCREEN'
+		key = K'LEAVESCREEN'
     end
 
     if ws._type == df.viewscreen_topicmeetingst then
-    	key = 'OPTION' .. tostring(idx+1)
+    	key = K('OPTION' .. tostring(idx+1))
     end
 
 	gui.simulateInput(ws, key)
@@ -538,7 +538,7 @@ function import_req_set(changes, close)
 	end
 
 	if istrue(close) then
-		gui.simulateInput(ws, 'LEAVESCREEN')
+		gui.simulateInput(ws, K'LEAVESCREEN')
 	end
 end
 
@@ -806,6 +806,6 @@ function landholders_set(hfid, close)
 	end
 
 	if istrue(close) then
-		gui.simulateInput(ws, 'LEAVESCREEN')
+		gui.simulateInput(ws, K'LEAVESCREEN')
 	end	
 end

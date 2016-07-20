@@ -31,7 +31,7 @@ function get_load_game_screen()
 
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     titlews.sel_menu_line = 0
-    gui.simulateInput(titlews, 'SELECT')
+    gui.simulateInput(titlews, K'SELECT')
 
     -- This is to deal with the custom dfhack load screen
     ws = dfhack.gui.getCurViewscreen()
@@ -74,7 +74,7 @@ function savegame_load(folder)
     for i,s in ipairs(ws.saves) do
         if s.folder_name == folder then
             ws.sel_idx = i
-            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, K'SELECT')
 
             return true
         end
@@ -160,7 +160,7 @@ function create_new_world(params)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' and/or 'start playing' menu items
     titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0) + (#titlews.start_savegames > 0 and 1 or 0)
-    gui.simulateInput(titlews, 'SELECT')
+    gui.simulateInput(titlews, K'SELECT')
 
     worldgen_params = params
 
@@ -184,7 +184,7 @@ function progress_worldgen()
     if ws.unk_b4 == 0 then
         -- Close 'Welcome to ...' message
         if #ws.welcome_msg > 0 then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
         end    
 
         --xxx: the second condition is for the advanced worldgen mode which isn't supported
@@ -198,7 +198,7 @@ function progress_worldgen()
                 ws.savagery = savagery
                 ws.mineral_occurence = mineral_occurence
 
-                gui.simulateInput(ws, 'MENU_CONFIRM')
+                gui.simulateInput(ws, K'MENU_CONFIRM')
                 worldgen_params = nil
             end
 

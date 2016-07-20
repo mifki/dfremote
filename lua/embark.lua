@@ -63,13 +63,13 @@ function embark_newgame(folder)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' menu item
     titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0)
-    gui.simulateInput(titlews, 'SELECT')
+    gui.simulateInput(titlews, K'SELECT')
     titlews:logic()
     titlews:render()
 
     if titlews.sel_subpage == df.viewscreen_titlest.T_sel_subpage.StartSelectWorld then
     	titlews.sel_submenu_line = idx
-	    gui.simulateInput(titlews, 'SELECT')
+	    gui.simulateInput(titlews, K'SELECT')
 	    titlews:logic()
 	    titlews:render()
 
@@ -82,7 +82,7 @@ function embark_newgame(folder)
     end
 
 	titlews.sel_menu_line = 0
-    gui.simulateInput(titlews, 'SELECT')
+    gui.simulateInput(titlews, K'SELECT')
 end
 
 --luacheck: in=
@@ -154,8 +154,8 @@ function embark_get_reclaim_sites()
 
 		ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 		ws.reclaim_idx = i
-		gui.simulateInput(ws, 'SETUP_RECLAIM')
-		gui.simulateInput(ws, 'CHANGETAB')
+		gui.simulateInput(ws, K'SETUP_RECLAIM')
+		gui.simulateInput(ws, K'CHANGETAB')
 		ws:render()
 
 		local site_info = ''
@@ -282,7 +282,7 @@ function embark_finder_find(w, h, params)
 		ws.finder.options[idx] = v
 	end
 
-	gui.simulateInput(ws, 'SELECT')
+	gui.simulateInput(ws, K'SELECT')
 	matches = {}
 end
 
@@ -369,7 +369,7 @@ function embark_finder_next()
 
 		ws.location.region_pos.x = match[1]-1
 		ws.location.region_pos.y = match[2]
-		gui.simulateInput(ws, 'CURSOR_RIGHT')
+		gui.simulateInput(ws, K'CURSOR_RIGHT')
 
 		--ws:render()
 	end
@@ -413,7 +413,7 @@ function embark_cancel()
     optsws.parent = ws
     ws.child = optsws
 
-    gui.simulateInput(optsws, 'SELECT')
+    gui.simulateInput(optsws, K'SELECT')
 end
 
 --luacheck: in=
@@ -423,14 +423,14 @@ function embark_embark()
 		return
 	end
 
-	gui.simulateInput(ws, 'SETUP_EMBARK')
+	gui.simulateInput(ws, K'SETUP_EMBARK')
 	ws = dfhack.gui.getCurViewscreen()
 
 	-- We're still on the embark map screen, likely a message box is displayed
 	if ws._type == df.viewscreen_choose_start_sitest then
 		if ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal then --hint:df.viewscreen_choose_start_sitest
 			--todo: should return this message to the app instead of accepting silently
-			gui.simulateInput(ws, 'SELECT')
+			gui.simulateInput(ws, K'SELECT')
 			ws = dfhack.gui.getCurViewscreen()
 		end
 	end
@@ -447,9 +447,9 @@ function embark_reclaim(idx)
 	ws.finder.finder_state = -1
 	ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 	ws.reclaim_idx = idx
-	gui.simulateInput(ws, 'SETUP_RECLAIM')
+	gui.simulateInput(ws, K'SETUP_RECLAIM')
 	ws:render()
-	gui.simulateInput(ws, 'SETUP_EMBARK')
+	gui.simulateInput(ws, K'SETUP_EMBARK')
 
 	local ws2 = dfhack.gui.getCurViewscreen()
 
@@ -496,7 +496,7 @@ function embark_play(idx)
 
     --native.set_timer(1, 'embark_play_go')
 
-    gui.simulateInput(ws, 'SELECT')
+    gui.simulateInput(ws, K'SELECT')
 
 	local ws = dfhack.gui.getCurViewscreen()
 
@@ -504,7 +504,7 @@ function embark_play(idx)
 	if ws._type == df.viewscreen_setupdwarfgamest and (istrue(ws.in_problems) or ws.points_remaining > 0) then --as:ws=df.viewscreen_setupdwarfgamest
 		ws.in_problems = 0
 		ws.points_remaining = 0
-		gui.simulateInput(ws, 'SETUP_EMBARK')
+		gui.simulateInput(ws, K'SETUP_EMBARK')
 		ws = dfhack.gui.getCurViewscreen()
 	end
 

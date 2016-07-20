@@ -7,67 +7,67 @@ local orders = {
 					'Announce some job cancellations',
 					'Announce most job cancellations',
 					'Announce all job cancellations'
-				}, 'ORDERS_EXCEPTIONS'
+				}, K'ORDERS_EXCEPTIONS'
 			},
 		}, df.ui_sidebar_mode.Orders
 	},
 
 	{
 		'Gathering', {
-			{ 'standing_orders_gather_animals', 'Dwarves gather animals', 'ORDERS_GATHER_ANIMALS' },
-			{ 'standing_orders_gather_food', 'Dwarves gather food', 'ORDERS_GATHER_FOOD' },
-			{ 'standing_orders_gather_furniture', 'Dwarves gather furniture', 'ORDERS_GATHER_FURNITURE' },
-			{ 'standing_orders_gather_bodies', 'Dwarves gather bodies', 'ORDERS_GATHER_BODIES' },
-			{ 'standing_orders_gather_minerals', 'Dwarves gather minerals', 'ORDERS_GATHER_STONE' },
-			{ 'standing_orders_gather_wood', 'Dwarves gather wood', 'ORDERS_GATHER_WOOD' },
+			{ 'standing_orders_gather_animals', 'Dwarves gather animals', K'ORDERS_GATHER_ANIMALS' },
+			{ 'standing_orders_gather_food', 'Dwarves gather food', K'ORDERS_GATHER_FOOD' },
+			{ 'standing_orders_gather_furniture', 'Dwarves gather furniture', K'ORDERS_GATHER_FURNITURE' },
+			{ 'standing_orders_gather_bodies', 'Dwarves gather bodies', K'ORDERS_GATHER_BODIES' },
+			{ 'standing_orders_gather_minerals', 'Dwarves gather minerals', K'ORDERS_GATHER_STONE' },
+			{ 'standing_orders_gather_wood', 'Dwarves gather wood', K'ORDERS_GATHER_WOOD' },
 		}, df.ui_sidebar_mode.Orders
 	},
 
 	{
 		'Refuse', {
-			{ 'standing_orders_gather_refuse', 'Dwarves gather refuse', 'ORDERS_REFUSE_GATHER' },
-			{ 'standing_orders_gather_refuse_outside', '\tDwarves gather refuse from outside', 'ORDERS_REFUSE_OUTSIDE' },
-			{ 'standing_orders_gather_vermin_remains', '\t\tDwarves gather vermin remains', 'ORDERS_REFUSE_OUTSIDE_VERMIN' },
+			{ 'standing_orders_gather_refuse', 'Dwarves gather refuse', K'ORDERS_REFUSE_GATHER' },
+			{ 'standing_orders_gather_refuse_outside', '\tDwarves gather refuse from outside', K'ORDERS_REFUSE_OUTSIDE' },
+			{ 'standing_orders_gather_vermin_remains', '\t\tDwarves gather vermin remains', K'ORDERS_REFUSE_OUTSIDE_VERMIN' },
 		--[[}, df.ui_sidebar_mode.OrdersRefuse
 	},
 
 	{
 		'', {]]
-			{ 'standing_orders_dump_corpses', '\tDwarves dump corpses', 'ORDERS_REFUSE_DUMP_CORPSE' },
-			{ 'standing_orders_dump_skulls', '\tDwarves dump skulls', 'ORDERS_REFUSE_DUMP_SKULL' },
-			{ 'standing_orders_dump_bones', '\tDwarves dump bones', 'ORDERS_REFUSE_DUMP_BONE' }, 
-			{ 'standing_orders_dump_shells', '\tDwarves dump shells', 'ORDERS_REFUSE_DUMP_SHELL' },
-			{ 'standing_orders_dump_skins', '\tDwarves dump skins', 'ORDERS_REFUSE_DUMP_SKIN' },
-			{ 'standing_orders_dump_hair', '\tDwarves dump hair & wool', 'ORDERS_REFUSE_DUMP_STRAND_TISSUE' },
-			{ 'standing_orders_dump_other', '\tDwarves dump other', 'ORDERS_REFUSE_DUMP_OTHER' },
+			{ 'standing_orders_dump_corpses', '\tDwarves dump corpses', K'ORDERS_REFUSE_DUMP_CORPSE' },
+			{ 'standing_orders_dump_skulls', '\tDwarves dump skulls', K'ORDERS_REFUSE_DUMP_SKULL' },
+			{ 'standing_orders_dump_bones', '\tDwarves dump bones', K'ORDERS_REFUSE_DUMP_BONE' }, 
+			{ 'standing_orders_dump_shells', '\tDwarves dump shells', K'ORDERS_REFUSE_DUMP_SHELL' },
+			{ 'standing_orders_dump_skins', '\tDwarves dump skins', K'ORDERS_REFUSE_DUMP_SKIN' },
+			{ 'standing_orders_dump_hair', '\tDwarves dump hair & wool', K'ORDERS_REFUSE_DUMP_STRAND_TISSUE' },
+			{ 'standing_orders_dump_other', '\tDwarves dump other', K'ORDERS_REFUSE_DUMP_OTHER' },
 		}, df.ui_sidebar_mode.OrdersRefuse
 	},
 
 	{
 		'Forbidding', {
-			{ 'standing_orders_forbid_used_ammo', 'Forbid used ammunition', 'ORDERS_FORBID_PROJECTILE' },
-			{ 'standing_orders_forbid_own_dead', 'Forbid your dead', 'ORDERS_FORBID_YOUR_CORPSE' },
-			{ 'standing_orders_forbid_own_dead_items', 'Forbid your death items', 'ORDERS_FORBID_YOUR_ITEMS' },
-			{ 'standing_orders_forbid_other_nohunt', 'Forbid other dead', 'ORDERS_FORBID_OTHER_CORPSE' },
-			{ 'standing_orders_forbid_other_dead_items', 'Forbid other death items', 'ORDERS_FORBID_OTHER_ITEMS' },
+			{ 'standing_orders_forbid_used_ammo', 'Forbid used ammunition', K'ORDERS_FORBID_PROJECTILE' },
+			{ 'standing_orders_forbid_own_dead', 'Forbid your dead', K'ORDERS_FORBID_YOUR_CORPSE' },
+			{ 'standing_orders_forbid_own_dead_items', 'Forbid your death items', K'ORDERS_FORBID_YOUR_ITEMS' },
+			{ 'standing_orders_forbid_other_nohunt', 'Forbid other dead', K'ORDERS_FORBID_OTHER_CORPSE' },
+			{ 'standing_orders_forbid_other_dead_items', 'Forbid other death items', K'ORDERS_FORBID_OTHER_ITEMS' },
 		}, df.ui_sidebar_mode.OrdersForbid
 	},
 
 	{
 		'', {
-			{ 'standing_orders_farmer_harvest', 'Only farmers harvest', 'ORDERS_ALL_HARVEST' },
-			{ 'standing_orders_mix_food', 'Mix food', 'ORDERS_MIXFOODS' },
+			{ 'standing_orders_farmer_harvest', 'Only farmers harvest', K'ORDERS_ALL_HARVEST' },
+			{ 'standing_orders_mix_food', 'Mix food', K'ORDERS_MIXFOODS' },
 		}, df.ui_sidebar_mode.Orders
 	},
 
 	{
 		'Workshop Orders', {
-			{ 'standing_orders_auto_collect_webs', 'Auto collect webs', 'ORDERS_COLLECT_WEB' },
-			{ 'standing_orders_auto_slaughter', 'Auto slaughter', 'ORDERS_SLAUGHTER' },
-			{ 'standing_orders_auto_butcher', 'Auto butcher', 'ORDERS_BUTCHER' },
-			{ 'standing_orders_auto_fishery', 'Auto fishery', 'ORDERS_AUTO_FISHERY' },
-			{ 'standing_orders_auto_kitchen', 'Auto kitchen', 'ORDERS_AUTO_KITCHEN' },
-			{ 'standing_orders_auto_tan', 'Auto tan', 'ORDERS_TAN' },
+			{ 'standing_orders_auto_collect_webs', 'Auto collect webs', K'ORDERS_COLLECT_WEB' },
+			{ 'standing_orders_auto_slaughter', 'Auto slaughter', K'ORDERS_SLAUGHTER' },
+			{ 'standing_orders_auto_butcher', 'Auto butcher', K'ORDERS_BUTCHER' },
+			{ 'standing_orders_auto_fishery', 'Auto fishery', K'ORDERS_AUTO_FISHERY' },
+			{ 'standing_orders_auto_kitchen', 'Auto kitchen', K'ORDERS_AUTO_KITCHEN' },
+			{ 'standing_orders_auto_tan', 'Auto tan', K'ORDERS_TAN' },
 		}, df.ui_sidebar_mode.OrdersWorkshop
 	},
 
@@ -85,14 +85,14 @@ local orders = {
 
 	{
 		'', {
-			{ 'standing_orders_use_dyed_cloth', 'Use dyed cloth only', 'ORDERS_DYED_CLOTH' },
+			{ 'standing_orders_use_dyed_cloth', 'Use dyed cloth only', K'ORDERS_DYED_CLOTH' },
 		}, df.ui_sidebar_mode.OrdersWorkshop
 	},
 
 	{
 		'Activity Zone Orders', {
-			{ 'standing_orders_zoneonly_drink', 'Zone-only drinking', 'ORDERS_ZONE_DRINKING' },
-			{ 'standing_orders_zoneonly_fish', 'Zone-only fishing', 'ORDERS_ZONE_FISHING' },
+			{ 'standing_orders_zoneonly_drink', 'Zone-only drinking', K'ORDERS_ZONE_DRINKING' },
+			{ 'standing_orders_zoneonly_fish', 'Zone-only fishing', K'ORDERS_ZONE_FISHING' },
 		}, df.ui_sidebar_mode.OrdersZone
 	}
 }
@@ -128,14 +128,14 @@ local function parse_orders_refuse(t, ret, ws)
 
 	ret['standing_orders_gather_refuse'] = t(0, 11, 'G')
 	if ws and not ret['standing_orders_gather_refuse'] then --as:ws=df.viewscreen
-		gui.simulateInput(ws, 'ORDERS_REFUSE_GATHER')
+		gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
 		ws:render()
 		s1 = true
 	end
 
 	ret['standing_orders_gather_refuse_outside'] = t(1, 11, 'G')
 	if ws and not ret['standing_orders_gather_refuse_outside'] then --as:ws=df.viewscreen
-		gui.simulateInput(ws, 'ORDERS_REFUSE_OUTSIDE')
+		gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
 		ws:render()
 		s2 = true
 	end
@@ -152,10 +152,10 @@ local function parse_orders_refuse(t, ret, ws)
 	ret['standing_orders_dump_other'] = t(9+dy, 11, 'D')
 
 	if s2 then
-		gui.simulateInput(ws, 'ORDERS_REFUSE_OUTSIDE')
+		gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
 	end
 	if s1 then
-		gui.simulateInput(ws, 'ORDERS_REFUSE_GATHER')
+		gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
 	end
 end
 
@@ -272,12 +272,12 @@ function orders_set(section, idx, val)
 	        local globals = {}        	
     		parse_orders_refuse(t, globals, ws)
 			if idx ~= 1 and not globals['standing_orders_gather_refuse'] then
-				gui.simulateInput(ws, 'ORDERS_REFUSE_GATHER')
+				gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
 				s1 = true
 			end
 
 			if idx ~= 2 and not globals['standing_orders_gather_refuse_outside'] then
-				gui.simulateInput(ws, 'ORDERS_REFUSE_OUTSIDE')
+				gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
 				s2 = true
 			end    		
     	end
@@ -307,10 +307,10 @@ function orders_set(section, idx, val)
 	    end
 
 		if s2 then
-			gui.simulateInput(ws, 'ORDERS_REFUSE_OUTSIDE')
+			gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
 		end
 		if s1 then
-			gui.simulateInput(ws, 'ORDERS_REFUSE_GATHER')
+			gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
 		end
 
 	    return true

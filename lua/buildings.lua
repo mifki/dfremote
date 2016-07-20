@@ -136,7 +136,7 @@ function building_query_selected(bldid)
         df.global.cursor.x = bld.x1
         df.global.cursor.y = bld.y1
         df.global.cursor.z = bld.z-1
-        gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        gui.simulateInput(ws, K'CURSOR_UP_Z')        
     end
 
     local btype = bld:getType()
@@ -367,7 +367,7 @@ function building_query_selected(bldid)
 
     elseif btype == df.building_type.FarmPlot then
         local bld = bld --as:df.building_farmplotst
-        local keys = { 'BUILDJOB_FARM_SPRING', 'BUILDJOB_FARM_SUMMER', 'BUILDJOB_FARM_AUTUMN', 'BUILDJOB_FARM_WINTER' }
+        local keys = { K'BUILDJOB_FARM_SPRING', K'BUILDJOB_FARM_SUMMER', K'BUILDJOB_FARM_AUTUMN', K'BUILDJOB_FARM_WINTER' }
 
         local crops = {}
         for i,sk in ipairs(keys) do
@@ -462,7 +462,7 @@ function building_workshop_set_suspend(bldid, idx, value)
 
     if bld.jobs[idx].flags['suspend'] ~= istrue(value) then
         df.global.ui_workshop_job_cursor = idx
-        gui.simulateInput(ws, 'BUILDJOB_SUSPEND')
+        gui.simulateInput(ws, K'BUILDJOB_SUSPEND')
     end
 
     return true    
@@ -482,7 +482,7 @@ function building_workshop_cancel(bldid, idx)
     local bld = df.global.world.selected_building
 
     df.global.ui_workshop_job_cursor = idx
-    gui.simulateInput(ws, 'BUILDJOB_CANCEL')
+    gui.simulateInput(ws, K'BUILDJOB_CANCEL')
 
     return true    
 end
@@ -572,10 +572,10 @@ function get_job_choices(ws, level)
             subchoices = get_job_choices(ws, level+1)
 
             if level > 0 then
-                gui.simulateInput(ws, 'LEAVESCREEN')
+                gui.simulateInput(ws, K'LEAVESCREEN')
             else
-                gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-                gui.simulateInput(ws, 'CURSOR_UP_Z')
+                gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+                gui.simulateInput(ws, K'CURSOR_UP_Z')
             end
             
         else
@@ -722,13 +722,13 @@ function building_workshop_get_jobchoices(bldid)
     return ret
 end
 
-local jobs_mechanics = { 'HOTKEY_MECHANIC_PARTS', 'HOTKEY_MECHANIC_TRACTION_BENCH' }
-local jobs_butchers = { 'HOTKEY_BUTCHER_BUTCHER', 'HOTKEY_BUTCHER_EXTRACT', 'HOTKEY_BUTCHER_CATCH' }
-local jobs_fishery = { 'HOTKEY_FISHERY_PROCESS', 'HOTKEY_FISHERY_EXTRACT', 'HOTKEY_FISHERY_CATCH' }
-local jobs_loom = { 'HOTKEY_LOOM_COLLECT_SILK', 'HOTKEY_LOOM_WEAVE_CLOTH', 'HOTKEY_LOOM_WEAVE_SILK', 'HOTKEY_LOOM_WEAVE_YARN', 'HOTKEY_LOOM_WEAVE_METAL' }
-local jobs_kennels = { 'HOTKEY_KENNEL_CATCH_VERMIN', 'HOTKEY_KENNEL_TAME_VERMIN' }
-local jobs_dyers = { 'HOTKEY_DYER_THREAD', 'HOTKEY_DYER_CLOTH' }
-local jobs_trap = { 'HOTKEY_TRAP_PULL_LEVER', 'HOTKEY_TRAP_BRIDGE', 'HOTKEY_TRAP_CAGE', 'HOTKEY_TRAP_CHAIN', 'HOTKEY_TRAP_DOOR', 'HOTKEY_TRAP_FLOODGATE', 'HOTKEY_TRAP_HATCH', 'HOTKEY_TRAP_GRATE_WALL', 'HOTKEY_TRAP_GRATE_FLOOR', 'HOTKEY_TRAP_BARS_VERTICAL', 'HOTKEY_TRAP_BARS_FLOOR', 'HOTKEY_TRAP_SUPPORT', 'HOTKEY_TRAP_SPIKE', 'HOTKEY_TRAP_GEAR_ASSEMBLY', 'HOTKEY_TRAP_TRACK_STOP' }
+local jobs_mechanics = { K'HOTKEY_MECHANIC_PARTS', K'HOTKEY_MECHANIC_TRACTION_BENCH' }
+local jobs_butchers = { K'HOTKEY_BUTCHER_BUTCHER', K'HOTKEY_BUTCHER_EXTRACT', K'HOTKEY_BUTCHER_CATCH' }
+local jobs_fishery = { K'HOTKEY_FISHERY_PROCESS', K'HOTKEY_FISHERY_EXTRACT', K'HOTKEY_FISHERY_CATCH' }
+local jobs_loom = { K'HOTKEY_LOOM_COLLECT_SILK', K'HOTKEY_LOOM_WEAVE_CLOTH', K'HOTKEY_LOOM_WEAVE_SILK', K'HOTKEY_LOOM_WEAVE_YARN', K'HOTKEY_LOOM_WEAVE_METAL' }
+local jobs_kennels = { K'HOTKEY_KENNEL_CATCH_VERMIN', K'HOTKEY_KENNEL_TAME_VERMIN' }
+local jobs_dyers = { K'HOTKEY_DYER_THREAD', K'HOTKEY_DYER_CLOTH' }
+local jobs_trap = { K'HOTKEY_TRAP_PULL_LEVER', K'HOTKEY_TRAP_BRIDGE', K'HOTKEY_TRAP_CAGE', K'HOTKEY_TRAP_CHAIN', K'HOTKEY_TRAP_DOOR', K'HOTKEY_TRAP_FLOODGATE', K'HOTKEY_TRAP_HATCH', K'HOTKEY_TRAP_GRATE_WALL', K'HOTKEY_TRAP_GRATE_FLOOR', K'HOTKEY_TRAP_BARS_VERTICAL', K'HOTKEY_TRAP_BARS_FLOOR', K'HOTKEY_TRAP_SUPPORT', K'HOTKEY_TRAP_SPIKE', K'HOTKEY_TRAP_GEAR_ASSEMBLY', K'HOTKEY_TRAP_TRACK_STOP' }
 
 --luacheck: in=number,number,bool
 function building_workshop_addjob(bldid, idx, rep)
@@ -754,7 +754,7 @@ function building_workshop_addjob(bldid, idx, rep)
         local bld = bld --as:df.building_trapst
 
         if idx < #jobs_trap then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
+            gui.simulateInput(ws, K'BUILDJOB_ADD')
             ws:logic() --to initialize / switch to add job menu
             gui.simulateInput(ws, jobs_trap[idx+1])
 
@@ -769,21 +769,21 @@ function building_workshop_addjob(bldid, idx, rep)
 
         if wtype == df.workshop_type.Mechanics then
             if idx < #jobs_mechanics then
-                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                gui.simulateInput(ws, K'BUILDJOB_ADD')
                 ws:logic() --to initialize / switch to add job menu
                 gui.simulateInput(ws, jobs_mechanics[idx+1])
             end
     
         elseif wtype == df.workshop_type.Butchers then
             if idx < #jobs_butchers then
-                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                gui.simulateInput(ws, K'BUILDJOB_ADD')
                 ws:logic() --to initialize / switch to add job menu
                 gui.simulateInput(ws, jobs_butchers[idx+1])
             end
     
         elseif wtype == df.workshop_type.Fishery then
             if idx < #jobs_fishery then
-                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                gui.simulateInput(ws, K'BUILDJOB_ADD')
                 ws:logic() --to initialize / switch to add job menu
                 gui.simulateInput(ws, jobs_fishery[idx+1])
             end
@@ -797,30 +797,30 @@ function building_workshop_addjob(bldid, idx, rep)
     
         elseif wtype == df.workshop_type.Kennels then
             if idx < #jobs_kennels then
-                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                gui.simulateInput(ws, K'BUILDJOB_ADD')
                 ws:logic() --to initialize / switch to add job menu
                 gui.simulateInput(ws, jobs_kennels[idx+1])
             end
     
         elseif wtype == df.workshop_type.Dyers then
             if idx < #jobs_dyers then
-                gui.simulateInput(ws, 'BUILDJOB_ADD')
+                gui.simulateInput(ws, K'BUILDJOB_ADD')
                 ws:logic() --to initialize / switch to add job menu
                 gui.simulateInput(ws, jobs_dyers[idx+1])
             end
     
         elseif wtype == df.workshop_type.Jewelers then
-            gui.simulateInput(ws, 'BUILDJOB_ADD')
+            gui.simulateInput(ws, K'BUILDJOB_ADD')
             ws:logic() --to initialize / switch to add job menu
             local m = math.floor(idx / 4)
             local t = idx % 4
             df.global.ui_building_item_cursor = m
             if t == 0 then
-                gui.simulateInput(ws, 'HOTKEY_JEWELER_CUT')
+                gui.simulateInput(ws, K'HOTKEY_JEWELER_CUT')
             else
-                local w = { 'HOTKEY_JEWELER_FINISHED', 'HOTKEY_JEWELER_FURNITURE', 'HOTKEY_JEWELER_AMMO' }
+                local w = { K'HOTKEY_JEWELER_FINISHED', K'HOTKEY_JEWELER_FURNITURE', K'HOTKEY_JEWELER_AMMO' }
                 ws:logic() --to initialize / switch to menu
-                gui.simulateInput(ws, 'HOTKEY_JEWELER_ENCRUST')
+                gui.simulateInput(ws, K'HOTKEY_JEWELER_ENCRUST')
                 gui.simulateInput(ws, w[t])
             end
         
@@ -990,19 +990,19 @@ function building_room_free(bldid)
     end
 
     local keys = {
-        [df.building_type.Chair] = 'BUILDJOB_CHAIR_FREE',
-        [df.building_type.Table] = 'BUILDJOB_TABLE_FREE',
-        [df.building_type.Bed] = 'BUILDJOB_BED_FREE',
-        [df.building_type.Box] = 'BUILDJOB_RACKSTAND_FREE',
-        [df.building_type.Cabinet] = 'BUILDJOB_RACKSTAND_FREE',
-        [df.building_type.Armorstand] = 'BUILDJOB_RACKSTAND_FREE',
-        [df.building_type.Weaponrack] = 'BUILDJOB_RACKSTAND_FREE',
-        [df.building_type.ArcheryTarget] = 'BUILDJOB_TARGET_FREE',
-        [df.building_type.Coffin] = 'BUILDJOB_COFFIN_FREE',
-        [df.building_type.Slab] = 'BUILDJOB_STATUE_FREE',
-        [df.building_type.Cage] = 'BUILDJOB_CAGE_FREE',
-        [df.building_type.Chain] = 'BUILDJOB_CHAIN_FREE',
-        [df.building_type.Well] = 'BUILDJOB_WELL_FREE',
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_FREE',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_FREE',
+        [df.building_type.Bed] = K'BUILDJOB_BED_FREE',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_FREE',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_FREE',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_FREE',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_FREE',
+        [df.building_type.ArcheryTarget] = K'BUILDJOB_TARGET_FREE',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_FREE',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_FREE',
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_FREE',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_FREE',
+        [df.building_type.Well] = K'BUILDJOB_WELL_FREE',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1027,17 +1027,17 @@ function building_room_owner_get_candidates(bldid)
     end
 
     local keys = {
-        [df.building_type.Chair] = 'BUILDJOB_CHAIR_ASSIGN',
-        [df.building_type.Table] = 'BUILDJOB_TABLE_ASSIGN',
-        [df.building_type.Bed] = 'BUILDJOB_BED_ASSIGN',
-        [df.building_type.Box] = 'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Cabinet] = 'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Armorstand] = 'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Weaponrack] = 'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Coffin] = 'BUILDJOB_COFFIN_ASSIGN',
-        [df.building_type.Slab] = 'BUILDJOB_STATUE_ASSIGN',  
-        [df.building_type.Cage] = 'BUILDJOB_CAGE_ASSIGN',
-        [df.building_type.Chain] = 'BUILDJOB_CHAIN_ASSIGN',
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1156,12 +1156,12 @@ function building_set_flag(bldid, flag, value)
 
         if flag == 1 then
             if bld.bed_flags.barracks ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_BED_BARRACKS')
+                gui.simulateInput(ws, K'BUILDJOB_BED_BARRACKS')
             end
 
         elseif flag == 2 then
             if bld.bed_flags.dormitory ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_BED_DORMITORY')
+                gui.simulateInput(ws, K'BUILDJOB_BED_DORMITORY')
             end
         end
 
@@ -1170,7 +1170,7 @@ function building_set_flag(bldid, flag, value)
         if flag == 1 then
             local fert = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.FertilizeField)
             if fert ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_FARM_FERTILIZE')
+                gui.simulateInput(ws, K'BUILDJOB_FARM_FERTILIZE')
             end
 
         elseif flag == 2 then
@@ -1230,11 +1230,11 @@ function building_set_flag(bldid, flag, value)
         local bld = bld --as:df.building_tradedepotst
         if flag == 1 then
             if bld.trade_flags.trader_requested ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_DEPOT_REQUEST_TRADER')
+                gui.simulateInput(ws, K'BUILDJOB_DEPOT_REQUEST_TRADER')
             end
         elseif flag == 2 then
             if bld.trade_flags.anyone_can_trade ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_DEPOT_BROKER_ONLY')
+                gui.simulateInput(ws, K'BUILDJOB_DEPOT_BROKER_ONLY')
             end
         end
 
@@ -1242,7 +1242,7 @@ function building_set_flag(bldid, flag, value)
         local bld = bld --as:df.building_chainst
         if flag == 1 then
             if bld.flags.justice ~= istrue(value) then
-                gui.simulateInput(ws, 'BUILDJOB_CHAIN_JUSTICE')
+                gui.simulateInput(ws, K'BUILDJOB_CHAIN_JUSTICE')
             end
         end
 
@@ -1357,7 +1357,7 @@ function building_remove(bldid)
     end
 
     dfhack.buildings.deconstruct(df.global.world.selected_building)
-    --gui.simulateInput(ws, 'DESTROYBUILDING')
+    --gui.simulateInput(ws, K'DESTROYBUILDING')
 
     return true
 end
@@ -1373,7 +1373,7 @@ function building_stopremoval(bldid)
         return
     end
 
-    gui.simulateInput(ws, 'SUSPENDBUILDING')
+    gui.simulateInput(ws, K'SUSPENDBUILDING')
     return true    
 end
 
@@ -1388,7 +1388,7 @@ function building_suspend(bldid)
         return
     end
 
-    gui.simulateInput(ws, 'SUSPENDBUILDING')
+    gui.simulateInput(ws, K'SUSPENDBUILDING')
     return true    
 end
 
@@ -1418,7 +1418,7 @@ function building_start_resize(bldid)
     --todo: some checks here
     
     df.global.ui_building_in_resize = true
-    gui.simulateInput(dfhack.gui.getCurViewscreen(), { 'SECONDSCROLL_DOWN', 'SECONDSCROLL_UP' })
+    gui.simulateInput(dfhack.gui.getCurViewscreen(), { K'SECONDSCROLL_DOWN', K'SECONDSCROLL_UP' })
     
     return true
 end
@@ -1482,7 +1482,7 @@ function link_target_confirm(fast)
     end
     
     local ws = screen_main()
-    gui.simulateInput(ws, 'SELECT')    
+    gui.simulateInput(ws, K'SELECT')    
     
     -- Automatically select first two mechanisms
     if istrue(fast) then
@@ -1493,8 +1493,8 @@ function link_target_confirm(fast)
            and bld == df.global.world.selected_building
            and linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2 then
 
-            gui.simulateInput(ws, 'SELECT')
-            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, K'SELECT')
+            gui.simulateInput(ws, K'SELECT')
             
             df.global.cursor.x = bld.centerx
             df.global.cursor.y = bld.centery
@@ -1517,10 +1517,10 @@ function link_targets_zoom(idx)
 
     if idx > 0 then
         df.global.ui_building_item_cursor = idx - 1
-        gui.simulateInput(screen_main(), 'SECONDSCROLL_DOWN')
+        gui.simulateInput(screen_main(), K'SECONDSCROLL_DOWN')
     else
         df.global.ui_building_item_cursor = idx + 1
-        gui.simulateInput(screen_main(), 'SECONDSCROLL_UP')
+        gui.simulateInput(screen_main(), K'SECONDSCROLL_UP')
     end
 
     recenter_view(df.global.cursor.x, df.global.cursor.y, df.global.cursor.z)
@@ -1561,7 +1561,7 @@ function link_mechanisms_choose(idx)
     local ws = screen_main()
 
     df.global.ui_building_item_cursor = idx
-    gui.simulateInput(ws, 'SELECT')
+    gui.simulateInput(ws, K'SELECT')
 
     -- Finished choosing mechanisms, zoom back to the lever
     if not df.global.ui_workshop_in_add then
@@ -1578,12 +1578,12 @@ end
 --luacheck: in=
 function link_mechanisms_cancel()
     local ws = screen_main()
-    gui.simulateInput(ws, 'LEAVESCREEN')
+    gui.simulateInput(ws, K'LEAVESCREEN')
 end
 
 local assign_animal_keys = {
-    [df.building_type.Cage] = 'BUILDJOB_CAGE_ASSIGN_OCC',
-    [df.building_type.Chain] = 'BUILDJOB_CHAIN_ASSIGN_OCC',
+    [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN_OCC',
+    [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN_OCC',
 }
 
 --luacheck: in=number
@@ -1679,7 +1679,7 @@ function building_assign(bldid, objid, objtype, on)
         if (not v and unitid == -1) or (v and v.id == unitid) then
             if single or istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
                 df.global.ui_building_item_cursor = i
-                gui.simulateInput(ws, 'SELECT')
+                gui.simulateInput(ws, K'SELECT')
             end
 
             if single then
@@ -1701,7 +1701,7 @@ function building_assign(bldid, objid, objtype, on)
                 if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
                     df.global.ui_building_item_cursor = i
                     local ws = dfhack.gui.getCurViewscreen()
-                    gui.simulateInput(ws, 'SELECT')
+                    gui.simulateInput(ws, K'SELECT')
                 end
 
                 break            

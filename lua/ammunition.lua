@@ -71,12 +71,12 @@ end
 --luacheck: in=
 function ammunition_get_additem()
     return execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_ADD_ITEM')
-        gui.simulateInput(ws, 'SELECT')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_MATERIAL')
-        gui.simulateInput(ws, 'LEAVESCREEN')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_REMOVE_ITEM')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_ADD_ITEM')
+        gui.simulateInput(ws, K'SELECT')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_MATERIAL')
+        gui.simulateInput(ws, K'LEAVESCREEN')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_REMOVE_ITEM')
 
         local items = {}
         for i,v in ipairs(ws.ammo.add_item.type) do
@@ -156,7 +156,7 @@ end
 --luacheck: in=number,number
 function ammunition_item_remove(squadid, idx)
     execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION')
 
         for i,v in ipairs(ws.ammo.squads) do
         	if (not v and squadid == -1) or (v and v.id == squadid) then
@@ -165,7 +165,7 @@ function ammunition_item_remove(squadid, idx)
         				return
         			end
 			        ws.layer_objects[0].cursor = i - 1 --hint:df.layer_object_listst
-			        gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+			        gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 			    else
         			if idx < 0 or idx >= #df.global.ui.equipment.hunter_ammunition then
         				return
@@ -175,7 +175,7 @@ function ammunition_item_remove(squadid, idx)
 				ws.layer_objects[0].active = false
 				ws.layer_objects[1].active = true
 		        ws.layer_objects[1].cursor = idx --hint:df.layer_object_listst
-		        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_REMOVE_ITEM')
+		        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_REMOVE_ITEM')
 
 		        break
         	end

@@ -1534,5 +1534,5 @@ function building_stockpile_create()
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_STOCKPILES')    
+    gui.simulateInput(ws, K'D_STOCKPILES')    
 end

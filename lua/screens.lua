@@ -40,7 +40,7 @@ function execute_with_selected_zone(bldid, fn)
 		df.global.cursor.x = x
 	    df.global.cursor.y = zone.y1
 	    df.global.cursor.z = zone.z-1
-	    gui.simulateInput(ws, 'CURSOR_UP_Z')
+	    gui.simulateInput(ws, K'CURSOR_UP_Z')
 
 	    return fn(ws, zone)
 	end)
@@ -48,7 +48,7 @@ end
 
 function execute_with_nobles_screen(reset, fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_NOBLES')
+		gui.simulateInput(ws, K'D_NOBLES')
 		local noblesws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_noblelistst
 
 		--todo: why is this here? 
@@ -73,7 +73,7 @@ end
 
 function execute_with_military_screen(fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_MILITARY')
+		gui.simulateInput(ws, K'D_MILITARY')
 		local milws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_militaryst
 
 		local ok,ret = pcall(fn, milws)
@@ -89,7 +89,7 @@ end
 
 function execute_with_units_screen(fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_UNITLIST')
+		gui.simulateInput(ws, K'D_UNITLIST')
 		local unitsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_unitlistst
 
 		local ok,ret = pcall(fn, unitsws)
@@ -105,7 +105,7 @@ end
 
 function execute_with_jobs_screen(fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_JOBLIST')
+		gui.simulateInput(ws, K'D_JOBLIST')
 		local jobsws = dfhack.gui.getCurViewscreen()
 
 		local ok,ret = pcall(fn, jobsws)
@@ -133,12 +133,12 @@ status_pages = {
 
 function execute_with_status_page(pageid, fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_STATUS')
+		gui.simulateInput(ws, K'D_STATUS')
 		local statusws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_overallstatusst
 		
 		if pageid ~= -1 then
 			statusws.visible_pages:insert(0,pageid)
-		    gui.simulateInput(statusws, 'SELECT')
+		    gui.simulateInput(statusws, K'SELECT')
 	    end
         
         local pagews = dfhack.gui.getCurViewscreen()
@@ -156,7 +156,7 @@ end
 
 function execute_with_manager_screen(fn)
 	local jobsws = df.viewscreen_joblistst:new()
-	gui.simulateInput(jobsws, 'UNITJOB_MANAGER')
+	gui.simulateInput(jobsws, K'UNITJOB_MANAGER')
 	jobsws:delete()
 
 	local managerws = dfhack.gui.getCurViewscreen()
@@ -173,7 +173,7 @@ end
 
 function execute_with_manager_orders_screen(fn)
 	return execute_with_manager_screen(function(ws)
-		gui.simulateInput(ws, 'MANAGER_NEW_ORDER')
+		gui.simulateInput(ws, K'MANAGER_NEW_ORDER')
 		local ordersws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_createquotast
 
 		local ok,ret = pcall(fn, ordersws)
@@ -189,7 +189,7 @@ end
 
 function execute_with_locations_screen(fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_LOCATIONS')
+		gui.simulateInput(ws, K'D_LOCATIONS')
 		local locsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_locationsst
 
 		local ok,ret = pcall(fn, locsws)
@@ -205,7 +205,7 @@ end
 
 function execute_with_petitions_screen(fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, 'D_PETITIONS')
+		gui.simulateInput(ws, K'D_PETITIONS')
 		local petitionsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_petitionsst
 		if petitionsws._type ~= df.viewscreen_petitionsst then
 			error('wrong screen '..tostring(petitionsws._type))
@@ -242,7 +242,7 @@ function execute_with_locations_for_building(bldid, fn)
 	    end
 
 	    return execute_with_selected_zone(bldid, function(ws)
-			gui.simulateInput(ws, 'ASSIGN_LOCATION')
+			gui.simulateInput(ws, K'ASSIGN_LOCATION')
 			local ok,ret = pcall(fn, ws, bld)
 			df.global.ui.main.mode = df.ui_sidebar_mode.Zones
 
@@ -263,7 +263,7 @@ function execute_with_locations_for_building(bldid, fn)
         error('no selected building')
     end    
 
-	gui.simulateInput(ws, 'ASSIGN_LOCATION')    
+	gui.simulateInput(ws, K'ASSIGN_LOCATION')    
 	local ok,ret = pcall(fn, ws, bld)
 	df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
 

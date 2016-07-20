@@ -81,7 +81,7 @@ function job_get_description(unitid)
     unitlistws.cursor_pos[0] = 0
     unitlistws.units[0]:insert(0, unit)
     unitlistws.jobs[0]:insert(0, nil)
-    gui.simulateInput(unitlistws, 'UNITJOB_VIEW_JOB')
+    gui.simulateInput(unitlistws, K'UNITJOB_VIEW_JOB')
     df.delete(unitlistws)
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst

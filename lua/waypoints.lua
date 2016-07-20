@@ -8,7 +8,7 @@ function waypoints_mode_points()
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_NOTE')	
+    gui.simulateInput(ws, K'D_NOTE')	
 end
 
 --luacheck: in=bool
@@ -103,7 +103,7 @@ function waypoints_place_point(name, comment)
     end
 
     local oldid = df.global.ui.waypoints.next_point_id
-    gui.simulateInput(ws, 'D_NOTE_PLACE')
+    gui.simulateInput(ws, K'D_NOTE_PLACE')
 
     -- protection from updating wrong point if a new one wasn't placed
     if oldid == df.global.ui.waypoints.next_point_id then
@@ -134,7 +134,7 @@ function waypoints_delete_point(id)
 	for i,v in ipairs(df.global.ui.waypoints.points) do
 		if v.id == id then
 			df.global.ui.waypoints.cur_point_index = i
-			gui.simulateInput(ws, 'D_NOTE_DELETE')
+			gui.simulateInput(ws, K'D_NOTE_DELETE')
 			break
 		end
 	end

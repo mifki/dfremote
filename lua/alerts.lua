@@ -53,8 +53,8 @@ end
 --luacheck: in=
 function alerts_add()
     execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_ALERTS')
-        gui.simulateInput(ws, 'D_MILITARY_ALERTS_ADD')
+        gui.simulateInput(ws, K'D_MILITARY_ALERTS')
+        gui.simulateInput(ws, K'D_MILITARY_ALERTS_ADD')
     end)
 end
 
@@ -71,10 +71,10 @@ function alert_delete(id)
     end
 
     execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_ALERTS')
+        gui.simulateInput(ws, K'D_MILITARY_ALERTS')
         ws.layer_objects[0].cursor = idx --hint:df.layer_object_listst
-        gui.simulateInput(ws, 'D_MILITARY_ALERTS_DELETE')
-        gui.simulateInput(ws, 'MENU_CONFIRM')
+        gui.simulateInput(ws, K'D_MILITARY_ALERTS_DELETE')
+        gui.simulateInput(ws, K'MENU_CONFIRM')
     end)
 
     return true

@@ -34,10 +34,10 @@ function build(idx)
         local ws = screen_main()
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
@@ -57,7 +57,7 @@ function build_confirm(fast)
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
 
-    gui.simulateInput(ws, 'SELECT')
+    gui.simulateInput(ws, K'SELECT')
     
     -- Automatically select first (closest) item(s); break if wrong mode or nothing to select
     if istrue(fast) then
@@ -68,7 +68,7 @@ function build_confirm(fast)
                 for i,choice in ipairs(df.global.ui_build_selector.choices) do
                     if choice:getNumCandidates() > 0 then
                         df.global.ui_build_selector.sel_index = i
-                        gui.simulateInput(ws, 'SELECT')
+                        gui.simulateInput(ws, K'SELECT')
                         
                         if df.global.ui_build_selector.building_type == -1 then
                             if lastbldcmd ~= -1 then
@@ -94,7 +94,7 @@ end
 function build_req_get(grouped)
     if df.global.ui.main.mode == df.ui_sidebar_mode.Build and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
         if istrue(grouped) ~= istrue(df.global.ui_build_selector.is_grouped) then
-            gui.simulateInput(screen_main(), 'BUILDING_EXPAND_CONTRACT')
+            gui.simulateInput(screen_main(), K'BUILDING_EXPAND_CONTRACT')
         end
 
         local choices = {}
@@ -128,9 +128,9 @@ function build_req_choose(idx, on, all)
     all = istrue(all)
 
     if on then
-        gui.simulateInput(ws, (all and 'SELECT_ALL' or 'SELECT'))
+        gui.simulateInput(ws, (all and K'SELECT_ALL' or K'SELECT'))
     else
-        gui.simulateInput(ws, (all and 'DESELECT_ALL' or 'DESELECT'))
+        gui.simulateInput(ws, (all and K'DESELECT_ALL' or K'DESELECT'))
     end
 
     -- If we're done selecting materials, repeat the last build command - useful when placing many buildings like beds
@@ -152,7 +152,7 @@ function build_req_cancel()
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
 
-    gui.simulateInput(ws, 'LEAVESCREEN')
+    gui.simulateInput(ws, K'LEAVESCREEN')
 
     if lastbldcmd ~= -1 then
         build(lastbldcmd)
@@ -166,7 +166,7 @@ function build_req_done()
     local ws = dfhack.gui.getCurViewscreen()
     --todo: check that we're in the right mode
 
-    gui.simulateInput(ws, 'BUILDING_ADVANCE_STAGE')
+    gui.simulateInput(ws, K'BUILDING_ADVANCE_STAGE')
 
     -- If we're done selecting materials, repeat the last build command - useful when placing many buildings like beds
     if df.global.ui_build_selector.building_type == -1 then
@@ -286,8 +286,8 @@ function build_options_set(option, value)
                 else
                     -- Need to update display after flow / floor flow change
                     local ws = dfhack.gui.getCurViewscreen()
-                    gui.simulateInput(ws, 'SECONDSCROLL_DOWN')
-                    gui.simulateInput(ws, 'SECONDSCROLL_UP')
+                    gui.simulateInput(ws, K'SECONDSCROLL_DOWN')
+                    gui.simulateInput(ws, K'SECONDSCROLL_UP')
                 end
             end
          end
@@ -316,8 +316,8 @@ function build_options_set(option, value)
             if btype == df.building_type.Bridge or btype == df.building_type.ScrewPump then
                 -- Placing requirements differ depending on direction, need to force update errors
                 local ws = dfhack.gui.getCurViewscreen()
-                gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-                gui.simulateInput(ws, 'CURSOR_UP_Z')
+                gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+                gui.simulateInput(ws, K'CURSOR_UP_Z')
             end
         end
     end
@@ -376,8 +376,8 @@ function build_set_trap_options(info)
         pi.unit_max = info[11]
 
         local ws = dfhack.gui.getCurViewscreen()
-        gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-        gui.simulateInput(ws, 'CURSOR_UP_Z')
+        gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+        gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     --xxx: not used
     elseif btype == df.building_type.Trap and df.global.ui_build_selector.building_subtype == 5 then --track stop
