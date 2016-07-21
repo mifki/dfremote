@@ -1,3 +1,22 @@
+function petition_unitname(agreement)
+	if #agreement.parties[0].histfig_ids > 0 then
+		local hf_id = agreement.parties[0].histfig_ids[0]
+		local hf = df.historical_figure.find(hf_id)
+		local unit_id = hf and hf.unit_id or -1
+		local unit = df.unit.find(unit_id)
+		
+		return unit and unit_fulltitle(unit) or '#unknown unit#'
+
+	elseif #agreement.parties[0].entity_ids > 0 then
+		local entity_id = agreement.parties[0].entity_ids[0]
+		local entity = df.historical_entity.find(entity_id)
+
+		return translatename(entity.name, true) or '#unknown entity#'
+	end
+
+	return '#unknown unit#'
+end
+
 --luacheck: in=
 function petitions_get_list()
 	local ret = {}
@@ -7,21 +26,19 @@ function petitions_get_list()
 		-- type = 2 - residency, type = 3 - citizenship
 		if agreement and #agreement.parties == 2 and #agreement.details == 1
 		   and (agreement.details[0].type == 2 or agreement.details[0].type == 3) then
-			local hf_id = agreement.parties[0].histfig_ids[0]
-			local hf = df.historical_figure.find(hf_id)
-			local unit_id = hf and hf.unit_id or -1
-			local unit = df.unit.find(unit_id)
-			local unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
+			local unitname = petition_unitname(agreement)
 
 			--todo: enum item should be used instead of 41 once it's available in dfhack
 			local reason = (agreement.details[0].type == 3) and 4 or (agreement.details[0].data.data1.reason - 41)
 
-			table.insert(ret, { unitname, v, unit_id, reason })
+			table.insert(ret, { unitname, v, reason })
 		end
 	end
 
 	return ret
 end
+
+local petition_reasons_long = { 'monster hunting', 'entertaining citizens and visitors', 'soldiering', 'study' }
 
 --luacheck: in=number
 function petition_get_info(id)
@@ -32,28 +49,18 @@ function petition_get_info(id)
 
 	local atype = agreement.details[0].type
 	local txt = '#unknown petition type#'
-	local unitname = '#unknown unit#'
+	local unitname = petition_unitname(agreement)
 	local reason = -1
 
 	if atype == 2 then -- residency
-		local hf_id = agreement.parties[0].histfig_ids[0]
-		local hf = df.historical_figure.find(hf_id)
-		local unit_id = hf and hf.unit_id or -1
-		local unit = df.unit.find(unit_id)
-		unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
+		local site = df.world_site.find(df.global.ui.site_id)
 
 		reason = agreement.details[0].data.data1.reason - 41
-		--{ @"Monster Hunting", @"Entertaining", @"Soldiering", @"Study" }
 
-		txt = 'residency'
+		txt = '[C:2:0:1]' .. unitname .. ' [C:7:0:1]wishes to reside in [C:6:0:1]' .. translatename(site.name, true)
+		txt = txt .. ' [C:7:0:1]for the purpose of [C:2:0:1]' .. petition_reasons_long[reason+1] .. '.'
 
 	elseif atype == 3 then -- citizenship
-		local hf_id = agreement.parties[0].histfig_ids[0]
-		local hf = df.historical_figure.find(hf_id)
-		local unit_id = hf and hf.unit_id or -1
-		local unit = df.unit.find(unit_id)
-		unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
-		
 		local entity_id = agreement.parties[1].entity_ids[0]
 		local entity = df.historical_entity.find(entity_id)
 		
