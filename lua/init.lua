@@ -701,12 +701,15 @@ local q = last_nearest_point[4][8]
     if mainmode == df.ui_sidebar_mode.ViewUnits then
         --todo: pass unit name to the app
         local unit = (df.global.ui_selected_unit ~= -1) and df.global.world.units.active[df.global.ui_selected_unit]
-        local fullname = nil
+        local txt = nil
         if unit then
-            local name = unit and unitname(unit)
-            fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
+            txt = unit_fulltitle(unit)
+            --local name = unit and unitname(unit)
+            --fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
+            local jobtitle = unit_jobtitle(unit)
+            txt = txt .. '\n' .. jobtitle
         end
-        return 24, (unit and 1 or 0), fullname
+        return 24, (unit and 1 or 0), txt
     end
 
     --loo[k]
