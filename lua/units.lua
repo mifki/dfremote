@@ -853,7 +853,12 @@ function unit_get_thoughts(unitid, is_histfig)
         unitlistws.cursor_pos[0] = 0
         unitlistws.units[0]:insert(0, unit)
         unitlistws.jobs[0]:insert(0, nil)
-        gui.simulateInput(unitlistws, K'UNITJOB_VIEW')
+        
+        if df_ver >= 4200 then
+            gui.simulateInput(unitlistws, K'UNITJOB_VIEW_UNIT')
+        else
+            gui.simulateInput(unitlistws, K'UNITJOB_VIEW')
+        end
 
         local ws = dfhack.gui.getCurViewscreen()
         if ws._type == df.viewscreen_unitst then
