@@ -485,6 +485,7 @@ sent_popups = {}
 local last_idlers = nil
 local last_siege = nil
 local last_day = nil
+local last_petitions = nil
 local last_report_alert = nil
 local idlers_wait = 0
 
@@ -616,7 +617,7 @@ function get_status()
 
             last_nearest_point = waypoints_nearest_point()
         end        
-local q = last_nearest_point[4][8]
+
         local can_place = not last_nearest_point or last_nearest_point[4][1] ~= 0 or last_nearest_point[4][2] ~= 0 or last_nearest_point[4][3] ~= 0
         return 26, can_place and 1 or 0, last_nearest_point and { last_nearest_point[1], last_nearest_point[4] } or nil
     end
@@ -891,12 +892,19 @@ local q = last_nearest_point[4][8]
         table.insert(ext, report_alert)
     end
     
-    local haspetitions = false
+    local hasnewpetitions = false
     if df_ver >= 4200 then --dfver:4200-
-        haspetitions = #df.global.ui.petitions > 0
+        local petitions = #df.global.ui.petitions
+    
+        if petitions ~= last_petitions then
+            last_petitions = petitions
+            hasnewpetitions = true
+            ext = ext or {}
+            table.insert(ext, petitions)
+        end
     end
 
-    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert, haspetitions), ext
+    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert, hasnewpetitions), ext
 end
 
 local send_center = false
@@ -925,6 +933,7 @@ function get_status_ext(needs_sync)
         last_popup = nil
         last_idlers = nil
         last_siege = nil
+        last_petitions = nil
         last_day = nil
         last_report_alert = nil
         idlers_wait = 0
