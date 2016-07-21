@@ -1306,6 +1306,10 @@ function designate(idx)
     local z = df.global.window_z
 
     reset_main()
+    
+    --todo: until we support this, otherwise there's no way to change to normal mode
+    df.global.ui_sidebar_menus.designation.marker_only = false
+    df.global.ui_sidebar_menus.designation.priority = 4000
 
     gui.simulateInput(ws, K'D_DESIGNATE')
 
