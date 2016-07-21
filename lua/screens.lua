@@ -272,3 +272,33 @@ function execute_with_locations_for_building(bldid, fn)
 	end
 	return ret
 end
+
+function execute_with_job_details(bldid, idx, fn)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+    --todo: check bld.id == bldid
+
+    if idx < 0 or idx > #bld.jobs then
+    	error('invalid job idx '..tostring(idx))
+    end
+
+    df.global.ui_workshop_job_cursor = idx
+
+    gui.simulateInput(ws, K'BUILDJOB_DETAILS')
+    --todo: check that df.global.ui_sidebar_menus.job_details.job ~= nil
+	local ok,ret = pcall(fn, ws) 
+	df.global.ui_sidebar_menus.job_details.job = nil
+
+	if not ok then
+		error (ret)
+	end
+	return ret
+end

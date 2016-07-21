@@ -49,6 +49,7 @@ require 'remote.raws'
 if df_ver >= 4200 then --dfver:4200-
     require 'remote.locations'
     require 'remote.petitions'
+    require 'remote.jobdetails'
 end
 
 native = {}
