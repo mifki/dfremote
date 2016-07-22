@@ -1762,6 +1762,11 @@ local handlers = {
         [1] = artifacts_list,
     },
 
+    [199] = {
+        [1] = job_details_get_types,
+        [2] = job_details_get_choices,
+    },
+
     [203] = {
         [1] = build_req_get,
         [2] = build_req_choose,
