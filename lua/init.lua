@@ -1765,6 +1765,7 @@ local handlers = {
     [199] = {
         [1] = job_details_get_types,
         [2] = job_details_get_choices,
+        [3] = job_details_set,
     },
 
     [203] = {

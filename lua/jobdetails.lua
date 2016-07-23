@@ -1,18 +1,43 @@
-local detail_type_names = { 'Material', 'Image', 'Size', 'Type' }
+local detail_type_names = { 'Material', 'Image', 'Size', 'Decoration Type' }
+local decoration_type_titles = { 'Image', 'Covered', 'Hanging rings', 'Bands', 'Spikes' }
 
 --luacheck: in=number,number
 function job_details_get_types(bldid, idx)
 	return execute_with_job_details(bldid, idx, function(ws)
-		local ret = {}
+		local list = {}
 
-		--local job = df.global.ui_sidebar_menus.job_details.detail_type.job
+		local job = df.global.ui_sidebar_menus.job_details.job
+		local jobtitle = dfhack.job.getName(job)
 
 		--0-material, 1-image, 2-size, 3-type
 		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
-			table.insert(ret, { detail_type_names[v+1], i, v, '' })
+			if v ~= 1 then -- image not supported
+				local cur = ''
+
+				if v == 0 then
+					local mat_type = job.mat_type
+					local mat_index = job.mat_index
+					
+					local mi = dfhack.matinfo.decode(mat_type, mat_index)
+					local mat = mi.material
+		            cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+
+		        elseif v == 2 then
+					local creature = df.global.world.raws.creatures.all[job.hist_figure_id]
+					cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
+
+		        elseif v == 3 then
+					cur = decoration_type_titles[job.hist_figure_id]
+
+				end
+
+				table.insert(list, { detail_type_names[v+1], i, v, cur })
+			end
 		end
 
-		return ret
+		--todo: pass not just job title, include e.g. 'for <race>' for armor, etc.
+
+		return { list, jobtitle }
 	end)
 end
 
@@ -23,17 +48,15 @@ function job_details_get_choices(bldid, jobidx, detidx)
 		
 		local det = df.global.ui_sidebar_menus.job_details
 
-		--local job = det.detail_type.job
-
-		--todo: check detidx range
-		--todo: don't allow to get image choices
 		local dtype = det.detail_type[detidx]
-		if dtype ~= 0 then -- Material
+		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
 			error('unsupported detail type '..tostring(dtype))
 		end
 
-		df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
-		gui.simulateInput(ws, K'SELECT')
+		if det.setting_deatil_type == -1 then
+			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+			gui.simulateInput(ws, K'SELECT')
+		end
 		
 		-- using _visible instead of _all because they're already sorted - available mats on top
 		if dtype == 0 then -- material
@@ -46,11 +69,58 @@ function job_details_get_choices(bldid, jobidx, detidx)
 				local mat = mi.material
 	            local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
 				
-				table.insert(ret, { title, { mat_type, mat_index }, mat_amount })
+				table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
+			end
+		
+		elseif dtype == 2 then -- size
+			for i,v in ipairs(det.sizes_visible) do
+				local creature = df.global.world.raws.creatures.all[v]
+				local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
+
+				table.insert(ret, { title, i --[[, mp.NIL]] })
+			end			
+
+		elseif dtype == 3 then -- type
+			for i,v in ipairs(det.decoration_types) do
+				if v ~= 0 then -- image not supported
+					local title = decoration_type_titles[v+1]
+
+					table.insert(ret, { title, i --[[, mp.NIL]] })
+				end
 			end
 		end
 
 		return ret
+	end)
+end
+
+--luacheck: in=number,number,number,number
+function job_details_set(bldid, jobidx, detidx, choiceidx)
+	return execute_with_job_details(bldid, jobidx, function(ws)
+		local det = df.global.ui_sidebar_menus.job_details
+
+		local dtype = det.detail_type[detidx]
+		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+			error('unsupported detail type '..tostring(dtype))
+		end
+
+		--todo: modify job.hist_figure_id which holds the detail setting directly ?
+
+		if det.setting_deatil_type == -1 then
+			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+			gui.simulateInput(ws, K'SELECT')
+		end
+		
+		if dtype == 0 then -- material
+			det.mat_cursor = choiceidx
+		elseif dtype == 2 then -- size
+			det.size_cursor = choiceidx
+		elseif dtype == 3 then -- size
+			det.decoration_cursor = choiceidx
+		end
+		gui.simulateInput(ws, K'SELECT')
+
+		return true
 	end)
 end
 
