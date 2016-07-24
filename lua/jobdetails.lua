@@ -7,6 +7,11 @@ function job_details_get_types(bldid, idx)
 		local list = {}
 
 		local job = df.global.ui_sidebar_menus.job_details.job
+
+		if not job then
+			return {}, mp.NIL
+		end
+
 		local jobtitle = dfhack.job.getName(job)
 
 		--0-material, 1-image, 2-size, 3-type
@@ -124,5 +129,45 @@ function job_details_set(bldid, jobidx, detidx, choiceidx)
 	end)
 end
 
+function order_details_get_types(idx)
+	return execute_with_order_details(idx, function(ws)
+		local list = {}
+
+		local order = df.global.world.manager_orders[idx]
+		local ordertitle = 'asda'
+
+		--0-material, 1-image, 2-size, 3-type
+		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
+			if v ~= 1 then -- image not supported
+				local cur = ''
+
+				if v == 0 then
+					local mat_type = order.mat_type
+					local mat_index = order.mat_index
+					
+					local mi = dfhack.matinfo.decode(mat_type, mat_index)
+					local mat = mi.material
+		            cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+
+		        elseif v == 2 then
+					local creature = df.global.world.raws.creatures.all[order.hist_figure_id]
+					cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
+
+		        elseif v == 3 then
+					cur = decoration_type_titles[order.hist_figure_id]
+
+				end
+
+				table.insert(list, { detail_type_names[v+1], i, v, cur })
+			end
+		end
+
+		--todo: pass not just order title, include e.g. 'for <race>' for armor, etc.
+
+		return { list, ordertitle }
+	end)
+end
+
 -- print(json:encode(job_details_get_types(-1,0)))
 -- print(json:encode(job_details_get_choices(-1,0,0)))
+-- print(json:encode(order_details_get_types(1)))

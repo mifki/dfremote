@@ -293,12 +293,41 @@ function execute_with_job_details(bldid, idx, fn)
     df.global.ui_workshop_job_cursor = idx
 
     gui.simulateInput(ws, K'BUILDJOB_DETAILS')
-    --todo: check that df.global.ui_sidebar_menus.job_details.job ~= nil
+    
+    --xxx: this is (temporarily?) done in calling fns to distinguish between error and no details when needed
+    --[[if df.global.ui_sidebar_menus.job_details.job == nil then
+    	error('could not transition to job detail settings')
+    end]]
+
 	local ok,ret = pcall(fn, ws) 
+	
 	df.global.ui_sidebar_menus.job_details.job = nil
 
 	if not ok then
 		error (ret)
 	end
 	return ret
+end
+
+function execute_with_order_details(idx, fn)
+	return execute_with_manager_screen(function(ws)
+		--todo: check idx range
+	    ws.sel_idx = idx
+
+	    gui.simulateInput(ws, K'MANAGER_DETAILS')
+	    
+	    local detws = dfhack.gui.getCurViewscreen()
+	    if detws._type ~= df.viewscreen_workquota_detailsst then
+	    	error('could not switch to order details screen '..tostring(detws._type))
+	    end
+
+		local ok,ret = pcall(fn, detws) 
+		
+		detws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
 end

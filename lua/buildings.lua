@@ -219,7 +219,15 @@ function building_query_selected(bldid)
         local jobs = {}
         for i,job in ipairs(bld.jobs) do
             local title = dfhack.job.getName(job)
-            table.insert(jobs, { title, job.flags.whole })
+
+            --todo: first check that job type supports setting details
+            local can_set_details = (#job.items == 0)
+
+            --todo: game actually shows 'A' not based on flags but rather on presence of general_ref_unit_workerst ref
+
+            local moreflags = packbits(can_set_details)
+
+            table.insert(jobs, { title, job.flags.whole, moreflags })
         end
 
         local moodinfo = building_workshop_get_mood(bld)
