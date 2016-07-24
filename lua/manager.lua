@@ -1,3 +1,22 @@
+function ordertitle(o)
+	local btn = df.interface_button_building_new_jobst:new()
+	
+	btn.reaction_name = o.reaction_name
+	btn.hist_figure_id = o.hist_figure_id
+	btn.job_type = o.job_type
+	btn.item_type = o.item_type
+	btn.item_subtype = o.item_subtype
+	btn.mat_type = o.mat_type
+	btn.mat_index = o.mat_index
+	btn.item_category.whole = o.item_category.whole
+	btn.material_category.whole = o.material_category.whole
+	
+	local title = utils.call_with_string(btn, 'getLabel')
+	df.delete(btn)
+
+	return title
+end
+
 --luacheck: in=
 function manager_get_orders()
     local have_manager = have_noble('MANAGER')
@@ -5,17 +24,7 @@ function manager_get_orders()
 	local orders = {}
 
 	for i,o in ipairs(df.global.world.manager_orders) do
-		local btn = df.interface_button_building_new_jobst:new()
-		btn.reaction_name = o.reaction_name
-		btn.hist_figure_id = o.hist_figure_id
-		btn.job_type = o.job_type
-		btn.item_type = o.item_type
-		btn.item_subtype = o.item_subtype
-		btn.mat_type = o.mat_type
-		btn.mat_index = o.mat_index
-		btn.item_category.whole = o.item_category.whole
-		btn.material_category.whole = o.material_category.whole
-		local title = utils.call_with_string(btn, 'getLabel')
+		local title = ordertitle(o)
 
 		local maxw = 0
 		if df_ver >= 4200 then

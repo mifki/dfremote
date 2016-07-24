@@ -3,6 +3,10 @@ local decoration_type_titles = { 'Image', 'Covered', 'Hanging rings', 'Bands', '
 
 --luacheck: in=number,number
 function job_details_get_types(bldid, idx)
+	if bldid == -2 then
+		return order_details_get_types(idx)
+	end
+
 	return execute_with_job_details(bldid, idx, function(ws)
 		local list = {}
 
@@ -48,6 +52,10 @@ end
 
 --luacheck: in=number,number,number
 function job_details_get_choices(bldid, jobidx, detidx)
+	if bldid == -2 then
+		return order_details_get_choices(jobidx, detidx)
+	end
+
 	return execute_with_job_details(bldid, jobidx, function(ws)
 		local ret = {}
 		
@@ -101,6 +109,10 @@ end
 
 --luacheck: in=number,number,number,number
 function job_details_set(bldid, jobidx, detidx, choiceidx)
+	if bldid == -2 then
+		return order_details_set(jobidx, detidx, choiceidx)
+	end
+
 	return execute_with_job_details(bldid, jobidx, function(ws)
 		local det = df.global.ui_sidebar_menus.job_details
 
@@ -134,7 +146,7 @@ function order_details_get_types(idx)
 		local list = {}
 
 		local order = df.global.world.manager_orders[idx]
-		local ordertitle = 'asda'
+		local ordertitle = ordertitle(order)
 
 		--0-material, 1-image, 2-size, 3-type
 		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
@@ -165,6 +177,87 @@ function order_details_get_types(idx)
 		--todo: pass not just order title, include e.g. 'for <race>' for armor, etc.
 
 		return { list, ordertitle }
+	end)
+end
+
+function order_details_get_choices(idx, detidx)
+	return execute_with_order_details(idx, function(ws)
+		local ret = {}
+		
+		local det = df.global.ui_sidebar_menus.job_details
+
+		local dtype = det.detail_type[detidx]
+		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+			error('unsupported detail type '..tostring(dtype))
+		end
+
+		if det.setting_deatil_type == -1 then
+			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+			gui.simulateInput(ws, K'SELECT')
+		end
+		
+		-- using _visible instead of _all because they're already sorted - available mats on top
+		if dtype == 0 then -- material
+			for i,v in ipairs(det.mat_type_visible) do
+				local mat_type = v
+				local mat_index = det.mat_index_visible[i]
+				local mat_amount = det.mat_amount_visible[i]
+				
+				local mi = dfhack.matinfo.decode(mat_type, mat_index)
+				local mat = mi.material
+	            local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+				
+				table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
+			end
+		
+		elseif dtype == 2 then -- size
+			for i,v in ipairs(det.sizes_visible) do
+				local creature = df.global.world.raws.creatures.all[v]
+				local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
+
+				table.insert(ret, { title, i --[[, mp.NIL]] })
+			end			
+
+		elseif dtype == 3 then -- type
+			for i,v in ipairs(det.decoration_types) do
+				if v ~= 0 then -- image not supported
+					local title = decoration_type_titles[v+1]
+
+					table.insert(ret, { title, i --[[, mp.NIL]] })
+				end
+			end
+		end
+
+		return ret
+	end)
+end
+
+function order_details_set(idx, detidx, choiceidx)
+	return execute_with_order_details(idx, function(ws)
+		local det = df.global.ui_sidebar_menus.job_details
+
+		local dtype = det.detail_type[detidx]
+		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+			error('unsupported detail type '..tostring(dtype))
+		end
+
+		--todo: modify job.hist_figure_id which holds the detail setting directly ?
+
+		if det.setting_deatil_type == -1 then
+			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+			gui.simulateInput(ws, K'SELECT')
+		end
+		
+		if dtype == 0 then -- material
+			det.mat_cursor = choiceidx
+		elseif dtype == 2 then -- size
+			det.size_cursor = choiceidx
+		elseif dtype == 3 then -- size
+			det.decoration_cursor = choiceidx
+		end
+		gui.simulateInput(ws, K'SELECT')
+
+		return true
 	end)
 end
 

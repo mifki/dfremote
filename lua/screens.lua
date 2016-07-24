@@ -276,11 +276,11 @@ end
 function execute_with_job_details(bldid, idx, fn)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        return
+        error('wrong screen '..tostring(ws._type))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
+        error('no selected building')
     end
 
     local bld = df.global.world.selected_building
