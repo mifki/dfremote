@@ -757,6 +757,8 @@ function building_workshop_addjob(bldid, idx, rep)
     if #bld.jobs >= 10 then
         return --error('too many jobs')
     end
+    
+    df.global.ui_workshop_in_add = false
 
     if bld._type == df.building_trapst and (bld.trap_type == df.trap_type.Lever or bld.trap_type == df.trap_type.PressurePlate) then --hint:df.building_trapst
         local bld = bld --as:df.building_trapst
@@ -1741,6 +1743,36 @@ function building_well_is_active()
 
     local ch = df.global.gps.screen[(x*df.global.gps.dimy+2)*4]
     return string.char(ch) == 'A'
+end
+
+--luacheck: in=
+function building_quick_action(idx)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+    
+    local bld = df.global.world.selected_building
+
+    if df.global.ui.main.mode ~= 17 or bld == nil then
+        return
+    end
+
+    -- For doors - lock/unlock
+    if bld._type == df.building_doorst then
+        if idx == 1 then
+            bld.door_flags.forbidden = not bld.door_flags.forbidden
+        end
+    
+    -- For levers - pull
+    elseif bld._type == df.building_trapst and bld:getSubtype() == df.trap_type.Lever then
+        if idx == 1 then
+            df.global.ui_workshop_in_add = false
+            gui.simulateInput(ws, K'BUILDJOB_ADD')
+            ws:logic() --to initialize / switch to add job menu
+            gui.simulateInput(ws, K'HOTKEY_TRAP_PULL_LEVER')
+        end
+    end
 end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))

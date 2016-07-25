@@ -689,8 +689,10 @@ function get_status()
                 end
             end
 
-            if bld:getType() == df.building_type.Coffin and bld.owner and bld.owner.flags1.dead then
+            if bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
+            elseif bld._type == df.building_doorst and bld.door_flags.forbidden then
+                name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
             end
 
             return 23, (bld and 1 or 0), name
@@ -1344,6 +1346,26 @@ function designate(idx)
     return true
 end
 
+local original_designation_mode = nil
+
+--luacheck: in=
+function designate_toggle_erase()
+    local mainmode = df.global.ui.main.mode
+    
+    if mainmode == df.ui_sidebar_mode.DesignateMine then
+        original_designation_mode = mainmode
+        df.global.ui.main.mode = df.ui_sidebar_mode.DesignateRemoveDesignation
+        return true
+    
+    elseif mainmode == df.ui_sidebar_mode.DesignateRemoveDesignation and original_designation_mode then
+        df.global.ui.main.mode = original_designation_mode
+        original_designation_mode = nil
+        return true
+    end
+    
+    return false
+end
+
 --luacheck: in=
 function close_legends()
     if screen_main()._type ~= df.viewscreen_legendsst then
@@ -1677,6 +1699,7 @@ local handlers = {
         [5] = building_set_flag,
         [6] = building_start_resize,
         [7] = building_suspend,
+        [8] = building_quick_action,
 
         [10] = building_workshop_get_jobchoices,
         [11] = building_workshop_set_repeat,
@@ -1718,6 +1741,7 @@ local handlers = {
     [193] = {
         [1] = set_traffic_costs,
         [2] = designate,
+        [3] = designate_toggle_erase,
     },
 
     [195] = {
