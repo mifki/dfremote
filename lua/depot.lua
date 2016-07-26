@@ -116,7 +116,7 @@ function read_trader_reply()
     local mood = ''
     local start = false
 
-    for j=1,df.global.gps.dimy-2 do
+    for j=1,df.global.gps.dimy-3 do
         local empty = true
 
         for i=2,df.global.gps.dimx-2 do
@@ -143,12 +143,12 @@ function read_trader_reply()
         end
 
         if empty and #reply > 0 then
-            for j=j+1,df.global.gps.dimy-2 do
+            for j=j+1,df.global.gps.dimy-3 do
                 local ch = df.global.gps.screen[(2*df.global.gps.dimy+j)*4]
                 
                 if ch ~= 0 then
                     if ch == 219 then
-                        break;
+                        break
                     end
 
                     for i=2,df.global.gps.dimx-2 do
