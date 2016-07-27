@@ -13,15 +13,22 @@ function stone_get()
 	local economic = {}
 	local other = {}
 
-	local eco = df.global.ui.economic_stone
-
 	for i,raw in ipairs(df.global.world.raws.inorganics) do 
+		local mat = raw.material
+		local name = capitalize(#mat.stone_name > 0 and mat.stone_name or mat.state_name[0])
+		local magmasafe = mat.heat.ignite_point > 12000 and mat.heat.melting_point > 12000
+		local restricted = istrue(df.global.ui.economic_stone[i])
+		local flags = packbits(restricted,magmasafe)
+
 		if stone_is_economic(raw) then
-			table.insert(economic, { raw.material.state_name[0], i, eco[i] })
+			table.insert(economic, { name, i, flags })
 		elseif stone_is_other(raw) then
-			table.insert(other, { raw.material.state_name[0], i, eco[i] })
+			table.insert(other, { name, i, flags })
 		end
 	end
+
+  	table.sort(economic, function(a,b) return a[1] < b[1] end)
+  	table.sort(other, function(a,b) return a[1] < b[1] end)
 
 	return { economic, other }
 end
