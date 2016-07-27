@@ -1617,45 +1617,43 @@ function building_assign_get_candidates(bldid)
 
     local ret = {}
 
-    local single = (btype == df.building_type.Chain)
+    if btype == df.building_type.Chain then
+        for i,unit in ipairs(df.global.ui_building_assign_units) do
+            if not unit then
+                table.insert(ret, { 'Nobody', -1, false, 0, 0 })
+            else
+                table.insert(ret, { unit_fulltitle(unit), unit.id, false, 0, unit_assigned_status(unit,bld) })
+            end
+        end        
 
-    for i,v in ipairs(df.global.ui_building_assign_type) do
-        --xxx: this shouldn't happen, but was reported. bug in game? 
-        if i >= #df.global.ui_building_assign_is_marked or i >= #df.global.ui_building_assign_units or i >= #df.global.ui_building_assign_items then
-            break
-        end
+    else
+        for i,v in ipairs(df.global.ui_building_assign_type) do
+            --xxx: this shouldn't happen, but was reported. bug in game? 
+            if i >= #df.global.ui_building_assign_is_marked or i >= #df.global.ui_building_assign_units or i >= #df.global.ui_building_assign_items then
+                break
+            end
 
-        local title = '?something?'
-        local id = -1
-        local is_assigned = not single and istrue(df.global.ui_building_assign_is_marked[i]) or false
-        local status = 0
+            local title = '?something?'
+            local id = -1
+            local is_assigned = istrue(df.global.ui_building_assign_is_marked[i])
+            local status = 0
 
-        --todo: should include unit sex for units, don't forger about gelded
-        if v == 0 then
-            local unit = df.global.ui_building_assign_units[i]
-            id = unit.id
-            title = unit_fulltitle(unit)
-            status = unit_assigned_status(unit, bld)
-        elseif v == 1 then
-            local item = df.global.ui_building_assign_items[i]
-            id = item.id
-            title = itemname(item, 0, true)
-            status = 0
-        end
+            --todo: should include unit sex for units, don't forger about gelded
+            if v == 0 then
+                local unit = df.global.ui_building_assign_units[i]
+                id = unit.id
+                title = unit_fulltitle(unit)
+                status = unit_assigned_status(unit, bld)
+            elseif v == 1 then
+                local item = df.global.ui_building_assign_items[i]
+                id = item.id
+                title = itemname(item, 0, true)
+                status = 0
+            end
 
-        if obj then
             table.insert(ret, { title, id, is_assigned, v, status })
         end
     end
-    --[[for i,unit in ipairs(df.global.ui_building_assign_units) do
-        if not unit then
-            table.insert(ret, { 'Nobody', -1, -1, false, 0 })
-        else
-            local is_assigned = not single and istrue(df.global.ui_building_assign_is_marked[i]) or false
-
-            table.insert(ret, { unit_fulltitle(unit), unit.id, unit.sex, is_assigned, unit_assigned_status(unit,bld) })
-        end
-    end]]
 
     df.global.ui_building_in_assign = false
 
