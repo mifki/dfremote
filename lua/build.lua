@@ -87,7 +87,18 @@ function build_confirm(fast)
         end
     end
 
-    return build_req_get(true) or {} --todo: or nil ?
+    local ret = build_req_get(true)
+    if not ret then
+        if lastbldcmd ~= -1 then
+            build(lastbldcmd)
+        else
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
+        end
+
+        return {}
+    end
+
+    return ret
 end
 
 --luacheck: in=bool
