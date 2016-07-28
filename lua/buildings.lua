@@ -121,7 +121,7 @@ function building_query_selected(bldid)
     end
 
     local bld
-    if bldid and bldid ~= -1 and bldid ~= 0 then
+    if bldid and bldid ~= -1 then
         bld = df.building.find(bldid)
     else
         bld = df.global.world.selected_building

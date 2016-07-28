@@ -8,7 +8,7 @@ end
 
 --luacheck: in=number
 function zone_settings_get(bldid)
-    local zone = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected --as:df.building_civzonest
+    local zone = (bldid and bldid ~= -1) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected --as:df.building_civzonest
     if not zone then
         error('no zone found for id '..tostring(bldid))
     end

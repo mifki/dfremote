@@ -223,7 +223,7 @@ function execute_with_petitions_screen(fn)
 end
 
 function execute_with_locations_for_building(bldid, fn)
-    local bld = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.world.selected_building
+    local bld = (bldid and bldid ~= -1) and df.building.find(bldid) or df.global.world.selected_building
     if not bld then
         error('no building/zone '..tostring(bldid))
     end
