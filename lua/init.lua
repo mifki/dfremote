@@ -573,12 +573,20 @@ function get_status()
     --[d]esignate
     if modestr:sub(1,#'Designate') == 'Designate' then
         if df.global.selection_rect.start_x == -30000 then
-            return 31, mainmode
+            if mainmode == df.ui_sidebar_mode.DesignateMine and df.global.ui_sidebar_menus.designation.mine_mode > 0 then
+                return 31, mainmode, df.global.ui_sidebar_menus.designation.mine_mode
+            else
+                return 31, mainmode
+            end
         else
             local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
             local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
             local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
-            return 32, mainmode, { dx, dy, dz }
+            if mainmode == df.ui_sidebar_mode.DesignateMine and df.global.ui_sidebar_menus.designation.mine_mode > 0 then
+                return 32, mainmode, { dx, dy, dz, df.global.ui_sidebar_menus.designation.mine_mode }
+            else
+                return 32, mainmode, { dx, dy, dz }
+            end
         end
     end
 
@@ -624,7 +632,7 @@ function get_status()
     end
 
     --stock[p]ile
-    if mainmode == 15 then
+    if mainmode == df.ui_sidebar_mode.Stockpiles then
         if df.global.selection_rect.start_x == -30000 then
             return 41, 0
         else
@@ -637,7 +645,7 @@ function get_status()
     end
 
     --[b]uild
-    if mainmode == 16 then
+    if mainmode == df.ui_sidebar_mode.Build then
         local bldstage = df.global.ui_build_selector.stage
 
         if bldstage == 1 or bldstage == 0 then
