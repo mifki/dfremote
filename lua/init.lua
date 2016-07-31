@@ -1803,6 +1803,8 @@ local handlers = {
         [1] = job_details_get_types,
         [2] = job_details_get_choices,
         [3] = job_details_set,
+        [4] = job_details_set_image,
+        [5] = job_details_image_get_choices,
     },
 
     [203] = {
