@@ -1359,8 +1359,13 @@ local original_designation_mode = nil
 --luacheck: in=
 function designate_toggle_erase()
     local mainmode = df.global.ui.main.mode
-    
-    if mainmode == df.ui_sidebar_mode.DesignateMine then
+    local modestr = df.ui_sidebar_mode[mainmode] or ''
+
+    if mainmode ~= df.ui_sidebar_mode.DesignateRemoveDesignation and
+       modestr:sub(1,#'Designate') == 'Designate' and
+       modestr:sub(1,#'DesignateItems') ~= 'DesignateItems' and
+       modestr:sub(1,#'DesignateTraffic') ~= 'DesignateTraffic' and
+       modestr:sub(1,#'DesignateToggle') ~= 'DesignateToggle' then
         original_designation_mode = mainmode
         df.global.ui.main.mode = df.ui_sidebar_mode.DesignateRemoveDesignation
         return true
