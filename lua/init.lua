@@ -1072,7 +1072,6 @@ function end_game_abandon()
     gui.simulateInput(optsws, K'MENU_CONFIRM')
 end
 
---todo: need to preserve cursor pos when switching between these modes
 --luacheck: in=
 function query_building()
     reset_main()

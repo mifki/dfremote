@@ -392,7 +392,6 @@ function location_assign(bldid, locid)
 	end)
 end
 
---todo: fix for bed/table
 --luacheck: in=number
 function locations_add_get_deity_choices(bldid)
 	return execute_with_locations_for_building(bldid, function(ws, bld)
@@ -432,7 +431,6 @@ function locations_add_get_deity_choices(bldid)
     end)	
 end
 
---todo: fix for bed/table
 --luacheck: in=number,number,number
 function locations_add(bldid, tp, deityid)
 	return execute_with_locations_for_building(bldid, function(ws, bld)

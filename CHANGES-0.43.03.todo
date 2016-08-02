@@ -5,6 +5,5 @@ New stuff
 - Repeatable work orders, ability to set restart frequencies
 
 Other bug fixes/tweaks
-- Allowed new citizens with some previously site-wide occupations to be reassigned
 - Allowed some site-wide occupations for dwarves
 - Made paper slurries stockpile-able (won't work without updated raws)

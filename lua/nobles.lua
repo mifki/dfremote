@@ -91,7 +91,6 @@ function have_broker_appraisal()
     return false
 end
 
---todo: use numeric bld type
 local room_type_table = { --as:{qidx:number,no:string}[]
     [df.building_bedst] = { qidx = 2, no='No Bedroom' },
     [df.building_tablest] = { qidx = 3, no='No Dining Room'},

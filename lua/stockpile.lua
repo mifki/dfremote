@@ -1026,245 +1026,245 @@ end
 --todo: should cache this
 function stockpile_settings_schema()
     local ret =
-{
     {
-        'Animals', 'animals',
         {
-            { 'Animals', 'enabled', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles }
+            'Animals', 'animals',
+            {
+                { 'Animals', 'enabled', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles }
+            },
+            {
+                { 'Empty Cages', 'empty_cages' }, { 'Empty Animal Traps', 'empty_traps' }
+            }
         },
+    
         {
-            { 'Empty Cages', 'empty_cages' }, { 'Empty Animal Traps', 'empty_traps' }
-        }
-    },
-
-    {
-        'Food', 'food', 
-        {
-            { 'Meat', 'meat', #df.global.world.raws.mat_table.organic_types.Meat, nil, organic_meat_titles },
-            { 'Fish', 'fish', #df.global.world.raws.mat_table.organic_types.Fish, nil, organic_fish_titles },
-            { 'Unprepared Fish', 'unprepared_fish', #df.global.world.raws.mat_table.organic_types.UnpreparedFish, nil, organic_rawfish_titles  },
-            { 'Egg', 'egg', #df.global.world.raws.mat_table.organic_types.Eggs, nil, organic_egg_titles },
-            { 'Plants', 'plants', #df.global.world.raws.mat_table.organic_types.Plants, foodplant_to_plant_idx, foodplant_titles },
-            { 'Drink (Plant)', 'drink_plant', #df.global.world.raws.mat_table.organic_types.PlantDrink, nil, organic_plantdrink_titles },
-            { 'Drink (Animal)', 'drink_animal', #df.global.world.raws.mat_table.organic_types.CreatureDrink, nil, organic_creaturedrink_titles },
-            { 'Cheese (Plant)', 'cheese_plant', #df.global.world.raws.mat_table.organic_types.PlantCheese, nil, organic_plantcheese_titles },
-            { 'Cheese (Animal)', 'cheese_animal', #df.global.world.raws.mat_table.organic_types.CreatureCheese, nil, organic_creaturecheese_titles },
-            { 'Seeds', 'seeds', #df.global.world.raws.mat_table.organic_types.Seed, nil, organic_seed_titles },
-            { 'Fruit/Leaves', 'leaves', #df.global.world.raws.mat_table.organic_types.Leaf, nil, organic_leaf_titles },
-            { 'Milled Plant', 'powder_plant', #df.global.world.raws.mat_table.organic_types.PlantPowder, nil, organic_plantpowder_titles },
-            { 'Bone Meal', 'powder_creature', #df.global.world.raws.mat_table.organic_types.CreaturePowder, nil, organic_creaturepowder_titles },
-            { 'Fat', 'glob', #df.global.world.raws.mat_table.organic_types.Glob, nil, organic_glob_titles },
-            { 'Paste', 'glob_paste', #df.global.world.raws.mat_table.organic_types.Paste, nil, organic_paste_titles },
-            { 'Pressed Material', 'glob_pressed', #df.global.world.raws.mat_table.organic_types.Pressed, nil, organic_pressed_titles },
-            { 'Extract (Plant)', 'liquid_plant', #df.global.world.raws.mat_table.organic_types.PlantLiquid, nil, organic_plantliquid_titles },
-            { 'Extract (Animal)', 'liquid_animal', #df.global.world.raws.mat_table.organic_types.CreatureLiquid, nil, organic_animalliquid_titles },
-            { 'Misc. Liquid', 'liquid_misc', #df.global.world.raws.mat_table.organic_types.MiscLiquid, nil, organic_miscliquid_titles },
+            'Food', 'food', 
+            {
+                { 'Meat', 'meat', #df.global.world.raws.mat_table.organic_types.Meat, nil, organic_meat_titles },
+                { 'Fish', 'fish', #df.global.world.raws.mat_table.organic_types.Fish, nil, organic_fish_titles },
+                { 'Unprepared Fish', 'unprepared_fish', #df.global.world.raws.mat_table.organic_types.UnpreparedFish, nil, organic_rawfish_titles  },
+                { 'Egg', 'egg', #df.global.world.raws.mat_table.organic_types.Eggs, nil, organic_egg_titles },
+                { 'Plants', 'plants', #df.global.world.raws.mat_table.organic_types.Plants, foodplant_to_plant_idx, foodplant_titles },
+                { 'Drink (Plant)', 'drink_plant', #df.global.world.raws.mat_table.organic_types.PlantDrink, nil, organic_plantdrink_titles },
+                { 'Drink (Animal)', 'drink_animal', #df.global.world.raws.mat_table.organic_types.CreatureDrink, nil, organic_creaturedrink_titles },
+                { 'Cheese (Plant)', 'cheese_plant', #df.global.world.raws.mat_table.organic_types.PlantCheese, nil, organic_plantcheese_titles },
+                { 'Cheese (Animal)', 'cheese_animal', #df.global.world.raws.mat_table.organic_types.CreatureCheese, nil, organic_creaturecheese_titles },
+                { 'Seeds', 'seeds', #df.global.world.raws.mat_table.organic_types.Seed, nil, organic_seed_titles },
+                { 'Fruit/Leaves', 'leaves', #df.global.world.raws.mat_table.organic_types.Leaf, nil, organic_leaf_titles },
+                { 'Milled Plant', 'powder_plant', #df.global.world.raws.mat_table.organic_types.PlantPowder, nil, organic_plantpowder_titles },
+                { 'Bone Meal', 'powder_creature', #df.global.world.raws.mat_table.organic_types.CreaturePowder, nil, organic_creaturepowder_titles },
+                { 'Fat', 'glob', #df.global.world.raws.mat_table.organic_types.Glob, nil, organic_glob_titles },
+                { 'Paste', 'glob_paste', #df.global.world.raws.mat_table.organic_types.Paste, nil, organic_paste_titles },
+                { 'Pressed Material', 'glob_pressed', #df.global.world.raws.mat_table.organic_types.Pressed, nil, organic_pressed_titles },
+                { 'Extract (Plant)', 'liquid_plant', #df.global.world.raws.mat_table.organic_types.PlantLiquid, nil, organic_plantliquid_titles },
+                { 'Extract (Animal)', 'liquid_animal', #df.global.world.raws.mat_table.organic_types.CreatureLiquid, nil, organic_animalliquid_titles },
+                { 'Misc. Liquid', 'liquid_misc', #df.global.world.raws.mat_table.organic_types.MiscLiquid, nil, organic_miscliquid_titles },
+            },
+            {
+                { 'Prepared Food', 'prepared_meals' }
+            }
         },
+    
         {
-            { 'Prepared Food', 'prepared_meals' }
-        }
-    },
-
-    {
-        'Furniture & Siege Ammo', 'furniture',
+            'Furniture & Siege Ammo', 'furniture',
+            {
+                { 'Type', 'type', #furniture_type, nil, furniture_type_titles },
+    
+                { 'Stone & Clay', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
+                { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                
+                { 'Other Materials', 'other_mats', #furniture_other_materials, nil, furniture_other_material_titles },
+                
+                { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
+                { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            },
+            {
+                --{ 'Sand Bags', 'sand_bags' } --XXX: not shown in the UI, seems not used
+            }
+        },     
+    
         {
-            { 'Type', 'type', #furniture_type, nil, furniture_type_titles },
-
-            { 'Stone & Clay', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-            { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            
-            { 'Other Materials', 'other_mats', #furniture_other_materials, nil, furniture_other_material_titles },
-            
-            { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
-            { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            'Corpses', 'corpses',
+            {}, {}
         },
+    
         {
-            --{ 'Sand Bags', 'sand_bags' } --XXX: not shown in the UI, seems not used
-        }
-    },     
-
-    {
-        'Corpses', 'corpses',
-        {}, {}
-    },
-
-    {
-        'Refuse', 'refuse',
+            'Refuse', 'refuse',
+            {
+                { 'Type', 'type', df.item_type._last_item+1, refusetype_to_itemtype_idx, refuse_type_titles }, --todo: in game it's 112 somehow
+    
+                --todo: all filtered 799->655
+                { 'Corpses', 'corpses', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Body Parts', 'body_parts', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Skulls', 'skulls', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Bones', 'bones', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Shells', 'shells', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Teeth', 'teeth', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Horns & Hooves', 'horns', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+                { 'Hair & Wool', 'hair', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+            },
+            {
+                --XXX: in game these are shown in Type list, we'll include them as flags for now!
+                { 'Fresh Raw Hide', 'fresh_raw_hide' },
+                { 'Rotten Raw Hide', 'rotten_raw_hide' },
+            }
+        },        
+    
         {
-            { 'Type', 'type', df.item_type._last_item+1, refusetype_to_itemtype_idx, refuse_type_titles }, --todo: in game it's 112 somehow
-
-            --todo: all filtered 799->655
-            { 'Corpses', 'corpses', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Body Parts', 'body_parts', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Skulls', 'skulls', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Bones', 'bones', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Shells', 'shells', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Teeth', 'teeth', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Horns & Hooves', 'horns', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
-            { 'Hair & Wool', 'hair', #df.global.world.raws.creatures.all, animal_to_creature_idx, animal_titles },
+            'Stone', 'stone',
+            {
+                --todo: all filtered
+                { 'Metal Ores', 'mats', #df.global.world.raws.inorganics, metalore_to_mat_idx, metalore_titles },
+                { 'Economic', 'mats', #df.global.world.raws.inorganics, economic_to_mat_idx, economic_titles },
+                { 'Other Stone', 'mats', #df.global.world.raws.inorganics, otherstone_to_mat_idx, otherstone_titles },
+                { 'Clay', 'mats', #df.global.world.raws.inorganics, clay_to_mat_idx, clay_titles },
+            },
+            {
+            }
+        },    
+    
+        {
+            'Ammo', 'ammo',
+            {
+                { 'Type', 'type', #df.global.world.raws.itemdefs.ammo, nil, ammo_type_titles },
+                
+                { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Other Materials', 'other_mats', #ammo_other_materials, nil, ammo_other_material_titles },
+                
+                { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
+                { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            },
+            {
+            }
         },
+    
         {
-            --XXX: in game these are shown in Type list, we'll include them as flags for now!
-            { 'Fresh Raw Hide', 'fresh_raw_hide' },
-            { 'Rotten Raw Hide', 'rotten_raw_hide' },
-        }
-    },        
-
-    {
-        'Stone', 'stone',
-        {
-            --todo: all filtered
-            { 'Metal Ores', 'mats', #df.global.world.raws.inorganics, metalore_to_mat_idx, metalore_titles },
-            { 'Economic', 'mats', #df.global.world.raws.inorganics, economic_to_mat_idx, economic_titles },
-            { 'Other Stone', 'mats', #df.global.world.raws.inorganics, otherstone_to_mat_idx, otherstone_titles },
-            { 'Clay', 'mats', #df.global.world.raws.inorganics, clay_to_mat_idx, clay_titles },
+            'Coins', 'coins',
+            {
+                { 'Coins', 'mats', #df.global.world.raws.inorganics, nil, inorganic_titles },
+            },
+            {
+            }
         },
+    
         {
-        }
-    },    
-
-    {
-        'Ammo', 'ammo',
-        {
-            { 'Type', 'type', #df.global.world.raws.itemdefs.ammo, nil, ammo_type_titles },
-            
-            { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Other Materials', 'other_mats', #ammo_other_materials, nil, ammo_other_material_titles },
-            
-            { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
-            { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            'Bars & Blocks', 'bars_blocks',
+            {
+                { 'Bars - Metal', 'bars_mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Bars - Other Materials', 'bars_other_mats', #bars_other_materials, nil, bars_other_material_titles },
+                { 'Blocks - Stone & Clay', 'blocks_mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
+                { 'Blocks - Metal', 'blocks_mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Blocks - Other Materials', 'blocks_other_mats', #blocks_other_materials, nil, blocks_other_material_titles }
+            },
+            {
+            }
         },
+    
         {
-        }
-    },
-
-    {
-        'Coins', 'coins',
-        {
-            { 'Coins', 'mats', #df.global.world.raws.inorganics, nil, inorganic_titles },
+            'Gems', 'gems',
+            {
+                { 'Rough Gem', 'rough_mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
+                { 'Rough Glass', 'rough_other_mats', #df.global.world.raws.mat_table.builtin, glass_to_builtin_idx, glass_titles },
+                { 'Cut Gem', 'cut_mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
+                { 'Cut Glass', 'cut_other_mats', #df.global.world.raws.mat_table.builtin, glass_to_builtin_idx, glass_titles },
+                { 'Cut Stone', 'cut_mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
+            },
+            {
+            }
         },
+    
         {
-        }
-    },
-
-    {
-        'Bars & Blocks', 'bars_blocks',
+            'Finished Goods', 'finished_goods',
+            {
+                { 'Type', 'type', df.item_type._last_item+1, goods_to_itemtype_idx, goods_titles },
+    
+                { 'Stone & Clay', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
+                { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Gem', 'mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
+    
+                { 'Other Materials', 'other_mats', #goods_other_materials, nil, goods_other_material_titles },
+                
+                { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
+                { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            },
+            {
+            }
+        },        
+    
         {
-            { 'Bars - Metal', 'bars_mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Bars - Other Materials', 'bars_other_mats', #bars_other_materials, nil, bars_other_material_titles },
-            { 'Blocks - Stone & Clay', 'blocks_mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-            { 'Blocks - Metal', 'blocks_mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Blocks - Other Materials', 'blocks_other_mats', #blocks_other_materials, nil, blocks_other_material_titles }
+            'Leather', 'leather',
+            {
+                { 'Leather', 'mats', #df.global.world.raws.mat_table.organic_types.Leather, nil, organic_leather_titles }
+            },
+            {
+            }
+        },       
+    
+        {
+            'Cloth', 'cloth',
+            {
+                { 'Thread - Silk', 'thread_silk', #df.global.world.raws.mat_table.organic_types.Silk, nil, organic_silk_thread_titles },
+                { 'Thread - Plant', 'thread_plant', #df.global.world.raws.mat_table.organic_types.PlantFiber, nil, organic_plantfiber_thread_titles },
+                { 'Thread - Yarn', 'thread_yarn', #df.global.world.raws.mat_table.organic_types.Yarn, nil, organic_yarn_thread_titles },
+                { 'Thread - Metal', 'thread_metal', #df.global.world.raws.mat_table.organic_types.MetalThread, nil, organic_metalthread_thread_titles },
+    
+                { 'Cloth - Silk', 'cloth_silk', #df.global.world.raws.mat_table.organic_types.Silk, nil, organic_silk_cloth_titles },
+                { 'Cloth - Plant', 'cloth_plant', #df.global.world.raws.mat_table.organic_types.PlantFiber, nil, organic_plantfiber_cloth_titles },
+                { 'Cloth - Yarn', 'cloth_yarn', #df.global.world.raws.mat_table.organic_types.Yarn, nil, organic_yarn_cloth_titles },
+                { 'Cloth - Metal', 'cloth_metal', #df.global.world.raws.mat_table.organic_types.MetalThread, nil, organic_metalthread_cloth_titles },
+            },
+            {
+            }
+        },    
+    
+        {
+            'Wood', 'wood',
+            {
+                { 'Wood', 'mats', #df.global.world.raws.plants.all, tree_to_plant_idx, tree_titles }
+            },
+            {
+            }
+        },    
+    
+        {
+            'Weapons & Trap Components', 'weapons',
+            {
+                { 'Weapons', 'weapon_type', #df.global.world.raws.itemdefs.weapons, nil, weapon_titles },
+                { 'Trap Components', 'trapcomp_type', #df.global.world.raws.itemdefs.trapcomps, nil, trapcomp_titles },
+                
+                { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Stone', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
+                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials },
+                
+                { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
+                { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            },
+            {
+                { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
+            }
+        },    
+    
+        {
+            'Armor', 'armor',
+            {
+                { 'Body', 'body', #df.global.world.raws.itemdefs.armor, nil, armor_titles },
+                { 'Head', 'head', #df.global.world.raws.itemdefs.helms, nil, headwear_titles },
+                { 'Feet', 'feet', #df.global.world.raws.itemdefs.shoes, nil, footwear_titles },
+                { 'Hands', 'hands', #df.global.world.raws.itemdefs.gloves, nil, handwear_titles },
+                { 'Legs', 'legs', #df.global.world.raws.itemdefs.pants, nil, legwear_titles },
+                { 'Sheilds', 'shield', #df.global.world.raws.itemdefs.shields, nil, shield_titles },
+                
+                { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
+                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials  },
+                
+                { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
+                { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
+            },
+            {
+                { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
+            }
         },
-        {
-        }
-    },
-
-    {
-        'Gems', 'gems',
-        {
-            { 'Rough Gem', 'rough_mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
-            { 'Rough Glass', 'rough_other_mats', #df.global.world.raws.mat_table.builtin, glass_to_builtin_idx, glass_titles },
-            { 'Cut Gem', 'cut_mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
-            { 'Cut Glass', 'cut_other_mats', #df.global.world.raws.mat_table.builtin, glass_to_builtin_idx, glass_titles },
-            { 'Cut Stone', 'cut_mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-        },
-        {
-        }
-    },
-
-    {
-        'Finished Goods', 'finished_goods',
-        {
-            { 'Type', 'type', df.item_type._last_item+1, goods_to_itemtype_idx, goods_titles },
-
-            { 'Stone & Clay', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-            { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Gem', 'mats', #df.global.world.raws.inorganics, gem_to_mat_idx, gem_titles },
-
-            { 'Other Materials', 'other_mats', #goods_other_materials, nil, goods_other_material_titles },
-            
-            { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
-            { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
-        },
-        {
-        }
-    },        
-
-    {
-        'Leather', 'leather',
-        {
-            { 'Leather', 'mats', #df.global.world.raws.mat_table.organic_types.Leather, nil, organic_leather_titles }
-        },
-        {
-        }
-    },       
-
-    {
-        'Cloth', 'cloth',
-        {
-            { 'Thread - Silk', 'thread_silk', #df.global.world.raws.mat_table.organic_types.Silk, nil, organic_silk_thread_titles },
-            { 'Thread - Plant', 'thread_plant', #df.global.world.raws.mat_table.organic_types.PlantFiber, nil, organic_plantfiber_thread_titles },
-            { 'Thread - Yarn', 'thread_yarn', #df.global.world.raws.mat_table.organic_types.Yarn, nil, organic_yarn_thread_titles },
-            { 'Thread - Metal', 'thread_metal', #df.global.world.raws.mat_table.organic_types.MetalThread, nil, organic_metalthread_thread_titles },
-
-            { 'Cloth - Silk', 'cloth_silk', #df.global.world.raws.mat_table.organic_types.Silk, nil, organic_silk_cloth_titles },
-            { 'Cloth - Plant', 'cloth_plant', #df.global.world.raws.mat_table.organic_types.PlantFiber, nil, organic_plantfiber_cloth_titles },
-            { 'Cloth - Yarn', 'cloth_yarn', #df.global.world.raws.mat_table.organic_types.Yarn, nil, organic_yarn_cloth_titles },
-            { 'Cloth - Metal', 'cloth_metal', #df.global.world.raws.mat_table.organic_types.MetalThread, nil, organic_metalthread_cloth_titles },
-        },
-        {
-        }
-    },    
-
-    {
-        'Wood', 'wood',
-        {
-            { 'Wood', 'mats', #df.global.world.raws.plants.all, tree_to_plant_idx, tree_titles }
-        },
-        {
-        }
-    },    
-
-    {
-        'Weapons & Trap Components', 'weapons',
-        {
-            { 'Weapons', 'weapon_type', #df.global.world.raws.itemdefs.weapons, nil, weapon_titles },
-            { 'Trap Components', 'trapcomp_type', #df.global.world.raws.itemdefs.trapcomps, nil, trapcomp_titles },
-            
-            { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Stone', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-            { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials },
-            
-            { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
-            { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
-        },
-        {
-            { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
-        }
-    },    
-
-    {
-        'Armor', 'armor',
-        {
-            { 'Body', 'body', #df.global.world.raws.itemdefs.armor, nil, armor_titles },
-            { 'Head', 'head', #df.global.world.raws.itemdefs.helms, nil, headwear_titles },
-            { 'Feet', 'feet', #df.global.world.raws.itemdefs.shoes, nil, footwear_titles },
-            { 'Hands', 'hands', #df.global.world.raws.itemdefs.gloves, nil, handwear_titles },
-            { 'Legs', 'legs', #df.global.world.raws.itemdefs.pants, nil, legwear_titles },
-            { 'Sheilds', 'shield', #df.global.world.raws.itemdefs.shields, nil, shield_titles },
-            
-            { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-            { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials  },
-            
-            { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
-            { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
-        },
-        {
-            { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
-        }
-    },
-}
+    }
 
     if df_ver >= 4200 then --dfver:4200-
         table.insert(ret,

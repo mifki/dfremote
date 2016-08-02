@@ -97,8 +97,7 @@ local orders = {
 	}
 }
 
--- have to have all this manual reading from the screen because orders globals are not available on all platforms
---todo: use direct data access on Windows
+--todo: order globals are now available on all platforms, use them
 
 local function parse_orders_main(t, ret)
     ret['standing_orders_job_cancel_announce'] = t(0, 12, 's') and 1 or t(0, 12, 'm') and 2 or t(0, 12, 'a') and 3 or 0
