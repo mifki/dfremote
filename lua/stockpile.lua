@@ -1005,6 +1005,14 @@ function organic_miscliquid_titles()
     return organic_titles_prefixstate('MiscLiquid', 'Liquid', '')
 end
 
+function sheet_paper_titles()
+    return organic_titles_prefixstate(37, 0, ' sheet')
+end
+
+function sheet_parchment_titles()
+    return organic_titles_prefixstate(38, 0, ' sheet')
+end
+
 function inorganic_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
@@ -1017,7 +1025,7 @@ end
 
 --todo: should cache this
 function stockpile_settings_schema()
-    return
+    local ret =
 {
     {
         'Animals', 'animals',
@@ -1255,8 +1263,23 @@ function stockpile_settings_schema()
         {
             { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
         }
-    }
+    },
 }
+
+    if df_ver >= 4200 then --dfver:4200-
+        table.insert(ret,
+        {
+            'Sheet', 'sheet',
+            {
+                { 'Paper', 'paper', #df.global.world.raws.mat_table.organic_types[37], nil, sheet_paper_titles },
+                { 'Parchment', 'parchment', #df.global.world.raws.mat_table.organic_types[38], nil, sheet_parchment_titles },
+            },
+            {
+            }
+        })
+    end
+
+    return ret
 end
 
 --luacheck: in=
