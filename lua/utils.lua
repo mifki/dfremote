@@ -80,7 +80,7 @@ end
 
 function unitprof(unit)
     local prof = dfhack.units.getProfessionName(unit)
-    local ret = capitalize(prof) --xxx: getting rid of the second return value
+    local ret = capitalize(prof) -- to get rid of the second return value
     return ret
 end
 

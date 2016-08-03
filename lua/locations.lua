@@ -94,15 +94,15 @@ function location_get_info(id)
 		local site = df.world_site.find(df.global.ui.site_id)
 		local group_id = df.global.ui.group_id
 
-		local occupations = {}
-
+		local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
+		
 		for i,occ in ipairs(df.global.world.occupations.all) do
 			if occ.anon_1 == group_id and occ.unit_id ~= -1 then
 				local unit = df.unit.find(occ.unit_id)
 				local unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
 
 				local pos = #occupations + 1
-				for j,v in ipairs(occupations) do --as:{1:string,2:number,3:number,4:string,5:number}
+				for j,v in ipairs(occupations) do
 					--[[if v[5] == -1 and occ.type == v[3] then
 						pos = occ.unit_id == -1 and 0 or j
 						break
@@ -188,7 +188,8 @@ function location_get_info(id)
 					params = { loc.contents.desired_instruments }
 				end
 
-				local occupations = {}
+				local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
+				
 				for i,occ in ipairs(loc.occupations) do
 					local unit = occ.unit_id ~= -1 and df.unit.find(occ.unit_id) or nil
 					local unitname = occ.unit_id ~= -1 and (unit and unit_fulltitle(unit) or '#unknown unit#') or mp.NIL

@@ -27,7 +27,7 @@ function manager_get_orders()
 		local title = ordertitle(o)
 
 		local maxw = 0
-		if df_ver >= 4200 then
+		if df_ver >= 4200 then --dfver:4200-
 			maxw = o.max_workshops
 		end
 

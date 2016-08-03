@@ -270,27 +270,36 @@ function building_query_selected(bldid)
         if btype == df.building_type.Table then
             local bld = bld --as:df.building_tablest
             table.insert(ret, bld.table_flags.meeting_hall)
-            local loc
+            
+            local lname = mp.NIL
             if df_ver >= 4200 then --dfver:4200-
                 if bld.is_room and bld.location_id ~= -1 then
-                    loc = location_find_by_id(bld.location_id)
+                    local loc = location_find_by_id(bld.location_id)
+                    if loc then
+                        lname = locname(loc)
+                    end
                 end
             end
-            table.insert(ret, loc and locname(loc) or mp.NIL)
+            table.insert(ret, lname)
 
         elseif btype == df.building_type.Bed then
             local bld = bld --as:df.building_bedst
             table.insert(ret, bld.bed_flags.whole)
             table.insert(ret, get_squads_use(bld))
 
-            local loc
+            -- some operations on bedrooms are unavailable if the bed is in a tavern
+            local lname, is_tavern = mp.NIL, false
             if df_ver >= 4200 then --dfver:4200-
                 if bld.is_room and bld.location_id ~= -1 then
-                    loc = location_find_by_id(bld.location_id)
+                    local loc = location_find_by_id(bld.location_id)
+                    if loc then
+                        lname = locname(loc) 
+                        is_tavern = loc._type == df.abstract_building_inn_tavernst
+                    end
                 end
             end
-            table.insert(ret, loc and locname(loc) or mp.NIL)
-            table.insert(ret, loc and (loc._type == df.abstract_building_inn_tavernst) or false)
+            table.insert(ret, lname)
+            table.insert(ret, is_tavern)
 
         elseif btype == df.building_type.ArcheryTarget then
             local bld = bld --as:df.building_archerytargetst
@@ -1743,7 +1752,7 @@ function building_well_is_active()
     return string.char(ch) == 'A'
 end
 
---luacheck: in=
+--luacheck: in=number
 function building_quick_action(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1757,13 +1766,13 @@ function building_quick_action(idx)
     end
 
     -- For doors - lock/unlock
-    if bld._type == df.building_doorst then
+    if bld._type == df.building_doorst then --as:bld=df.building_doorst
         if idx == 1 then
             bld.door_flags.forbidden = not bld.door_flags.forbidden
         end
     
     -- For levers - pull
-    elseif bld._type == df.building_trapst and bld:getSubtype() == df.trap_type.Lever then
+    elseif bld._type == df.building_trapst and bld:getSubtype() == df.trap_type.Lever then --as:bld=df.building_trapst
         if idx == 1 then
             df.global.ui_workshop_in_add = false
             gui.simulateInput(ws, K'BUILDJOB_ADD')

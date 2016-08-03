@@ -15,7 +15,8 @@ function C_pet_available(item)
 end
 
 function C_pet_ownerid(item)
-	return item['item_petst.anon_1']
+	local ownerid = item['item_petst.anon_1'] --as:number
+	return ownerid
 end
 
 function C_crime_report_found_body(r)
@@ -46,16 +47,17 @@ function C_manager_order_is_validated(o)
 	return o.is_validated
 end
 
-function C_training_assignment_get_flags(training_assignment)
-	local flags = training_assignment.flags
-	return { any_trainer=flags.any_trainer, any_unassigned_trainer=flags.any_unassigned_trainer, train_war=flags.train_war, train_hunt=flags.train_hunt }
+function C_training_assignment_get_flags(training_assignment)	
+	local any_trainer 			 = bit32.band(training_assignment.auto_mode, 1) ~= 0
+	local any_unassigned_trainer = bit32.band(training_assignment.auto_mode, 2) ~= 0
+	local train_war 			 = bit32.band(training_assignment.auto_mode, 4) ~= 0
+	local train_hunt 			 = bit32.band(training_assignment.auto_mode, 8) ~= 0	
+	
+	return { any_trainer=any_trainer, any_unassigned_trainer=any_unassigned_trainer, train_war=train_war, train_hunt=train_hunt }
 end
 
 function C_training_assignment_set_flags(training_assignment, flags)
-	training_assignment.flags.any_trainer 			 = istrue(flags.any_trainer)
-	training_assignment.flags.any_unassigned_trainer = istrue(flags.any_unassigned_trainer)
-	training_assignment.flags.train_war 			 = istrue(flags.train_war)
-	training_assignment.flags.train_hunt 			 = istrue(flags.train_hunt)
+	training_assignment.auto_mode = packbits(flags.any_trainer, flags.any_unassigned_trainer, flags.train_war, flags.train_hunt)
 end
 
 function C_build_req_get_required(req)

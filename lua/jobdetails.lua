@@ -273,7 +273,7 @@ local function ensure_images_loaded(bldid, idx)
 				gui.simulateInput(ws, K'SELECT')
 
 				local imgws = dfhack.gui.getCurViewscreen()
-				if imgws._type == df.viewscreen_image_creatorst then
+				if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
 					for j,w in ipairs(imgws.anon_1) do
 						if w == 5 then
 							imgws.category_idx = j
@@ -382,8 +382,9 @@ function job_details_set_image(bldid, idx, imgtype, id)
 
 	    order.art_spec.type = imgtype
 	    if type(id) == 'table' then
-	    	order.art_spec.id = id[1]
-	    	order.art_spec.subid = id[2]
+	    	local spec = id --as:number[]
+	    	order.art_spec.id = spec[1]
+	    	order.art_spec.subid = spec[2]
 	    else
 	    	order.art_spec.id = id
 	    	order.art_spec.subid = -1
@@ -412,9 +413,10 @@ function job_details_set_image(bldid, idx, imgtype, id)
 
     job.art_spec.type = imgtype
     if type(id) == 'table' then
-    	job.art_spec.id = id[1]
-    	job.art_spec.subid = id[2]
-    else
+    	local spec = id --as:number[]
+    	job.art_spec.id = spec[1]
+    	job.art_spec.subid = spec[2]
+    else --as:id=number
     	job.art_spec.id = id
     	job.art_spec.subid = -1
     end

@@ -159,7 +159,7 @@ function execute_with_manager_screen(fn)
 	gui.simulateInput(jobsws, K'UNITJOB_MANAGER')
 	jobsws:delete()
 
-	local managerws = dfhack.gui.getCurViewscreen()
+	local managerws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_jobmanagementst
 
 	local ok,ret = pcall(fn, managerws)
 
@@ -236,7 +236,7 @@ function execute_with_locations_for_building(bldid, fn)
         error('not a room '..tostring(bldid))
     end
 
-    if bld._type == df.building_civzonest then
+    if bld._type == df.building_civzonest then --as:bld=df.building_civzonest
 	    if not bld.zone_flags.meeting_area then
 	    	error('not a meeting area '..tostring(bld.zone_flags.whole))
 	    end
@@ -316,7 +316,7 @@ function execute_with_order_details(idx, fn)
 
 	    gui.simulateInput(ws, K'MANAGER_DETAILS')
 	    
-	    local detws = dfhack.gui.getCurViewscreen()
+	    local detws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_workquota_detailsst
 	    if detws._type ~= df.viewscreen_workquota_detailsst then
 	    	error('could not switch to order details screen '..tostring(detws._type))
 	    end

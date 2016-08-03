@@ -13,14 +13,17 @@ function zone_settings_get(bldid)
         error('no zone found for id '..tostring(bldid))
     end
 
-    local loc
+    local lname = mp.NIL
     if df_ver >= 4200 then --dfver:4200-
         if zone.zone_flags.meeting_area and zone.location_id ~= -1 then
-            loc = location_find_by_id(zone.location_id)
+            local loc = location_find_by_id(zone.location_id)
+            if loc then
+                lname = locname(loc)
+            end
         end
     end
 
-    return { zonename(zone), zone.id, zone.zone_flags.whole, loc and locname(loc) or mp.NIL }
+    return { zonename(zone), zone.id, zone.zone_flags.whole, lname }
 end
 
 --luacheck: in=number,number,number

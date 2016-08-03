@@ -226,7 +226,7 @@ function orders_get()
 		for j,v in ipairs(g[2]) do
 			local title = v[2]
 			local field = v[1]
-			val = globals[field] or false --todo: -1 and disable in-app (?)
+			local val = globals[field] or false --todo: -1 and disable in-app (?)
 
 			table.insert(grp, { title, val })
 		end

@@ -595,7 +595,7 @@ function squad_add_members(id, unitids)
 
                     for j,unit in ipairs(ws.positions.candidates) do
                         if unit.id == v then
-                            ws.layer_objects[2].cursor = j
+                            ws.layer_objects[2].cursor = j --hint:df.layer_object_listst
                             gui.simulateInput(ws, K'SELECT')        
                          
                             break

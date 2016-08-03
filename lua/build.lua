@@ -74,7 +74,7 @@ function build_confirm(fast)
                             if lastbldcmd ~= -1 then
                                 build(lastbldcmd)
                             else
-                                df.global.ui.main.mode = 0
+                                df.global.ui.main.mode = df.ui_sidebar_mode.Default
                             end
                             
                             return {}

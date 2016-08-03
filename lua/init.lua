@@ -61,6 +61,7 @@ local lastblderrsync = 0
 lastann = 0
 lastannrep = 0
 local lastextdata = nil
+local extdata = nil
 
 building_btns = {} --as:df.interface_button_construction_building_selectorst[]
 designate_cmds = {}
@@ -699,7 +700,7 @@ function get_status()
 
             if bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
-            elseif bld._type == df.building_doorst and bld.door_flags.forbidden then
+            elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
                 name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
             end
 
@@ -1031,10 +1032,6 @@ function save_and_close()
     optsws.parent = ws
     ws.child = optsws
 
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
-
     gui.simulateInput(optsws, K'SELECT')
 end
 
@@ -1045,10 +1042,6 @@ function end_game_retire()
 
     optsws.parent = ws
     ws.child = optsws
-
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
 
     optsws.in_retire_dwf_abandon_adv = 1
 
@@ -1062,10 +1055,6 @@ function end_game_abandon()
 
     optsws.parent = ws
     ws.child = optsws
-
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    local _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
 
     optsws.in_abandon_dwf = 1
 

@@ -337,7 +337,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
     local jobcolor = 11
     local onbreak = is_onbreak(unit)
 
-    if df_ver >= 4200 then
+    if df_ver >= 4200 then --dfver:4200-
         if #unit.social_activities > 0 then
             local actid = unit.social_activities[0] --todo: use 0 or last ?
 
@@ -1074,13 +1074,7 @@ function unit_get_relationships(unitid)
 
         local rel_u = ws.relation_unit_type[i]
         local rel_hf = ws.relation_histfig_type[i]
-
-        if rel_hf ~= -1 then
-            rel = relations_hf[rel_hf+1]
-        else
-            rel = relations_unit[rel_u+1]
-        end
-
+        local rel = (rel_hf ~= -1) and relations_hf[rel_hf+1] or relations_unit[rel_u+1]
         local flags = (v and 1 or 0) + (can_zoom and 2 or 0) + (can_view and 4 or 0)
 
         table.insert(ret, { name, id, namecolor, rel[1], rel[2], flags, can_zoom and pos2table(v.pos) or mp.NIL })
