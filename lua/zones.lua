@@ -88,6 +88,8 @@ function zone_information_get(bldid, mode)
                 local status = unit_assigned_status(unit, zone)
                 table.insert(list, { title, unit.id, is_assigned, status })
             end
+            
+            df.global.ui.main.mode = df.ui_sidebar_mode.Zones
         end)
     
         return { list }
@@ -124,6 +126,8 @@ function zone_information_get(bldid, mode)
 
                 table.insert(list, { title, id, is_assigned, v, status })
             end
+            
+            df.global.ui.main.mode = df.ui_sidebar_mode.Zones
         end)
 
         return { list, zone.pit_flags.whole }
@@ -196,6 +200,7 @@ function zone_assign(bldid, mode, objid, objtype, on)
             end
         end
 
+        df.global.ui.main.mode = df.ui_sidebar_mode.Zones
     end)
 end
 

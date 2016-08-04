@@ -1092,7 +1092,7 @@ void remote_start()
     enabler->gfps = 5;
 
     INTERPOSE_HOOK(dwarfmode_hook2, render).apply(true);
-    //INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(true);
+    INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(true);
 
     remote_on = true;
 
@@ -1113,7 +1113,7 @@ void remote_stop()
     *df::global::pause_state = true;
 
     INTERPOSE_HOOK(dwarfmode_hook2, render).apply(false);
-    //INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(false);
+    INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(false);
 
     remote_on = false;
     timer_timeout = -1;
