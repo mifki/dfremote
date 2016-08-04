@@ -1,4 +1,4 @@
-local designations = {
+local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:number}[]"}[]
     { 'Mine', 'd', df.interface_key.DESIGNATE_DIG },
     { 'Channel', 'h', df.interface_key.DESIGNATE_CHANNEL },
     { 'Up Stair', 'u', df.interface_key.DESIGNATE_STAIR_UP },
@@ -36,6 +36,7 @@ local designations = {
     } }
 }
 
+--luacheck: in=
 function setup_get_designations()
     local choices = {}
 
@@ -105,15 +106,17 @@ local function get_choices_build()
     return choices            
 end
 
+--luacheck: in=
 function setup_get_buildings()
     return execute_with_main_mode(0, function(ws)
-        gui.simulateInput(ws, 'D_BUILDING')
+        gui.simulateInput(ws, K'D_BUILDING')
         building_btns = {}
         return get_choices_build()
     end)
 end
 
 --todo: add a flag to return gamelist/worldgen detailed info straight away
+--luacheck: in=string,string
 function setup_get_server_info(clientver, pwd)
     --todo: no need to check pwd and match version if not foreign
     local ver = matching_version(clientver)
@@ -125,7 +128,7 @@ function setup_get_server_info(clientver, pwd)
     local ws = dfhack.gui.getCurViewscreen()
 
     -- Get rid of help and options screens
-    if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then
+    if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then --hint:df.viewscreen_textviewerst
         local parent = ws.parent
         parent.child = nil
         ws:delete()
@@ -133,7 +136,7 @@ function setup_get_server_info(clientver, pwd)
     end
 
     -- Busy loading game
-    if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then
+    if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then --hint:df.viewscreen_loadgamest
         return { ver, 'busy-loading-game' }
     end
 
@@ -154,7 +157,7 @@ function setup_get_server_info(clientver, pwd)
 
     -- Worldgen in progress (unlike other screens below, this screen is a child of the title screen)
     if ws._type == df.viewscreen_new_regionst then
-        if worldgen_params or (not istrue(ws.simple_mode) and not istrue(ws.in_worldgen)) then
+        if worldgen_params or (not istrue(ws.simple_mode) and not istrue(ws.in_worldgen)) then --hint:df.viewscreen_new_regionst
             return { ver, 'worldgen' }
         end
     end
@@ -210,6 +213,7 @@ function setup_get_server_info(clientver, pwd)
     return { ver, 'unknown' }
 end
 
+--luacheck: in=number
 function setup_get_mapinfo(wtoken)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -243,10 +247,12 @@ function setup_get_mapinfo(wtoken)
     return mapinfo
 end
 
+--luacheck: in=
 function setup_get_settings()
     return { df.global.enabler.fps, df.global.enabler.calculated_fps }
 end
 
+--luacheck: in=number,number
 function setup_set_setting(idx, value)
     if idx == 1 then
         if value < 10 then value = 10 end

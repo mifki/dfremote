@@ -1,3 +1,4 @@
+--luacheck: in=
 function ammunition_get_list()
 	local ret = {}
 
@@ -25,6 +26,7 @@ function ammunition_get_list()
 	return ret
 end
 
+--luacheck: in=
 function ammunition_get_list_short()
 	local ret = {}
 
@@ -39,6 +41,7 @@ function ammunition_get_list_short()
 	return ret
 end
 
+--luacheck: in=number
 function ammunition_get_squad(id)
 	local function process_specs(specs)
 		local ammolist = {}
@@ -65,14 +68,15 @@ function ammunition_get_squad(id)
 end
 
 --todo: can do this directly, without employing UI
+--luacheck: in=
 function ammunition_get_additem()
     return execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_ADD_ITEM')
-        gui.simulateInput(ws, 'SELECT')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_MATERIAL')
-        gui.simulateInput(ws, 'LEAVESCREEN')
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_REMOVE_ITEM')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_ADD_ITEM')
+        gui.simulateInput(ws, K'SELECT')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_MATERIAL')
+        gui.simulateInput(ws, K'LEAVESCREEN')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_REMOVE_ITEM')
 
         local items = {}
         for i,v in ipairs(ws.ammo.add_item.type) do
@@ -109,6 +113,7 @@ function ammunition_get_additem()
     end)
 end
 
+--luacheck: in=number,number[],number[]
 function ammunition_item_add(squadid, itemspec, matspec)
 	local specs
 
@@ -148,9 +153,10 @@ function ammunition_item_add(squadid, itemspec, matspec)
 end
 
 --todo: maybe do this directly, without employing UI, just don't forget to set df.global.ui.equipment.update.ammo
+--luacheck: in=number,number
 function ammunition_item_remove(squadid, idx)
     execute_with_military_screen(function(ws)
-        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION')
+        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION')
 
         for i,v in ipairs(ws.ammo.squads) do
         	if (not v and squadid == -1) or (v and v.id == squadid) then
@@ -158,8 +164,8 @@ function ammunition_item_remove(squadid, idx)
         			if idx < 0 or idx >= #v.ammunition then
         				return
         			end
-			        ws.layer_objects[0].cursor = i - 1
-			        gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')
+			        ws.layer_objects[0].cursor = i - 1 --hint:df.layer_object_listst
+			        gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
 			    else
         			if idx < 0 or idx >= #df.global.ui.equipment.hunter_ammunition then
         				return
@@ -168,8 +174,8 @@ function ammunition_item_remove(squadid, idx)
 
 				ws.layer_objects[0].active = false
 				ws.layer_objects[1].active = true
-		        ws.layer_objects[1].cursor = idx
-		        gui.simulateInput(ws, 'D_MILITARY_AMMUNITION_REMOVE_ITEM')
+		        ws.layer_objects[1].cursor = idx --hint:df.layer_object_listst
+		        gui.simulateInput(ws, K'D_MILITARY_AMMUNITION_REMOVE_ITEM')
 
 		        break
         	end
@@ -177,6 +183,7 @@ function ammunition_item_remove(squadid, idx)
     end)	
 end
 
+--luacheck: in=number,number
 function ammunition_get_assigned(squadid, idx)
 	local spec
 	local obj
@@ -209,6 +216,7 @@ function ammunition_get_assigned(squadid, idx)
 	return ret
 end
 
+--luacheck: in=number,number,number
 function ammunition_set_amount(squadid, idx, amount)
 	local spec
 
@@ -229,6 +237,7 @@ function ammunition_set_amount(squadid, idx, amount)
 	return true
 end
 
+--luacheck: in=number,number,number
 function ammunition_set_flags(squadid, idx, flags)
 	local spec
 

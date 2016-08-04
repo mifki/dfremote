@@ -1,5 +1,9 @@
 --todo: do this in C
 function charptr_to_string(charptr)
+	--[[if not charptr then
+		return ''
+	end]]
+
 	local ret = ''
 
 	while true do
@@ -77,6 +81,7 @@ function read_meeting_screen()
 	return text, reply, actions
 end
 
+--luacheck: in=
 function meeting_get()
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -84,23 +89,25 @@ function meeting_get()
     local reply = false
 
     if ws._type == df.viewscreen_textviewerst and ws.parent._type == df.viewscreen_meetingst then
+    	local ws = ws --as:df.viewscreen_textviewerst
     	text = ''
     	for i,v in ipairs(ws.formatted_text) do
 	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
 	    end
 
-    	activity = ws.parent.dipscript_popup.activity
+    	activity = ws.parent.dipscript_popup.activity --hint:df.viewscreen_meetingst
     	actions = { 'Done' }
     end
 
     if ws._type == df.viewscreen_topicmeetingst then
+    	local ws = ws --as:df.viewscreen_topicmeetingst
     	activity = ws.popup.activity
 
     	--todo: include all lines here! :)
     	if #ws.text > 0 then
     		text = '<p align=justify>'
     		for i,v in ipairs(ws.text) do
-    			local line = dfhack.df2utf(v.value:gsub('  ', ' '))
+    			local line = dfhack.df2utf(v.value:gsub('%s+', ' '))
 				
 				if text:sub(#text,#text) == '.' and line:find('^[A-Z]') then
 					text = text .. '</p><p align=justify>'
@@ -136,17 +143,18 @@ function meeting_get()
 	return { text, actions, actor_fullname, noble_fullname, reply }
 end
 
+--luacheck: in=number
 function meeting_action(idx)
 	local ws = dfhack.gui.getCurViewscreen()
 
 	local key
 
 	if ws._type == df.viewscreen_textviewerst and ws.parent._type == df.viewscreen_meetingst then
-		key = 'LEAVESCREEN'
+		key = K'LEAVESCREEN'
     end
 
     if ws._type == df.viewscreen_topicmeetingst then
-    	key = 'OPTION' .. tostring(idx+1)
+    	key = K('OPTION' .. tostring(idx+1))
     end
 
 	gui.simulateInput(ws, key)
@@ -474,8 +482,9 @@ function get_sell_items(civ_id)
 	return cats
 end
 
+--luacheck: in=
 function import_req_get_items()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_takerequestsst
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
 		return
 	end
@@ -499,7 +508,7 @@ function import_req_get_items()
 
 		local items = {}
 		for j=0,n-1 do
-			local name = capitalize(nf(sf(s,j)))
+			local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
 			--print (name)
 			table.insert(items, { name })
 		end
@@ -510,8 +519,9 @@ function import_req_get_items()
 	return ret
 end
 
+--luacheck: in=number[][],bool
 function import_req_set(changes, close)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_takerequestsst
 	if ws._type ~= df.viewscreen_topicmeeting_takerequestsst then
 		return
 	end
@@ -528,7 +538,7 @@ function import_req_set(changes, close)
 	end
 
 	if istrue(close) then
-		gui.simulateInput(ws, 'LEAVESCREEN')
+		gui.simulateInput(ws, K'LEAVESCREEN')
 	end
 end
 
@@ -550,7 +560,7 @@ function process_sell_agreement(civ_id, reqs)
 
 		local items = {}
 		for j=0,n-1 do
-			local name = capitalize(nf(sf(s,j)))
+			local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
 			table.insert(items, { name, reqs.items.priority[cat[2]][j], math.floor(reqs.price[cat[2]][j]/128*100) })
 		end
 
@@ -560,8 +570,9 @@ function process_sell_agreement(civ_id, reqs)
 	return ret	
 end
 
+--luacheck: in=
 function import_agreement_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradeagreementst
 	if ws._type ~= df.viewscreen_tradeagreementst then
 		return
 	end
@@ -685,7 +696,7 @@ local item_type_names_pl = {
     'BOOK'
 }
 
-local mat_cat_names = {
+local mat_cat_names = { --as:string[]
 	[shft(df.dfhack_material_category.plant)] = 'plant',
 	[shft(df.dfhack_material_category.wood)] = 'wooden',
 	[shft(df.dfhack_material_category.cloth)] = 'cloth',
@@ -729,7 +740,7 @@ function process_buy_agreement(reqs)
 		local subtype = reqs.items.item_subtype[i]
 		if subtype == -1 then
 			name = item_type_names_pl[v+1]
-			if type(name) == 'table' then
+			if type(name) == 'table' then --as:name=number[]
 				name = name[mat_cat.whole] or name[0]
 			end
 		
@@ -739,14 +750,16 @@ function process_buy_agreement(reqs)
 
 		--todo: for bars + material the game shows only material eg. 'ash', but 'bars' if no material
 		title = title .. name
-		table.insert(ret, { capitalize(title), reqs.items.priority[i], math.floor(reqs.price[i]/128*100) })
+		title = dfhack.df2utf(title):utf8capitalize()
+		table.insert(ret, { title, reqs.items.priority[i], math.floor(reqs.price[i]/128*100) })
 	end
 
 	return ret	
 end
 
+--luacheck: in=
 function export_agreement_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_requestagreementst
 	if ws._type ~= df.viewscreen_requestagreementst then
 		return
 	end
@@ -757,8 +770,9 @@ function export_agreement_get()
 	return { ret, translatename(ws.civ.name) }
 end
 
+--luacheck: in=
 function landholders_get()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_fill_land_holder_positionsst
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then
 		return
 	end
@@ -775,8 +789,9 @@ function landholders_get()
 	return { candidates, 'A Barony' }
 end
 
+--luacheck: in=number,bool
 function landholders_set(hfid, close)
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_topicmeeting_fill_land_holder_positionsst
 	if ws._type ~= df.viewscreen_topicmeeting_fill_land_holder_positionsst then
 		return
 	end
@@ -788,10 +803,10 @@ function landholders_set(hfid, close)
 	if #ws.selected_histfig_ids > 0 then
 		ws.selected_histfig_ids[0] = hfid
 	else
-		ws:insert(0, hfid)
+		ws.selected_histfig_ids:insert(0, hfid)
 	end
 
 	if istrue(close) then
-		gui.simulateInput(ws, 'LEAVESCREEN')
+		gui.simulateInput(ws, K'LEAVESCREEN')
 	end	
 end

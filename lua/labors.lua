@@ -1,4 +1,4 @@
-local labor_groups = {
+local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:number,4:number,5:bool}}}[]
     { "Mining", 7, {
         { "Miner", df.profession.MINER, df.unit_labor.MINE, df.job_skill.MINING, true }
     } },
@@ -226,8 +226,8 @@ function is_special_labor(laboridx)
     return false
 end
 
+--luacheck: in=
 function labors_get_labors()
-
     local labor_counts = labors_get_counts()
 
     local groups = {}
@@ -246,6 +246,7 @@ function labors_get_labors()
 end
 
 --todo: don't count common labors like hauling
+--luacheck: in=
 function labors_get_counts()
     local ret = {}
 
@@ -279,6 +280,7 @@ function find_labor_obj(laboridx)
     end
 end
 
+--luacheck: in=number
 function labors_get_dwarves_with_labor(laboridx)
 	local labor = find_labor_obj(laboridx)
 
@@ -326,6 +328,7 @@ function labors_get_dwarves_with_labor(laboridx)
     return { enabled, disabled }
 end
 
+--luacheck: in=
 function labors_get_all_dwarves()
     local allowed = {}
     local disallowed = {}
@@ -355,6 +358,7 @@ function labors_get_all_dwarves()
     return { allowed, disallowed }
 end
 
+--luacheck: in=number
 function labors_get_dwarf_labors(unitid)
 	local unit = df.unit.find(unitid)
     if not unit then
@@ -394,10 +398,11 @@ function labors_get_dwarf_labors(unitid)
 end
 
 --todo: allow to pass changes as an array in second argument (?) array of 2-value arrays ?
+--luacheck: in=number
 function labors_set(unitid, ...)
 	local unit = df.unit.find(unitid)
 	local ulabors = unit.status.labors
-    local changes = {...}
+    local changes = {...} --as:number[]
 
     for i=1,#changes,2 do
         local idx = changes[i]

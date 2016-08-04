@@ -1,0 +1,9 @@
+New stuff
+- Can put start conditions on work orders (by amount of resources or dependence on other work orders)
+- Can create work order from profile which is tied to specific workshop
+- Can set maximum number of general work orders per shop or disallow them by profession or altogether (note: this won't work for active old-save jobs)
+- Repeatable work orders, ability to set restart frequencies
+
+Other bug fixes/tweaks
+- Allowed some site-wide occupations for dwarves
+- Made paper slurries stockpile-able (won't work without updated raws)

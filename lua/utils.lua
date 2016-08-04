@@ -18,7 +18,7 @@ function bit(f, v)
 end
 
 function packbits(...)
-    local args = table.pack(...)
+    local args = table.pack(...) --as:number[]
     local v = 0
     
     for i=0,7 do
@@ -51,7 +51,8 @@ function ripairs_tbl(t)
 end
 
 function capitalize(str)
-    return str:gsub("(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
+    local ret = string.gsub(str, "(%a)([%w_']*)", function(a,b) return string.upper(a)..b end)    
+    return ret
 end
 
 function unitname(unit, eng)
@@ -79,7 +80,7 @@ end
 
 function unitprof(unit)
     local prof = dfhack.units.getProfessionName(unit)
-    local ret = capitalize(prof) --xxx: getting rid of the second return value
+    local ret = capitalize(prof) -- to get rid of the second return value
     return ret
 end
 
@@ -89,7 +90,13 @@ function bldname(bld)
     return string.utf8capitalize(name)
 end
 
+function locname(loc)
+    local name = dfhack.df2utf(dfhack.TranslateName(loc:getName(), true))
+    return string.utf8capitalize(name)
+end
+
 --todo: this should add {} for forbidden items
+--todo: add info what different type values do
 function itemname(item, type, decorate)
     local name = dfhack.items.getDescription(item, type, decorate):gsub('`', '\'')
 
@@ -99,10 +106,14 @@ function itemname(item, type, decorate)
         local wear = item:getWear()
         if wear > 0 then
             local x
-            if wear == 1 then x = 'x'
-            elseif wear == 2 then x = 'X'
-            elseif wear == 3 then x = 'xX'
-            else wear = 'XX'
+            if wear == 1 then
+                x = 'x'
+            elseif wear == 2 then
+                x = 'X'
+            elseif wear == 3 then
+                x = 'xX'
+            else
+                x = 'XX'
             end
 
             name = x .. name .. x
@@ -110,7 +121,7 @@ function itemname(item, type, decorate)
     end
 
     local artname = nil
-    local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT)
+    local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT) --as:df.general_ref_artifact
     if ref then
         local art = df.artifact_record.find(ref.artifact_id)
         artname = translatename(art.name) .. ' "' .. translatename(art.name, true) .. '"'
@@ -163,6 +174,10 @@ function sleep(n)  -- seconds
   while clock() - t0 <= n do end
 end
 
+function K(k)
+    return df.interface_key[k]
+end
+
 function list_select_item_by_id(ws, listidx, array, id)
     local idx = -1
     for i,v in ipairs(array) do
@@ -177,8 +192,8 @@ function list_select_item_by_id(ws, listidx, array, id)
     end
 
     if idx > 0 then
-        ws.layer_objects[listidx].cursor = idx - 1
-        gui.simulateInput(ws, 'STANDARDSCROLL_DOWN')            
+        ws.layer_objects[listidx].cursor = idx - 1 --hint:df.layer_object_listst
+        gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
     end 
 
     return idx

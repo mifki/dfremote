@@ -1,5 +1,6 @@
+--luacheck: in=
 function worldgen_status()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type == df.viewscreen_export_regionst or ws.parent._type == df.viewscreen_export_regionst then
         return { 'saving' }
@@ -22,6 +23,10 @@ function worldgen_status()
 
     if istrue(ws.worldgen_paused) then
         local can_use_world = state >= 9
+        
+        --todo: why are these not set?
+        local world_name = nil
+        local world_name_eng = nil  
         
         return { 'paused', year, world_name or mp.NIL, world_name_eng or mp.NIL, can_use_world }
     end
@@ -54,24 +59,26 @@ function worldgen_status()
     return { 'processing', year, world_name or mp.NIL, world_name_eng or mp.NIL, state }
 end
 
+--luacheck: in=
 function worldgen_accept()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
         error('wrong screen '..tostring(ws._type))
     end
 
     if istrue(ws.worldgen_paused) then
-        gui.simulateInput(ws, 'WORLD_GEN_USE')
+        gui.simulateInput(ws, K'WORLD_GEN_USE')
     elseif df.global.world.worldgen_status.state == 10 then
-        gui.simulateInput(ws, 'SELECT')        
+        gui.simulateInput(ws, K'SELECT')        
     end
 
     return true
 end
 
+--luacheck: in=
 function worldgen_cancel()
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
         error('wrong screen '..tostring(ws._type))
@@ -91,33 +98,35 @@ function worldgen_cancel()
     end
 
     if not istrue(ws.worldgen_paused) and df.global.world.worldgen_status.state ~= 10 then
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
     end
 
-    gui.simulateInput(ws, 'WORLD_GEN_ABORT')
+    gui.simulateInput(ws, K'WORLD_GEN_ABORT')
 end
 
+--luacheck: in=
 function worldgen_continue()
-    local ws = dfhack.gui.getCurViewscreen()    
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst    
 
     if ws._type ~= df.viewscreen_new_regionst or not istrue(ws.worldgen_paused) then
         return
     end
 
-    gui.simulateInput(ws, 'WORLD_GEN_CONTINUE')
+    gui.simulateInput(ws, K'WORLD_GEN_CONTINUE')
 end
 
+--luacheck: in=number
 function worldgen_resolve_rejected(action)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if action == 1 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_CONTINUE')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_CONTINUE')
     elseif action == 2 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ABORT')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ABORT')
     elseif action == 3 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ALLOW_THIS')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ALLOW_THIS')
     elseif action == 4 then
-        gui.simulateInput(ws, 'WORLD_PARAM_REJECT_ALLOW_ALL')
+        gui.simulateInput(ws, K'WORLD_PARAM_REJECT_ALLOW_ALL')
     end
 end
 
@@ -159,9 +168,10 @@ local function site_type_name(site)
 end
 
 --todo: conditions for reclaimable are wrong
+--luacheck: in=
 function worldgen_get_world_info()
     local races = { ['DWARF']=0, ['GOBLIN']=0, ['ELF']=0, ['HUMAN']=0, ['KOBOLD']=0 }
-    local pops = {}
+    local pops = {} --as:{pop:number,civs:{_array:{name:string,sites:'df.world_site[]'}}}[]
     local reclaimable = {}
 
     -- Find race idx for the races we're interested in; don't know how to do this properly
@@ -246,7 +256,7 @@ function worldgen_get_world_info()
     local ret = ''
 
     --todo: no-civ sites must go last
-    for i,v in ipairs({'DWARF', 'HUMAN', 'ELF', 'GOBLIN', 'KOBOLD' }) do
+    for i,v in ipairs({'DWARF', 'HUMAN', 'ELF', 'GOBLIN', 'KOBOLD'}) do
         local race_id = races[v]
         local race = df.global.world.raws.creatures.all[race_id]
         local t = pops[race_id]
@@ -256,7 +266,7 @@ function worldgen_get_world_info()
 
         for j,civ in pairs(t.civs) do
             ret = ret .. '[P][C:7:0:0]' .. (civ.name and ('    civ. [C:6:0:1]' .. civ.name) or '    [C:6:0:1]---')
-            for k,site in ipairs(civ.sites) do 
+            for k,site in ipairs(civ.sites) do --as:df.world_site
                 local name = dfhack.df2utf(dfhack.TranslateName(site.name, false))
                 local name_eng = dfhack.df2utf(dfhack.TranslateName(site.name, true))
                 local type_name = site_type_name(site)

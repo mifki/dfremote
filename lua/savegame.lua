@@ -9,7 +9,6 @@ function get_load_game_screen()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
-
     if ws._type ~= df.viewscreen_titlest then
         return nil
     end
@@ -22,15 +21,17 @@ function get_load_game_screen()
         ws:delete()
         ws = parent
     end
-    ws.breakdown_level = 0
+    ws.breakdown_level = df.interface_breakdown_types.NONE
     
-    if #ws.arena_savegames-#ws.start_savegames == 1 then
+    local titlews = ws --as:df.viewscreen_titlest
+    
+    if #titlews.arena_savegames-#titlews.start_savegames == 1 then
         return nil, true
     end
 
-    ws.sel_subpage = 0
-    ws.sel_menu_line = 0
-    gui.simulateInput(ws, 'SELECT')
+    titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
+    titlews.sel_menu_line = 0
+    gui.simulateInput(titlews, K'SELECT')
 
     -- This is to deal with the custom dfhack load screen
     ws = dfhack.gui.getCurViewscreen()
@@ -41,8 +42,9 @@ function get_load_game_screen()
     return ws
 end
 
+--luacheck: in=
 function savegame_list()
-    local ws,nogames = get_load_game_screen()
+    local ws,nogames = get_load_game_screen() --as:df.viewscreen_loadgamest
     if not ws then
         if nogames then
             return {}
@@ -62,8 +64,9 @@ function savegame_list()
     return ret
 end
 
+--luacheck: in=string
 function savegame_load(folder)
-    local ws = get_load_game_screen()
+    local ws = get_load_game_screen() --as:df.viewscreen_loadgamest
     if not ws then
         return
     end
@@ -71,26 +74,29 @@ function savegame_load(folder)
     for i,s in ipairs(ws.saves) do
         if s.folder_name == folder then
             ws.sel_idx = i
-            gui.simulateInput(ws, 'SELECT')
+            gui.simulateInput(ws, K'SELECT')
 
             return true
         end
     end
 end
 
+--luacheck: in=
 function savegame_checkloaded()
     local ws = screen_main()
 
-    if ws._type == df.viewscreen_dwarfmodest or ws._type == df.viewscreen_advmodest then
+    if ws._type == df.viewscreen_dwarfmodest or ws._type == df.viewscreen_dungeonmodest then
         return true
     end
 
     return false
 end
 
+--luacheck: in=string
 function savegame_delete(folder)
 end
 
+--luacheck: in=
 function worlds_get_empty()
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -98,7 +104,6 @@ function worlds_get_empty()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
-
     if ws._type ~= df.viewscreen_titlest then
         return nil
     end
@@ -109,9 +114,10 @@ function worlds_get_empty()
         ws = ws.parent
     end
 
+    local titlews = ws --as:df.viewscreen_titlest
     local ret = {}
 
-    for i,v in ipairs(ws.start_savegames) do
+    for i,v in ipairs(titlews.start_savegames) do
         local folder = v.save_dir
         local name = dfhack.df2utf(v.world_name_str)
 
@@ -122,6 +128,8 @@ function worlds_get_empty()
 end
 
 worldgen_params = nil
+
+--luacheck: in=number[]
 function create_new_world(params)
     if #params ~= 7 then
         return
@@ -133,7 +141,6 @@ function create_new_world(params)
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
-
     if ws._type ~= df.viewscreen_titlest then
         return
     end
@@ -146,12 +153,14 @@ function create_new_world(params)
         ws:delete()
         ws = parent
     end
-    ws.breakdown_level = 0
+    ws.breakdown_level = df.interface_breakdown_types.NONE
+    
+    local titlews = ws --as:df.viewscreen_titlest
 
-    ws.sel_subpage = 0
+    titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     -- whether there's a 'continue playing' and/or 'start playing' menu items
-    ws.sel_menu_line = (#ws.arena_savegames-#ws.start_savegames > 1 and 1 or 0) + (#ws.start_savegames > 0 and 1 or 0)
-    gui.simulateInput(ws, 'SELECT')
+    titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0) + (#titlews.start_savegames > 0 and 1 or 0)
+    gui.simulateInput(titlews, K'SELECT')
 
     worldgen_params = params
 
@@ -161,11 +170,12 @@ function create_new_world(params)
     native.set_timer(2, 'progress_worldgen')
 end
 
+--luacheck: in=
 function progress_worldgen()
-    local ws = dfhack.gui.getCurViewscreen()
-    print('check', ws._type)
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
+        print('check', ws._type)
         worldgen_params = nil
         return
     end    
@@ -174,7 +184,7 @@ function progress_worldgen()
     if ws.unk_b4 == 0 then
         -- Close 'Welcome to ...' message
         if #ws.welcome_msg > 0 then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
         end    
 
         --xxx: the second condition is for the advanced worldgen mode which isn't supported
@@ -188,7 +198,7 @@ function progress_worldgen()
                 ws.savagery = savagery
                 ws.mineral_occurence = mineral_occurence
 
-                gui.simulateInput(ws, 'MENU_CONFIRM')
+                gui.simulateInput(ws, K'MENU_CONFIRM')
                 worldgen_params = nil
             end
 

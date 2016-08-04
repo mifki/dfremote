@@ -182,14 +182,17 @@ local stocks_category_names = {
     'books',    
 }
 
+--luacheck: in=
 function stocks_init()
     native.itemcache_init()
 end
 
+--luacheck: in=
 function stocks_free()
     native.itemcache_free()
 end
 
+--luacheck: in=
 function stocks_get_categories()
     local data = native.itemcache_get()
     local list = {}
@@ -205,6 +208,7 @@ function stocks_get_categories()
     return { list, precision }
 end
 
+--luacheck: in=number,bool
 function stocks_get_items(type, grouped)
     local data = native.itemcache_get_category(type)
 
@@ -216,7 +220,7 @@ function stocks_get_items(type, grouped)
 
     else
         for i,v in ipairs(data.groups_index) do
-            for j,item in ipairs(v.items) do
+            for j,item in ipairs(v.items) do --as:df.item
                 local title = itemname(item, 4, true)
 
                 --todo: check that using flags.in_building is ok and shouldn't rather check the actual ref to the containing building
@@ -253,6 +257,7 @@ function group_can_melt(group)
     return true
 end
 
+--luacheck: in=number[],number,number
 function stocks_group_action(groupid, action, value)
     local type = groupid[1]
     local subtype = groupid[2]
@@ -288,6 +293,7 @@ function stocks_group_action(groupid, action, value)
     end
 end
 
+--luacheck: in=
 function stocks_search(q, grouped)
     local ret = {}
 
@@ -299,7 +305,7 @@ function stocks_search(q, grouped)
 
     else
         for i,v in ipairs(data) do
-            for j,item in ipairs(v.items) do
+            for j,item in ipairs(v.items) do --as:df.item
                 local title = itemname(item, 4, true)
 
                 table.insert(ret, { title, item.id, item.flags.whole, item_can_melt(item), item_is_fort_owned(item) })

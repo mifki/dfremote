@@ -2,15 +2,20 @@ function waypoints_point_find_by_id(id)
 	return utils.binsearch(df.global.ui.waypoints.points, id, 'id')
 end
 
+--luacheck: in=
 function waypoints_mode_points()
-    df.global.ui.main.mode = 0
+	--todo: use reset_main()
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_NOTE')	
+    gui.simulateInput(ws, K'D_NOTE')	
 end
 
+--luacheck: in=bool
 function waypoints_get_points(full)
 	local ret = {}
+	
+	full = istrue(full)
 
 	for i,v in ipairs(df.global.ui.waypoints.points) do
 		local name = pointname(v)
@@ -29,6 +34,7 @@ function waypoints_get_points(full)
 	return ret	
 end
 
+--luacheck: in=
 function waypoints_nearest_point()
 	if df.global.cursor.x == -30000 then
 		return nil
@@ -60,10 +66,12 @@ function waypoints_nearest_point()
 	return nil
 end
 
+--luacheck: in=
 function waypoints_nearest_and_all()
 	return { waypoints_nearest_point() or mp.NIL, waypoints_get_points(true) }
 end
 
+--luacheck: in=number,number,number,string,string
 function waypoints_add_point(x, y, z, name, comment)
 	local pt = df.ui.T_waypoints.T_points:new()
 
@@ -83,6 +91,7 @@ function waypoints_add_point(x, y, z, name, comment)
 	df.global.ui.waypoints.next_point_id = df.global.ui.waypoints.next_point_id + 1
 end
 
+--luacheck: in=string,string
 function waypoints_place_point(name, comment)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -94,7 +103,7 @@ function waypoints_place_point(name, comment)
     end
 
     local oldid = df.global.ui.waypoints.next_point_id
-    gui.simulateInput(ws, 'D_NOTE_PLACE')
+    gui.simulateInput(ws, K'D_NOTE_PLACE')
 
     -- protection from updating wrong point if a new one wasn't placed
     if oldid == df.global.ui.waypoints.next_point_id then
@@ -111,6 +120,7 @@ function waypoints_place_point(name, comment)
 end
 
 -- points may be referenced from squad orders, let's not try deleting them ourselves and use game ui instead
+--luacheck: in=number
 function waypoints_delete_point(id)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -124,12 +134,13 @@ function waypoints_delete_point(id)
 	for i,v in ipairs(df.global.ui.waypoints.points) do
 		if v.id == id then
 			df.global.ui.waypoints.cur_point_index = i
-			gui.simulateInput(ws, 'D_NOTE_DELETE')
+			gui.simulateInput(ws, K'D_NOTE_DELETE')
 			break
 		end
 	end
 end
 
+--luacheck: in=number
 function waypoints_zoom_to_point(id)
 	local pt = waypoints_point_find_by_id(id)
 	if not pt then
@@ -142,6 +153,7 @@ function waypoints_zoom_to_point(id)
 	df.global.cursor.z = pt.pos.z
 end
 
+--luacheck: in=
 function waypoints_get_routes()
 	local ret = {}
 

@@ -1,21 +1,34 @@
+--luacheck: in=
 function zone_create()
-    df.global.ui.main.mode = 0
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_CIVZONE')
+    gui.simulateInput(ws, K'D_CIVZONE')
 end
 
+--luacheck: in=number
 function zone_settings_get(bldid)
-    local zone = (bldid and bldid ~= -1 and bldid ~= 0) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected
+    local zone = (bldid and bldid ~= -1) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected --as:df.building_civzonest
     if not zone then
         error('no zone found for id '..tostring(bldid))
     end
 
-    return { zonename(zone), zone.id, zone.zone_flags.whole }
+    local lname = mp.NIL
+    if df_ver >= 4200 then --dfver:4200-
+        if zone.zone_flags.meeting_area and zone.location_id ~= -1 then
+            local loc = location_find_by_id(zone.location_id)
+            if loc then
+                lname = locname(loc)
+            end
+        end
+    end
+
+    return { zonename(zone), zone.id, zone.zone_flags.whole, lname }
 end
 
+--luacheck: in=number,number,number
 function zone_settings_set(bldid, option, value)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
 
     if option >= 0 and option <= 31 then
         zone.zone_flags[option] = istrue(value)
@@ -29,15 +42,16 @@ function zone_settings_set(bldid, option, value)
     end
 end
 
+--luacheck: in=number,number
 function zone_information_get(bldid, mode)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
 
     if mode == df.building_civzonest.T_zone_flags.gather then
         return { zone.gather_flags.whole }
     end 
 
     if mode == df.building_civzonest.T_zone_flags.hospital then
-        local counts = { [df.building_type.Bed]=0, [df.building_type.Table]=0, [df.building_type.TractionBench]=0, [df.building_type.Box]=0 }
+        local counts = { [df.building_type.Bed]=0, [df.building_type.Table]=0, [df.building_type.TractionBench]=0, [df.building_type.Box]=0 } --as:number[]
 
         for i,bld in ipairs(df.global.world.buildings.all) do
             if bld.z == zone.z and not bld.is_room then
@@ -66,7 +80,7 @@ function zone_information_get(bldid, mode)
     if mode == df.building_civzonest.T_zone_flags.pen_pasture then
         local list = {}
         execute_with_selected_zone(bldid, function(ws)
-            gui.simulateInput(ws, 'CIVZONE_PEN_OPTIONS')
+            gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
 
             for i,unit in ipairs(df.global.ui_building_assign_units) do
                 local title = unit_fulltitle(unit)
@@ -74,6 +88,8 @@ function zone_information_get(bldid, mode)
                 local status = unit_assigned_status(unit, zone)
                 table.insert(list, { title, unit.id, is_assigned, status })
             end
+            
+            df.global.ui.main.mode = df.ui_sidebar_mode.Zones
         end)
     
         return { list }
@@ -82,7 +98,7 @@ function zone_information_get(bldid, mode)
     if mode == df.building_civzonest.T_zone_flags.pit_pond then
         local list = {}
         execute_with_selected_zone(bldid, function(ws)
-            gui.simulateInput(ws, 'CIVZONE_POND_OPTIONS')
+            gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
 
             for i,v in ipairs(df.global.ui_building_assign_type) do
                 --xxx: this shouldn't happen, but was reported. bug in game? 
@@ -91,23 +107,27 @@ function zone_information_get(bldid, mode)
                 end
 
                 local title = '?something?'
-                local obj = nil
+                local id = -1
                 local is_assigned = istrue(df.global.ui_building_assign_is_marked[i])
                 local status = 0
 
                 --todo: should include unit sex for units
                 if v == 0 then
-                    obj = df.global.ui_building_assign_units[i]
-                    title = unit_fulltitle(obj)
-                    status = unit_assigned_status(obj, zone)
+                    local unit = df.global.ui_building_assign_units[i]
+                    id = unit.id
+                    title = unit_fulltitle(unit)
+                    status = unit_assigned_status(unit, zone)
                 elseif v == 1 then
-                    obj = df.global.ui_building_assign_items[i]
-                    title = itemname(obj, 0, true)
+                    local item = df.global.ui_building_assign_items[i]
+                    id = item.id
+                    title = itemname(item, 0, true)
                     status = 0
                 end
 
-                table.insert(list, { title, obj and obj.id or -1, is_assigned, v, status })
+                table.insert(list, { title, id, is_assigned, v, status })
             end
+            
+            df.global.ui.main.mode = df.ui_sidebar_mode.Zones
         end)
 
         return { list, zone.pit_flags.whole }
@@ -116,8 +136,9 @@ function zone_information_get(bldid, mode)
     return nil   
 end
 
+--luacheck: in=number,number,number,number
 function zone_information_set(bldid, mode, option, value)
-    local zone = df.building.find(bldid)
+    local zone = df.building.find(bldid) --as:df.building_civzonest
     if not zone or zone:getType() ~= df.building_type.Civzone then
         error('no zone or not a zone'..tostring(bldid))
     end
@@ -151,11 +172,12 @@ function zone_information_set(bldid, mode, option, value)
     end
 end
 
+--luacheck: in=number,number,number,number,bool
 function zone_assign(bldid, mode, objid, objtype, on)
     on = istrue(on)
 
     execute_with_selected_zone(bldid, function(ws)
-        gui.simulateInput(ws, (mode == df.building_civzonest.T_zone_flags.pit_pond and 'CIVZONE_POND_OPTIONS' or 'CIVZONE_PEN_OPTIONS'))
+        gui.simulateInput(ws, (mode == df.building_civzonest.T_zone_flags.pit_pond and K'CIVZONE_POND_OPTIONS' or K'CIVZONE_PEN_OPTIONS'))
 
         local vect = nil
         if objtype == 0 then
@@ -170,7 +192,7 @@ function zone_assign(bldid, mode, objid, objtype, on)
                     if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
                         df.global.ui_building_item_cursor = i
                         local ws = dfhack.gui.getCurViewscreen()
-                        gui.simulateInput(ws, 'SELECT')
+                        gui.simulateInput(ws, K'SELECT')
                     end
 
                     break            
@@ -178,13 +200,15 @@ function zone_assign(bldid, mode, objid, objtype, on)
             end
         end
 
+        df.global.ui.main.mode = df.ui_sidebar_mode.Zones
     end)
 end
 
+--luacheck: in=number
 function zone_remove(bldid)
     execute_with_selected_zone(bldid, function(ws)
         df.global.ui_sidebar_menus.zone.remove = true
-        gui.simulateInput(ws, 'CIVZONE_REMOVE_ZONE')
+        gui.simulateInput(ws, K'CIVZONE_REMOVE_ZONE')
         df.global.ui_sidebar_menus.zone.remove = false
     end)
 end

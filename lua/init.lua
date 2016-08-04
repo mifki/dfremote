@@ -2,10 +2,14 @@ remote_version = require 'remote.version'
 
 json = require 'remote.JSON'
 mp = require 'remote.MessagePack'
+_ = require 'remote.underscore'
 
 gui = require 'gui'
 utils = require 'utils'
-_ = require 'remote.underscore'
+
+df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4303, etc.
+
+require 'remote.compat'
 
 require 'remote.utf8.utf8data'
 require 'remote.utf8.utf8'
@@ -21,6 +25,7 @@ require 'remote.depot'
 require 'remote.buildings'
 require 'remote.stockpile'
 require 'remote.units'
+require 'remote.jobs'
 require 'remote.items'
 require 'remote.manager'
 require 'remote.orders'
@@ -41,6 +46,12 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 
+if df_ver >= 4200 then --dfver:4200-
+    require 'remote.locations'
+    require 'remote.petitions'
+    require 'remote.jobdetails'
+end
+
 native = {}
 --dfhack.open_plugin(native, 'remote')
 
@@ -50,11 +61,12 @@ local lastblderrsync = 0
 lastann = 0
 lastannrep = 0
 local lastextdata = nil
+local extdata = nil
 
-building_btns = {}
+building_btns = {} --as:df.interface_button_construction_building_selectorst[]
 designate_cmds = {}
 
---xxx: makeing it possible to access a global with the currently being linked building type
+--xxx: making it possible to access a global with the currently being linked building type
 --xxx: this is a hack until the required global is added to dfhack !!
 if dfhack.getOSType() == 'windows' then
     dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807+dfhack.internal.getRebaseDelta())
@@ -79,14 +91,15 @@ function close_all()
     end
 
     if ws._type == df.viewscreen_textviewerst then
+        local ws = ws --as:df.viewscreen_textviewerst
         --todo: need to properly handle these screens
         if ws.page_filename == 'data/announcement/fortressintro' or ws.page_filename == 'data/announcement/unretire' then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
             return
         end
 
         if ws.page_filename == 'data/help/' then
-            gui.simulateInput(ws, 'LEAVESCREEN')
+            gui.simulateInput(ws, K'LEAVESCREEN')
             return
         end
 
@@ -117,7 +130,7 @@ function reset_main()
         df.global.ui_workshop_in_add = false
         df.global.art_image_chunk_next_id = 255
         df.global.ui_sidebar_menus.zone.selected = nil
-        df.global.ui.main.mode = 0
+        df.global.ui.main.mode = df.ui_sidebar_mode.Default
         df.global.ui.waypoints.in_edit_waypts_mode = false
         df.global.ui.waypoints.in_edit_name_mode = false
         squads_reset()
@@ -185,7 +198,7 @@ function get_look_list(detailed)
         if t == df.ui_look_list.T_items.T_type.Item then
             local item = v.item
 
-            local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT)
+            local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT) --as:df.general_ref_artifact
             if ref then
                 title = translatename(df.artifact_record.find(ref.artifact_id).name)
             else
@@ -211,7 +224,7 @@ function get_look_list(detailed)
             color = 15 --dfhack.units.getProfessionColor(v.unit)
             if detailed then
                 local unit = v.unit
-                local job, jobcolor = unit_jobtitle(unit)
+                local job, jobcolor = unit_jobtitle(unit, false)
                 data = { unit.id, job, jobcolor }
             end
 
@@ -252,9 +265,12 @@ function get_look_list(detailed)
                 local plant_index = -1
 
                 for i,ev in ipairs(block.block_events) do
-                    if ev:getType() == df.block_square_event_type.grass and ev.amount[x%16][y%16] > amount then
-                        amount = ev.amount[x%16][y%16]
-                        plant_index = ev.plant_index
+                    if ev:getType() == df.block_square_event_type.grass then
+                        local ev = ev --as:df.block_square_event_grassst
+                        if ev.amount[x%16][y%16] > amount then
+                            amount = ev.amount[x%16][y%16]
+                            plant_index = ev.plant_index
+                        end
                     end
                 end
 
@@ -297,6 +313,7 @@ function get_look_list(detailed)
             elseif ttmat == df.tiletype_material.MINERAL then
                 for i,ev in ipairs(block.block_events) do
                     if ev:getType() == df.block_square_event_type.mineral then
+                        local ev = ev --as:df.block_square_event_mineralst
                         if bit32.band(ev.tile_bitmask.bits[y%16], shft(x%16)) ~= 0 then
                             local matinfo = dfhack.matinfo.decode(0, ev.inorganic_mat)
                             local matname = matinfo and matinfo.material.state_adj.Solid or 'mineral'
@@ -417,6 +434,7 @@ function get_look_list(detailed)
 end
 --print(pcall(function() print(json:encode(get_look_list(true))) end))
 
+--luacheck: in=
 function look_get_details()
     local c = df.global.cursor
     local bx = bit32.rshift(c.x, 4)
@@ -469,9 +487,17 @@ sent_popups = {}
 local last_idlers = nil
 local last_siege = nil
 local last_day = nil
+local last_petitions = nil
 local last_report_alert = nil
 local idlers_wait = 0
 
+local last_follow_unit = nil
+local last_follow_unitid = -1
+local last_follow_unit_x = nil
+local last_follow_unit_y = nil
+local last_follow_unit_z = nil
+
+--luacheck: in=
 function get_status()
     if screen_main()._type ~= df.viewscreen_dwarfmodest then
         return 97, 0
@@ -493,7 +519,7 @@ function get_status()
     if ws._type == df.viewscreen_topicmeetingst then
         --todo: this is a temporary hack to force send status update if the next
         --todo: meeting view is displayed the same remote tick when the previous one is dismissed
-        local zz = tostring(dfhack.gui.getCurViewscreen().popup)
+        local zz = tostring(ws.popup) --hint:df.viewscreen_topicmeetingst
         return 60, 2, { zz }
     end
 
@@ -513,22 +539,25 @@ function get_status()
         return 60, 6
     end  
 
-    if ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/announcement/') then
-        local text = ''
-        for i,v in ipairs(ws.formatted_text) do
-            text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+    if ws._type == df.viewscreen_textviewerst then
+        local ws = ws --as:df.viewscreen_textviewerst
+        if ws.page_filename:find('data/announcement/') then
+            local text = ''
+            for i,v in ipairs(ws.formatted_text) do
+                text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+            end
+            text = text:gsub('%s+', ' ')
+    
+            local title = ws.title
+            title = title:gsub("^%s+", ""):gsub("%s+$", "")
+    
+            return 98, 0, { title, text }
         end
-        text = text:gsub('%s+', ' ')
-
-        local title = ws.title
-        title = title:gsub("^%s+", ""):gsub("%s+$", "")
-
-        return 98, 0, { title, text }
     end
     
     --if ws._type == df.viewscreen_dwarfmodest then
     local mainmode = df.global.ui.main.mode
-    local modestr = df.ui_sidebar_mode[mainmode]
+    local modestr = df.ui_sidebar_mode[mainmode] or ''
 
     if mainmode ~= df.ui_sidebar_mode.LookAround then
         last_look_list = nil
@@ -545,12 +574,20 @@ function get_status()
     --[d]esignate
     if modestr:sub(1,#'Designate') == 'Designate' then
         if df.global.selection_rect.start_x == -30000 then
-            return 31, mainmode
+            if mainmode == df.ui_sidebar_mode.DesignateMine and df.global.ui_sidebar_menus.designation.mine_mode > 0 then
+                return 31, mainmode, df.global.ui_sidebar_menus.designation.mine_mode
+            else
+                return 31, mainmode
+            end
         else
             local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
             local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
             local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
-            return 32, mainmode, { dx, dy, dz }
+            if mainmode == df.ui_sidebar_mode.DesignateMine and df.global.ui_sidebar_menus.designation.mine_mode > 0 then
+                return 32, mainmode, { dx, dy, dz, df.global.ui_sidebar_menus.designation.mine_mode }
+            else
+                return 32, mainmode, { dx, dy, dz }
+            end
         end
     end
 
@@ -596,7 +633,7 @@ function get_status()
     end
 
     --stock[p]ile
-    if mainmode == 15 then
+    if mainmode == df.ui_sidebar_mode.Stockpiles then
         if df.global.selection_rect.start_x == -30000 then
             return 41, 0
         else
@@ -609,7 +646,7 @@ function get_status()
     end
 
     --[b]uild
-    if mainmode == 16 then
+    if mainmode == df.ui_sidebar_mode.Build then
         local bldstage = df.global.ui_build_selector.stage
 
         if bldstage == 1 or bldstage == 0 then
@@ -661,8 +698,10 @@ function get_status()
                 end
             end
 
-            if bld:getType() == df.building_type.Coffin and bld.owner and bld.owner.flags1.dead then
+            if bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
+            elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
+                name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
             end
 
             return 23, (bld and 1 or 0), name
@@ -675,12 +714,15 @@ function get_status()
     if mainmode == df.ui_sidebar_mode.ViewUnits then
         --todo: pass unit name to the app
         local unit = (df.global.ui_selected_unit ~= -1) and df.global.world.units.active[df.global.ui_selected_unit]
-        local fullname = nil
+        local txt = nil
         if unit then
-            local name = unit and unitname(unit)
-            fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
+            txt = unit_fulltitle(unit)
+            --local name = unit and unitname(unit)
+            --fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
+            local jobtitle = unit_jobtitle(unit)
+            txt = txt .. '\n' .. jobtitle
         end
-        return 24, (unit and 1 or 0), fullname
+        return 24, (unit and 1 or 0), txt
     end
 
     --loo[k]
@@ -735,8 +777,8 @@ function get_status()
     if mainmode == df.ui_sidebar_mode.Burrows then
         local sel_idx = df.global.ui.burrows.sel_index
         if sel_idx == -1 then
-            df.global.ui.main.mode = 0
-            mainmode = 0
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
+            mainmode = df.ui_sidebar_mode.Default
         else
             local burrow = df.global.ui.burrows.list[sel_idx]
             local bname = burrowname(burrow)
@@ -811,7 +853,7 @@ function get_status()
     if last_follow_unit then
         ext = ext or {}
         --todo: both unit and job colours
-        table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit) })
+        table.insert(ext, { unit_fulltitle(last_follow_unit), unit_jobtitle(last_follow_unit, false) })
     end
 
     local hasnewidlers = false
@@ -861,8 +903,20 @@ function get_status()
         ext = ext or {}
         table.insert(ext, report_alert)
     end
+    
+    local hasnewpetitions = false
+    if df_ver >= 4200 then --dfver:4200-
+        local petitions = #df.global.ui.petitions
+    
+        if petitions ~= last_petitions then
+            last_petitions = petitions
+            hasnewpetitions = true
+            ext = ext or {}
+            table.insert(ext, petitions)
+        end
+    end
 
-    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert), ext
+    return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert, hasnewpetitions), ext
 end
 
 local send_center = false
@@ -879,9 +933,7 @@ function recenter_view(x,y,z)
     --end
 end
 
-local last_follow_unit = nil
-local last_follow_unitid = -1
-
+--luacheck: in=bool
 function get_status_ext(needs_sync)
     needs_sync = istrue(needs_sync)
 
@@ -893,6 +945,7 @@ function get_status_ext(needs_sync)
         last_popup = nil
         last_idlers = nil
         last_siege = nil
+        last_petitions = nil
         last_day = nil
         last_report_alert = nil
         idlers_wait = 0
@@ -933,6 +986,7 @@ function generrseqstr(seq)
     return string.char(130, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
 end
 
+--luacheck: in=number,number,number,number
 function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_high = high
     df.global.ui.main.traffic_cost_normal = normal
@@ -940,11 +994,13 @@ function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_restricted = restricted
 end
 
+--luacheck: in=bool
 function pause_game(pause)
     df.global.pause_state = istrue(pause)
 end
 
 -- from quicksave.lua
+--luacheck: in=
 function save_game()
     local ui_main = df.global.ui.main
     local flags4 = df.global.d_init.flags4
@@ -967,6 +1023,7 @@ function save_game()
     end
 end
 
+--luacheck: in=
 function save_and_close()
     local ws = screen_main()
     local optsws = df.viewscreen_optionst:new()
@@ -975,13 +1032,10 @@ function save_and_close()
     optsws.parent = ws
     ws.child = optsws
 
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
-
-    gui.simulateInput(optsws, 'SELECT')
+    gui.simulateInput(optsws, K'SELECT')
 end
 
+--luacheck: in=
 function end_game_retire()
     local ws = screen_main()
     local optsws = df.viewscreen_optionst:new()
@@ -989,15 +1043,12 @@ function end_game_retire()
     optsws.parent = ws
     ws.child = optsws
 
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
-
     optsws.in_retire_dwf_abandon_adv = 1
 
-    gui.simulateInput(optsws, 'MENU_CONFIRM')
+    gui.simulateInput(optsws, K'MENU_CONFIRM')
 end
 
+--luacheck: in=
 function end_game_abandon()
     local ws = screen_main()
     local optsws = df.viewscreen_optionst:new()
@@ -1005,16 +1056,12 @@ function end_game_abandon()
     optsws.parent = ws
     ws.child = optsws
 
-    --xxx: this is temporary until ending_game field is in publicly available dfhack version
-    _,addr = optsws:_field('in_abandon_dwf'):sizeof()
-    dfhack.internal.memmove(addr+1, addr, 1)
-
     optsws.in_abandon_dwf = 1
 
-    gui.simulateInput(optsws, 'MENU_CONFIRM')
+    gui.simulateInput(optsws, K'MENU_CONFIRM')
 end
 
---todo: need to preserve cursor pos when switching between these modes
+--luacheck: in=
 function query_building()
     reset_main()
 
@@ -1023,7 +1070,7 @@ function query_building()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_BUILDJOB')    
+    gui.simulateInput(ws, K'D_BUILDJOB')    
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1031,14 +1078,15 @@ function query_building()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
 
+--luacheck: in=
 function query_unit()
     reset_main()
 
@@ -1047,7 +1095,7 @@ function query_unit()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_VIEWUNIT') 
+    gui.simulateInput(ws, K'D_VIEWUNIT') 
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1055,14 +1103,15 @@ function query_unit()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
 
+--luacheck: in=
 function query_look()
     reset_main()
 
@@ -1071,7 +1120,7 @@ function query_look()
     local z = df.global.window_z
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'D_LOOK')
+    gui.simulateInput(ws, K'D_LOOK')
 
     if x ~= -30000 then
         df.global.cursor.x = x
@@ -1079,15 +1128,16 @@ function query_look()
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 end
 
 
+--luacheck: in=
 function select_confirm()
     --[[local zoombacktobld = nil
     if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding then
@@ -1112,14 +1162,14 @@ function select_confirm()
     local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'SELECT')
+    gui.simulateInput(ws, K'SELECT')
 
     if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
        oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
-        df.global.ui.main.mode = 17
+        df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
         local ws = screen_main()
-        gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-        gui.simulateInput(ws, 'CURSOR_UP_Z')        
+        gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+        gui.simulateInput(ws, K'CURSOR_UP_Z')        
     end
 
     --[[if zoombacktobld then
@@ -1127,21 +1177,26 @@ function select_confirm()
     end]]
 end
 
+--luacheck: in=
 function leavescreen()
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, 'LEAVESCREEN')    
+    gui.simulateInput(ws, K'LEAVESCREEN')    
 end
 
+
+--luacheck: in=
 function zlevel_up()
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_UP_Z')    
+    gui.simulateInput(ws, K'CURSOR_UP_Z')    
 end
 
+--luacheck: in=
 function zlevel_down()
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')    
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')    
 end
 
+--luacheck: in=string
 function zlevel_set(data)
     local z = data:byte(1)
     local ws = screen_main()
@@ -1149,45 +1204,52 @@ function zlevel_set(data)
     if z > 0 then
         df.global.window_z = z - 1
         df.global.cursor.z = z - 1
-        gui.simulateInput(ws, 'CURSOR_UP_Z')
+        gui.simulateInput(ws, K'CURSOR_UP_Z')
     else
         df.global.window_z = z + 1
         df.global.cursor.z = z + 1
-        gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+        gui.simulateInput(ws, K'CURSOR_DOWN_Z')
     end
 end
 
+--luacheck: in=
 function dim_bigger()
     local ws = screen_main()
-    gui.simulateInput(ws, 'SECONDSCROLL_DOWN')    
+    gui.simulateInput(ws, K'SECONDSCROLL_DOWN')    
 end
 
+--luacheck: in=
 function dim_smaller()
     local ws = screen_main()
-    gui.simulateInput(ws, 'SECONDSCROLL_UP')    
+    gui.simulateInput(ws, K'SECONDSCROLL_UP')    
 end
 
+--luacheck: in=
 function dim_x_more()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_X_UP')    
+    gui.simulateInput(ws, K'BUILDING_DIM_X_UP')    
 end
 
+--luacheck: in=
 function dim_x_less()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_X_DOWN')    
+    gui.simulateInput(ws, K'BUILDING_DIM_X_DOWN')    
 end
 
+--luacheck: in=
 function dim_y_more()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_Y_UP')    
+    gui.simulateInput(ws, K'BUILDING_DIM_Y_UP')    
 end
 
+--luacheck: in=
 function dim_y_less()
     local ws = screen_main()
-    gui.simulateInput(ws, 'BUILDING_DIM_Y_DOWN')    
+    gui.simulateInput(ws, K'BUILDING_DIM_Y_DOWN')    
 end
 
 
+--luacheck: in=string
 function set_cursor_pos(data)
     local mx = data:byte(1)
     local my = data:byte(2)
@@ -1197,8 +1259,8 @@ function set_cursor_pos(data)
     df.global.cursor.z = df.global.window_z
 
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     if data:byte(3) ~= 0 then
         -- limit zones to 31x31 max
@@ -1214,18 +1276,19 @@ function set_cursor_pos(data)
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
         local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE 
 
-        gui.simulateInput(ws, 'SELECT')
+        gui.simulateInput(ws, K'SELECT')
 
         if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
             oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
-            df.global.ui.main.mode = 17
+            df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
             local ws = screen_main()
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         end
     end
 end
 
+--luacheck: in=string
 function set_cursor_pos_relative(data)
     local dx = data:byte(1) - 127
     local dy = data:byte(2) - 127
@@ -1235,10 +1298,11 @@ function set_cursor_pos_relative(data)
     df.global.cursor.z = df.global.window_z
 
     local ws = screen_main()
-    gui.simulateInput(ws, 'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, 'CURSOR_UP_Z')
+    gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
 end
 
+--luacheck: in=number
 function designate(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1250,8 +1314,12 @@ function designate(idx)
     local z = df.global.window_z
 
     reset_main()
+    
+    --todo: until we support this, otherwise there's no way to change to normal mode
+    df.global.ui_sidebar_menus.designation.marker_only = false
+    df.global.ui_sidebar_menus.designation.priority = 4000
 
-    gui.simulateInput(ws, 'D_DESIGNATE')
+    gui.simulateInput(ws, K'D_DESIGNATE')
 
     local cmd = designate_cmds[idx]
     for i,v in ipairs(cmd) do
@@ -1264,16 +1332,42 @@ function designate(idx)
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
     end
 
     return true
 end
 
+local original_designation_mode = nil
+
+--luacheck: in=
+function designate_toggle_erase()
+    local mainmode = df.global.ui.main.mode
+    local modestr = df.ui_sidebar_mode[mainmode] or ''
+
+    if mainmode ~= df.ui_sidebar_mode.DesignateRemoveDesignation and
+       modestr:sub(1,#'Designate') == 'Designate' and
+       modestr:sub(1,#'DesignateItems') ~= 'DesignateItems' and
+       modestr:sub(1,#'DesignateTraffic') ~= 'DesignateTraffic' and
+       modestr:sub(1,#'DesignateToggle') ~= 'DesignateToggle' then
+        original_designation_mode = mainmode
+        df.global.ui.main.mode = df.ui_sidebar_mode.DesignateRemoveDesignation
+        return true
+    
+    elseif mainmode == df.ui_sidebar_mode.DesignateRemoveDesignation and original_designation_mode then
+        df.global.ui.main.mode = original_designation_mode
+        original_designation_mode = nil
+        return true
+    end
+    
+    return false
+end
+
+--luacheck: in=
 function close_legends()
     if screen_main()._type ~= df.viewscreen_legendsst then
         return
@@ -1287,8 +1381,8 @@ function close_legends()
         ws = parent
     end
 
-    ws.cur_page = 0
-    gui.simulateInput(ws, 'LEAVESCREEN')
+    ws.cur_page = df.viewscreen_legendsst.T_cur_page.Main --hint:df.viewscreen_legendsst
+    gui.simulateInput(ws, K'LEAVESCREEN')
 end
 
 function ensure_native()
@@ -1476,6 +1570,22 @@ local handlers = {
         [10] = setup_get_settings,
     },
 
+    [139] = {
+        [1] = locations_get_list,
+        [2] = location_get_info,
+        [3] = location_set_restriction,
+        [4] = location_set_parameter,
+        [5] = location_retire,
+        [6] = locations_add,
+        [7] = locations_add_get_deity_choices,
+        
+        [10] = location_occupation_get_candidates,
+        [11] = location_occupation_assign,
+
+        [20] = location_assign_get_list,
+        [21] = location_assign,
+    },
+
     [140] = {
         [1] = building_stockpile_setmax,
         [2] = building_stockpile_getsettings,
@@ -1483,6 +1593,17 @@ local handlers = {
         [4] = building_stockpile_setflag,
         [5] = building_stockpile_create,
         [6] = building_stockpile_getsettings_level3,
+    },
+
+    [141] = {
+        [1] = petitions_get_list,
+        [2] = petition_respond,
+        [3] = petition_get_info,
+    },
+
+    [142] = {
+        --[1] = jobs_get_list,
+        [2] = job_get_description,
     },
 
     [144] = {
@@ -1496,6 +1617,7 @@ local handlers = {
         [3] = manager_new_order,
         [4] = manager_delete_order,
         [5] = manager_reorder,
+        [6] = manager_order_set_max_workshops,
     },
 
     [148] = {
@@ -1578,6 +1700,7 @@ local handlers = {
         [5] = building_set_flag,
         [6] = building_start_resize,
         [7] = building_suspend,
+        [8] = building_quick_action,
 
         [10] = building_workshop_get_jobchoices,
         [11] = building_workshop_set_repeat,
@@ -1619,6 +1742,7 @@ local handlers = {
     [193] = {
         [1] = set_traffic_costs,
         [2] = designate,
+        [3] = designate_toggle_erase,
     },
 
     [195] = {
@@ -1661,6 +1785,14 @@ local handlers = {
 
     [198] = {
         [1] = artifacts_list,
+    },
+
+    [199] = {
+        [1] = job_details_get_types,
+        [2] = job_details_get_choices,
+        [3] = job_details_set,
+        [4] = job_details_set_image,
+        [5] = job_details_image_get_choices,
     },
 
     [203] = {
@@ -1794,7 +1926,7 @@ function matching_version(clientver, apply)
         df.global.d_init.flags4.PAUSE_ON_LOAD = true
         df.global.d_init.flags4.INITIAL_SAVE = false
         df.global.d_init.flags4.EMBARK_WARNING_ALWAYS = false
-        df.global.d_init.post_prepare_embark_confirmation = 2 -- 'no'
+        df.global.d_init.post_prepare_embark_confirmation = df.d_init_embark_confirm.NO
         df.global.d_init.idlers = df.d_init_idlers.OFF
         
         --todo: don't use _silent if debug is on

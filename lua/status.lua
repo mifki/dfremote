@@ -86,6 +86,7 @@ function get_unit_counts()
     return ret_civil, ret_mil, ret_animal
 end
 
+--luacheck: in=
 function status_get_overview()
     local wealth = df.global.ui.tasks.wealth
     local food = df.global.ui.tasks.food
@@ -98,7 +99,7 @@ function status_get_overview()
 
     local site = df.world_site.find(df.global.ui.site_id)
     local is_mountainhome = have_noble('MONARCH') --todo: what if monarch dies? there should be more correct way
-    local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. string.utf8capitalize(dfhack.df2utf(dfhack.TranslateName(site.name))) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
+    local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. translatename(site.name) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
 
     local month = math.floor(df.global.cur_year_tick / TU_PER_MONTH)
     local datestr = format_date(df.global.cur_year, df.global.cur_year_tick) .. ', ' .. seasonparts[month%3+1] .. seasons[math.floor(month/3)+1]
@@ -111,12 +112,14 @@ function status_get_overview()
     return { site_title, datestr, created_wealth, wealth.imported, wealth.exported, ret_food, population, c1,c2,c3, have_appraisal, precision }
 end
 
+--luacheck: in=bool
 function status_get_health(include_healthy)
     if not have_noble('CHIEF_MEDICAL_DWARF') then
         return { false }
     end
 
     return execute_with_status_page(status_pages.Health, function(ws)
+        local ws = ws --as:df.viewscreen_layer_overall_healthst
         local ret = {}
 
         for i,unit in ipairs(ws.unit) do

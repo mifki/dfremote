@@ -61,6 +61,7 @@ end
 
 --todo: output for stockpiles should be improved before used in app (currently containers and items inside are mixed)
 --todo: make this use bldid too
+--luacheck: in=number
 function building_get_contained_items(bldid)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -85,7 +86,7 @@ function building_get_contained_items(bldid)
         end
 
     else
-        for i,citem in ipairs(bld.contained_items) do
+        for i,citem in ipairs(bld.contained_items) do --hint:df.building_actual
             local item = citem.item
             local title = itemname(item, 0, true)
 
@@ -96,8 +97,9 @@ function building_get_contained_items(bldid)
     return ret
 end
 
+--luacheck: in=number,number,bool
 function item_action(itemid, action, value)
-    local item = df.item:is_instance(itemid) and itemid or df.item.find(itemid)
+    local item = df.item:is_instance(itemid) and itemid or df.item.find(itemid) --as:df.item
 
     if not item then
         error('no item '..tostring(itemid))
@@ -141,8 +143,9 @@ item_spatter_sizes = {
     { 50, 'covering' },
 }
 
+--luacheck: in=number
 function item_query(itemid)
-    local item = df.item.find(itemid)
+    local item = df.item.find(itemid) --as:df.item_actual
     if not item then
         error('no item '..tostring(itemid))
     end
@@ -195,6 +198,7 @@ function item_query(itemid)
     return { realname or dispname, item.id, item.flags.whole, item_can_melt(item), realname and dispname or mp.NIL, value, item.weight, itemscnt, unitscnt, contaminants }
 end
 
+--luacheck: in=number
 function item_get_description(itemid)
     local item = df.item.find(itemid)
     if not item then
@@ -203,11 +207,11 @@ function item_get_description(itemid)
 
     local itemws = df.viewscreen_itemst:new()
     itemws.item = item
-    gui.simulateInput(itemws, 'ITEM_DESCRIPTION')
+    gui.simulateInput(itemws, K'ITEM_DESCRIPTION')
 
     df.delete(itemws)
 
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
 
     local text = ''
     
@@ -223,11 +227,12 @@ function item_get_description(itemid)
 
     text = text:gsub('  ', ' ')
 
-    ws.breakdown_level = 2
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     return { text }
 end
 
+--luacheck: in=number
 function item_get_contained_items(itemid)
     local item = df.item.find(itemid)
     if not item then
@@ -238,6 +243,7 @@ function item_get_contained_items(itemid)
 
     for i,v in ipairs(item.general_refs) do
         if v._type == df.general_ref_contains_itemst then
+            local v = v --as:df.general_ref_contains_itemst
             local item = df.item.find(v.item_id)
             if item then
                 local title = itemname(item, 0, true)
@@ -249,6 +255,7 @@ function item_get_contained_items(itemid)
     return ret
 end
 
+--luacheck: in=number
 function item_get_contained_units(itemid)
     local item = df.item.find(itemid)
     if not item then
@@ -259,6 +266,7 @@ function item_get_contained_units(itemid)
 
     for i,v in ipairs(item.general_refs) do
         if v._type == df.general_ref_contains_unitst then
+            local v = v --as:df.general_ref_contains_unitst
             local unit = df.unit.find(v.unit_id)
             if unit then
                 local title = unit_fulltitle(unit)
@@ -270,6 +278,7 @@ function item_get_contained_units(itemid)
     return ret
 end
 
+--luacheck: in=
 function artifacts_list()
     local ret = {}
 
@@ -286,7 +295,7 @@ function artifacts_list()
     return ret
 end
 
-mat_category_names = {
+mat_category_names = { --as:string[]
     [df.entity_material_category.None] = 'any material',
     [df.entity_material_category.Leather] = 'leather',
     [df.entity_material_category.Cloth] = 'cloth',
@@ -339,6 +348,7 @@ function generic_item_name(type, subtype, mat_class, mat_type, mat_index, single
     return title
 end
 
+--luacheck: in=number
 function item_zoom(itemid)
     local item = df.item.find(itemid)
     if not item then
@@ -350,17 +360,17 @@ function item_zoom(itemid)
         recenter_view(x, y, z)
 
         local ws = dfhack.gui.getCurViewscreen()
-        gui.simulateInput(ws, 'D_LOOK')
+        gui.simulateInput(ws, K'D_LOOK')
 
         df.global.cursor.x = x
         df.global.cursor.y = y
 
         if z > 0 then
             df.global.cursor.z = z - 1
-            gui.simulateInput(ws, 'CURSOR_UP_Z')        
+            gui.simulateInput(ws, K'CURSOR_UP_Z')        
         else
             df.global.cursor.z = z + 1
-            gui.simulateInput(ws, 'CURSOR_DOWN_Z')
+            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         end
 
         return true
