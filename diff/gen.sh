@@ -19,7 +19,8 @@ function p {
 rm -rf raw
 
 p Afro remote.png
-p ASCII-Default remote.png
+p ASCII-Default curses_800x600.png
+p ASCII-Square curses_square_16x16.png
 p CLA CLA.png
 p Duerer duerer_map_15x15.png
 p GemSet gemset_map.png

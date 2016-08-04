@@ -32,6 +32,7 @@ rm -rf packages/*
 
 p Afro
 p ASCII-Default
+p ASCII-Square
 p CLA
 p Duerer
 p GemSet
