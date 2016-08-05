@@ -45,7 +45,7 @@ function squad_order_title(squad)
         if ordertype == df.squad_order_type.MOVE then
             ordertitle = 'Station'
         elseif ordertype == df.squad_order_type.KILL_LIST then
-            ordertitle = squad.orders[0].title --hint:df.squad_order_kill_listst
+            ordertitle = dfhack.df2utf(squad.orders[0].title):utf8capitalize() --hint:df.squad_order_kill_listst
         end
     end
 
@@ -105,19 +105,7 @@ function squads_get_info()
 
     for i,squad in ipairs(df.global.ui.squads.list) do
     	local name = squadname(squad)
-
-        --todo: handle other order types
-    	local ordertitle = ''
-    	if #squad.orders > 0 then
-    	    local order = squad.orders[0]
-    		local ordertype = order:getType()
-    		if ordertype == df.squad_order_type.MOVE then
-    			ordertitle = 'Station'
-			elseif ordertype == df.squad_order_type.KILL_LIST then
-			    local order = order --as:df.squad_order_kill_listst
-    			ordertitle = order.title
-    		end
-    	end
+    	local ordertitle = squad_order_title(squad)
 
     	local numsoldiers = 0
     	for i,pos in ipairs(squad.positions) do
