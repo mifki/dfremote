@@ -178,6 +178,7 @@ static int timer_timeout = -1;
 static string timer_fn;
 
 static int maxlevels = 3;
+static bool graphics = true;
 
 static void patch_rendering(bool enable_lower_levels)
 {
@@ -574,6 +575,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
         int maxy = std::min(newheight, world->map.y_count - gwindow_y);
         int cnt = 0;
         int lastdz = 0;
+        int lastinfobyte = 0;
+        unsigned char *lastinfobyteptr = NULL;
         for (int y = 0; y < maxy; y++)
         {
             for (int x = 0; x < maxx; x++)
@@ -592,9 +595,25 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
+                    if (graphics && !(lastinfobyte--))
+                    {
+                        lastinfobyteptr = b;
+                        *(b++) = 0;
+                        lastinfobyte = 8;
+                    }
+
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
-                    *(b++) = s[0]; //ch
+
+                    if (graphics && *(gscreendummy+tile))
+                    {
+                        *out2 << xx << " " << yy << "  " << *(gscreendummy+tile) << std::endl;
+                        *lastinfobyteptr |= 1 << (8-lastinfobyte+1);
+                        *(unsigned short*)b = *(gscreendummy+tile);
+                        b += 2;
+                    }
+                    else
+                        *(b++) = s[0]; //ch
 
                     int dz = (s[3] & 0xfe) >> 1;
 

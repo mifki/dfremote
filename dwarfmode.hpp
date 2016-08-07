@@ -41,7 +41,7 @@ void render_remote_map()
     // So we adjust all this so that it renders to our gdimx x gdimy buffer starting at (0,0).
     gps->screen       = gscreen - 4*newheight - 4;
     gps->screen_limit = gscreen + newwidth * newheight * 4;
-    gps->screentexpos = gscreendummy;
+    gps->screentexpos = gscreendummy - newheight - 1;
 
     init->display.grid_x = newwidth + gmenu_w + 2;
     init->display.grid_y = newheight + 2;
