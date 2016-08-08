@@ -946,6 +946,21 @@ local relations_unit = {
     { 'Considers Brigand', 12 },
     { 'Loyal Soldier', 15 },
     { 'Considers Monster', 13 },    
+    
+    --todo: use correct colours for below
+    { 'Considers Storyteller', 13 },
+    { 'Considers Poet', 13 },
+    { 'Considers Bard', 13 },
+    { 'Considers Dancer', 13 },
+    { 'Master', 13 },
+    { 'Apprentice', 13 },
+    { 'Companion', 13 },
+    { 'Former Master', 13 },
+    { 'Former Apprentice', 13 },
+    { 'Considers Quarreler', 13 },
+    { 'Considers Flatterer', 13 },
+    { 'Hunter', 13 },
+    { 'Protector Of The Weak', 13 },
 }
 
 local relations_hf = {
@@ -1077,7 +1092,7 @@ function unit_get_relationships(unitid)
 
         local rel_u = ws.relation_unit_type[i]
         local rel_hf = ws.relation_histfig_type[i]
-        local rel = (rel_hf ~= -1) and relations_hf[rel_hf+1] or relations_unit[rel_u+1]
+        local rel = ((rel_hf ~= -1) and relations_hf[rel_hf+1] or relations_unit[rel_u+1]) or { '#unknown relation#', 7 }
         local flags = (v and 1 or 0) + (can_zoom and 2 or 0) + (can_view and 4 or 0)
 
         table.insert(ret, { name, id, namecolor, rel[1], rel[2], flags, can_zoom and pos2table(v.pos) or mp.NIL })
