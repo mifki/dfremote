@@ -343,20 +343,23 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
 
             local act = df.activity_entry.find(actid)
             for i,ev in ripairs(act.events) do
-                --todo: what is free_units and are all of free_units also in units ?
-                for j,v in ipairs(ev.participants.free_units) do
-                    if v == unit.id then
-                        local s = df.new 'string'
-                        ev:getName(unit.id, s)
-                        local jobtitle = s.value
-                        s:delete()
+                --todo: where's the participants structure in activity_event_harassmentst ?
+                if ev._type ~= df.activity_event_harassmentst then
+                    --todo: what is free_units and are all of free_units also in units ?
+                    for j,v in ipairs(ev.participants.free_units) do
+                        if v == unit.id then
+                            local s = df.new 'string'
+                            ev:getName(unit.id, s)
+                            local jobtitle = s.value
+                            s:delete()
 
-                        --[[if #unit.anon_4 > 0 then
-                            local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
-                            jobtitle = jobtitle .. '!'
-                        end]]
+                            --[[if #unit.anon_4 > 0 then
+                                local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
+                                jobtitle = jobtitle .. '!'
+                            end]]
 
-                        return dfhack.df2utf(jobtitle), 10, 2
+                            return dfhack.df2utf(jobtitle), 10, 2
+                        end
                     end
                 end
             end
