@@ -786,10 +786,12 @@ function organic_titles_prefixstate(group, state, suffix)
     
     for i=0,#types-1 do
         local mi = dfhack.matinfo.decode(types[i], indexes[i])
-        if mi then
+        if mi and mi.material then
             local mat = mi.material
             local t = capitalize((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[state] .. suffix)
             table.insert(ret, t)
+        else
+            table.insert(ret, '#unknown#')
         end
     end
 
@@ -809,10 +811,12 @@ function organic_meat_titles()
     
     for i=2,#types-1 do
         local mi = dfhack.matinfo.decode(types[i], indexes[i])
-        if mi then
+        if mi and mi.material then
             local mat = mi.material
             local t = capitalize((#mat.meat_name[2]>0 and (mat.meat_name[2] .. ' ') or '') .. (#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.meat_name[0])
             table.insert(ret, t)
+        else
+            table.insert(ret, '#unknown#')
         end
     end
 
@@ -939,9 +943,11 @@ function organic_seed_titles()
     
     for i=0,#types-1 do
         local mi = dfhack.matinfo.decode(types[i], indexes[i])
-        if mi then
+        if mi and mi.plant then
             local t = capitalize(mi.plant.seed_plural)
             table.insert(ret, t)
+        else
+            table.insert(ret, '#unknown#')
         end
     end
 
@@ -956,7 +962,7 @@ function organic_leaf_titles()
     
     for i=0,#types-1 do
         local mi = dfhack.matinfo.decode(types[i], indexes[i])
-        if mi then
+        if mi and mi.plant then
             local t = nil
             for j,growth in ipairs(mi.plant.growths) do
                 if growth.str_growth_item[3] == mi.material.id then
@@ -967,6 +973,8 @@ function organic_leaf_titles()
             t = t or ((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[state] .. suffix)
             t = capitalize(t)
             table.insert(ret, t)
+        else
+            table.insert(ret, '#unknown#')
         end
     end
 
