@@ -13,7 +13,7 @@ function job_details_get_types(bldid, idx)
 		local job = df.global.ui_sidebar_menus.job_details.job
 
 		if not job then
-			return {}, mp.NIL
+			return { {}, mp.NIL }
 		end
 
 		local jobtitle = dfhack.job.getName(job)
