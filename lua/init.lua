@@ -160,7 +160,7 @@ local flow_type_names = {
     'Material Vapor', --customised
     'Ocean Wave',
     'Sea Foam',
-    'ItemCloud'
+    'Item Cloud'
 }
 
 local grass_density_prefix = { 'Sparse ', '', 'Dense ' }

@@ -192,6 +192,7 @@ function get_sell_items(civ_id)
 	end
 
 	--todo: sex for all creatures
+	--todo: use material prefix instead of creature/plant name
 	local cats = {
 		{
 			'Leather', df.entity_sell_category.Leather, res.organic.leather, f2,
@@ -479,6 +480,20 @@ function get_sell_items(civ_id)
 		},
 	}
 
+	if df_ver >= 4200 then --dfver:4200-
+		table.insert(cats,
+		{
+			'Sheet', 62, res.organic.anon_1, f2, --todo: not in entity_sell_category enum
+			function (mi) return (#mi.material.prefix>0 and (mi.material.prefix .. ' ') or '') .. mi.material.state_name.Solid .. ' sheet' end, false
+		})
+
+		table.insert(cats,
+		{
+			'Cups / Mugs / Goblets', 63, res.misc_mat.crafts, f2, --todo: not in entity_sell_category enum
+			function (mi) return (mi.creature and mi.creature.name[0] .. ' ' or '') ..  mi.material.state_name.Solid .. ' crafts' end, false
+		})
+	end
+
 	return cats
 end
 
@@ -589,13 +604,16 @@ local item_type_names_pl = {
     'Bars',
     'Cut Gems',
     'Blocks',
-    'ROUGH',
+    'Rough Gems',
     'BOULDER',
     'WOOD',
     'Doors',
     'Floodgates',
     'Beds',
-    'CHAIR',
+    {
+    	[0]='Thrones',
+    	[shft(df.dfhack_material_category.wood)]='Chairs',
+	},
     {
     	[0]='Chains',
     	[shft(df.dfhack_material_category.cloth)]='Ropes',
@@ -611,14 +629,14 @@ local item_type_names_pl = {
     { [0]='Musical Instruments', function (i) return df.global.world.raws.itemdefs.instruments[i].name_plural end },
     { [0]='Toys', function (i) return df.global.world.raws.itemdefs.toys[i].name_plural end },
     'Windows',
-    'CAGE',
-    'BARREL',
-    'BUCKET',
-    'ANIMALTRAP',
-    'TABLE',
-    'COFFIN',
-    'STATUE',
-    'CORPSE',
+    'Cages',
+    'Barrels',
+    'Buckets',
+    'Animal Traps',
+    'Tables',
+    'Coffins',
+    'Statues',
+    'Corpses',
     { [0]='Weapons', function(i) return itemdefname(df.global.world.raws.itemdefs.weapons[i]) end },
     { [0]='Armor', function (i) return itemdefname2(df.global.world.raws.itemdefs.armor[i]) end },
     { [0]='Footwear', function (i) return itemdefname(df.global.world.raws.itemdefs.shoes[i]) end },
@@ -636,11 +654,11 @@ local item_type_names_pl = {
     	[shft(df.dfhack_material_category.yarn)]='Bags',
     	[shft(df.dfhack_material_category.stone)]='Coffers',
 	},
-    'BIN',
-    'ARMORSTAND',
-    'WEAPONRACK',
-    'CABINET',
-    'FIGURINE',
+    'Bins',
+    'Armor Stands',
+    'Weapon Racks',
+    'Cabinets',
+    'Figurines',
     'Amulets',
     'Scepters',
     { [0]='Ammunition', function (i) return itemdefname(df.global.world.raws.itemdefs.ammo[i]) end },
@@ -651,49 +669,53 @@ local item_type_names_pl = {
     'Large Gems',
     'Anvils',
     'CORPSEPIECE',
-    'REMAINS',
+    'Remains',
     'Meat',
     'Fish',
     'FISH_RAW',
-    'VERMIN',
-    'PET',
+    'Vermin',
+    'Pets',
     'Seeds',
     'Plants',
     'Tanned Hides',
     'PLANT_GROWTH',
     'Thread',
     'Cloth',
-    'TOTEM',
+    'Totems',
     { [0]='Legwear', function (i) return itemdefname(df.global.world.raws.itemdefs.pants[i]) end },
     'Backpacks',
     'Quivers',
-    'CATAPULTPARTS',
-    'BALLISTAPARTS',
+    'Catapulta Parts',
+    'Ballista Parts',
     { [0]='Siege Ammo', function (i) return df.global.world.raws.itemdefs.siege_ammo[i].name_plural end },
-    'BALLISTAARROWHEAD',
-    'TRAPPARTS',
+    'Ballista Arrow Heads',
+    'Mechanisms',
     { [0]='Trap Components', function (i) return itemdefname(df.global.world.raws.itemdefs.trapcomps[i]) end },
     'Drinks',
     'Powder',
     'Cheese',
     { [0]='Prepared Meals', function (i) return df.global.world.raws.itemdefs.food[i].name end }, --subtype is ignored in game
     'LIQUID_MISC',
-    'COIN',
+    'Coins',
     'GLOB',
     'ROCK',
-    'PIPE_SECTION',
-    'HATCH_COVER',
-    'GRATE',
-    'QUERN',
-    'MILLSTONE',
+    'Pipe Sections',
+    'Hatch Covers',
+    'Grates',
+    'Querns',
+    'Millstones',
     'Splints',
     'Crutches',
-    'TRACTION_BENCH',
-    'ORTHOPEDIC_CAST',
+    'Traction Benches',
+    'Orthopedic Casts',
     { [0]='Tools', function (i) return df.global.world.raws.itemdefs.tools[i].name_plural end },
-    'SLAB',
-    'EGG',
-    'BOOK'
+    'Slabs',
+    'Eggs',
+    'Books',
+
+    -- 0.42+
+    'Sheet',
+    'Branches'
 }
 
 local mat_cat_names = { --as:string[]
@@ -712,6 +734,10 @@ local mat_cat_names = { --as:string[]
 	[shft(df.dfhack_material_category.yarn)] = 'yarn',
 }
 
+if df_ver >= 4200 then --dfver:4200-
+	mat_cat_names[shft(df.dfhack_material_category.strand)] = 'strand'
+end
+
 function process_buy_agreement(reqs)
 	local ret = {}
 
@@ -727,7 +753,7 @@ function process_buy_agreement(reqs)
 		elseif reqs.items.mat_types[i] ~= -1 then
 			local mi = dfhack.matinfo.decode(reqs.items.mat_types[i], reqs.items.mat_indices[i])
 			--todo: always use Solid ?
-			title = (mi and mi.material.state_adj.Solid or 'unknown material') .. ' '
+			title = (mi and mi.material.state_adj.Solid or '#unknown material#') .. ' '
 
 			if mi.material.flags.IS_GLASS then
 				mat_cat.glass = true
@@ -749,7 +775,7 @@ function process_buy_agreement(reqs)
 		end
 
 		--todo: for bars + material the game shows only material eg. 'ash', but 'bars' if no material
-		title = title .. name
+		title = title .. (name or '#unknown items#')
 		title = dfhack.df2utf(title):utf8capitalize()
 		table.insert(ret, { title, reqs.items.priority[i], math.floor(reqs.price[i]/128*100) })
 	end

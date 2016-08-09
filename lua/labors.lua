@@ -76,7 +76,7 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
         { "Strand Extractor", df.profession.STRAND_EXTRACTOR, df.unit_labor.EXTRACT_STRAND, df.job_skill.EXTRACT_STRAND }, 
         { "Potter", df.profession.POTTER, df.unit_labor.POTTERY, df.job_skill.POTTERY }, 
         { "Glazer", df.profession.GLAZER, df.unit_labor.GLAZING, df.job_skill.GLAZING }, 
-        { "Waxer", df.profession.WAX_WORKER, df.unit_labor.WAX_WORKING, df.job_skill.WAX_WORKING }
+        { "Wax Worker", df.profession.WAX_WORKER, df.unit_labor.WAX_WORKING, df.job_skill.WAX_WORKING }
     } },
     { "Engineering", 12, {
         { "Siege Engineer", df.profession.SIEGE_ENGINEER, df.unit_labor.SIEGECRAFT, df.job_skill.SIEGECRAFT }, 
@@ -104,7 +104,12 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
         { "Trade Goods", df.profession.NONE, df.unit_labor.HAUL_TRADE, df.job_skill.NONE }, 
         { "Water", df.profession.NONE, df.unit_labor.HAUL_WATER, df.job_skill.NONE }
     } },
-};
+}
+
+if df_ver >= 4200 then --dfver:4200-
+    table.insert(labor_groups[10][3], { "Papermaker", df.profession.PAPERMAKER, df.unit_labor.PAPERMAKING, df.job_skill.PAPERMAKING })
+    table.insert(labor_groups[10][3], { "Bookbinder", df.profession.BOOKBINDER, df.unit_labor.BOOKBINDING, df.job_skill.BOOKBINDING })
+end
 
 --[[local labor_groups2 = {
     { "Mining", 7, {
@@ -212,7 +217,9 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
         { "Trade Goods", df.profession.NONE, df.unit_labor.HAUL_TRADE, df.job_skill.NONE }, 
         { "Water", df.profession.NONE, df.unit_labor.HAUL_WATER, df.job_skill.NONE }
     } },
-};]]
+}
+add papermaking, bookbinding
+]]
 
 local special_labors = { df.unit_labor.MINE, df.unit_labor.CUTWOOD, df.unit_labor.HUNT }
 
