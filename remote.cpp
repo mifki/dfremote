@@ -95,21 +95,19 @@ static int gmenu_w;
 
 // Buffers for map rendering
 static uint8_t *gscreen;
-// static int32_t *gscreentexpos;
-// static int8_t *gscreentexpos_addcolor;
-// static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
+static int32_t *gscreentexpos;
+static int8_t *gscreentexpos_addcolor;
+static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
 
 
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
-// static int32_t *mscreentexpos;
-// static int8_t *mscreentexpos_addcolor;
-// static uint8_t *mscreentexpos_grayscale;
-// static uint8_t *mscreentexpos_cf;
-// static uint8_t *mscreentexpos_cbr;
+static int32_t *mscreentexpos;
+static int8_t *mscreentexpos_addcolor;
+static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;
 
 // We don't support creature graphics yet, but still screentexpos* should point to big enough buffers or one buffer
-static int32_t *gscreendummy;
+// static int32_t *gscreendummy;
 
 #include "patches.hpp"
 
@@ -599,30 +597,50 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     {
                         lastinfobyteptr = b;
                         *(b++) = 0;
-                        lastinfobyte = 8;
+                        lastinfobyte = 7;
                     }
 
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
 
-                    if (graphics && *(gscreendummy+tile))
+                    unsigned char bg, fg;
+
+                    if (graphics && *(gscreentexpos+tile))
                     {
-                        *out2 << xx << " " << yy << "  " << *(gscreendummy+tile) << std::endl;
-                        *lastinfobyteptr |= 1 << (8-lastinfobyte+1);
-                        *(unsigned short*)b = *(gscreendummy+tile);
+                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
+                        *(unsigned short*)b = *(gscreentexpos+tile);
                         b += 2;
+
+                        if (gscreentexpos_grayscale[tile])
+                        {
+                            fg = gscreentexpos_cf[tile];
+                            bg = gscreentexpos_cbr[tile];
+                        }
+                        else if (gscreentexpos_addcolor[tile])
+                        {
+                            bg   = s[2] & 7;
+                            unsigned char bold = (s[3] & 1) * 8;
+                            fg   = (s[1] + bold) % 16;
+                        }
+                        else
+                        {
+                            fg = 15;
+                            bg = 0;
+                        }
                     }
                     else
+                    {
                         *(b++) = s[0]; //ch
 
-                    int dz = (s[3] & 0xfe) >> 1;
-
-                    unsigned char bg   = s[2] & 7;
-                    unsigned char bold = (s[3] & 1) * 8;
-                    unsigned char fg   = (s[1] + bold) % 16;
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
 
                     *(b++) = fg | (bg << 4);
 
+
+                    int dz = (s[3] & 0xfe) >> 1;
                     if (lastdz != dz) {
                         *(b-1) |= 128;
                         *(b++) = dz - lastdz;

@@ -1849,6 +1849,7 @@ local handlers = {
         [5] = setup_get_mapinfo,
         [6] = perform_update,
         [7] = raws_apply_tileset,
+        [8] = raws_apply_creature_gfx,
 
         [10] = setup_get_settings,
         [11] = setup_set_setting,

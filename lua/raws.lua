@@ -211,3 +211,121 @@ function raws_apply_tileset(zjsondata)
 
     return true
 end
+
+-- we don't support compression for incoming commands globally, so msgpack data here is compressed and then msgpacked as a parameter
+--luacheck: in=string
+function raws_apply_creature_gfx(zmsgpackdata)
+    local msgpackdata = ''
+    local function appenddata(ch)
+        msgpackdata = msgpackdata .. string.char(ch)
+    end
+
+    deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
+    local data = mp.unpack(msgpackdata)
+
+    for i,raw in ipairs(df.global.world.raws.creatures.all) do
+        local gfx = raw.graphics
+        for j=0,#gfx.texpos-1 do
+            gfx.texpos[j] = 0
+        end
+        for j=0,#gfx.texpos_gs-1 do
+            gfx.texpos_gs[j] = 0
+        end
+        for j=0,#gfx.add_color-1 do
+            gfx.add_color[j] = 0
+        end
+
+        for j,v in ipairs(gfx.entity_link_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.entity_link_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.entity_link_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.site_link_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.site_link_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.site_link_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.profession_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.profession_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.profession_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.appointments) do
+            v:delete()
+        end
+        gfx.appointments:resize(0)
+    end
+
+    for i,v in ipairs(data) do
+        local id = v[1]
+        print(id)
+        local idx,raw = utils.linear_index(df.global.world.raws.creatures.all,id,'creature_id')
+
+        if raw then
+            local gfx = raw.graphics
+            for j=2,#v do
+                local def = v[j]
+                local type = def[1]
+                local code = def[2]
+                local tex = def[3]
+
+                --todo: check ranges for all code types
+
+                printall(def)
+                if type == 1 then
+                    gfx.profession_texpos[0][code] = tex
+                elseif type == 2 then
+                    gfx.texpos[code] = tex
+                elseif type == 3 then
+                    gfx.entity_link_texpos[0][code] = tex
+                elseif type == 4 then
+                    gfx.site_link_texpos[0][code] = tex
+                elseif type == 0 then
+                    local app = df.creature_graphics_appointment:new()
+                    app.token = code
+                    app.texpos[0] = tex
+                    gfx.appointments:insert(#gfx.appointments, app)
+                end
+            end
+        else
+            print('not found '..id)
+        end
+    end
+
+    df.global.init.display.flag.USE_GRAPHICS = true
+
+    return true
+end
