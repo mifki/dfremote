@@ -78,9 +78,14 @@ function zone_information_get(bldid, mode)
     end
 
     if mode == df.building_civzonest.T_zone_flags.pen_pasture then
-        local list = {}
-        execute_with_selected_zone(bldid, function(ws)
+        return execute_with_selected_zone(bldid, function(ws)
             gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
+
+            if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
+                return nil
+            end
+
+            local list = {}
 
             for i,unit in ipairs(df.global.ui_building_assign_units) do
                 local title = unit_fulltitle(unit)
@@ -90,15 +95,20 @@ function zone_information_get(bldid, mode)
             end
             
             df.global.ui.main.mode = df.ui_sidebar_mode.Zones
+
+            return { list }
         end)
-    
-        return { list }
     end
     
     if mode == df.building_civzonest.T_zone_flags.pit_pond then
-        local list = {}
-        execute_with_selected_zone(bldid, function(ws)
+        return execute_with_selected_zone(bldid, function(ws)
             gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
+
+            if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
+                return nil
+            end
+
+            local list = {}
 
             for i,v in ipairs(df.global.ui_building_assign_type) do
                 --xxx: this shouldn't happen, but was reported. bug in game? 
@@ -128,9 +138,9 @@ function zone_information_get(bldid, mode)
             end
             
             df.global.ui.main.mode = df.ui_sidebar_mode.Zones
-        end)
 
-        return { list, zone.pit_flags.whole }
+            return { list, zone.pit_flags.whole }
+        end)
     end        
 
     return nil   
