@@ -1129,7 +1129,7 @@ void remote_start()
     enabler->gfps = 5;
 
     INTERPOSE_HOOK(dwarfmode_hook2, render).apply(true);
-    //INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(true);
+    INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(true);
 
     remote_on = true;
 

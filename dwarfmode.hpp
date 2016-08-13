@@ -239,23 +239,20 @@ struct dwarfmode_hook2 : public df::viewscreen_dwarfmodest
 
     DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
     {
-        // Some operations, like switching to activity zone info, will try to recenter the view and fail otherwise
+        // The game will try to make sure cursor is visible and not near the edge of the screen
+        // Some operations will fail if we don't do that ourselves beforehand
         if (df::global::ui->main.mode > 0 && df::global::cursor->x != -30000)
         {
-            int tdimx = init->display.grid_x;
-            int tdimy = init->display.grid_y;
+            int mapw = init->display.grid_x - get_menu_width() - 2;
+            int maph = init->display.grid_y - 2;
             int oldwx = *df::global::window_x;
             int oldwy = *df::global::window_y;
 
-            init->display.grid_x = 999;
-            init->display.grid_y = 999;
-            *df::global::window_x = 0;
-            *df::global::window_y = 0;
-    
+            *df::global::window_x = std::max(0, std::min(df::global::cursor->x - 10, df::global::world->map.x_count-mapw));
+            *df::global::window_y = std::max(0, std::min(df::global::cursor->y - 10, df::global::world->map.y_count-maph));
+
             INTERPOSE_NEXT(feed)(input);
 
-            init->display.grid_x = tdimx;
-            init->display.grid_y = tdimy;
             *df::global::window_x = oldwx;
             *df::global::window_y = oldwy;
         }
@@ -294,5 +291,5 @@ struct dwarfmode_hook2 : public df::viewscreen_dwarfmodest
     }
 };
 
-IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, render, 300);
-IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, feed, 300);
+IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, render, -300);
+IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, feed, -300);
