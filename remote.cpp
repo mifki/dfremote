@@ -106,9 +106,6 @@ static int32_t *mscreentexpos;
 static int8_t *mscreentexpos_addcolor;
 static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;
 
-// We don't support creature graphics yet, but still screentexpos* should point to big enough buffers or one buffer
-// static int32_t *gscreendummy;
-
 #include "patches.hpp"
 
 #ifdef WIN32
@@ -176,7 +173,6 @@ static int timer_timeout = -1;
 static string timer_fn;
 
 static int maxlevels = 3;
-static bool graphics = true;
 
 static void patch_rendering(bool enable_lower_levels)
 {
@@ -488,6 +484,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
 bool send_map_updates(send_func sendfunc, void *conn)
 {
+    bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
     bool needs_sync = force_send_status;
     force_send_status = false;
 
@@ -639,7 +636,6 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
                     *(b++) = fg | (bg << 4);
 
-
                     int dz = (s[3] & 0xfe) >> 1;
                     if (lastdz != dz) {
                         *(b-1) |= 128;
@@ -667,7 +663,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
     if (b != emptyb+1 || send_z)
     {
-        *firstb |= (1 << 3);
+        *firstb |= ((graphics ? 2 : 1) << 3);
         *emptyb = zlevel;//send_z ? zlevel : 0xff;
         send_z = false;
     }
