@@ -107,6 +107,11 @@ function depot_movegoods_set(idx, status)
     if ws._type ~= df.viewscreen_layer_assigntradest then
         return
     end
+    
+    --todo: temporary
+    if type(status) ~= 'number' then
+        error('status is not a number '..type(status))
+    end
 
     ws.info[idx].status = status
 end
