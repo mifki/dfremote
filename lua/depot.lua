@@ -110,7 +110,7 @@ function depot_movegoods_set(idx, status)
     
     --todo: temporary
     if type(status) ~= 'number' then
-        error('status is not a number '..type(status))
+        error('status is not a number '..type(status)..' '..tostring(status))
     end
 
     ws.info[idx].status = status
