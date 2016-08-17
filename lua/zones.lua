@@ -82,7 +82,7 @@ function zone_information_get(bldid, mode)
             gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                return nil
+                error('can not switch to zone info mode')
             end
 
             local list = {}
@@ -105,7 +105,7 @@ function zone_information_get(bldid, mode)
             gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                return nil
+                error('can not switch to zone info mode')
             end
 
             local list = {}
