@@ -165,7 +165,7 @@ function zonename(zone)
 end
 
 function jobname(job)
-    return dfhack.df2utf(dfhack.job.getName(job))
+    return dfhack.df2utf(dfhack.job.getName(job)):utf8capitalize()
 end
 
 function pos2table(pos)
