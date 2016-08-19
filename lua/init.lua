@@ -66,14 +66,6 @@ local extdata = nil
 building_btns = {} --as:df.interface_button_construction_building_selectorst[]
 designate_cmds = {}
 
---xxx: making it possible to access a global with the currently being linked building type
---xxx: this is a hack until the required global is added to dfhack !!
-if dfhack.getOSType() == 'windows' then
-    dfhack.internal.setAddress('art_image_chunk_next_id', 0x01165807+dfhack.internal.getRebaseDelta())
-else
-    dfhack.internal.setAddress('art_image_chunk_next_id', dfhack.internal.getAddress('ui_workshop_in_add')+1)
-end
-
 function close_all()
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -128,7 +120,7 @@ function reset_main()
         df.global.world.selected_building = nil
         df.global.ui_selected_unit = -1
         df.global.ui_workshop_in_add = false
-        df.global.art_image_chunk_next_id = 255
+        C_lever_target_type_set(-1)
         df.global.ui_sidebar_menus.zone.selected = nil
         df.global.ui.main.mode = df.ui_sidebar_mode.Default
         df.global.ui.waypoints.in_edit_waypts_mode = false
@@ -686,8 +678,8 @@ function get_status()
             local name = bldname(bld)
     
             if bld._type == df.building_trapst and df.global.ui_workshop_in_add then
-                local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
-                if linkmode ~= 0xff then
+                local linkmode = C_lever_target_type_get()
+                if linkmode ~= -1 then
 
                     if linkmode == string.byte('t') or linkmode == string.byte('l') then
                         local enough = #df.global.ui_building_assign_items >= 2
@@ -1143,7 +1135,7 @@ function select_confirm()
     if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding then
 
         local bld = df.global.world.selected_building
-        if bld and bit32.band(df.global.art_image_chunk_next_id, 0xff) ~= 0xff then
+        if bld and C_lever_target_type_get() ~= -1 then
             zoombacktobld = bld
         end
     end]]

@@ -777,7 +777,7 @@ function building_workshop_addjob(bldid, idx, rep)
             ws:logic() --to initialize / switch to add job menu
             gui.simulateInput(ws, jobs_trap[idx+1])
 
-            if df.global.ui_workshop_in_add and bit32.band(df.global.art_image_chunk_next_id, 0xff) ~= 0xff then
+            if df.global.ui_workshop_in_add and C_lever_target_type_get() ~= -1 then
                 recenter_view(df.global.cursor.x, df.global.cursor.y, df.global.cursor.z)
             end
         end
@@ -1470,7 +1470,7 @@ function link_targets_get()
         [string.byte'T'] = 'TRAP',
     }
 
-    local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
+    local linkmode = C_lever_target_type_get()
     local id = modes_to_ids[linkmode]
     if not id then
         return
@@ -1505,7 +1505,7 @@ function link_target_confirm(fast)
     
     -- Automatically select first two mechanisms
     if istrue(fast) then
-        local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
+        local linkmode = C_lever_target_type_get()
 
         -- If the mode is right, the same building is still selected, linkmode is right, and we have enough mechanisms to select
         if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding and df.global.ui_workshop_in_add
@@ -1556,7 +1556,7 @@ function link_mechanisms_get()
         return
     end
 
-    local linkmode = bit32.band(df.global.art_image_chunk_next_id, 0xff)
+    local linkmode = C_lever_target_type_get()
     if linkmode ~= string.byte('t') and linkmode ~= string.byte('l') then
         return
     end

@@ -79,3 +79,11 @@ function C_build_req_get_provided(req)
 
 	return req.count_provided
 end
+
+function C_lever_target_type_get()
+	return df.global.ui_lever_target_type
+end
+
+function C_lever_target_type_set(val)
+	df.global.ui_lever_target_type = val
+end

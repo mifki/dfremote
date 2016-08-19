@@ -71,3 +71,19 @@ end
 function C_build_req_get_provided(req)
 	return req.count_provided
 end
+
+function C_lever_target_type_get()
+	if dfhack.getOSType() == 'windows' then
+		return df.reinterpret_cast('int8_t', 0x01165807+dfhack.internal.getRebaseDelta()).value
+	else
+		return df.reinterpret_cast('int8_t', dfhack.internal.getAddress('ui_workshop_in_add')+1).value
+	end	
+end
+
+function C_lever_target_type_set(val)
+	if dfhack.getOSType() == 'windows' then
+		df.reinterpret_cast('int8_t', 0x01165807+dfhack.internal.getRebaseDelta()).value = val
+	else
+		df.reinterpret_cast('int8_t', dfhack.internal.getAddress('ui_workshop_in_add')+1).value = val
+	end	
+end
