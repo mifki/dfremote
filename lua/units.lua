@@ -350,7 +350,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                         if v == unit.id then
                             local s = df.new 'string'
                             ev:getName(unit.id, s)
-                            local jobtitle = s.value
+                            local jobtitle = dfhack.df2utf(s.value)
                             s:delete()
 
                             --[[if #unit.anon_4 > 0 then
@@ -358,7 +358,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                                 jobtitle = jobtitle .. '!'
                             end]]
 
-                            return dfhack.df2utf(jobtitle), 10, 2
+                            return jobtitle, 10, 2
                         end
                     end
                 end
@@ -368,7 +368,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         end
     end
 
-    local jobtitle = unit.job.current_job and dfhack.job.getName(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
+    local jobtitle = unit.job.current_job and jobname(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
     if unit.job.current_job and unit.job.current_job.flags['repeat'] and not norepeatsuffix then
         jobtitle = jobtitle .. '/R'
     end
@@ -409,7 +409,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
             if act and #act.events > 0 then
                 local s = df.new 'string'
                 act.events[0]:getName(unit.id, s)
-                jobtitle = s.value
+                jobtitle = dfhack.df2utf(s.value)
                 s:delete()
 
                 jobcolor = 14
@@ -432,7 +432,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                 if ev then
                     local s = df.new 'string'
                     ev:getName(unit.id, s)
-                    jobtitle = s.value
+                    jobtitle = dfhack.df2utf(s.value)
                     s:delete()
 
                     jobcolor = 14
@@ -445,7 +445,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         end
     end
     
-    return dfhack.df2utf(jobtitle), jobcolor, unit.job.current_job and 1 or 0
+    return jobtitle, jobcolor, unit.job.current_job and 1 or 0
 end
 
 -- df.viewscreen_unitlist_page.Citizens, Livestock, Others, Dead

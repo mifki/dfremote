@@ -218,7 +218,7 @@ function building_query_selected(bldid)
     elseif workshop then
         local jobs = {}
         for i,job in ipairs(bld.jobs) do
-            local title = dfhack.job.getName(job)
+            local title = jobname(job)
 
             --todo: first check that job type supports setting details
             local can_set_details = (#job.items == 0)

@@ -164,6 +164,10 @@ function zonename(zone)
     return 'Activity Zone #' .. tostring(zone.zone_num)
 end
 
+function jobname(job)
+    return dfhack.df2utf(dfhack.job.getName(job))
+end
+
 function pos2table(pos)
     return (pos.x ~= -30000) and { pos.x, pos.y, pos.z } or mp.NIL
 end

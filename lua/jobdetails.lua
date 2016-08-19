@@ -16,7 +16,7 @@ function job_details_get_types(bldid, idx)
 			return { {}, mp.NIL }
 		end
 
-		local jobtitle = dfhack.job.getName(job)
+		local jobtitle = jobname(job)
 
 		--0-material, 1-image, 2-size, 3-type
 		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do

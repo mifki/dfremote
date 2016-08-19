@@ -4,7 +4,7 @@ function jobs_get_list()
 
         for i,job in ipairs(ws.jobs) do
             if job then
-                local title = dfhack.job.getName(job)
+                local title = jobname(job)
                 if job.flags['repeat'] then
                     title = title .. '/R'
                 end
@@ -38,7 +38,7 @@ function job_get_description(unitid)
     if unit.job.current_job then
         local job = unit.job.current_job
 
-        local title = dfhack.job.getName(job)
+        local title = jobname(job)
         local worker = dfhack.job.getWorker(job)
         local profcolor = dfhack.units.getProfessionColor(unit)
 
