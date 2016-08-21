@@ -1064,6 +1064,8 @@ function building_room_owner_get_candidates(bldid)
     ws:logic()
     ws:render()
 
+    --todo: check that we have switched to the assignment mode
+
     local ret = {}
     room_candidate_ids = {}
 
@@ -1087,7 +1089,7 @@ end
 
 --luacheck: in=number,number
 function building_room_owner_set(bldid, idx)
-    local ws = dfhack.gui.getCurViewscreen()
+    --[[local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
     end
@@ -1138,7 +1140,46 @@ function building_room_owner_set(bldid, idx)
         end
     end
 
-    dfhack.buildings.setOwner(bld, unit)
+    dfhack.buildings.setOwner(bld, unit)]]
+
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    if not df.global.world.selected_building.is_room then
+        error('not a room')
+    end
+
+    local keys = {
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+    }
+
+    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
+    --todo: don't know which of the following is required
+    ws:logic()
+    ws:render()
+
+    --todo: check that we have switched to the assignment mode    
+
+    df.global.ui_building_item_cursor = idx    
+    gui.simulateInput(ws, 'SELECT')
+
+    df.global.ui_building_in_assign = false    
 
     return true
 end
