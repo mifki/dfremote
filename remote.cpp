@@ -339,6 +339,8 @@ bool block_is_unmined(int bx, int by, int zlevel)
 
 void send_initial_map(unsigned short seq, unsigned char startblk, send_func sendfunc, void *conn)
 {
+    bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
+*out2 << "GG " << graphics << std::endl;
     int map_w = world->map.x_count;
     int map_h = world->map.y_count;
 
@@ -436,10 +438,21 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
             *(b++) = bx;
             *(b++) = by;
 
+            int lastinfobyte = 0;
+            unsigned char *lastinfobyteptr = NULL;
+
             for (int j = 0; j < 16; j++)
             {
                 for (int i = 0; i < 16; i++)
                 {
+                    if (graphics && !(lastinfobyte--))
+                    {
+                        *out2 << "F"<< std::endl;
+                        lastinfobyteptr = b;
+                        *(b++) = 0;
+                        lastinfobyte = 7;
+                    }
+
                     int x = bx*16 + i;
                     int y = by*16 + j;
 
@@ -447,16 +460,42 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                     unsigned char *s = gscreen + tile*4;
                     unsigned int *is = (unsigned int*)gscreen + tile;
 
-                    *(b++) = s[0]; //ch
+                    unsigned char bg, fg;
+
+                    if (graphics && *(gscreentexpos+tile))
+                    {
+                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
+                        *(unsigned short*)b = *(gscreentexpos+tile);
+                        b += 2;
+                        *out2 << "G " << bx << " " << by << " " << i << " " << j << std::endl;
+
+                        if (gscreentexpos_grayscale[tile])
+                        {
+                            fg = gscreentexpos_cf[tile];
+                            bg = gscreentexpos_cbr[tile];
+                        }
+                        else if (gscreentexpos_addcolor[tile])
+                        {
+                            bg   = s[2] & 7;
+                            unsigned char bold = (s[3] & 1) * 8;
+                            fg   = (s[1] + bold) % 16;
+                        }
+                        else
+                        {
+                            fg = 15;
+                            bg = 0;
+                        }
+                    }
+                    else
+                    {
+                        *(b++) = s[0]; //ch
+
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
 
                     int dz = (s[3] & 0xfe) >> 1;                    
-
-                    int bg = s[2] & 7;
-                    int bold = (s[3] & 1) * 8;
-                    int fg   = (s[1] + bold) % 16;
-
-                    *(b++) = fg + (bg << 4);
-
                     if (lastdz != dz) {
                         *(b-1) |= 128;
                         *(b++) = dz - lastdz;
