@@ -961,9 +961,9 @@ function building_workshop_profile_set_unit(bldid, unitid, on)
     end
 
     local bld = df.global.world.selected_building --as:df.building_workshopst
-    if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
+    --[[if bld._type ~= df.building_workshopst and bld._type ~= df.building_furnacest then
         error('not a workshop or furnace '..tostring(bld._type))
-    end
+    end]]
 
     local profile = bld.profile
     on = istrue(on)
