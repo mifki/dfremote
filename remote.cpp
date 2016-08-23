@@ -340,7 +340,7 @@ bool block_is_unmined(int bx, int by, int zlevel)
 void send_initial_map(unsigned short seq, unsigned char startblk, send_func sendfunc, void *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
-*out2 << "GG " << graphics << std::endl;
+
     int map_w = world->map.x_count;
     int map_h = world->map.y_count;
 
@@ -447,7 +447,6 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                 {
                     if (graphics && !(lastinfobyte--))
                     {
-                        *out2 << "F"<< std::endl;
                         lastinfobyteptr = b;
                         *(b++) = 0;
                         lastinfobyte = 7;
@@ -467,7 +466,6 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                         *lastinfobyteptr |= 1 << (7-lastinfobyte);
                         *(unsigned short*)b = *(gscreentexpos+tile);
                         b += 2;
-                        *out2 << "G " << bx << " " << by << " " << i << " " << j << std::endl;
 
                         if (gscreentexpos_grayscale[tile])
                         {
@@ -494,6 +492,8 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                         unsigned char bold = (s[3] & 1) * 8;
                         fg   = (s[1] + bold) % 16;
                     }
+
+                    *(b++) = fg | (bg << 4);
 
                     int dz = (s[3] & 0xfe) >> 1;                    
                     if (lastdz != dz) {
