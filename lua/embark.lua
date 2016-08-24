@@ -517,6 +517,8 @@ function embark_play(idx)
 
         local title = ws.title
         title = title:gsub("^%s+", ""):gsub("%s+$", "")
+        
+        df.global.pause_state = true
 
 	    return { title, text }
 	end
