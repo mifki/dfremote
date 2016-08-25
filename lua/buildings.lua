@@ -1601,8 +1601,10 @@ function link_mechanisms_get()
     if linkmode ~= string.byte('t') and linkmode ~= string.byte('l') then
         return
     end
+    
+    local enough = (linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2) or
+                   (linkmode == string.byte('l') and #df.global.ui_building_assign_items >= 1) or false
 
-    local enough = #df.global.ui_building_assign_items >= 1
     if not enough then
         return { linkmode, false, {} }
     end
