@@ -682,7 +682,8 @@ function get_status()
                 if linkmode ~= -1 then
 
                     if linkmode == string.byte('t') or linkmode == string.byte('l') then
-                        local enough = #df.global.ui_building_assign_items >= 2
+                        local enough = (linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2) or
+                                       (linkmode == string.byte('l') and #df.global.ui_building_assign_items >= 1) or false
                         return 103, enough and 1 or 0
                     else
                         return 102, 0, name --todo: return whether there's a building under cursor and its name
