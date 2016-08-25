@@ -1237,10 +1237,14 @@ function building_set_flag(bldid, flag, value)
             bld.seasonal_fertilize = istrue(value) and 1 or 0
         end
 
-    elseif btype == df.building_type.Door then
+    elseif btype == df.building_type.Door or btype == df.building_type.Hatch then
         local bld = bld --as:df.building_doorst
         if flag == 1 then
-            bld.door_flags.forbidden = istrue(value)
+            -- For some reason, just setting forbidden flag doesn't prevent dwarves from using the door
+            if bld.door_flags.forbidden ~= istrue(value) then
+               gui.simulateInput(ws, K'BUILDJOB_DOOR_LOCK')
+               --todo: return whether the lock was successfull to the app ?
+            end
         elseif flag == 2 then
             bld.door_flags.pet_passable = istrue(value)
         elseif flag == 3 then
