@@ -1493,8 +1493,8 @@ function link_targets_get()
         return
     end
 
-    local bld = df.global.world.selected_building --as:df.building_trapst
-    if not bld or bld._type ~= df.building_trapst then
+    local trigger = df.global.world.selected_building --as:df.building_trapst
+    if not trigger or trigger._type ~= df.building_trapst then
         return
     end
 
@@ -1521,13 +1521,25 @@ function link_targets_get()
         return
     end
 
+    local linked_ids = {}
+    for i,v in ipairs(trigger.linked_mechanisms) do
+        for j,w in ipairs(v.general_refs) do
+            if w._type == df.general_ref_building_holderst then
+                utils.insert_sorted(linked_ids, w.building_id)
+                break
+            end
+        end
+    end
+
     local ret = {}
 
-    --todo: pass coords so that client can zoom straight away ?
+    --todo: pass bld id to zoom without using ui_building_item_cursor !
     for i,bld in ipairs(df.global.world.buildings.other[id]) do
         if not (linkmode == string.byte'T' and bld.trap_type ~= df.trap_type.TrackStop) then --hint:df.building_trapst
-            local title = bldname(bld)
-            table.insert(ret, { title, bld.z - df.global.window_z })
+            if not utils.binsearch(linked_ids, bld.id) then
+                local title = bldname(bld)
+                table.insert(ret, { title, bld.z - df.global.window_z })
+            end
         end
     end
 
