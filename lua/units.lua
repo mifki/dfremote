@@ -491,9 +491,16 @@ local function unitlist_process_citizen(unit)
     end
 
     local jobrepeat = unit.job.current_job and unit.job.current_job.flags['repeat']
+    
+    local legendary = false
+    for i,v in ipairs(unit.status.current_soul.skills) do
+        if v.rating >= 15 then
+            legendary = true
+            break
+        end
+    end    
 
-    local flags = (can_goto_bld and 1 or 0) + (can_cancel and 2 or 0) + (can_suspend and 4 or 0) + (can_repeat and 8 or 0)
-                + (can_remove_wrk and 16 or 0) + (jobrepeat and 32 or 0)
+    local flags = packbits(can_goto_bld, can_cancel, can_suspend, can_repeat, can_remove_wrk, jobrepeat, legendary)
 
     local profcolor = dfhack.units.getProfessionColor(unit)
 
