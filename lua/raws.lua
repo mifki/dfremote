@@ -212,17 +212,7 @@ function raws_apply_tileset(zjsondata)
     return true
 end
 
--- we don't support compression for incoming commands globally, so msgpack data here is compressed and then msgpacked as a parameter
---luacheck: in=string
-function raws_apply_creature_gfx(zmsgpackdata)
-    local msgpackdata = ''
-    local function appenddata(ch)
-        msgpackdata = msgpackdata .. string.char(ch)
-    end
-
-    deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
-    local data = mp.unpack(msgpackdata)
-
+function reset_creature_gfx()
     for i,raw in ipairs(df.global.world.raws.creatures.all) do
         local gfx = raw.graphics
         for j=0,#gfx.texpos-1 do
@@ -287,7 +277,22 @@ function raws_apply_creature_gfx(zmsgpackdata)
             v:delete()
         end
         gfx.appointments:resize(0)
+    end    
+end
+
+-- we don't support compression for incoming commands globally, so msgpack data here is compressed and then msgpacked as a parameter
+--luacheck: in=string
+function raws_apply_creature_gfx(zmsgpackdata)
+    df.global.init.display.flag.USE_GRAPHICS = true    
+    reset_creature_gfx()
+
+    local msgpackdata = ''
+    local function appenddata(ch)
+        msgpackdata = msgpackdata .. string.char(ch)
     end
+
+    deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
+    local data = mp.unpack(msgpackdata)
 
     for i,v in ipairs(data) do
         local id = v[1]
