@@ -720,7 +720,9 @@ function get_status()
             --local name = unit and unitname(unit)
             --fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
             local jobtitle = unit_jobtitle(unit)
-            txt = txt .. '\n' .. jobtitle
+            if #jobtitle > 0 then
+                txt = txt .. '\n' .. jobtitle
+            end
         end
         return 24, (unit and 1 or 0), txt
     end
