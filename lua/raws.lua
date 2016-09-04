@@ -24,7 +24,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     for id,v in pairs(data.tools or {}) do
@@ -36,7 +36,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     for j,raw in ipairs(df.global.world.raws.inorganics) do
@@ -56,7 +56,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     local def_grass_tiles = { 46, 44, 96, 39 }
@@ -146,14 +146,14 @@ function raws_apply_tileset(zjsondata)
                                 end
                             end
                         end
-                        if not gf then print('not found '..id) end
+                        -- if not gf then print('not found '..id) end
                     end
                 end
 
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     if data.sky then
@@ -207,7 +207,7 @@ function raws_apply_tileset(zjsondata)
         end
     end
 
-    print 'successfully patched raws in memory'
+    -- print 'successfully patched raws in memory'
 
     return true
 end
@@ -294,6 +294,10 @@ function raws_apply_creature_gfx(zmsgpackdata)
     deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
     local data = mp.unpack(msgpackdata)
 
+    if not data then
+        return true
+    end
+
     for i,v in ipairs(data) do
         local id = v[1]
         print(id)
@@ -312,16 +316,21 @@ function raws_apply_creature_gfx(zmsgpackdata)
                 printall(def)
                 if type == 1 then
                     gfx.profession_texpos[0][code] = tex
+                    gfx.profession_texpos_gs[0][code] = tex
                 elseif type == 2 then
                     gfx.texpos[code] = tex
+                    gfx.texpos_gs[code] = tex
                 elseif type == 3 then
                     gfx.entity_link_texpos[0][code] = tex
+                    gfx.entity_link_texpos_gs[0][code] = tex
                 elseif type == 4 then
                     gfx.site_link_texpos[0][code] = tex
+                    gfx.site_link_texpos_gs[0][code] = tex
                 elseif type == 0 then
                     local app = df.creature_graphics_appointment:new()
                     app.token = code
                     app.texpos[0] = tex
+                    app.texpos_gs[0] = tex
                     gfx.appointments:insert(#gfx.appointments, app)
                 end
             end
