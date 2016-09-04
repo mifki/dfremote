@@ -401,6 +401,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     b += 2;
 
     *(b++) = zlevel;
+    *(b++) = graphics;
 
     unsigned char *nextblk = b;
     *(b++) = 0;
