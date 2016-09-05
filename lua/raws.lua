@@ -297,6 +297,8 @@ function raws_apply_creature_gfx(zmsgpackdata)
     if not data then
         return true
     end
+    
+    local nonempty = false
 
     for i,v in ipairs(data) do
         local id = v[1]
@@ -334,12 +336,17 @@ function raws_apply_creature_gfx(zmsgpackdata)
                     gfx.appointments:insert(#gfx.appointments, app)
                 end
             end
+        
+            nonempty = true
+        
         else
             print('not found '..id)
         end
     end
 
-    df.global.init.display.flag.USE_GRAPHICS = true
+    if nonempty then
+        df.global.init.display.flag.USE_GRAPHICS = true
+    end
 
     return true
 end
