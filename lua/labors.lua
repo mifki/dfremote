@@ -87,7 +87,7 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
     { "Other Jobs", 4, {
         { "Architect", df.profession.ARCHITECT, df.unit_labor.ARCHITECT, df.job_skill.DESIGNBUILDING }, 
         { "Alchemist", df.profession.ALCHEMIST, df.unit_labor.ALCHEMIST, df.job_skill.ALCHEMY }, 
-        { "Cleaning", df.profession.NONE, df.unit_labor.CLEAN, df.job_skill.NONE }, 
+        { "Cleaner", df.profession.NONE, df.unit_labor.CLEAN, df.job_skill.NONE }, 
         { "Lever Operator", df.profession.NONE, df.unit_labor.PULL_LEVER, df.job_skill.NONE }, 
         { "Road Builder", df.profession.NONE, df.unit_labor.BUILD_ROAD, df.job_skill.NONE },
         { "Construction Builder", df.profession.NONE, df.unit_labor.BUILD_CONSTRUCTION, df.job_skill.NONE },
