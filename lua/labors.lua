@@ -89,7 +89,9 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
         { "Alchemist", df.profession.ALCHEMIST, df.unit_labor.ALCHEMIST, df.job_skill.ALCHEMY }, 
         { "Cleaning", df.profession.NONE, df.unit_labor.CLEAN, df.job_skill.NONE }, 
         { "Lever Operator", df.profession.NONE, df.unit_labor.PULL_LEVER, df.job_skill.NONE }, 
-        { "Construction Removal", df.profession.NONE, df.unit_labor.REMOVE_CONSTRUCTION, df.job_skill.NONE }
+        { "Road Builder", df.profession.NONE, df.unit_labor.BUILD_ROAD, df.job_skill.NONE },
+        { "Construction Builder", df.profession.NONE, df.unit_labor.BUILD_CONSTRUCTION, df.job_skill.NONE },
+        { "Construction Remover", df.profession.NONE, df.unit_labor.REMOVE_CONSTRUCTION, df.job_skill.NONE }
     } },
     { "Hauling", 3, {
         { "Stone", df.profession.NONE, df.unit_labor.HAUL_STONE, df.job_skill.NONE }, 
@@ -202,6 +204,8 @@ end
         { "Alchemy", df.profession.ALCHEMIST, df.unit_labor.ALCHEMIST, df.job_skill.ALCHEMY }, 
         { "Cleaning", df.profession.NONE, df.unit_labor.CLEAN, df.job_skill.NONE }, 
         { "Lever Operation", df.profession.NONE, df.unit_labor.PULL_LEVER, df.job_skill.NONE }, 
+        { "Road Building", df.profession.NONE, df.unit_labor.BUILD_ROAD, df.job_skill.NONE },
+        { "Construction Building", df.profession.NONE, df.unit_labor.BUILD_CONSTRUCTION, df.job_skill.NONE },
         { "Construction Removal", df.profession.NONE, df.unit_labor.REMOVE_CONSTRUCTION, df.job_skill.NONE }
     } },
     { "Hauling", 3, {
