@@ -283,7 +283,7 @@ end
 -- we don't support compression for incoming commands globally, so msgpack data here is compressed and then msgpacked as a parameter
 --luacheck: in=string
 function raws_apply_creature_gfx(zmsgpackdata)
-    df.global.init.display.flag.USE_GRAPHICS = true    
+    df.global.init.display.flag.USE_GRAPHICS = false    
     reset_creature_gfx()
 
     local msgpackdata = ''
@@ -302,7 +302,6 @@ function raws_apply_creature_gfx(zmsgpackdata)
 
     for i,v in ipairs(data) do
         local id = v[1]
-        print(id)
         local idx,raw = utils.linear_index(df.global.world.raws.creatures.all,id,'creature_id')
 
         if raw then
@@ -312,27 +311,32 @@ function raws_apply_creature_gfx(zmsgpackdata)
                 local type = def[1]
                 local code = def[2]
                 local tex = def[3]
+                local addcolor = istrue(def[4])
 
                 --todo: check ranges for all code types
 
-                printall(def)
                 if type == 1 then
                     gfx.profession_texpos[0][code] = tex
                     gfx.profession_texpos_gs[0][code] = tex
+                    gfx.profession_add_color[0][code] = addcolor
                 elseif type == 2 then
                     gfx.texpos[code] = tex
                     gfx.texpos_gs[code] = tex
+                    gfx.add_color[code] = addcolor
                 elseif type == 3 then
                     gfx.entity_link_texpos[0][code] = tex
                     gfx.entity_link_texpos_gs[0][code] = tex
+                    gfx.entity_link_add_color[0][code] = addcolor
                 elseif type == 4 then
                     gfx.site_link_texpos[0][code] = tex
                     gfx.site_link_texpos_gs[0][code] = tex
+                    gfx.site_link_add_color[0][code] = addcolor
                 elseif type == 0 then
                     local app = df.creature_graphics_appointment:new()
                     app.token = code
                     app.texpos[0] = tex
                     app.texpos_gs[0] = tex
+                    app.add_color[0] = addcolor
                     gfx.appointments:insert(#gfx.appointments, app)
                 end
             end
