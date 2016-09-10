@@ -625,8 +625,35 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 if (!rblk)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
-                unsigned int is = *((unsigned int*)gscreen + tile);
-                is &= 0x01ffffff; // Ignore depth information
+                unsigned int is;
+                unsigned char bg, fg;
+                unsigned short texpos = 0;
+                if (graphics && (texpos=*(gscreentexpos+tile)))
+                {
+                    if (gscreentexpos_grayscale[tile])
+                    {
+                        fg = gscreentexpos_cf[tile];
+                        bg = gscreentexpos_cbr[tile];
+                    }
+                    else if (gscreentexpos_addcolor[tile])
+                    {
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
+                    else
+                    {
+                        fg = 15;
+                        bg = 0;
+                    }                    
+
+                    is = texpos | (fg << 4) | bg;
+                }
+                else
+                {
+                    is = *((unsigned int*)gscreen + tile);
+                    is &= 0x01ffffff; // Ignore depth information
+                }
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
@@ -640,30 +667,11 @@ bool send_map_updates(send_func sendfunc, void *conn)
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
 
-                    unsigned char bg, fg;
-
-                    if (graphics && *(gscreentexpos+tile))
+                    if (texpos)
                     {
                         *lastinfobyteptr |= 1 << (7-lastinfobyte);
-                        *(unsigned short*)b = *(gscreentexpos+tile);
+                        *(unsigned short*)b = texpos;
                         b += 2;
-
-                        if (gscreentexpos_grayscale[tile])
-                        {
-                            fg = gscreentexpos_cf[tile];
-                            bg = gscreentexpos_cbr[tile];
-                        }
-                        else if (gscreentexpos_addcolor[tile])
-                        {
-                            bg   = s[2] & 7;
-                            unsigned char bold = (s[3] & 1) * 8;
-                            fg   = (s[1] + bold) % 16;
-                        }
-                        else
-                        {
-                            fg = 15;
-                            bg = 0;
-                        }
                     }
                     else
                     {
