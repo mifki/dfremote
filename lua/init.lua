@@ -114,6 +114,10 @@ function close_all()
     end
 end
 
+function cancel_to_1st_corner()
+    df.global.selection_rect.start_x = -30000
+end
+
 function reset_main()
     if dfhack.gui.getCurViewscreen()._type == df.viewscreen_dwarfmodest then
         -- if cancelling flow mode zone creation, need to remove the not-yet-created zone !
@@ -1421,6 +1425,7 @@ local handlers = {
 
     [99] = close_all,
     [100] = reset_main,
+    [101] = cancel_to_1st_corner,
 
     [113] = set_cursor_pos,
     [114] = set_cursor_pos_relative,
