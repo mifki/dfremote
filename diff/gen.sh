@@ -9,6 +9,7 @@ function p {
 	rm -rf raw
 	cp -r raw_vanilla-$V raw
 	cp -r DFgraphics-$V/$1/raw/* raw/
+	cp -r DFgraphics-$V/$1/raw/graphics out-$V/tileset-$1/
 	node diff.js raw DFgraphics-$V/$1/data/init > out-$V/tileset-$1/raw.json
 	cp DFgraphics-$V/$1/data/init/colors.txt out-$V/tileset-$1/
 	cp "DFgraphics-$V/$1/data/art/$2" out-$V/tileset-$1/tileset.png
@@ -18,7 +19,7 @@ function p {
 
 rm -rf raw
 
-p Afro remote.png
+p Afro Afro_16x16.png
 p ASCII-Default curses_800x600.png
 p ASCII-Square curses_square_16x16.png
 p CLA CLA.png
@@ -33,7 +34,7 @@ p Obsidian Obsidian_16x16_df40.png
 p Phoebus Phoebus_16x16.png
 p Shizzle curses_1280x500.png
 p SimpleMood 16x16_sm.png
-p Spacefox remote.png
+p Spacefox Spacefox_16x16Dibujor02.png
 p Taffer taffer_20x20_serif_hollow_straight_walls.png
 p Tergel 16x16_Tergel.png
 p Wanderlust wanderlust.png
