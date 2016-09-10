@@ -500,6 +500,9 @@ local function unitlist_process_citizen(unit)
         end
     end    
 
+    --xxx: temporary due to a bug in the app
+    legendary = false
+
     local flags = packbits(can_goto_bld, can_cancel, can_suspend, can_repeat, can_remove_wrk, jobrepeat, legendary)
 
     local profcolor = dfhack.units.getProfessionColor(unit)
