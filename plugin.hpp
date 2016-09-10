@@ -12,6 +12,7 @@ DFHACK_PLUGIN_LUA_FUNCTIONS {
     DFHACK_LUA_FUNCTION(update_wtoken),
     DFHACK_LUA_FUNCTION(start_update),
     DFHACK_LUA_FUNCTION(custom_command),
+    DFHACK_LUA_FUNCTION(init_dummy_gfx),
     DFHACK_LUA_END
 };
 

@@ -1310,11 +1310,47 @@ bool start_update()
     return (Core::getInstance().runCommand(*out2, "remote-update", args) == CR_OK);
 }
 
-static std::string custom_command(std::string data)
+struct gl_texpos {
+    float left, right, top, bottom;
+};
+
+static void init_dummy_gfx(int count)
 {
-    return NULL;
+    if (!enabler->textures.gl_texpos)
+        return;
+
+    if (count <= enabler->textures.raws.size())
+        return;
+
+    struct gl_texpos *oldtexpos = (struct gl_texpos*)enabler->textures.gl_texpos;
+    struct gl_texpos *newtexpos = new struct gl_texpos[count];
+    
+    for (int i = 0; i < count; i++)
+    {
+        if (i < enabler->textures.raws.size())
+            newtexpos[i] = oldtexpos[i];
+        else
+            newtexpos[i] = oldtexpos['Z'];
+    }
+
+    delete[] oldtexpos;
+    enabler->textures.gl_texpos = newtexpos;
 }
 
 #include "config.hpp"
 #include "commands.hpp"
+
+static std::string custom_command(std::string data)
+{
+    vector<string> tokens = split(data.c_str(), ',');
+
+    if (!tokens.size())
+        return "";
+
+    if (tokens[0] == "gfx")
+        init_dummy_gfx(atoi(tokens[1].c_str()));
+
+    return "";
+}
+
 #include "plugin.hpp"

@@ -298,7 +298,7 @@ function raws_apply_creature_gfx(zmsgpackdata)
         return true
     end
     
-    local nonempty = false
+    local max = 0
 
     for i,v in ipairs(data) do
         local id = v[1]
@@ -312,6 +312,10 @@ function raws_apply_creature_gfx(zmsgpackdata)
                 local code = def[2]
                 local tex = def[3]
                 local addcolor = istrue(def[4])
+
+                if tex > max then
+                    max = tex
+                end
 
                 --todo: check ranges for all code types
 
@@ -341,14 +345,13 @@ function raws_apply_creature_gfx(zmsgpackdata)
                 end
             end
         
-            nonempty = true
-        
         else
-            print('not found '..id)
+            --print('not found '..id)
         end
     end
 
-    if nonempty then
+    if max > 0 then
+        native.custom_command("gfx,"..tostring(max))
         df.global.init.display.flag.USE_GRAPHICS = true
     end
 
