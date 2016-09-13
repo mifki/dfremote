@@ -24,7 +24,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     for id,v in pairs(data.tools or {}) do
@@ -36,7 +36,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     for j,raw in ipairs(df.global.world.raws.inorganics) do
@@ -56,7 +56,7 @@ function raws_apply_tileset(zjsondata)
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     local def_grass_tiles = { 46, 44, 96, 39 }
@@ -146,14 +146,14 @@ function raws_apply_tileset(zjsondata)
                                 end
                             end
                         end
-                        if not gf then print('not found '..id) end
+                        -- if not gf then print('not found '..id) end
                     end
                 end
 
                 break
             end
         end
-        if not f then print('not found '..id) end
+        -- if not f then print('not found '..id) end
     end
 
     if data.sky then
@@ -207,7 +207,153 @@ function raws_apply_tileset(zjsondata)
         end
     end
 
-    print 'successfully patched raws in memory'
+    -- print 'successfully patched raws in memory'
+
+    return true
+end
+
+function reset_creature_gfx()
+    for i,raw in ipairs(df.global.world.raws.creatures.all) do
+        local gfx = raw.graphics
+        for j=0,#gfx.texpos-1 do
+            gfx.texpos[j] = 0
+        end
+        for j=0,#gfx.texpos_gs-1 do
+            gfx.texpos_gs[j] = 0
+        end
+        for j=0,#gfx.add_color-1 do
+            gfx.add_color[j] = 0
+        end
+
+        for j,v in ipairs(gfx.entity_link_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.entity_link_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.entity_link_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.site_link_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.site_link_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.site_link_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.profession_texpos) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.profession_texpos_gs) do
+            for k=0,#v-1 do
+                v[k] = 0
+            end
+        end
+        for j,v in ipairs(gfx.profession_add_color) do
+            for k=0,#v-1 do
+                v[k] = false
+            end
+        end
+
+        for j,v in ipairs(gfx.appointments) do
+            v:delete()
+        end
+        gfx.appointments:resize(0)
+    end    
+end
+
+-- we don't support compression for incoming commands globally, so msgpack data here is compressed and then msgpacked as a parameter
+--luacheck: in=string
+function raws_apply_creature_gfx(zmsgpackdata)
+    df.global.init.display.flag.USE_GRAPHICS = false    
+    reset_creature_gfx()
+
+    local msgpackdata = ''
+    local function appenddata(ch)
+        msgpackdata = msgpackdata .. string.char(ch)
+    end
+
+    deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
+    local data = mp.unpack(msgpackdata)
+
+    if not data then
+        return true
+    end
+    
+    local max = 0
+
+    for i,v in ipairs(data) do
+        local id = v[1]
+        local idx,raw = utils.linear_index(df.global.world.raws.creatures.all,id,'creature_id')
+
+        if raw then
+            local gfx = raw.graphics
+            for j=2,#v do
+                local def = v[j]
+                local type = def[1]
+                local code = def[2]
+                local tex = def[3]
+                local addcolor = istrue(def[4])
+
+                if tex > max then
+                    max = tex
+                end
+
+                --todo: check ranges for all code types
+
+                if type == 1 then
+                    gfx.profession_texpos[0][code] = tex
+                    gfx.profession_texpos_gs[0][code] = tex
+                    gfx.profession_add_color[0][code] = addcolor
+                elseif type == 2 then
+                    gfx.texpos[code] = tex
+                    gfx.texpos_gs[code] = tex
+                    gfx.add_color[code] = addcolor
+                elseif type == 3 then
+                    gfx.entity_link_texpos[0][code] = tex
+                    gfx.entity_link_texpos_gs[0][code] = tex
+                    gfx.entity_link_add_color[0][code] = addcolor
+                elseif type == 4 then
+                    gfx.site_link_texpos[0][code] = tex
+                    gfx.site_link_texpos_gs[0][code] = tex
+                    gfx.site_link_add_color[0][code] = addcolor
+                elseif type == 0 then
+                    local app = df.creature_graphics_appointment:new()
+                    app.token = code
+                    app.texpos[0] = tex
+                    app.texpos_gs[0] = tex
+                    app.add_color[0] = addcolor
+                    gfx.appointments:insert(#gfx.appointments, app)
+                end
+            end
+        
+        else
+            --print('not found '..id)
+        end
+    end
+
+    if max > 0 then
+        native.custom_command("gfx,"..tostring(max))
+        df.global.init.display.flag.USE_GRAPHICS = true
+    end
 
     return true
 end

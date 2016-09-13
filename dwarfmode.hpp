@@ -34,6 +34,10 @@ void render_remote_map()
 
     uint8_t *sctop                     = gps->screen;
     int32_t *screentexpostop           = gps->screentexpos;
+        int8_t *screentexpos_addcolortop   = gps->screentexpos_addcolor;
+        uint8_t *screentexpos_grayscaletop = gps->screentexpos_grayscale;
+        uint8_t *screentexpos_cftop        = gps->screentexpos_cf;
+        uint8_t *screentexpos_cbrtop       = gps->screentexpos_cbr;
 
     // In fort mode render_map() will render starting at (1,1)
     // and will use dimensions from init->display.grid to calculate map region to render
@@ -41,7 +45,12 @@ void render_remote_map()
     // So we adjust all this so that it renders to our gdimx x gdimy buffer starting at (0,0).
     gps->screen       = gscreen - 4*newheight - 4;
     gps->screen_limit = gscreen + newwidth * newheight * 4;
-    gps->screentexpos = gscreendummy;
+    // gps->screentexpos = gscreendummy - newheight - 1;
+        gps->screentexpos           = gscreentexpos           - newheight - 1;
+        gps->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
+        gps->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
+        gps->screentexpos_cf        = gscreentexpos_cf        - newheight - 1;
+        gps->screentexpos_cbr       = gscreentexpos_cbr       - newheight - 1;
 
     init->display.grid_x = newwidth + gmenu_w + 2;
     init->display.grid_y = newheight + 2;
@@ -65,6 +74,11 @@ void render_remote_map()
     {
         gps->screen                 = mscreen - 4*newheight - 4;
         gps->screen_limit           = mscreen + newwidth * newheight * 4;
+            gps->screentexpos           = mscreentexpos           - newheight - 1;
+            gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
+            gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
+            gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
+            gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
 
         bool empty_tiles_left, rendered1st = false;
         int p = 1;
@@ -174,6 +188,14 @@ void render_remote_map()
                     }
 
                     *((int*)gscreen + tile) = *((int*)mscreen + tile2);
+                        if (*(mscreentexpos+tile2))
+                        {
+                            *(gscreentexpos + tile) = *(mscreentexpos + tile2);
+                            *(gscreentexpos_addcolor + tile) = *(mscreentexpos_addcolor + tile2);
+                            *(gscreentexpos_grayscale + tile) = *(mscreentexpos_grayscale + tile2);
+                            *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
+                            *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
+                        }
                     gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
                 }
 
@@ -202,7 +224,12 @@ void render_remote_map()
 
     gps->screen = enabler->renderer->screen = sctop;
     gps->screen_limit = gps->screen + gps->dimx * gps->dimy * 4;
-    gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
+//    gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
+        gps->screentexpos           = screentexpostop;
+        gps->screentexpos_addcolor  = screentexpos_addcolortop;
+        gps->screentexpos_grayscale = screentexpos_grayscaletop;
+        gps->screentexpos_cf        = screentexpos_cftop;
+        gps->screentexpos_cbr       = screentexpos_cbrtop;
 }
 
 

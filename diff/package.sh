@@ -8,8 +8,10 @@ function p {
 	
 		cp out-4024/tileset-$1/raw.json out/tileset-$1/4024/
 		cp out-4024/tileset-$1/tileset.png out/tileset-$1/4024/
+		cp -r out-4024/tileset-$1/graphics out/tileset-$1/4024/
 		
 		cp out-4024/tileset-$1/colors.txt out/tileset-$1/
+
 	fi
 
 	if [ -d out-4303/tileset-$1 ] ; then
@@ -17,8 +19,10 @@ function p {
 	
 		cp out-4303/tileset-$1/raw.json out/tileset-$1/4303/
 		cp out-4303/tileset-$1/tileset.png out/tileset-$1/4303/
+		cp -r out-4303/tileset-$1/graphics out/tileset-$1/4303/
 		
 		cp out-4303/tileset-$1/colors.txt out/tileset-$1/
+
 	fi
 
 	cd out

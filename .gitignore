@@ -7,3 +7,6 @@ enet/config.log
 enet/config.status
 enet/libtool
 enet/Makefile
+diff/node_modules
+diff/out-*
+diff/packages

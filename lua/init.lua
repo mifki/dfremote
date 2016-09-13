@@ -106,6 +106,10 @@ function close_all()
     end
 end
 
+function cancel_to_1st_corner()
+    df.global.selection_rect.start_x = -30000
+end
+
 function reset_main()
     if dfhack.gui.getCurViewscreen()._type == df.viewscreen_dwarfmodest then
         -- if cancelling flow mode zone creation, need to remove the not-yet-created zone !
@@ -713,7 +717,9 @@ function get_status()
             --local name = unit and unitname(unit)
             --fullname = (#name > 0 and (name .. ', ') or '') .. unitprof(unit)
             local jobtitle = unit_jobtitle(unit)
-            txt = txt .. '\n' .. jobtitle
+            if #jobtitle > 0 then
+                txt = txt .. '\n' .. jobtitle
+            end
         end
         return 24, (unit and 1 or 0), txt
     end
@@ -1416,6 +1422,7 @@ local handlers = {
 
     [99] = close_all,
     [100] = reset_main,
+    [101] = cancel_to_1st_corner,
 
     [113] = set_cursor_pos,
     [114] = set_cursor_pos_relative,
@@ -1846,6 +1853,7 @@ local handlers = {
         [5] = setup_get_mapinfo,
         [6] = perform_update,
         [7] = raws_apply_tileset,
+        [8] = raws_apply_creature_gfx,
 
         [10] = setup_get_settings,
         [11] = setup_set_setting,
@@ -1913,11 +1921,11 @@ local first_time_setup_done = false
 function matching_version(clientver, apply)
     -- In the future we may support different client versions and will return the best possible match
     
-    -- Also, we will configure some DF flags we require and unload incompatible plugins here, because
+    -- Also, we will configure some DF flags we require and unload incompatible plugins here
     if apply and not first_time_setup_done then
         print ('DF Remote will now adjust certain settings and disable several plugins that are incompatible with the server.\nYou may want to restart DF before playing locally again.')
         
-        df.global.init.display.flag.USE_GRAPHICS = false
+        --df.global.init.display.flag.USE_GRAPHICS = false
         df.global.init.font.use_ttf = df.init_font.T_use_ttf.TTF_OFF
         
         df.global.d_init.flags4.PAUSE_ON_LOAD = true

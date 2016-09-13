@@ -95,21 +95,16 @@ static int gmenu_w;
 
 // Buffers for map rendering
 static uint8_t *gscreen;
-// static int32_t *gscreentexpos;
-// static int8_t *gscreentexpos_addcolor;
-// static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
+static int32_t *gscreentexpos;
+static int8_t *gscreentexpos_addcolor;
+static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
 
 
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
-// static int32_t *mscreentexpos;
-// static int8_t *mscreentexpos_addcolor;
-// static uint8_t *mscreentexpos_grayscale;
-// static uint8_t *mscreentexpos_cf;
-// static uint8_t *mscreentexpos_cbr;
-
-// We don't support creature graphics yet, but still screentexpos* should point to big enough buffers or one buffer
-static int32_t *gscreendummy;
+static int32_t *mscreentexpos;
+static int8_t *mscreentexpos_addcolor;
+static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;
 
 #include "patches.hpp"
 
@@ -344,6 +339,8 @@ bool block_is_unmined(int bx, int by, int zlevel)
 
 void send_initial_map(unsigned short seq, unsigned char startblk, send_func sendfunc, void *conn)
 {
+    bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
+
     int map_w = world->map.x_count;
     int map_h = world->map.y_count;
 
@@ -404,6 +401,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     b += 2;
 
     *(b++) = zlevel;
+    *(b++) = graphics;
 
     unsigned char *nextblk = b;
     *(b++) = 0;
@@ -441,10 +439,20 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
             *(b++) = bx;
             *(b++) = by;
 
+            int lastinfobyte = 0;
+            unsigned char *lastinfobyteptr = NULL;
+
             for (int j = 0; j < 16; j++)
             {
                 for (int i = 0; i < 16; i++)
                 {
+                    if (graphics && !(lastinfobyte--))
+                    {
+                        lastinfobyteptr = b;
+                        *(b++) = 0;
+                        lastinfobyte = 7;
+                    }
+
                     int x = bx*16 + i;
                     int y = by*16 + j;
 
@@ -452,16 +460,43 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                     unsigned char *s = gscreen + tile*4;
                     unsigned int *is = (unsigned int*)gscreen + tile;
 
-                    *(b++) = s[0]; //ch
+                    unsigned char bg, fg;
+
+                    if (graphics && *(gscreentexpos+tile))
+                    {
+                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
+                        *(unsigned short*)b = *(gscreentexpos+tile);
+                        b += 2;
+
+                        if (gscreentexpos_grayscale[tile])
+                        {
+                            fg = gscreentexpos_cf[tile];
+                            bg = gscreentexpos_cbr[tile];
+                        }
+                        else if (gscreentexpos_addcolor[tile])
+                        {
+                            bg   = s[2] & 7;
+                            unsigned char bold = (s[3] & 1) * 8;
+                            fg   = (s[1] + bold) % 16;
+                        }
+                        else
+                        {
+                            fg = 15;
+                            bg = 0;
+                        }
+                    }
+                    else
+                    {
+                        *(b++) = s[0]; //ch
+
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
+
+                    *(b++) = fg | (bg << 4);
 
                     int dz = (s[3] & 0xfe) >> 1;                    
-
-                    int bg = s[2] & 7;
-                    int bold = (s[3] & 1) * 8;
-                    int fg   = (s[1] + bold) % 16;
-
-                    *(b++) = fg + (bg << 4);
-
                     if (lastdz != dz) {
                         *(b-1) |= 128;
                         *(b++) = dz - lastdz;
@@ -489,6 +524,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
 bool send_map_updates(send_func sendfunc, void *conn)
 {
+    bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
     bool needs_sync = force_send_status;
     force_send_status = false;
 
@@ -574,6 +610,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
         int maxy = std::min(newheight, world->map.y_count - gwindow_y);
         int cnt = 0;
         int lastdz = 0;
+        int lastinfobyte = 0;
+        unsigned char *lastinfobyteptr = NULL;
         for (int y = 0; y < maxy; y++)
         {
             for (int x = 0; x < maxx; x++)
@@ -587,23 +625,66 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 if (!rblk)
                     rblk = sent_blocks_idx[xx>>4][yy>>4][zlevel] = (rendered_block*) calloc(1, sizeof(rendered_block));
 
-                unsigned int is = *((unsigned int*)gscreen + tile);
-                is &= 0x01ffffff; // Ignore depth information
+                unsigned int is;
+                unsigned char bg, fg;
+                unsigned short texpos = 0;
+                if (graphics && (texpos=*(gscreentexpos+tile)))
+                {
+                    if (gscreentexpos_grayscale[tile])
+                    {
+                        fg = gscreentexpos_cf[tile];
+                        bg = gscreentexpos_cbr[tile];
+                    }
+                    else if (gscreentexpos_addcolor[tile])
+                    {
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
+                    else
+                    {
+                        fg = 15;
+                        bg = 0;
+                    }                    
+
+                    is = texpos | (fg << 4) | bg;
+                }
+                else
+                {
+                    is = *((unsigned int*)gscreen + tile);
+                    is &= 0x01ffffff; // Ignore depth information
+                }
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
+                    if (graphics && !(lastinfobyte--))
+                    {
+                        lastinfobyteptr = b;
+                        *(b++) = 0;
+                        lastinfobyte = 7;
+                    }
+
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
-                    *(b++) = s[0]; //ch
 
-                    int dz = (s[3] & 0xfe) >> 1;
+                    if (texpos)
+                    {
+                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
+                        *(unsigned short*)b = texpos;
+                        b += 2;
+                    }
+                    else
+                    {
+                        *(b++) = s[0]; //ch
 
-                    unsigned char bg   = s[2] & 7;
-                    unsigned char bold = (s[3] & 1) * 8;
-                    unsigned char fg   = (s[1] + bold) % 16;
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
 
                     *(b++) = fg | (bg << 4);
 
+                    int dz = (s[3] & 0xfe) >> 1;
                     if (lastdz != dz) {
                         *(b-1) |= 128;
                         *(b++) = dz - lastdz;
@@ -630,7 +711,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
     if (b != emptyb+1 || send_z)
     {
-        *firstb |= (1 << 3);
+        *firstb |= ((graphics ? 2 : 1) << 3);
         *emptyb = zlevel;//send_z ? zlevel : 0xff;
         send_z = false;
     }
@@ -1237,11 +1318,47 @@ bool start_update()
     return (Core::getInstance().runCommand(*out2, "remote-update", args) == CR_OK);
 }
 
-static std::string custom_command(std::string data)
+struct gl_texpos {
+    float left, right, top, bottom;
+};
+
+static void init_dummy_gfx(int count)
 {
-    return NULL;
+    if (!enabler->textures.gl_texpos)
+        return;
+
+    if (count <= enabler->textures.raws.size())
+        return;
+
+    struct gl_texpos *oldtexpos = (struct gl_texpos*)enabler->textures.gl_texpos;
+    struct gl_texpos *newtexpos = new struct gl_texpos[count];
+    
+    for (int i = 0; i < count; i++)
+    {
+        if (i < enabler->textures.raws.size())
+            newtexpos[i] = oldtexpos[i];
+        else
+            newtexpos[i] = oldtexpos['Z'];
+    }
+
+    delete[] oldtexpos;
+    enabler->textures.gl_texpos = newtexpos;
 }
 
 #include "config.hpp"
 #include "commands.hpp"
+
+static std::string custom_command(std::string data)
+{
+    vector<string> tokens = split(data.c_str(), ',');
+
+    if (!tokens.size())
+        return "";
+
+    if (tokens[0] == "gfx")
+        init_dummy_gfx(atoi(tokens[1].c_str()));
+
+    return "";
+}
+
 #include "plugin.hpp"
