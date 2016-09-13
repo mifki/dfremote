@@ -80,7 +80,7 @@ local function get_choices_build()
             break
         end
 
-        local title = utils.call_with_string(choice, 'getLabel')
+        local title = utils.call_with_string(choice, 'getLabel'):gsub(' %(%d+%)$', '')
         local key = dfhack.screen.getKeyDisplay(choice.hotkey_id)
         if key == '?' then
             key = ''
