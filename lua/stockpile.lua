@@ -1242,7 +1242,7 @@ function stockpile_settings_schema()
                 
                 { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
                 { 'Stone', 'mats', #df.global.world.raws.inorganics, stoneclay_to_mat_idx, stoneclay_titles },
-                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials },
+                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_material_titles },
                 
                 { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
                 { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
@@ -1263,7 +1263,7 @@ function stockpile_settings_schema()
                 { 'Sheilds', 'shield', #df.global.world.raws.itemdefs.shields, nil, shield_titles },
                 
                 { 'Metal', 'mats', #df.global.world.raws.inorganics, metal_to_mat_idx, metal_titles },
-                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_materials  },
+                { 'Other Materials', 'other_mats', #weapons_other_materials, nil, weapons_other_material_titles  },
                 
                 { 'Core Quality', 'quality_core', item_quality, nil, quality_titles },
                 { 'Total Quality', 'quality_total', item_quality, nil, quality_titles }
