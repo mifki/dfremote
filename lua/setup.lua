@@ -217,6 +217,11 @@ end
 function setup_get_mapinfo(wtoken)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
+        -- it's a common situation - app tries to connect to a game that has been closed
+        if ws._type == df.viewscreen_titlest then
+            return
+        end
+        
         error('wrong screen '..tostring(ws._type))
     end
 
