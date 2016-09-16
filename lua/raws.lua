@@ -320,21 +320,29 @@ function raws_apply_creature_gfx(zmsgpackdata)
                 --todo: check ranges for all code types
 
                 if type == 1 then
-                    gfx.profession_texpos[0][code] = tex
-                    gfx.profession_texpos_gs[0][code] = tex
-                    gfx.profession_add_color[0][code] = addcolor
+                    if code < #gfx.profession_texpos[0] then
+                        gfx.profession_texpos[0][code] = tex
+                        gfx.profession_texpos_gs[0][code] = tex
+                        gfx.profession_add_color[0][code] = addcolor
+                    end
                 elseif type == 2 then
-                    gfx.texpos[code] = tex
-                    gfx.texpos_gs[code] = tex
-                    gfx.add_color[code] = addcolor
+                    if code < #gfx.texpos then
+                        gfx.texpos[code] = tex
+                        gfx.texpos_gs[code] = tex
+                        gfx.add_color[code] = addcolor
+                    end
                 elseif type == 3 then
-                    gfx.entity_link_texpos[0][code] = tex
-                    gfx.entity_link_texpos_gs[0][code] = tex
-                    gfx.entity_link_add_color[0][code] = addcolor
+                    if code < #gfx.entity_link_texpos[0] then
+                        gfx.entity_link_texpos[0][code] = tex
+                        gfx.entity_link_texpos_gs[0][code] = tex
+                        gfx.entity_link_add_color[0][code] = addcolor
+                    end
                 elseif type == 4 then
-                    gfx.site_link_texpos[0][code] = tex
-                    gfx.site_link_texpos_gs[0][code] = tex
-                    gfx.site_link_add_color[0][code] = addcolor
+                    if code < #gfx.site_link_texpos[0] then
+                        gfx.site_link_texpos[0][code] = tex
+                        gfx.site_link_texpos_gs[0][code] = tex
+                        gfx.site_link_add_color[0][code] = addcolor
+                    end
                 elseif type == 0 then
                     local app = df.creature_graphics_appointment:new()
                     app.token = code
