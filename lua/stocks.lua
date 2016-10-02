@@ -90,10 +90,6 @@ local stocks_category_types = {
 88,    
 }
 
-if df_ver >= 4200 then --dfver:4200-
-    table.insert(stocks_category_types, 39, 89) -- insert 'sheet' entry
-end
-
 local stocks_category_names = {
     'meat',
     'fish',
@@ -183,9 +179,14 @@ local stocks_category_names = {
     'crutches',
     'traction benches',
     'limb/body casts',
-    'codices',
-    'sheet'
+    'codices'
 }
+
+-- insert 'sheet' entry
+if df_ver >= 4200 then --dfver:4200-
+    table.insert(stocks_category_types, 39, 89)
+    table.insert(stocks_category_names, 39, 'sheet')
+end
 
 --luacheck: in=
 function stocks_init()
