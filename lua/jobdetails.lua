@@ -33,7 +33,7 @@ function job_details_get_types(bldid, idx)
 		        end
 
 	        elseif v == 2 then
-	        	local race = order.hist_figure_id ~= -1 and order.hist_figure_id or df.global.ui.race_id
+	        	local race = job.hist_figure_id ~= -1 and job.hist_figure_id or df.global.ui.race_id
 				local creature = df.global.world.raws.creatures.all[race]
 				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
