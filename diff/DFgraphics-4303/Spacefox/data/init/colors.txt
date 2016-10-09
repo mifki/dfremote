@@ -1,8 +1,7 @@
-These are the display colors in RGB.  The game is actually displaying extended ASCII characters in OpenGL, so you can modify the colors.
 
-[BLACK_R:32]
-[BLACK_G:39]
-[BLACK_B:49]
+[BLACK_R:42]
+[BLACK_G:51]
+[BLACK_B:64]
 [BLUE_R:0]
 [BLUE_G:106]
 [BLUE_B:255]
@@ -43,7 +42,7 @@ These are the display colors in RGB.  The game is actually displaying extended A
 [LMAGENTA_G:107]
 [LMAGENTA_B:255]
 [YELLOW_R:255]
-[YELLOW_G:232]
+[YELLOW_G:255]
 [YELLOW_B:102]
 [WHITE_R:255]
 [WHITE_G:250]
