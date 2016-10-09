@@ -323,7 +323,7 @@ function schedule_order_add(squadid, alertid, month, type, targets)
 		patrol.route_id = targets[1]
 
 	elseif type == df.squad_order_type.MOVE then
-		local pt = waypoints_point_find_by_id(targets[1])
+		local pt = waypoint_find_by_id(targets[1])
 		if not pt then
 			return
 		end

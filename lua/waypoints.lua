@@ -1,5 +1,9 @@
-function waypoints_point_find_by_id(id)
+function waypoint_find_by_id(id)
 	return utils.binsearch(df.global.ui.waypoints.points, id, 'id')
+end
+
+function route_find_by_id(id)
+	return utils.binsearch(df.global.ui.waypoints.routes, id, 'id')
 end
 
 --luacheck: in=
@@ -98,6 +102,7 @@ function waypoints_place_point(name, comment)
         return
     end
 
+    --todo: convert to screen_
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.NotesPoints then
     	return
     end
@@ -142,7 +147,7 @@ end
 
 --luacheck: in=number
 function waypoints_zoom_to_point(id)
-	local pt = waypoints_point_find_by_id(id)
+	local pt = waypoint_find_by_id(id)
 	if not pt then
 		return
 	end
@@ -153,8 +158,19 @@ function waypoints_zoom_to_point(id)
 	df.global.cursor.z = pt.pos.z
 end
 
+--luacheck: in=number,string,string
+function waypoints_set_name_comment(id, name, comment)
+	local pt = waypoint_find_by_id(id)
+	if not pt then
+		return
+	end
+
+	pt.name = name or ''
+	pt.comment = comment or ''
+end
+
 --luacheck: in=
-function waypoints_get_routes()
+function routes_get_list()
 	local ret = {}
 
 	for i,v in ipairs(df.global.ui.waypoints.routes) do
@@ -164,6 +180,63 @@ function waypoints_get_routes()
 	end
 
 	return ret
+end
+
+--luacheck: in=
+function routes_add_route()
+	local route = df.ui.T_waypoints.T_routes:new()
+
+	route.id = df.global.ui.waypoints.next_route_id
+
+	df.global.ui.waypoints.routes:insert(#df.global.ui.waypoints.routes, route)
+	df.global.ui.waypoints.next_route_id = df.global.ui.waypoints.next_route_id + 1	
+end
+
+-- routes may be referenced from squad orders, let's not try deleting them ourselves and use game ui instead
+--luacheck: in=number
+function route_delete(id)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    --todo: convert to screen_
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.NotesPoints then
+    	return
+    end
+
+    df.global.ui.main.mode = df.ui_sidebar_mode.NotesRoutes
+    df.global.ui.waypoints.in_edit_waypts_mode = false
+
+	for i,v in ipairs(df.global.ui.waypoints.routes) do
+		if v.id == id then
+			df.global.ui.waypoints.sel_route_idx = i
+			gui.simulateInput(ws, K'D_NOTE_ROUTE_DELETE')
+			break
+		end
+	end
+
+	df.global.ui.main.mode = df.ui_sidebar_mode.NotesPoints
+end
+
+--luacheck: in=number,string
+function route_set_name(id, name)
+	local route = route_find_by_id(id)
+	if not route then
+		return
+	end
+
+	route.name = name or ''
+end
+
+--luacheck: in=number
+function route_get_info(id)
+	local route = route_find_by_id(id)
+	if not route then
+		return
+	end
+
+	return {  }
 end
 
 --print(pcall(function() return json:encode(waypoints_place_point('qq', 'zz')) end))

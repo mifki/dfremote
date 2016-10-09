@@ -45,6 +45,7 @@ require 'remote.waypoints'
 require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
+require 'remote.hauling'
 
 if df_ver >= 4200 then --dfver:4200-
     require 'remote.locations'
@@ -1553,8 +1554,13 @@ local handlers = {
         [6] = waypoints_mode_points,
         [7] = waypoints_delete_point,
         [8] = waypoints_zoom_to_point,
+        [9] = waypoints_set_name_comment,
 
-        [10] = waypoints_get_routes,
+        [10] = routes_get_list,
+        [11] = routes_add_route,
+        [12] = route_delete,
+        [13] = route_set_name,
+        [14] = route_get_info,
     },
 
     [137] = {
