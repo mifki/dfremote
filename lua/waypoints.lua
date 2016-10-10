@@ -169,14 +169,32 @@ function waypoints_set_name_comment(id, name, comment)
 	pt.comment = comment or ''
 end
 
---luacheck: in=
-function routes_get_list()
+--luacheck: in=bool
+function routes_get_list(allpoints)
+	allpoints = istrue(allpoints)
+	
 	local ret = {}
 
-	for i,v in ipairs(df.global.ui.waypoints.routes) do
-		local name = routename(v)
+	for i,route in ipairs(df.global.ui.waypoints.routes) do
+		local name = routename(route)
 
-		table.insert(ret, { name, v.id })
+		if allpoints then
+			local pts = {}
+			
+			for j,v in ipairs(route.points) do
+				local pt = waypoint_find_by_id(v)
+				if pt then
+					table.insert(pts, { pointname(pt), pt.id })
+				else
+					table.insert(pts, { '#invalid waypoint#', -1 })
+				end
+			end
+
+			table.insert(ret, { name, route.id, pts })
+
+		else
+			table.insert(ret, { name, route.id })
+		end
 	end
 
 	return ret
@@ -235,8 +253,59 @@ function route_get_info(id)
 	if not route then
 		return
 	end
+	
+	local pts = {}
+	
+	for i,v in ipairs(route.points) do
+		local pt = waypoint_find_by_id(v)
+		if pt then
+			table.insert(pts, { pointname(pt), pt.id })
+		else
+			table.insert(pts, { '#invalid waypoint#', -1 })
+		end
+	end
 
-	return {  }
+	return { routename(route), route.id, pts }
+end
+
+--luacheck: in=number,number[]
+function route_add_points(id, ptids)
+	local route = route_find_by_id(id)
+	if not route then
+		return
+	end
+
+	for i,v in ipairs(ptids) do
+		--todo: check point id here?
+		route.points:insert(#route.points, v)
+	end
+end
+
+--luacheck: in=number,number,number
+function route_reorder_points(id, fromidx, toidx)
+	local route = route_find_by_id(id)
+	if not route then
+		return
+	end
+	
+	local ptid = route.points[fromidx]
+    route.points:erase(fromidx)
+    route.points:insert(toidx, ptid)
+end
+
+--luacheck: in=number,number,number
+function route_delete_point(id, ptid)
+	local route = route_find_by_id(id)
+	if not route then
+		return
+	end
+	
+	for i,v in ipairs(route.points) do
+		if v == ptid then
+			route.points:erase(i)
+			return true
+		end
+	end
 end
 
 --print(pcall(function() return json:encode(waypoints_place_point('qq', 'zz')) end))

@@ -1561,6 +1561,9 @@ local handlers = {
         [12] = route_delete,
         [13] = route_set_name,
         [14] = route_get_info,
+        [15] = route_add_points,
+        [16] = route_reorder_points,
+        [17] = route_delete_point,
     },
 
     [137] = {
