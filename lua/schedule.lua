@@ -274,7 +274,7 @@ function schedule_order_get_choices(type)
 	elseif type == df.squad_order_type.MOVE then
 		return waypoints_get_points()
 	elseif type == df.squad_order_type.PATROL_ROUTE then
-		return waypoints_get_routes()
+		return routes_get_list()
 	end
 end
 
