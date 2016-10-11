@@ -170,7 +170,7 @@ function waypoints_set_name_comment(id, name, comment)
 end
 
 --luacheck: in=bool
-function routes_get_list(allpoints)
+function routes_get_list(withpoints)
 	allpoints = istrue(allpoints)
 	
 	local ret = {}
@@ -178,16 +178,12 @@ function routes_get_list(allpoints)
 	for i,route in ipairs(df.global.ui.waypoints.routes) do
 		local name = routename(route)
 
-		if allpoints then
+		if withpoints then
 			local pts = {}
 			
 			for j,v in ipairs(route.points) do
 				local pt = waypoint_find_by_id(v)
-				if pt then
-					table.insert(pts, { pointname(pt), pt.id })
-				else
-					table.insert(pts, { '#invalid waypoint#', -1 })
-				end
+				table.insert(pts, pt and pointname(pt) or '#invalid waypoint#')
 			end
 
 			table.insert(ret, { name, route.id, pts })
@@ -258,11 +254,7 @@ function route_get_info(id)
 	
 	for i,v in ipairs(route.points) do
 		local pt = waypoint_find_by_id(v)
-		if pt then
-			table.insert(pts, { pointname(pt), pt.id })
-		else
-			table.insert(pts, { '#invalid waypoint#', -1 })
-		end
+		table.insert(pts, { pt and pointname(pt) or '#invalid point#', v })
 	end
 
 	return { routename(route), route.id, pts }
