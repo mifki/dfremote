@@ -143,7 +143,7 @@ struct rendered_block {
 
 rendered_block *sent_blocks_idx[16][16][256];
 
-bool rendered_tiles[256*256*256];
+bool *rendered_tiles;
 
 static lua_State *L;
 

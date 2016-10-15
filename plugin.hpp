@@ -81,6 +81,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCom
 {
     out2 = &out;
     allocate_buffers(256*256);
+    rendered_tiles = (bool*)malloc(256*256*256*sizeof(bool));
 
     #ifdef WIN32
         _render_map = (RENDER_MAP) (A_RENDER_MAP + Core::getInstance().vinfo->getRebaseDelta());
@@ -133,6 +134,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     enet_deinitialize();
     remote_stop();
     free_buffers();
+    free(rendered_tiles);
 
     return CR_OK;//FAILURE;
 
