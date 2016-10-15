@@ -18,7 +18,7 @@ DFHACK_PLUGIN_LUA_FUNCTIONS {
 
 void allocate_buffers(int tiles)
 {
-#define REALLOC(var,type,count) var = (type*)realloc(var, count * sizeof(type));
+#define REALLOC(var,type,count) var = (type*)realloc(var, (count) * sizeof(type));
 
     int extra_tiles = 256 + 1;
 
@@ -36,14 +36,14 @@ void allocate_buffers(int tiles)
     REALLOC(mscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
     REALLOC(mscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
 
-    gscreen                 = gscreen_origin                 + extra_tiles;
+    gscreen                 = gscreen_origin                 + extra_tiles * 4;
     gscreentexpos           = gscreentexpos_origin           + extra_tiles;
     gscreentexpos_addcolor  = gscreentexpos_addcolor_origin  + extra_tiles;
     gscreentexpos_grayscale = gscreentexpos_grayscale_origin + extra_tiles;
     gscreentexpos_cf        = gscreentexpos_cf_origin        + extra_tiles;
     gscreentexpos_cbr       = gscreentexpos_cbr_origin       + extra_tiles;
 
-    mscreen                 = mscreen_origin                 + extra_tiles;
+    mscreen                 = mscreen_origin                 + extra_tiles * 4;
     mscreentexpos           = mscreentexpos_origin           + extra_tiles;
     mscreentexpos_addcolor  = mscreentexpos_addcolor_origin  + extra_tiles;
     mscreentexpos_grayscale = mscreentexpos_grayscale_origin + extra_tiles;
