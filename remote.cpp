@@ -95,16 +95,24 @@ static int gmenu_w;
 
 // Buffers for map rendering
 static uint8_t *gscreen;
+static uint8_t *gscreen_origin;
 static int32_t *gscreentexpos;
+static int32_t *gscreentexpos_origin;
 static int8_t *gscreentexpos_addcolor;
+static int8_t *gscreentexpos_addcolor_origin;
 static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
+static uint8_t *gscreentexpos_grayscale_origin, *gscreentexpos_cf_origin, *gscreentexpos_cbr_origin;
 
 
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
+static uint8_t *mscreen_origin;
 static int32_t *mscreentexpos;
+static int32_t *mscreentexpos_origin;
 static int8_t *mscreentexpos_addcolor;
+static int8_t *mscreentexpos_addcolor_origin;
 static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;
+static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscreentexpos_cbr_origin;
 
 #include "patches.hpp"
 
@@ -135,7 +143,7 @@ struct rendered_block {
 
 rendered_block *sent_blocks_idx[16][16][256];
 
-bool rendered_tiles[256*256*256];
+bool *rendered_tiles;
 
 static lua_State *L;
 
@@ -319,7 +327,7 @@ void empty_map_cache()
 
     memset(sent_blocks_idx, 0, sizeof(sent_blocks_idx));
 
-    memset(rendered_tiles, 0, sizeof(rendered_tiles));
+    memset(rendered_tiles, 0, 256*256*256*sizeof(bool));
 }
 
 bool block_is_unmined(int bx, int by, int zlevel)

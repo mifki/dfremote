@@ -34,10 +34,10 @@ void render_remote_map()
 
     uint8_t *sctop                     = gps->screen;
     int32_t *screentexpostop           = gps->screentexpos;
-        int8_t *screentexpos_addcolortop   = gps->screentexpos_addcolor;
-        uint8_t *screentexpos_grayscaletop = gps->screentexpos_grayscale;
-        uint8_t *screentexpos_cftop        = gps->screentexpos_cf;
-        uint8_t *screentexpos_cbrtop       = gps->screentexpos_cbr;
+    int8_t *screentexpos_addcolortop   = gps->screentexpos_addcolor;
+    uint8_t *screentexpos_grayscaletop = gps->screentexpos_grayscale;
+    uint8_t *screentexpos_cftop        = gps->screentexpos_cf;
+    uint8_t *screentexpos_cbrtop       = gps->screentexpos_cbr;
 
     // In fort mode render_map() will render starting at (1,1)
     // and will use dimensions from init->display.grid to calculate map region to render
@@ -46,11 +46,11 @@ void render_remote_map()
     gps->screen       = gscreen - 4*newheight - 4;
     gps->screen_limit = gscreen + newwidth * newheight * 4;
     // gps->screentexpos = gscreendummy - newheight - 1;
-        gps->screentexpos           = gscreentexpos           - newheight - 1;
-        gps->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
-        gps->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
-        gps->screentexpos_cf        = gscreentexpos_cf        - newheight - 1;
-        gps->screentexpos_cbr       = gscreentexpos_cbr       - newheight - 1;
+    gps->screentexpos           = gscreentexpos           - newheight - 1;
+    gps->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
+    gps->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
+    gps->screentexpos_cf        = gscreentexpos_cf        - newheight - 1;
+    gps->screentexpos_cbr       = gscreentexpos_cbr       - newheight - 1;
 
     init->display.grid_x = newwidth + gmenu_w + 2;
     init->display.grid_y = newheight + 2;
@@ -74,11 +74,11 @@ void render_remote_map()
     {
         gps->screen                 = mscreen - 4*newheight - 4;
         gps->screen_limit           = mscreen + newwidth * newheight * 4;
-            gps->screentexpos           = mscreentexpos           - newheight - 1;
-            gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
-            gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
-            gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
-            gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
+        gps->screentexpos           = mscreentexpos           - newheight - 1;
+        gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
+        gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
+        gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
+        gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
 
         bool empty_tiles_left, rendered1st = false;
         int p = 1;

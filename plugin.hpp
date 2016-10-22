@@ -16,27 +16,39 @@ DFHACK_PLUGIN_LUA_FUNCTIONS {
     DFHACK_LUA_END
 };
 
-
 void allocate_buffers(int tiles)
 {
-#define REALLOC(var,type,count) var = (type*)realloc(var, count * sizeof(type));
+#define REALLOC(var,type,count) var = (type*)realloc(var, (count) * sizeof(type));
 
-    REALLOC(gscreen,                 uint8_t, tiles * 4)
-    REALLOC(gscreentexpos,           int32_t, tiles);
-    REALLOC(gscreentexpos_addcolor,  int8_t,  tiles);
-    REALLOC(gscreentexpos_grayscale, uint8_t, tiles);
-    REALLOC(gscreentexpos_cf,        uint8_t, tiles);
-    REALLOC(gscreentexpos_cbr,       uint8_t, tiles);
+    int extra_tiles = 256 + 1;
 
-    REALLOC(mscreen,                 uint8_t, tiles * 4)
-    REALLOC(mscreentexpos,           int32_t, tiles);
-    REALLOC(mscreentexpos_addcolor,  int8_t,  tiles);
-    REALLOC(mscreentexpos_grayscale, uint8_t, tiles);
-    REALLOC(mscreentexpos_cf,        uint8_t, tiles);
-    REALLOC(mscreentexpos_cbr,       uint8_t, tiles);
-    
-    // REALLOC(gscreendummy,            int32_t, tiles);
-    
+    REALLOC(gscreen_origin,                 uint8_t, (tiles+extra_tiles) * 4)
+    REALLOC(gscreentexpos_origin,           int32_t, tiles+extra_tiles);
+    REALLOC(gscreentexpos_addcolor_origin,  int8_t,  tiles+extra_tiles);
+    REALLOC(gscreentexpos_grayscale_origin, uint8_t, tiles+extra_tiles);
+    REALLOC(gscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
+    REALLOC(gscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
+
+    REALLOC(mscreen_origin,                 uint8_t, (tiles+extra_tiles) * 4)
+    REALLOC(mscreentexpos_origin,           int32_t, tiles+extra_tiles);
+    REALLOC(mscreentexpos_addcolor_origin,  int8_t,  tiles+extra_tiles);
+    REALLOC(mscreentexpos_grayscale_origin, uint8_t, tiles+extra_tiles);
+    REALLOC(mscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
+    REALLOC(mscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
+
+    gscreen                 = gscreen_origin                 + extra_tiles * 4;
+    gscreentexpos           = gscreentexpos_origin           + extra_tiles;
+    gscreentexpos_addcolor  = gscreentexpos_addcolor_origin  + extra_tiles;
+    gscreentexpos_grayscale = gscreentexpos_grayscale_origin + extra_tiles;
+    gscreentexpos_cf        = gscreentexpos_cf_origin        + extra_tiles;
+    gscreentexpos_cbr       = gscreentexpos_cbr_origin       + extra_tiles;
+
+    mscreen                 = mscreen_origin                 + extra_tiles * 4;
+    mscreentexpos           = mscreentexpos_origin           + extra_tiles;
+    mscreentexpos_addcolor  = mscreentexpos_addcolor_origin  + extra_tiles;
+    mscreentexpos_grayscale = mscreentexpos_grayscale_origin + extra_tiles;
+    mscreentexpos_cf        = mscreentexpos_cf_origin        + extra_tiles;
+    mscreentexpos_cbr       = mscreentexpos_cbr_origin       + extra_tiles;
 
     // We need to zero out these buffers because game doesn't change them for tiles without creatures,
     // so there will be garbage that will cause every tile to be updated each frame and other bad things
@@ -48,11 +60,28 @@ void allocate_buffers(int tiles)
     memset(gscreentexpos_cbr,       0, tiles);
 }
 
+void free_buffers()
+{
+    free(gscreen_origin);
+    free(gscreentexpos_origin);
+    free(gscreentexpos_addcolor_origin);
+    free(gscreentexpos_grayscale_origin);
+    free(gscreentexpos_cf_origin);
+    free(gscreentexpos_cbr_origin);
+
+    free(mscreen_origin);
+    free(mscreentexpos_origin);
+    free(mscreentexpos_addcolor_origin);
+    free(mscreentexpos_grayscale_origin);
+    free(mscreentexpos_cf_origin);
+    free(mscreentexpos_cbr_origin);
+}
 
 DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
 {
     out2 = &out;
     allocate_buffers(256*256);
+    rendered_tiles = (bool*)malloc(256*256*256*sizeof(bool));
 
     #ifdef WIN32
         _render_map = (RENDER_MAP) (A_RENDER_MAP + Core::getInstance().vinfo->getRebaseDelta());
@@ -104,6 +133,8 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 {
     enet_deinitialize();
     remote_stop();
+    free_buffers();
+    free(rendered_tiles);
 
     return CR_OK;//FAILURE;
 
