@@ -285,7 +285,7 @@ function route_reorder_points(id, fromidx, toidx)
     route.points:insert(toidx, ptid)
 end
 
---luacheck: in=number,number,number
+--luacheck: in=number,number
 function route_delete_point(id, ptid)
 	local route = route_find_by_id(id)
 	if not route then

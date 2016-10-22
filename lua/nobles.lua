@@ -91,14 +91,14 @@ function have_broker_appraisal()
     return false
 end
 
-local room_type_table = { --as:{qidx:number,no:string}[]
+room_type_table = { --as:{qidx:number,no:string}[]
     [df.building_bedst] = { qidx = 2, no='No Bedroom' },
     [df.building_tablest] = { qidx = 3, no='No Dining Room'},
     [df.building_chairst] = { qidx = 4, no='No Office' },
     [df.building_coffinst] = { qidx = 5, no='No Tomb' },
 }
 
-local room_quality_table = {
+room_quality_table = {
     { 1, 'Meager Quarters', 'Meager Dining Room', 'Meager Office', 'Grave' },
     { 100, 'Modest Quarters', 'Modest Dining Room', 'Modest Office', "Servant's Burial Chamber" },
     { 250, 'Quarters', 'Dining Room', 'Office', 'Burial Chamber' },

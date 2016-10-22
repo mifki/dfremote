@@ -1841,6 +1841,69 @@ function building_quick_action(idx)
     end
 end
 
+--luacheck: in=
+function buildings_get_list()
+    local ret = {}
+    
+    for i,bld in ipairs(df.global.world.buildings.other.IN_PLAY) do
+        local title, descr
+        
+        if bld.is_room then
+            local info = room_type_table[bld._type]
+            if info then
+                local quality = bld:getRoomValue(unit)
+            
+                for i,v in ripairs_tbl(room_quality_table) do
+                    if quality >= v[1] then
+                        title = bldname(bld) .. ', ' .. v[info.qidx]
+                        break
+                    end
+                end
+            else
+                title = bldname(bld)
+            end
+
+        else
+            title = bldname(bld)
+        end
+        
+        local owner = bld.owner
+        local flags = packbits(bld.is_room)
+        
+        table.insert(ret, { title, bld.id, bld:getType(), bld:getSubtype(), descr or mp.NIL, owner and unit_fulltitle(owner) or mp.NIL, owner and owner.id or -1, flags })
+    end
+    
+    table.sort(ret, function(a,b)
+        return a[3] == b[3] and a[4] < b[4] or a[3] < b[3]
+    end)
+    
+    return ret
+end
+
+--luacheck: in=number
+function building_goto(bldid)
+    local bld = df.building.find(bldid)
+
+    if not bld then
+        return
+    end
+
+    --todo: reset main
+    df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
+
+    df.global.cursor.x = bld.centerx
+    df.global.cursor.y = bld.centery
+    df.global.cursor.z = bld.z-1
+
+    local ws = dfhack.gui.getCurViewscreen()
+    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
+
+    recenter_view(bld.centerx, bld.centery, bld.z)
+    --return {jobbld.centerx,jobbld.centery,jobbld.z}
+end
+
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))
 --print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))
 --print(pcall(function() return json:encode(building_workshop_get_jobchoices(0)) end))
+--print(pcall(function() return json:encode(buildings_get_list()) end))

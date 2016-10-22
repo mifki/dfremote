@@ -687,6 +687,7 @@ function unit_goto_bld(unitid)
         return
     end
 
+    --todo: reset main
     df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
 
     df.global.cursor.x = jobbld.centerx
@@ -697,7 +698,7 @@ function unit_goto_bld(unitid)
     --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
     gui.simulateInput(ws, K'CURSOR_UP_Z')
 
-    recenter_view(jobbld.centerx,jobbld.centery, jobbld.z)
+    recenter_view(jobbld.centerx, jobbld.centery, jobbld.z)
     --return {jobbld.centerx,jobbld.centery,jobbld.z}
 end
 
