@@ -1734,7 +1734,7 @@ local handlers = {
         [41] = building_assign_get_candidates,
         [42] = building_assign,
         
-        [50] = buildings_get_list,
+        [50] = buildings_get_list2,
         [51] = building_goto,
     },
 

@@ -331,3 +331,22 @@ function execute_with_order_details(idx, fn)
 		return ret
 	end)
 end
+
+function execute_with_rooms_screen(fn)
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, K'D_ROOMS')
+		local roomsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_buildinglistst
+		if roomsws._type ~= df.viewscreen_buildinglistst then
+			error('wrong screen '..tostring(roomsws._type))
+		end
+
+		local ok,ret = pcall(fn, roomsws)
+
+		roomsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end

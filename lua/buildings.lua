@@ -1880,6 +1880,52 @@ function buildings_get_list()
     return ret
 end
 
+--luacheck: in=
+function buildings_get_list2()
+    return execute_with_rooms_screen(function(ws)
+        local ret = {}
+        for i,bld in ipairs(ws.buildings) do
+            local title, descr
+
+            if bld._type == df.building_civzonest then --as:bld=df.building_civzonest
+                title = 'Activity Zone'
+                descr = zone_mode_string_for_flags(bld.zone_flags.whole)
+
+                if not bld.zone_flags.active then
+                    title = title .. ' (Inactive)'
+                end
+            
+            elseif bld.is_room then
+                local info = room_type_table[bld._type]
+                if info then
+                    local quality = bld:getRoomValue(unit)
+                
+                    for i,v in ripairs_tbl(room_quality_table) do
+                        if quality >= v[1] then
+                            title = v[info.qidx]
+                            descr = bldname(bld)
+                            break
+                        end
+                    end
+                else
+                    title = bldname(bld)
+                end
+
+            else
+                title = bldname(bld)
+            end
+            
+            local owner = bld.owner
+            local is_room = bld.is_room and bld._type ~= df.building_civzonest
+            local flags = packbits(is_room)
+            
+            table.insert(ret, { title, bld.id, bld:getType(), bld:getSubtype(), descr or mp.NIL, owner and unit_fulltitle(owner) or mp.NIL, owner and owner.id or -1, flags })
+        end
+                
+        return ret
+    end)
+end
+
 --luacheck: in=number
 function building_goto(bldid)
     local bld = df.building.find(bldid)

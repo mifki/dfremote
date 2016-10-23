@@ -1,3 +1,24 @@
+zone_mode_names = {
+    --[['Active',]] 'Water Source', 'Fishing', 'Gather / Pick Fruit', 'Garbage Dump', 'Pen / Pasture',
+    'Pit / Pond', 'Sand', 'Clay', 'Meeting Area', 'Hospital', 'Animal Training'
+};
+zone_mode_flags = {
+    --[[df.building_civzonest.T_zone_flags.active,]] df.building_civzonest.T_zone_flags.water_source, df.building_civzonest.T_zone_flags.fishing, df.building_civzonest.T_zone_flags.gather, df.building_civzonest.T_zone_flags.garbage_dump, df.building_civzonest.T_zone_flags.pen_pasture,
+    df.building_civzonest.T_zone_flags.pit_pond, df.building_civzonest.T_zone_flags.sand, df.building_civzonest.T_zone_flags.clay, df.building_civzonest.T_zone_flags.meeting_area, df.building_civzonest.T_zone_flags.hospital, df.building_civzonest.T_zone_flags.animal_training
+}
+
+function zone_mode_string_for_flags(flags)
+    local ret = {}
+
+    for i,v in ipairs(zone_mode_flags) do
+        if hasbit(flags, v) then
+            table.insert(ret, zone_mode_names[i])
+        end
+    end
+
+    return table.concat(ret, ', ')
+end
+
 --luacheck: in=
 function zone_create()
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
