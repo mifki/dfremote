@@ -145,7 +145,11 @@ function pointname(point)
 end
 
 function routename(route)
-    return (#route.name > 0) and route.name or ('Route ' .. tostring(route.id+1))
+    return (#route.name > 0) and route.name or ('Route ' .. tostring(route.id))
+end
+
+function stopname(route)
+    return (#route.name > 0) and route.name or ('Stop ' .. tostring(route.id))
 end
 
 function alertname(alert)

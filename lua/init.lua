@@ -1633,6 +1633,13 @@ local handlers = {
         [6] = manager_order_set_max_workshops,
     },
 
+    [146] = {
+        [1] = hauling_get_routes,
+        [2] = hauling_route_info,
+        [3] = hauling_route_delete,
+        [4] = hauling_route_delete_stop,
+    },
+
     [148] = {
         [1] = look_get_details,
     },

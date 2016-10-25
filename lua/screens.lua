@@ -350,3 +350,19 @@ function execute_with_rooms_screen(fn)
 		return ret
 	end)
 end
+
+function execute_with_hauling_menu(fn)
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, K'D_HAULING')
+		if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
+			error('error switching to hauling menu '..tostring(df.global.ui.main.mode))
+		end
+
+		local ok,ret = pcall(fn, ws)
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end
