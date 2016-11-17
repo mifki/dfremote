@@ -42,7 +42,7 @@ function hauling_route_delete(id)
 end
 
 --luacheck: in=number,number
-function hauling_route_remove_stop(routeid, stopid)
+function hauling_route_delete_stop(routeid, stopid)
 	execute_with_hauling_menu(function(ws)
 		for i,v in ipairs(df.global.ui.hauling.view_stops) do
 			if v.id == stopid and df.global.ui.hauling.view_routes[i].id == routeid then

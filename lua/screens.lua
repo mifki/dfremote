@@ -135,6 +135,9 @@ function execute_with_status_page(pageid, fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_STATUS')
 		local statusws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_overallstatusst
+		if statusws._type ~= df.viewscreen_overallstatusst then
+			error('error switching to status screen '..tostring(statusws._type))
+		end
 		
 		if pageid ~= -1 then
 			statusws.visible_pages:insert(0,pageid)
