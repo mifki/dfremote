@@ -62,7 +62,11 @@ function execute_with_nobles_screen(reset, fn)
 
 		local ok,ret = pcall(fn, noblesws)
 
-		noblesws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+		-- nobles screen applies changes (noble replacement) only when destroyed,
+		-- if we don't do it now, the app will refresh and load old data
+		--noblesws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+		noblesws.parent.child = nil
+		noblesws:delete()
 
 		if not ok then
 			error (ret)
