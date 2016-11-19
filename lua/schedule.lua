@@ -267,12 +267,29 @@ function schedule_order_cancel(squadid, alertid, month, orderidx)
 	sched_order:delete()
 end
 
+--todo: the code is here temporarily becuase of a bug in the app which expects a table at index 2
 --luacheck: in=number
 function schedule_order_get_choices(type)
 	if type == df.squad_order_type.DEFEND_BURROWS then
-		return burrows_get_list()
+		--return burrows_get_list()
+
+		local ret = {}
+		for i,v in ipairs(df.global.ui.burrows.list) do
+			table.insert(ret, { burrowname(v), v.id, {} })
+		end
+
+		return ret
+	
 	elseif type == df.squad_order_type.MOVE then
-		return waypoints_get_points()
+		--return waypoints_get_points()
+
+		local ret = {}
+		for i,v in ipairs(df.global.ui.waypoints.points) do
+			table.insert(ret, { pointname(v), v.id, {} })
+		end
+
+		return ret	
+
 	elseif type == df.squad_order_type.PATROL_ROUTE then
 		return routes_get_list(true)
 	end
