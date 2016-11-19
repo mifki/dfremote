@@ -22,6 +22,13 @@ function have_noble(code)
 end
 
 function find_noble(code)
+    local assid = nil
+    local k = code:find(',')
+    if k then
+        assid = tonumber(code:sub(k+1))
+        code = code:sub(1, k-1)
+    end
+
     local pos = find_position(code)
     if not pos then
         return nil
@@ -30,7 +37,7 @@ function find_noble(code)
     local ass = nil
 
     for i,v in ipairs(df.global.ui.main.fortress_entity.positions.assignments) do
-        if v.position_id == pos.id then
+        if v.position_id == pos.id and (not assid or assid == v.id) then
             ass = v
             break
         end
@@ -39,7 +46,7 @@ function find_noble(code)
     if not ass then
         local civ = df.historical_entity.find(df.global.ui.civ_id)
         for i,v in ipairs(civ.positions.assignments) do
-            if v.position_id == pos.id then
+            if v.position_id == pos.id and (not assid or assid == v.id) then
                 ass = v
                 break
             end
@@ -276,9 +283,15 @@ function nobles_get_positions()
             end
 
             local flags = packbits(can_replace, has_demands, has_mandates)
+            local code = info.position.code
+
+            --xxx: it's a temporary (?) hack to support positions with multiple assignments
+            if info.position.number == -1 then
+                code = code .. ',' .. tostring(info.assignment and info.assignment.id or -1)
+            end
 
             --xxx: assuming position names are latin chars, otherwise should use df2utf, utf8capitalize
-            table.insert(ret, { capitalize(info.position.name[0]), info.position.code, unitname, unitid, flags, reqs_level })
+            table.insert(ret, { capitalize(info.position.name[0]), code, unitname, unitid, flags, reqs_level })
         end
 
         local allmandates = noble_get_mandates()
@@ -303,15 +316,25 @@ end
 --luacheck: in=string
 function nobles_get_candidates(code)
     return execute_with_nobles_screen(true, function(ws)
+        local assid = nil
+        local k = code:find(',')
+        if k then
+            assid = tonumber(code:sub(k+1))
+            code = code:sub(1, k-1)
+        end
+
         local posidx = -1
         for i,info in ipairs(ws.info) do
             if info.position.code == code then
-                posidx = i
-                break
+                if not assid or assid == (info.assignment and info.assignment.id or -1) then
+                    posidx = i
+                    break
+                end
             end
-        end    
+        end
+
         if posidx == -1 then
-            return
+            error('no position '..tostring(code)..','..tostring(assid))
         end    
 
         ws.layer_objects[0]:setListCursor(posidx)
@@ -329,18 +352,29 @@ function nobles_get_candidates(code)
     end)
 end
 
+--todo: make this accept unit id
 --luacheck: in=string,number
 function nobles_replace(code, candidx)
     return execute_with_nobles_screen(true, function(ws)
+        local assid = nil
+        local k = code:find(',')
+        if k then
+            assid = tonumber(code:sub(k+1))
+            code = code:sub(1, k-1)
+        end
+
         local posidx = -1
         for i,info in ipairs(ws.info) do
             if info.position.code == code then
-                posidx = i
-                break
+                if not assid or assid == (info.assignment and info.assignment.id or -1) then
+                    posidx = i
+                    break
+                end
             end
-        end    
+        end
+
         if posidx == -1 then
-            return
+            error('no position '..tostring(code)..','..tostring(assid))
         end    
 
         ws.layer_objects[0]:setListCursor(posidx)
