@@ -79,9 +79,8 @@ function translatename(name, eng)
 end
 
 function unitprof(unit)
-    local prof = dfhack.units.getProfessionName(unit)
-    local ret = capitalize(prof) -- to get rid of the second return value
-    return ret
+    local prof = dfhack.df2utf(dfhack.units.getProfessionName(unit))
+    return string.utf8capitalize(prof)
 end
 
 function bldname(bld)

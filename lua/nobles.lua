@@ -290,8 +290,7 @@ function nobles_get_positions()
                 code = code .. ',' .. tostring(info.assignment and info.assignment.id or -1)
             end
 
-            --xxx: assuming position names are latin chars, otherwise should use df2utf, utf8capitalize
-            table.insert(ret, { capitalize(info.position.name[0]), code, unitname, unitid, flags, reqs_level })
+            table.insert(ret, { dfhack.df2utf(info.position.name[0]):utf8capitalize(), code, unitname, unitid, flags, reqs_level })
         end
 
         local allmandates = noble_get_mandates()
