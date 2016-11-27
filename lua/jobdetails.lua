@@ -38,7 +38,7 @@ function job_details_get_types(bldid, idx)
 				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
 	        elseif v == 3 then
-				cur = decoration_type_titles[job.hist_figure_id]
+				cur = decoration_type_titles[job.hist_figure_id] or '#unknown#'
 
 			end
 
