@@ -363,9 +363,13 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                     end
                 end
             end
+        
         elseif activityonly then
             return nil
         end
+
+    elseif activityonly then
+        return nil
     end
 
     local jobtitle = unit.job.current_job and jobname(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
