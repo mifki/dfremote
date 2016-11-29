@@ -52,6 +52,7 @@
   <ItemGroup>
     <ClCompile Include="remote.cpp" />
     <ClCompile Include="sha256.cpp" />
+    <ClCompile Include="firewall-win.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="ws2_32.lib" />

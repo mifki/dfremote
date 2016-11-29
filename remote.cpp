@@ -211,6 +211,10 @@ static void patch_rendering(bool enable_lower_levels)
 #include "itemcache.hpp"
 #include "corehacks.hpp"
 
+#if defined(WIN32)
+    void check_open_firewall(color_ostream *out2, int port);
+#endif
+
 std::string hash_password(std::string &pwd)
 {
     std::string q = pwd;
@@ -1153,6 +1157,10 @@ void remote_start()
 {
     if (remote_on)
         return;
+
+#if defined(WIN32)
+    //check_open_firewall(out2, enet_port);
+#endif
 
     gmenu_w = -1;
     generate_new_server_token();
