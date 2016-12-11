@@ -164,6 +164,43 @@ local grass_density_prefix = { 'Sparse ', '', 'Dense ' }
 
 local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
 
+local friendly_shape_names = {
+    [df.tiletype_shape.PEBBLES] = 'pebbles',
+    [df.tiletype_shape.BOULDER] = 'boulder',
+    [df.tiletype_shape.WALL] = 'wall',
+    [df.tiletype_shape.FLOOR] = 'floor',
+    [df.tiletype_shape.FORTIFICATION] = 'fortification',
+    [df.tiletype_shape.STAIR_DOWN] = 'downward stairway',
+    [df.tiletype_shape.STAIR_UPDOWN] = 'up/down stairway',
+    [df.tiletype_shape.RAMP] = 'upward slope',
+    [df.tiletype_shape.RAMP_TOP] = 'downward slope',
+}
+
+function ttcaption(tt)
+    --todo: handle pillars
+    return friendly_shape_names[df.tiletype.attrs[tt].shape] or df.tiletype.attrs[tt].caption    
+end
+
+local function coordInTree(tree, x, y, z)
+        local x1 = tree.pos.x - math.floor(tree.tree_info.dim_x / 2)
+        local x2 = tree.pos.x + math.floor(tree.tree_info.dim_x / 2)
+        local y1 = tree.pos.y - math.floor(tree.tree_info.dim_y / 2)
+        local y2 = tree.pos.y + math.floor(tree.tree_info.dim_y / 2)
+        local z1 = tree.pos.z
+        local z2 = tree.pos.z + tree.tree_info.body_height
+        local z3 = tree.pos.z - tree.tree_info.roots_depth
+        
+        if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
+            local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1))
+            return (t.trunk or t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 or t.twigs) and t or nil
+        end
+        
+        if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
+            local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1))
+            return r.trunk and r or nil
+        end
+    end
+
 local last_look_x = -1
 local last_look_y = -1
 local last_look_z = -1
@@ -250,10 +287,12 @@ function get_look_list(detailed)
             local block = df.global.world.map.block_index[bx][by][z]
             local tt = block.tiletype[x%16][y%16]
             local ttmat = df.tiletype.attrs[tt].material
+
+            --todo: sand soil floor -> sand
             
             --todo: material
             --todo: damp !
-            --print(ttmat)
+            print(tt,ttmat)
 
             if ttmat == df.tiletype_material.GRASS_LIGHT or ttmat == df.tiletype_material.GRASS_DARK or
                 ttmat == df.tiletype_material.GRASS_DRY or ttmat == df.tiletype_material.GRASS_DEAD then
@@ -277,11 +316,16 @@ function get_look_list(detailed)
                 local density = grass_density_prefix[math.floor(amount/33.4)+1] or ''
 
                 title = density .. (plant and plant.name or 'grass')
+
+                if df.tiletype.attrs[tt].shape ~= df.tiletype_shape.FLOOR then
+                    title = title .. ' ' .. ttcaption(tt)
+                end
             
             elseif ttmat == df.tiletype_material.MUSHROOM or ttmat == df.tiletype_material.ROOT or
                 ttmat == df.tiletype_material.TREE or ttmat == df.tiletype_material.PLANT then
 
-                --todo: trunk pillar -> date palm trunk
+                --todo: shrubs, leaves, ...
+                --todo: fungiwood dead sapling -> dead young fungiwood
 
                 --xxx: this is from MapCache::prepare() but why???
                 local mapcol = df.global.world.map.column_index[math.floor(x/48)*3][math.floor(y/48)*3]
@@ -291,31 +335,69 @@ function get_look_list(detailed)
                     if not p.tree_info then
                         local pos = p.pos
                         if pos.x == x and pos.y == y and pos.z == z then
+                            print(p.material)
                             local plant = df.plant_raw.find(p.material)
+                            local plantname = plant and plant.name_plural or 'plant'
 
-                            title = (plant and plant.name or 'plant') .. ' ' .. df.tiletype.attrs[tt].caption 
+                            --todo: don't show tiletype caption for shrub and dead shrub (?)
+
+                            if tt == df.tiletype.Shrub then
+                                title = plantname
+                                if plant then
+                                    for k,m in ipairs(plant.growths) do
+                                        --todo: check timing_1, 2
+                                        title = title .. ', ' .. m.name_plural
+                                    end
+                                end
+                            elseif tt == df.tiletype.ShrubDead then
+                                title = 'Dead ' .. plantname
+                            else
+                                title = (plant and plant.name or 'plant') .. ' ' .. ttcaption(tt)
+                            end
                             break --todo: break ?
                         end
 
                     else
-                        --print('BIG TREE')
+                        local t = coordInTree(p, x, y, z)
+                        if t then
+                            local plant = df.plant_raw.find(p.material)
+
+                            title = (plant and plant.name or 'plant')
+
+                            if ttmat == df.tiletype_material.ROOT then
+                                title = title .. ' roots'
+                            elseif t.trunk then
+                                title = title .. ' trunk'
+                            elseif t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 then
+                                title = title .. ' branches'
+                            elseif t.twigs then
+                                title = title .. ' twigs'                                    
+                            end
+
+                            break --todo: break ?
+                        end
                     end
                 end
 
                 --todo: temporary
                 if #title == 0 then
-                    title = df.tiletype.attrs[tt].caption 
+                    title = ttcaption(tt)
                 end
 
             elseif ttmat == df.tiletype_material.MINERAL then
-                for i,ev in ipairs(block.block_events) do
+                for i,ev in ripairs(block.block_events) do
                     if ev:getType() == df.block_square_event_type.mineral then
                         local ev = ev --as:df.block_square_event_mineralst
                         if bit32.band(ev.tile_bitmask.bits[y%16], shft(x%16)) ~= 0 then
                             local matinfo = dfhack.matinfo.decode(0, ev.inorganic_mat)
                             local matname = matinfo and matinfo.material.state_adj.Solid or 'mineral'
-                                                        
-                            title = matname .. ' ' .. ((true or ev.flags.vein) and df.tiletype.attrs[tt].caption or 'cluster')
+                            title = matname .. ' ' .. ((true or ev.flags.vein) and ttcaption(tt) or 'cluster')
+        
+                            if df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
+                                title = 'smooth ' .. title
+                            end
+                            --todo: detailed
+        
                             break
                         end
                     end
@@ -323,7 +405,7 @@ function get_look_list(detailed)
 
             elseif ttmat == df.tiletype_material.STONE or ttmat == df.tiletype_material.SOIL or
                 ttmat == df.tiletype_material.DRIFTWOOD then
-                
+
                 local biome_offset_idx = block.region_offset[block.designation[x%16][y%16].biome]
                 local geolayer_idx = block.designation[x%16][y%16].geolayer_index
 
@@ -334,11 +416,44 @@ function get_look_list(detailed)
                 local layer = geobiome.layers[geolayer_idx]
                 local matinfo = dfhack.matinfo.decode(0, layer.mat_index)
 
-                print(biome_idx, geolayer_idx, rbio.geo_index, mat)
-                title = matinfo.material.state_adj[0] .. ' ' .. df.tiletype.attrs[tt].caption
+                --print(biome_idx, geolayer_idx, rbio.geo_index, mat)
+                if df.tiletype.attrs[tt].special == df.tiletype_special.FURROWED then
+                    title = 'furrowed ' .. matinfo.material.state_name[0]
+                else
+                    title = matinfo.material.state_adj[0] .. ' ' .. ttcaption(tt)
 
+                    if df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
+                        title = 'smooth ' .. title
+                    end
+                    --todo: detailed
+                end
+
+            elseif ttmat == df.tiletype_material.CONSTRUCTION then
+                local pos = df.coord:new()
+                pos.x = x
+                pos.y = y
+                pos.z = z
+                local const = df.construction.find(pos)
+                local mi = const and dfhack.matinfo.decode(const.mat_type, const.mat_index)
+                pos:delete()
+
+                local matname
+                if mi then
+                    matname = mi.material.state_adj[0]
+                    if const.item_type == df.item_type.BLOCKS then
+                        matname = matname .. ' block'
+                    elseif const.item_type == df.item_type.BOULDER then
+                        matname = 'rough ' .. matname .. ' block'
+                    elseif const.item_type == df.item_type.WOOD then
+                        matname = matname .. ' log'
+                    end
+                else
+                    matname = '#unknown material#'
+                end
+
+                title = matname .. ' ' .. ttcaption(tt)
             else
-                title = df.tiletype.attrs[tt].caption 
+                title = ttcaption(tt)
             end
 
             color = 1+8 --todo: blue or lightblue?
@@ -375,6 +490,7 @@ function get_look_list(detailed)
             local vermin = v.vermin
             local race = df.global.world.raws.creatures.all[vermin.race]
             title = (vermin.flags.is_colony and 'a colony or ' or '') .. race.name[vermin.amount > 1 and 1 or 0]
+            color = 2+8
 
         elseif t == df.ui_look_list.T_items.T_type.Spatter then
             local mi = dfhack.matinfo.decode(v.spatter_mat_type, v.spatter_mat_index)
@@ -405,8 +521,13 @@ function get_look_list(detailed)
                     color = c.color + c.bold*8
 
                 else
-                    title = mi.material.prefix .. ' ' .. mi.material.state_name.Solid
-                    color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+                    if mi.material.id == 'SEED' then
+                        title = mi.plant.seed_plural
+                        color = 2
+                    else
+                        title = mi.material.prefix .. ' ' .. mi.material.state_name.Solid
+                        color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+                    end
                 end
             end
         end
