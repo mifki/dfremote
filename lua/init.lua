@@ -172,6 +172,7 @@ local friendly_shape_names = {
     [df.tiletype_shape.FORTIFICATION] = 'fortification',
     [df.tiletype_shape.STAIR_DOWN] = 'downward stairway',
     [df.tiletype_shape.STAIR_UPDOWN] = 'up/down stairway',
+    [df.tiletype_shape.STAIR_UP] = 'upward stairway',
     [df.tiletype_shape.RAMP] = 'upward slope',
     [df.tiletype_shape.RAMP_TOP] = 'downward slope',
 }
@@ -199,7 +200,20 @@ local function coordInTree(tree, x, y, z)
             local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1))
             return r.trunk and r or nil
         end
+end
+
+local function find_engraving(x, y, z)
+    for i,v in ipairs(df.global.world.engravings) do
+        local pos = v.pos
+        if pos.x == x and pos.y == y and pos.z == z then
+            return v
+        end
     end
+
+    return nil
+end
+
+local quality_chars = { '', '-', '+', '*', dfhack.df2utf(string.char(240)), dfhack.df2utf(string.char(15)) }
 
 local last_look_x = -1
 local last_look_y = -1
@@ -391,9 +405,29 @@ function get_look_list(detailed)
                         if bit32.band(ev.tile_bitmask.bits[y%16], shft(x%16)) ~= 0 then
                             local matinfo = dfhack.matinfo.decode(0, ev.inorganic_mat)
                             local matname = matinfo and matinfo.material.state_adj.Solid or 'mineral'
-                            title = matname .. ' ' .. ((true or ev.flags.vein) and ttcaption(tt) or 'cluster')
+                            printall(ev.flags)
+                            title = matname .. ' ' .. ((ev.flags.cluster_small or ev.flags.cluster_one) and 'cluster' or ttcaption(tt))
         
-                            if df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
+                            if df.tiletype.attrs[tt].shape == df.tiletype_shape.FLOOR then
+                                for i,ev in ipairs(block.block_events) do
+                                    if ev:getType() == df.block_square_event_type.material_spatter then --as:ev=df.block_square_event_material_spatterst
+                                        if ev.amount[x%16][y%16] > 0 then
+                                            local mi = dfhack.matinfo.decode(ev.mat_type, ev.mat_index)
+                                            if mi and mi.material.id == 'MUD' then
+                                                title = 'muddy ' .. title
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+
+                            --todo: only for wall/floor
+                            local engraving = find_engraving(x, y, z)
+                            if engraving then
+                                local q = quality_chars[engraving.quality+1]
+                                title = q..'detailed'..q .. ' ' .. title
+
+                            elseif df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
                                 title = 'smooth ' .. title
                             end
                             --todo: detailed
@@ -422,10 +456,28 @@ function get_look_list(detailed)
                 else
                     title = matinfo.material.state_adj[0] .. ' ' .. ttcaption(tt)
 
-                    if df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
+                    if df.tiletype.attrs[tt].shape == df.tiletype_shape.FLOOR then
+                        for i,ev in ipairs(block.block_events) do
+                            if ev:getType() == df.block_square_event_type.material_spatter then --as:ev=df.block_square_event_material_spatterst
+                                if ev.amount[x%16][y%16] > 0 then
+                                    local mi = dfhack.matinfo.decode(ev.mat_type, ev.mat_index)
+                                    if mi and mi.material.id == 'MUD' then
+                                        title = 'muddy ' .. title
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    --todo: only for wall/floor
+                    local engraving = find_engraving(x, y, z)
+                    if engraving then
+                        local q = quality_chars[engraving.quality+1]
+                        title = q..'detailed'..q .. ' ' .. title
+
+                    elseif df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
                         title = 'smooth ' .. title
                     end
-                    --todo: detailed
                 end
 
             elseif ttmat == df.tiletype_material.CONSTRUCTION then
@@ -456,7 +508,7 @@ function get_look_list(detailed)
                 title = ttcaption(tt)
             end
 
-            color = 1+8 --todo: blue or lightblue?
+            color = 1
 
         elseif t == df.ui_look_list.T_items.T_type.Flow then
             local flow = v.flow

@@ -55,6 +55,7 @@ function capitalize(str)
     return ret
 end
 
+--todo: need to capitalize all words
 function unitname(unit, eng)
     --xxx: temporary - logs say this was called with nil unit from somewhere several times
     if not unit then
