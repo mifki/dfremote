@@ -306,7 +306,7 @@ function get_look_list(detailed)
             
             --todo: material
             --todo: damp !
-            print(tt,ttmat)
+            --print(tt,ttmat)
 
             if ttmat == df.tiletype_material.GRASS_LIGHT or ttmat == df.tiletype_material.GRASS_DARK or
                 ttmat == df.tiletype_material.GRASS_DRY or ttmat == df.tiletype_material.GRASS_DEAD then
@@ -349,7 +349,6 @@ function get_look_list(detailed)
                     if not p.tree_info then
                         local pos = p.pos
                         if pos.x == x and pos.y == y and pos.z == z then
-                            print(p.material)
                             local plant = df.plant_raw.find(p.material)
                             local plantname = plant and plant.name_plural or 'plant'
 
@@ -405,7 +404,6 @@ function get_look_list(detailed)
                         if bit32.band(ev.tile_bitmask.bits[y%16], shft(x%16)) ~= 0 then
                             local matinfo = dfhack.matinfo.decode(0, ev.inorganic_mat)
                             local matname = matinfo and matinfo.material.state_adj.Solid or 'mineral'
-                            printall(ev.flags)
                             title = matname .. ' ' .. ((ev.flags.cluster_small or ev.flags.cluster_one) and 'cluster' or ttcaption(tt))
         
                             if df.tiletype.attrs[tt].shape == df.tiletype_shape.FLOOR then
