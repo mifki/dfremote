@@ -241,9 +241,11 @@ function location_occupation_get_candidates(locid, occid)
 						local ret = {}
 						for k,unit in ipairs(ws.units) do
 							if unit then
-								table.insert(ret, { unit_fulltitle(unit), unit.id })
+								--xxx: temp fix for an app bug
+								table.insert(ret, { unit_fulltitle(unit), tostring(unit.id) })
 							else
-								table.insert(ret, { 'Nobody', -1 })
+								--xxx: temp fix for an app bug
+								table.insert(ret, { 'Nobody', tostring(-1) })
 							end
 						end
 
@@ -263,6 +265,9 @@ end
 
 --luacheck: in=number,number,number
 function location_occupation_assign(locid, occid, unitid)
+	--xxx: temp fix for an app bug
+	unitid = tonumber(unitid)
+
 	return execute_with_locations_screen(function(ws)
 		for i,loc in ipairs(ws.locations) do
 			if loc and loc.id == locid then
