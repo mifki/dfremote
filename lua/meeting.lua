@@ -573,13 +573,16 @@ function process_sell_agreement(civ_id, reqs)
 			n = #s
 		end
 
-		local items = {}
-		for j=0,n-1 do
-			local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
-			table.insert(items, { name, reqs.items.priority[cat[2]][j], math.floor(reqs.price[cat[2]][j]/128*100) })
-		end
+		-- no data while playing in 0.42+ but game started in 0.40
+		if #reqs.price[cat[2]] > 0 then
+			local items = {}
+			for j=0,n-1 do
+				local name = dfhack.df2utf(nf(sf(s,j))):utf8capitalize()
+				table.insert(items, { name, reqs.items.priority[cat[2]][j], math.floor(reqs.price[cat[2]][j]/128*100) })
+			end
 
-		table.insert(ret, { cat[1], cat[2], items })
+			table.insert(ret, { cat[1], cat[2], items })
+		end
 	end
 
 	return ret	
