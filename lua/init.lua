@@ -1195,6 +1195,29 @@ function save_game()
 end
 
 --luacheck: in=
+function dfaas_save_game(pwd)
+    if not native.verify_pwd(pwd or '') then
+        return false
+    end
+
+    --todo: need to return to main screen!
+
+    save_game()    
+    return true
+end
+
+--luacheck: in=
+function dfaas_save_done(pwd)
+    if not native.verify_pwd(pwd or '') then
+        return false
+    end
+
+    --todo: need to return to main screen!
+
+    return (df.global.ui.main.autosave_request ~= true)
+end
+
+--luacheck: in=
 function save_and_close()
     local ws = screen_main()
     local optsws = df.viewscreen_optionst:new()
@@ -1578,6 +1601,9 @@ local handlers_foreign = {
     [238] = {
         [4] = setup_get_server_info,
         [6] = perform_update,
+        
+        [20] = dfaas_save_game,
+        [21] = dfaas_save_done,
     },
 }
 
