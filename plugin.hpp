@@ -23,14 +23,14 @@ void allocate_buffers(int tiles)
     int extra_tiles = 256 + 1;
 
     REALLOC(gscreen_origin,                 uint8_t, (tiles+extra_tiles) * 4)
-    REALLOC(gscreentexpos_origin,           int32_t, tiles+extra_tiles);
+    REALLOC(gscreentexpos_origin,           long, tiles+extra_tiles);
     REALLOC(gscreentexpos_addcolor_origin,  int8_t,  tiles+extra_tiles);
     REALLOC(gscreentexpos_grayscale_origin, uint8_t, tiles+extra_tiles);
     REALLOC(gscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
     REALLOC(gscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
 
     REALLOC(mscreen_origin,                 uint8_t, (tiles+extra_tiles) * 4)
-    REALLOC(mscreentexpos_origin,           int32_t, tiles+extra_tiles);
+    REALLOC(mscreentexpos_origin,           long, tiles+extra_tiles);
     REALLOC(mscreentexpos_addcolor_origin,  int8_t,  tiles+extra_tiles);
     REALLOC(mscreentexpos_grayscale_origin, uint8_t, tiles+extra_tiles);
     REALLOC(mscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
@@ -53,7 +53,7 @@ void allocate_buffers(int tiles)
     // We need to zero out these buffers because game doesn't change them for tiles without creatures,
     // so there will be garbage that will cause every tile to be updated each frame and other bad things
     memset(gscreen,                 0, tiles * 4);
-    memset(gscreentexpos,           0, tiles * sizeof(int32_t));
+    memset(gscreentexpos,           0, tiles * sizeof(long));
     memset(gscreentexpos_addcolor,  0, tiles);
     memset(gscreentexpos_grayscale, 0, tiles);
     memset(gscreentexpos_cf,        0, tiles);
