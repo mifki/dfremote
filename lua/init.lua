@@ -1,7 +1,7 @@
 remote_version = require 'remote.version'
 
 json = require 'remote.JSON'
-mp = require 'remote.MessagePack'
+mp = math.frexp and require 'remote.MessagePack' or require 'remote.MessagePack53'
 _ = require 'remote.underscore'
 
 gui = require 'gui'
