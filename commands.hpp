@@ -24,6 +24,11 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
             remote_unpublish();
             save_config();
         }
+        else if (cmd == "connect")
+        {
+            remote_connect();
+            save_config();
+        }
         else if (cmd == "password" || cmd == "pwd" || cmd == "pass")
         {
             if (args.size() == 2)

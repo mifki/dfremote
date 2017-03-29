@@ -1362,6 +1362,7 @@ static void init_dummy_gfx(int count)
 }
 
 #include "config.hpp"
+#include "connect.hpp"
 #include "commands.hpp"
 
 static std::string custom_command(std::string data)
