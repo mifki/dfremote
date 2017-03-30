@@ -104,6 +104,26 @@ bool get_private_ip_list(vector<long> &ips)
 	return false;
 }
 
+void output_qrcode(uint8_t *data, int width)
+{
+	for (int x = 0; x < width; x++)
+		*out2 << "\033[47m  \033[0m";
+	for (int y = 0; y < width; y++) {
+		*out2 << "\033[47m  \033[0m";
+		for (int x = 0; x < width; x++) {
+			int byte = (x * width + y) / 8;
+			int bit = (x * width + y) % 8;
+			int value = data[byte] & (0x80 >> bit);
+			*out2 << (value ? "\033[40m  \033[0m" : "\033[47m  \033[0m");
+		}
+
+		*out2 << "\033[47m  \033[0m";
+		*out2 << std::endl;
+	}
+	for (int x = 0; x < width; x++)
+		*out2 << "\033[47m  \033[0m";	
+}
+
 void remote_connect()
 {
 	vector<long> ips;
@@ -120,19 +140,6 @@ void remote_connect()
 	uint8_t data[MAX_BITDATA] = {};
 	long ip = ips[0];
 	int width = EncodeData(QR_LEVEL_L, QR_VERSION_M, (char*)&ip, sizeof(long), data);
-	*out2 << width << std::endl;
-	
 
-	for (int y = 0; y < width; y++) {
-		*out2 << "\033[47m  \033[0m";
-		for (int x = 0; x < width; x++) {
-			int byte = (x * width + y) / 8;
-			int bit = (x * width + y) % 8;
-			int value = data[byte] & (0x80 >> bit);
-			*out2 << (value ? "\033[40m  \033[0m" : "\033[47m  \033[0m");
-		}
-
-		*out2 << "\033[47m  \033[0m";
-		*out2 << std::endl;
-	}	
+	output_qrcode(data, width);
 }
