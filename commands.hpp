@@ -26,7 +26,8 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
         }
         else if (cmd == "connect")
         {
-            remote_connect();
+            bool debug = (args.size() == 2 && args[1] == "debug");
+            remote_connect(debug);
             save_config();
         }
         else if (cmd == "password" || cmd == "pwd" || cmd == "pass")

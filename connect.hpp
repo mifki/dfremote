@@ -63,25 +63,25 @@ bool get_all_ips(vector<long> &ips)
 
 #else
 
-	struct ifaddrs *_ifap, *_ifa;
-	if (getifaddrs (&_ifap))
+	struct ifaddrs *ifas;
+	if (getifaddrs (&ifas))
 		return false;
 
   	bool found = false;
-	for (_ifa = _ifap; _ifa; _ifa = _ifa->ifa_next)
+	for (struct ifaddrs *ifa = ifas; ifa; ifa = ifa->ifa_next)
 	{
-		if (!_ifa->ifa_addr || _ifa->ifa_addr->sa_family != AF_INET)
+		if (!ifa->ifa_addr || ifa->ifa_addr->sa_family != AF_INET)
 			continue;
 
-		if ((_ifa->ifa_flags & IFF_LOOPBACK) || !(_ifa->ifa_flags & IFF_RUNNING))
+		if ((ifa->ifa_flags & IFF_LOOPBACK) || !(ifa->ifa_flags & IFF_RUNNING))
 			continue;
 
-		long ip = ((struct sockaddr_in*)_ifa->ifa_addr)->sin_addr.s_addr;
+		long ip = ((struct sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
 		ips.push_back(ip);
 		found = true;
 	}
 	
-	freeifaddrs (_ifap);
+	freeifaddrs (ifas);
 	return true;
 
 #endif
@@ -97,49 +97,90 @@ bool get_private_ip_list(vector<long> &ips)
 		return true;
 	}
 
-	// If that failes, get addresses for all network adapters
+	// If that fails, get addresses for all network adapters, and send them all to the app
 	if (get_all_ips(ips))
 		return true;
 
 	return false;
 }
 
+void ensure_publish_details()
+{
+
+}
+
 void output_qrcode(uint8_t *data, int width)
 {
-	for (int x = 0; x < width; x++)
-		*out2 << "\033[47m  \033[0m";
+#define WHITE "\033[47m  \033[0m"
+#define BLACK "\033[40m  \033[0m"
+
+	for (int x = 0; x < width+2; x++)
+		*out2 << WHITE;
+	*out2 << std::endl;
+
 	for (int y = 0; y < width; y++) {
-		*out2 << "\033[47m  \033[0m";
+		*out2 << WHITE;
 		for (int x = 0; x < width; x++) {
 			int byte = (x * width + y) / 8;
 			int bit = (x * width + y) % 8;
 			int value = data[byte] & (0x80 >> bit);
-			*out2 << (value ? "\033[40m  \033[0m" : "\033[47m  \033[0m");
+			*out2 << (value ? BLACK : WHITE);
 		}
 
-		*out2 << "\033[47m  \033[0m";
-		*out2 << std::endl;
+		*out2 << WHITE << std::endl;
 	}
-	for (int x = 0; x < width; x++)
-		*out2 << "\033[47m  \033[0m";	
+
+	for (int x = 0; x < width+2; x++)
+		*out2 << WHITE;
+	*out2 << std::endl;
 }
 
-void remote_connect()
+void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
+{
+	// Convert binary to numeric as built-in iOS QR Code decoding can return strings only
+	char buf[rawsz*3];
+	for (int i = 0; i < rawsz; i++)
+		sprintf(buf+i*3, "%03d", rawdata[i]);
+
+	uint8_t data[MAX_BITDATA];
+	int width = EncodeData(QR_LEVEL_L, 0, buf, 0, data);
+
+	output_qrcode(data, width);
+}
+
+void remote_connect(bool debug)
 {
 	vector<long> ips;
-	
 	get_private_ip_list(ips);
+	//TODO: check error and don't proceed if no ips
 
-	for (auto it = ips.cbegin(); it<ips.cend();it++)
+	for (auto it = ips.cbegin(); it < ips.cend();it++)
 	{
 		struct in_addr a;
 		a.s_addr = *it;
 		*out2 << inet_ntoa(a) << std::endl;
 	}
-*out2 << "test" << std::endl;
-	uint8_t data[MAX_BITDATA] = {};
-	long ip = ips[0];
-	int width = EncodeData(QR_LEVEL_L, QR_VERSION_M, (char*)&ip, sizeof(long), data);
 
-	output_qrcode(data, width);
+	ensure_publish_details();
+	remote_publish(publish_name);
+
+	// Status byte + IPs + published id hash
+	int rawsz = 1 + ips.size()*4 + 32;
+	uint8_t rawdata[rawsz];
+	uint8_t *rawptr = rawdata;
+
+	*rawptr++ = ips.size();
+
+	for (auto it = ips.cbegin(); it < ips.cend();it++)
+	{
+		*(uint32_t*)rawptr = *it;
+		rawptr += 4;
+	}
+
+    std::string pubid = publish_name + pwd_hash;
+    std::string pubhash = hash_password(pubid);
+    for (int i = 0; i < 32; i++)
+    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
+
+    show_qrcode_with_data(rawdata, rawsz);
 }
