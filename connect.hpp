@@ -104,9 +104,48 @@ bool get_private_ip_list(vector<long> &ips)
 	return false;
 }
 
-void ensure_publish_details()
-{
+static const char charset[] =
+"abcdefghijklmnopqrstuvwxyz"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"0123456789"
+"!#$";
 
+void ensure_publish_details(bool debug)
+{
+	// Generate name and password
+	// Don't generate password if there was a name, i.e. user deliberately didn't set password
+
+#ifdef arc4random
+    #define RND arc4random
+#else
+    srand(time(NULL));    
+    #define RND rand    
+#endif 
+
+	if (!publish_name.size())
+	{
+		string s = "";
+		for (int j = 0; j < 4; j++)
+		{
+			for (int i = 0; i < 4; i++)
+				s += charset[RND()%26];
+			if (j < 3)
+				s += '-';
+		}
+
+		publish_name = s;
+        save_config();
+
+		if (!pwd_hash.size())
+		{
+			string s = "";
+			for (int i = 0; i < 20; i++)
+				s += charset[RND()%(sizeof(charset)-1)];
+
+			pwd_hash = hash_password(s);
+	        save_config();
+		}
+	}
 }
 
 void output_qrcode(uint8_t *data, int width)
@@ -161,7 +200,7 @@ void remote_connect(bool debug)
 		*out2 << inet_ntoa(a) << std::endl;
 	}
 
-	ensure_publish_details();
+	ensure_publish_details(debug);
 	remote_publish(publish_name);
 
 	// Status byte + IPs + published id hash
