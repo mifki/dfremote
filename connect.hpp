@@ -180,7 +180,7 @@ void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
 	char buf[rawsz*3];
 	for (int i = 0; i < rawsz; i++)
 		sprintf(buf+i*3, "%03d", rawdata[i]);
-
+*out2 << buf << std::endl;
 	uint8_t data[MAX_BITDATA];
 	int width = EncodeData(QR_LEVEL_L, 0, buf, 0, data);
 
@@ -192,6 +192,7 @@ void remote_connect(bool debug)
 	vector<long> ips;
 	get_private_ip_list(ips);
 	//TODO: check error and don't proceed if no ips
+	//TODO: show warning if > 3 ips
 
 	for (auto it = ips.cbegin(); it < ips.cend();it++)
 	{
@@ -203,23 +204,33 @@ void remote_connect(bool debug)
 	ensure_publish_details(debug);
 	remote_publish(publish_name);
 
-	// Status byte + IPs + published id hash
-	int rawsz = 1 + ips.size()*4 + 32;
+	bool has_pwd = !pwd_hash.empty();
+
+	// Status byte + IPs + password (if any) + published name
+	int rawsz = 1 + ips.size()*4 + (has_pwd ? 32 : 0) + publish_name.length();
 	uint8_t rawdata[rawsz];
 	uint8_t *rawptr = rawdata;
 
-	*rawptr++ = ips.size();
+	// 1. Status byte -  flags & number of IPs
+	*rawptr++ = (has_pwd << 3) | (ips.size() & 3);
 
-	for (auto it = ips.cbegin(); it < ips.cend();it++)
+	// 2. List of IPs
+	for (int i = 0; i < ips.size() & 3; i++)
 	{
-		*(uint32_t*)rawptr = *it;
+		*(uint32_t*)rawptr = ips[i];
 		rawptr += 4;
 	}
 
-    std::string pubid = publish_name + pwd_hash;
-    std::string pubhash = hash_password(pubid);
-    for (int i = 0; i < 32; i++)
-    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
+	// 3. Password hash
+	if (has_pwd)
+	{
+	    for (int i = 0; i < 32; i++)
+	    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
+	}
+
+    // 4. Published name
+    memcpy(rawptr, publish_name.c_str(), publish_name.length());
+    rawptr += publish_name.length();
 
     show_qrcode_with_data(rawdata, rawsz);
 }
