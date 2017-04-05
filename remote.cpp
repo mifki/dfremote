@@ -225,6 +225,11 @@ std::string hash_password(std::string &pwd)
     return q;
 }
 
+bool verify_pwd(string pwdhash)
+{
+    return (pwd_hash.size() == 0 || pwd_hash == pwdhash);
+}
+
 void resend_outgoing()
 {
     for (auto it = outgoing.begin(); it != outgoing.end(); it++)
@@ -944,7 +949,7 @@ void enthreadmain(ENetHost *server)
                             string ver((const char*)mdata + 7, verlen);
                             string hash((const char*)mdata + 7 + verlen + 1, hashlen);
 
-                            if (pwd_hash.size() && pwd_hash != hash)
+                            if (!verify_pwd(hash))
                             {
                                 *out2 << "invalid password from " << address2ip(&event.peer->address) << std::endl;
 
@@ -1301,11 +1306,6 @@ void set_timer(int timeout, string fn)
 {
     timer_timeout = timeout * 1000 / 20;
     timer_fn = fn;
-}
-
-bool verify_pwd(string pwdhash)
-{
-    return (pwd_hash.size() == 0 || pwd_hash == pwdhash);
 }
 
 bool check_wtoken(unsigned int wtoken)

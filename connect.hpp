@@ -104,12 +104,6 @@ bool get_private_ip_list(vector<long> &ips)
 	return false;
 }
 
-static const char charset[] =
-"abcdefghijklmnopqrstuvwxyz"
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-"0123456789"
-"!#$";
-
 void ensure_publish_details(bool debug)
 {
 	// Generate name and password
@@ -125,23 +119,24 @@ void ensure_publish_details(bool debug)
 	if (!publish_name.size())
 	{
 		string s = "";
-		for (int j = 0; j < 4; j++)
+		for (int j = 0; j < 3; j++)
 		{
 			for (int i = 0; i < 4; i++)
-				s += charset[RND()%26];
-			if (j < 3)
+				s += 'a' + (RND()%26);
+			if (j < 2)
 				s += '-';
 		}
 
 		publish_name = s;
+		*out2 << publish_name << std::endl;
         save_config();
 
 		if (!pwd_hash.size())
 		{
 			string s = "";
-			for (int i = 0; i < 20; i++)
-				s += charset[RND()%(sizeof(charset)-1)];
-
+			for (int i = 0; i < 16; i++)
+				s += 1 + (RND()%255);
+*out2 << s << std::endl;
 			pwd_hash = hash_password(s);
 	        save_config();
 		}
@@ -206,8 +201,8 @@ void remote_connect(bool debug)
 
 	bool has_pwd = !pwd_hash.empty();
 
-	// Status byte + IPs + password (if any) + published name
-	int rawsz = 1 + ips.size()*4 + (has_pwd ? 32 : 0) + publish_name.length();
+	// Status byte + IPs + port + password (if any) + published name
+	int rawsz = 1 + ips.size()*4 + 2 + (has_pwd ? 32 : 0) + publish_name.length();
 	uint8_t rawdata[rawsz];
 	uint8_t *rawptr = rawdata;
 
@@ -221,14 +216,18 @@ void remote_connect(bool debug)
 		rawptr += 4;
 	}
 
-	// 3. Password hash
+	// 3. Port
+	*(uint16_t*)rawptr = enet_port;
+	rawptr += 2;
+
+	// 4. Password hash
 	if (has_pwd)
 	{
 	    for (int i = 0; i < 32; i++)
 	    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
 	}
 
-    // 4. Published name
+    // 5. Published name
     memcpy(rawptr, publish_name.c_str(), publish_name.length());
     rawptr += publish_name.length();
 
