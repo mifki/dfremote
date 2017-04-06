@@ -1,13 +1,19 @@
 #include <sys/types.h>
-#include <sys/ioctl.h>
-#include <ifaddrs.h>
-#include <netinet/in.h> 
 #include <string.h> 
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <net/if.h>
-#include <netdb.h>
 #include <algorithm>
+
+#ifdef WIN32
+	#include <winsock.h>
+	#include <ws2tcpip.h>
+#else
+	#include <sys/ioctl.h>
+	#include <ifaddrs.h>
+	#include <netinet/in.h> 
+	#include <arpa/inet.h>
+	#include <unistd.h>
+	#include <net/if.h>
+	#include <netdb.h>
+#endif
 
 #include "QR_Encode.h"
 
@@ -31,8 +37,12 @@ bool get_ip_with_inet(uint32_t *ip)
 
     *ip = name.sin_addr.s_addr;
 
+#ifdef WIN32
+    closesocket(sock);
+#else
     close(sock);
-
+#endif
+    
     return true;
 }
 
@@ -119,7 +129,11 @@ bool get_public_ip(uint32_t *ip, int *port)
     // Wait for the network thread to do the job
     enet_uint32 start = enet_time_get();
     do {
+#ifdef WIN32
+		Sleep (200); // 200 milliseconds 
+#else
 	    usleep(200*1000); // 200 milliseconds in microseconds
+#endif
 	} while (!ip_check_done && enet_time_get() - start < 5000);
 
     //TODO: call enet_peer_disconnect() ? enet_peer_disconnect_now() ?
@@ -177,12 +191,18 @@ void ensure_publish_details(bool debug)
 
 void output_qrcode(uint8_t *data, int width)
 {
-#define WHITE "\033[47m  \033[0m"
-#define BLACK "\033[40m  \033[0m"
+#ifdef WIN32
+	// On Windows, setting color passes the value directly to SetConsoleTextAttribute, which can set bg color too
+	#define WHITE (color_value)(BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE) << "  " 
+	#define BLACK (color_value)0 << "  "
+#else
+	#define WHITE "\033[47m  \033[0m"
+	#define BLACK "\033[40m  \033[0m"
+#endif
 
 	for (int x = 0; x < width+2; x++)
 		*out2 << WHITE;
-	*out2 << std::endl;
+	*out2 << COLOR_RESET << std::endl;
 
 	for (int y = 0; y < width; y++) {
 		*out2 << WHITE;
@@ -190,26 +210,33 @@ void output_qrcode(uint8_t *data, int width)
 			int byte = (x * width + y) / 8;
 			int bit = (x * width + y) % 8;
 			int value = data[byte] & (0x80 >> bit);
-			*out2 << (value ? BLACK : WHITE);
+			if (value)
+				*out2 << BLACK;
+			else
+				*out2 << WHITE;
 		}
 
-		*out2 << WHITE << std::endl;
+		*out2 << WHITE;
+		*out2 << COLOR_RESET << std::endl;
 	}
 
 	for (int x = 0; x < width+2; x++)
 		*out2 << WHITE;
-	*out2 << std::endl;
+	*out2 << COLOR_RESET << std::endl;
 }
 
 void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
 {
 	// Convert binary to numeric as built-in iOS QR Code decoding can return strings only
-	char buf[rawsz*3];
+	char *buf = new char[rawsz*3];
 	for (int i = 0; i < rawsz; i++)
 		sprintf(buf+i*3, "%03d", rawdata[i]);
+
 *out2 << buf << std::endl;
+
 	uint8_t data[MAX_BITDATA];
 	int width = EncodeData(QR_LEVEL_L, 0, buf, 0, data);
+	delete[] buf;
 
 	output_qrcode(data, width);
 }
@@ -247,22 +274,19 @@ void remote_connect(bool debug)
 		{
 			struct in_addr a;
 			a.s_addr = pub_ip;
-			*out2 << "server seems to have externally accessible IP " << inet_ntoa(a) << std::endl;
+			*out2 << "server seems to have an externally accessible IP " << inet_ntoa(a) << std::endl;
 			publish = false;
 		}
 	}
 
 	if (publish)
-	{
 		ensure_publish_details(debug);
-		remote_publish(publish_name);
-	}
 
 	bool has_pwd = !pwd_hash.empty();
 
 	// Status byte + IPs + port + password (if any) + published name
 	int rawsz = 1 + ips.size()*4 + 2 + (publish ? ((has_pwd ? 32 : 0) + publish_name.length()) : 0);
-	uint8_t rawdata[rawsz];
+	uint8_t *rawdata = new uint8_t[rawsz];
 	uint8_t *rawptr = rawdata;
 
 	// 1. Status byte -  flags & number of IPs
@@ -294,4 +318,9 @@ void remote_connect(bool debug)
 	}
 
     show_qrcode_with_data(rawdata, rawsz);
+    delete[] rawdata;
+
+    // So that any messages from another thread during connection don't interrupt QR code
+    if (publish)
+		remote_publish(publish_name);    	
 }
