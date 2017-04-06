@@ -7,10 +7,11 @@
 #include <unistd.h>
 #include <net/if.h>
 #include <netdb.h>
+#include <algorithm>
 
 #include "QR_Encode.h"
 
-bool get_ip_with_inet(long *ip) 
+bool get_ip_with_inet(uint32_t *ip) 
 {
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -35,7 +36,7 @@ bool get_ip_with_inet(long *ip)
     return true;
 }
 
-bool get_all_ips(vector<long> &ips)
+bool get_all_ips(vector<uint32_t> &ips)
 {
 #ifdef WIN32
 
@@ -51,7 +52,7 @@ bool get_all_ips(vector<long> &ips)
   	bool found = false;
 	for (int i = 0; host->h_addr_list[i]; i++)
 	{
-		long ip = ((struct in_addr*)host->h_addr_list[i])->s_addr;
+		uint32_t ip = ((struct in_addr*)host->h_addr_list[i])->s_addr;
 		if ((ip & htonl(0xff000000)) != htonl(0x7f000000))
 		{
 			ips.push_back(ip);
@@ -76,7 +77,7 @@ bool get_all_ips(vector<long> &ips)
 		if ((ifa->ifa_flags & IFF_LOOPBACK) || !(ifa->ifa_flags & IFF_RUNNING))
 			continue;
 
-		long ip = ((struct sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
+		uint32_t ip = ((struct sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
 		ips.push_back(ip);
 		found = true;
 	}
@@ -87,10 +88,10 @@ bool get_all_ips(vector<long> &ips)
 #endif
 }
 
-bool get_private_ip_list(vector<long> &ips)
+bool get_private_ip_list(vector<uint32_t> &ips)
 {
 	// First try finding address of an interface with a route to Internet (8.8.8.8)
-	long ip;
+	uint32_t ip;
 	if (get_ip_with_inet(&ip))
 	{
 		ips.push_back(ip);
@@ -102,6 +103,37 @@ bool get_private_ip_list(vector<long> &ips)
 		return true;
 
 	return false;
+}
+
+bool get_public_ip(uint32_t *ip, int *port)
+{
+    ENetAddress mediation_address;
+    enet_address_set_host (&mediation_address, "dfmed.mifki.com");
+    mediation_address.port = 1233;
+
+    ip_check_done = false;
+    ip_check_peer = enet_host_connect (server, &mediation_address, 2, 0);
+    if (!ip_check_peer)
+    	return false;
+
+    // Wait for the network thread to do the job
+    enet_uint32 start = enet_time_get();
+    do {
+	    usleep(200*1000); // 200 milliseconds in microseconds
+	} while (!ip_check_done && enet_time_get() - start < 5000);
+
+    //TODO: call enet_peer_disconnect() ? enet_peer_disconnect_now() ?
+    enet_peer_reset(ip_check_peer);
+    ip_check_peer = NULL;
+
+    if (ip_check_done)
+    {
+    	*ip = ext_addr.host;
+    	*port = ext_addr.port;
+    	return true;
+    }
+
+    return false;
 }
 
 void ensure_publish_details(bool debug)
@@ -184,11 +216,15 @@ void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
 
 void remote_connect(bool debug)
 {
-	vector<long> ips;
-	get_private_ip_list(ips);
-	//TODO: check error and don't proceed if no ips
-	//TODO: show warning if > 3 ips
+	if (!remote_start())
+	{
+		//TODO: red colour
+		*out2 << "Error starting Remote server, can not proceed" << std::endl;
+		return;
+	}
 
+	vector<uint32_t> ips;
+	get_private_ip_list(ips);
 	for (auto it = ips.cbegin(); it < ips.cend();it++)
 	{
 		struct in_addr a;
@@ -196,18 +232,41 @@ void remote_connect(bool debug)
 		*out2 << inet_ntoa(a) << std::endl;
 	}
 
-	ensure_publish_details(debug);
-	remote_publish(publish_name);
+	//TODO: check error and don't proceed if no ips
+	//TODO: show warning if > 7 ips
+	//TODO: check public ip only if private ip is from inet route
+
+	bool publish = true;
+	if (publish_name.empty())
+	{
+		uint32_t pub_ip;
+		int pub_port;
+		bool pub_ok = get_public_ip(&pub_ip, &pub_port);
+
+		if (enet_port == pub_port && std::find(ips.begin(), ips.end(), pub_ip) != ips.end())
+		{
+			struct in_addr a;
+			a.s_addr = pub_ip;
+			*out2 << "server seems to have externally accessible IP " << inet_ntoa(a) << std::endl;
+			publish = false;
+		}
+	}
+
+	if (publish)
+	{
+		ensure_publish_details(debug);
+		remote_publish(publish_name);
+	}
 
 	bool has_pwd = !pwd_hash.empty();
 
 	// Status byte + IPs + port + password (if any) + published name
-	int rawsz = 1 + ips.size()*4 + 2 + (has_pwd ? 32 : 0) + publish_name.length();
+	int rawsz = 1 + ips.size()*4 + 2 + (publish ? ((has_pwd ? 32 : 0) + publish_name.length()) : 0);
 	uint8_t rawdata[rawsz];
 	uint8_t *rawptr = rawdata;
 
 	// 1. Status byte -  flags & number of IPs
-	*rawptr++ = (has_pwd << 3) | (ips.size() & 3);
+	*rawptr++ = (publish << 4) | (has_pwd << 3) | (ips.size() & 3);
 
 	// 2. List of IPs
 	for (int i = 0; i < ips.size() & 3; i++)
@@ -220,16 +279,19 @@ void remote_connect(bool debug)
 	*(uint16_t*)rawptr = enet_port;
 	rawptr += 2;
 
-	// 4. Password hash
-	if (has_pwd)
+	if (publish)
 	{
-	    for (int i = 0; i < 32; i++)
-	    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
-	}
+		// 4. Password hash
+		if (has_pwd)
+		{
+		    for (int i = 0; i < 32; i++)
+		    	sscanf(pwd_hash.c_str()+i*2, "%02x", rawptr++);
+		}
 
-    // 5. Published name
-    memcpy(rawptr, publish_name.c_str(), publish_name.length());
-    rawptr += publish_name.length();
+	    // 5. Published name
+	    memcpy(rawptr, publish_name.c_str(), publish_name.length());
+	    rawptr += publish_name.length();
+	}
 
     show_qrcode_with_data(rawdata, rawsz);
 }
