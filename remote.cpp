@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <zlib.h>
 
 #if defined(WIN32)
@@ -860,7 +861,7 @@ void process_mediation_cmd(const unsigned char *mdata, int msz)
     {
         ENetAddress *clientaddr = (ENetAddress*)&mdata[4];
 
-        *out2 << "mediation server asked to connect to client at " << address2ip(clientaddr) << ":" << clientaddr->port << std::endl;
+        *out2 << "Mediation server asked to connect to client at " << address2ip(clientaddr) << ":" << clientaddr->port << std::endl;
         enet_host_connect (server, clientaddr, 2, 0);
     }
 }
@@ -874,7 +875,7 @@ void process_ip_check_cmd(const unsigned char *mdata, int msz)
     {
         ENetAddress *retaddr = (ENetAddress*)&mdata[4];
 
-        *out2 << "mediation server returned our public address " << address2ip(retaddr) << ":" << retaddr->port << std::endl;
+        //*out2 << "mediation server returned our public address " << address2ip(retaddr) << ":" << retaddr->port << std::endl;
         ext_addr = *retaddr;
         ip_check_done = true;
     }
@@ -944,13 +945,13 @@ void enthreadmain(ENetHost *server)
 
                 if (event.peer == mediation_peer)
                 {
-                    *out2 << "mediation peer connected" << std::endl;
+                    // *out2 << "mediation peer connected" << std::endl;
                     mediation_connected = true;
                     send_publish_cmd();
                 }
                 else if (event.peer == ip_check_peer)
                 {
-                    *out2 << "ip check peer connected" << std::endl;
+                    // *out2 << "ip check peer connected" << std::endl;
                     send_ip_check_cmd();
                 }
                 break;

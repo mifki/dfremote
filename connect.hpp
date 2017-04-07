@@ -1,6 +1,5 @@
 #include <sys/types.h>
 #include <string.h> 
-#include <algorithm>
 
 #ifdef WIN32
 	#include <winsock.h>
@@ -16,6 +15,14 @@
 #endif
 
 #include "QR_Encode.h"
+
+string format_ip(uint32_t ip)
+{
+	struct in_addr a;
+	a.s_addr = ip;
+	
+	return inet_ntoa(a);
+}
 
 bool get_ip_with_inet(uint32_t *ip) 
 {
@@ -98,19 +105,31 @@ bool get_all_ips(vector<uint32_t> &ips)
 #endif
 }
 
-bool get_private_ip_list(vector<uint32_t> &ips)
+bool get_private_ip_list(vector<uint32_t> &ips, bool debug)
 {
 	// First try finding address of an interface with a route to Internet (8.8.8.8)
 	uint32_t ip;
-	if (get_ip_with_inet(&ip))
+	if (0&&get_ip_with_inet(&ip))
 	{
+		if (debug)
+			*out2 << "Found IP with Internet route: " << format_ip(ip) << std::endl;
 		ips.push_back(ip);
 		return true;
 	}
 
 	// If that fails, get addresses for all network adapters, and send them all to the app
 	if (get_all_ips(ips))
+	{
+		if (debug)
+		{
+			*out2 << "Found all IPs:";
+			for (auto it = ips.cbegin(); it < ips.cend();it++)
+				*out2 << " " << format_ip(*it);
+			*out2 << std::endl;
+		}
+
 		return true;
+	}
 
 	return false;
 }
@@ -150,7 +169,7 @@ bool get_public_ip(uint32_t *ip, int *port)
     return false;
 }
 
-void ensure_publish_details(bool debug)
+void ensure_publish_details(bool debug, bool randomize)
 {
 	// Generate name and password
 	// Don't generate password if there was a name, i.e. user deliberately didn't set password
@@ -162,7 +181,7 @@ void ensure_publish_details(bool debug)
     #define RND rand    
 #endif 
 
-	if (!publish_name.size())
+	if (randomize || !publish_name.size())
 	{
 		string s = "";
 		for (int j = 0; j < 3; j++)
@@ -174,15 +193,13 @@ void ensure_publish_details(bool debug)
 		}
 
 		publish_name = s;
-		*out2 << publish_name << std::endl;
         save_config();
 
-		if (!pwd_hash.size())
+		if (randomize || !pwd_hash.size())
 		{
 			string s = "";
 			for (int i = 0; i < 16; i++)
 				s += 1 + (RND()%255);
-*out2 << s << std::endl;
 			pwd_hash = hash_password(s);
 	        save_config();
 		}
@@ -232,7 +249,7 @@ void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
 	for (int i = 0; i < rawsz; i++)
 		sprintf(buf+i*3, "%03d", rawdata[i]);
 
-*out2 << buf << std::endl;
+	//*out2 << buf << std::endl;
 
 	uint8_t data[MAX_BITDATA];
 	int width = EncodeData(QR_LEVEL_L, 0, buf, 0, data);
@@ -241,30 +258,24 @@ void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
 	output_qrcode(data, width);
 }
 
-void remote_connect(bool debug)
+void remote_connect(bool debug, bool no_external, bool no_publish, bool randomize)
 {
 	if (!remote_start())
 	{
-		//TODO: red colour
-		*out2 << "Error starting Remote server, can not proceed" << std::endl;
+		*out2 << COLOR_RED << "Error starting Remote server, can not proceed" << std::endl;
+		*out2 << COLOR_RESET;
 		return;
 	}
 
 	vector<uint32_t> ips;
-	get_private_ip_list(ips);
-	for (auto it = ips.cbegin(); it < ips.cend();it++)
-	{
-		struct in_addr a;
-		a.s_addr = *it;
-		*out2 << inet_ntoa(a) << std::endl;
-	}
+	get_private_ip_list(ips, debug);
 
 	//TODO: check error and don't proceed if no ips
 	//TODO: show warning if > 7 ips
 	//TODO: check public ip only if private ip is from inet route
 
-	bool publish = true;
-	if (publish_name.empty())
+	bool publish = !no_publish;
+	if (!no_external && publish_name.empty())
 	{
 		uint32_t pub_ip;
 		int pub_port;
@@ -272,15 +283,22 @@ void remote_connect(bool debug)
 
 		if (enet_port == pub_port && std::find(ips.begin(), ips.end(), pub_ip) != ips.end())
 		{
-			struct in_addr a;
-			a.s_addr = pub_ip;
-			*out2 << "server seems to have an externally accessible IP " << inet_ntoa(a) << std::endl;
-			publish = false;
+			*out2 << "Computer seems to have an externally accessible IP " << format_ip(pub_ip);
+			*out2 << " therefore server will not be published; use `remote connect -no-external` to change this." << std::endl;
+
+			ips.clear();
+			ips.push_back(pub_ip);
+
+			publish = false;			
+		}
+		else if (debug)
+		{
+			*out2 << "External address " << format_ip(pub_ip) << ":" << pub_port << " does not match private IPs and port " << enet_port << std::endl;
 		}
 	}
 
 	if (publish)
-		ensure_publish_details(debug);
+		ensure_publish_details(debug, randomize);
 
 	bool has_pwd = !pwd_hash.empty();
 
@@ -315,12 +333,20 @@ void remote_connect(bool debug)
 	    // 5. Published name
 	    memcpy(rawptr, publish_name.c_str(), publish_name.length());
 	    rawptr += publish_name.length();
+
+	    if (debug)
+	    	*out2 << "Publishing server with name " << publish_name << " and password hash " << pwd_hash << std::endl;
 	}
+
+	*out2 << COLOR_LIGHTGREEN << "Scan the following QR code with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
+#ifdef WIN32
+
+#endif
 
     show_qrcode_with_data(rawdata, rawsz);
     delete[] rawdata;
 
-    // So that any messages from another thread during connection don't interrupt QR code
+    // So that any messages from another thread during connection don't interrupt QR code output
     if (publish)
 		remote_publish(publish_name);    	
 }
