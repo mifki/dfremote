@@ -105,14 +105,14 @@ bool get_all_ips(vector<uint32_t> &ips)
 #endif
 }
 
-bool get_private_ip_list(vector<uint32_t> &ips, bool debug)
+bool get_private_ip_list(color_ostream &out, vector<uint32_t> &ips, bool debug)
 {
 	// First try finding address of an interface with a route to Internet (8.8.8.8)
 	uint32_t ip;
-	if (0&&get_ip_with_inet(&ip))
+	if (get_ip_with_inet(&ip))
 	{
 		if (debug)
-			*out2 << "Found IP with Internet route: " << format_ip(ip) << std::endl;
+			out << "Found IP with Internet route: " << format_ip(ip) << std::endl;
 		ips.push_back(ip);
 		return true;
 	}
@@ -122,10 +122,10 @@ bool get_private_ip_list(vector<uint32_t> &ips, bool debug)
 	{
 		if (debug)
 		{
-			*out2 << "Found all IPs:";
+			out << "Found all IPs:";
 			for (auto it = ips.cbegin(); it < ips.cend();it++)
-				*out2 << " " << format_ip(*it);
-			*out2 << std::endl;
+				out << " " << format_ip(*it);
+			out << std::endl;
 		}
 
 		return true;
@@ -206,7 +206,7 @@ void ensure_publish_details(bool debug, bool randomize)
 	}
 }
 
-void output_qrcode(uint8_t *data, int width)
+void output_qrcode(color_ostream &out, uint8_t *data, int width)
 {
 #ifdef WIN32
 	// On Windows, setting color passes the value directly to SetConsoleTextAttribute, which can set bg color too
@@ -218,57 +218,57 @@ void output_qrcode(uint8_t *data, int width)
 #endif
 
 	for (int x = 0; x < width+2; x++)
-		*out2 << WHITE;
-	*out2 << COLOR_RESET << std::endl;
+		out << WHITE;
+	out << COLOR_RESET << std::endl;
 
 	for (int y = 0; y < width; y++) {
-		*out2 << WHITE;
+		out << WHITE;
 		for (int x = 0; x < width; x++) {
 			int byte = (x * width + y) / 8;
 			int bit = (x * width + y) % 8;
 			int value = data[byte] & (0x80 >> bit);
 			if (value)
-				*out2 << BLACK;
+				out << BLACK;
 			else
-				*out2 << WHITE;
+				out << WHITE;
 		}
 
-		*out2 << WHITE;
-		*out2 << COLOR_RESET << std::endl;
+		out << WHITE;
+		out << COLOR_RESET << std::endl;
 	}
 
 	for (int x = 0; x < width+2; x++)
-		*out2 << WHITE;
-	*out2 << COLOR_RESET << std::endl;
+		out << WHITE;
+	out << COLOR_RESET << std::endl;
 }
 
-void show_qrcode_with_data(uint8_t *rawdata, int rawsz)
+void show_qrcode_with_data(color_ostream &out, uint8_t *rawdata, int rawsz)
 {
 	// Convert binary to numeric as built-in iOS QR Code decoding can return strings only
 	char *buf = new char[rawsz*3];
 	for (int i = 0; i < rawsz; i++)
 		sprintf(buf+i*3, "%03d", rawdata[i]);
 
-	//*out2 << buf << std::endl;
+	//out << buf << std::endl;
 
 	uint8_t data[MAX_BITDATA];
 	int width = EncodeData(QR_LEVEL_L, 0, buf, 0, data);
 	delete[] buf;
 
-	output_qrcode(data, width);
+	output_qrcode(out, data, width);
 }
 
-void remote_connect(bool debug, bool no_external, bool no_publish, bool randomize)
+void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_publish, bool randomize)
 {
 	if (!remote_start())
 	{
-		*out2 << COLOR_RED << "Error starting Remote server, can not proceed" << std::endl;
-		*out2 << COLOR_RESET;
+		out << COLOR_RED << "Error starting Remote server, can not proceed" << std::endl;
+		out << COLOR_RESET;
 		return;
 	}
 
 	vector<uint32_t> ips;
-	get_private_ip_list(ips, debug);
+	get_private_ip_list(out, ips, debug);
 
 	//TODO: check error and don't proceed if no ips
 	//TODO: show warning if > 7 ips
@@ -283,8 +283,8 @@ void remote_connect(bool debug, bool no_external, bool no_publish, bool randomiz
 
 		if (enet_port == pub_port && std::find(ips.begin(), ips.end(), pub_ip) != ips.end())
 		{
-			*out2 << "Computer seems to have an externally accessible IP " << format_ip(pub_ip);
-			*out2 << " therefore server will not be published; use `remote connect -no-external` to change this." << std::endl;
+			out << "Computer seems to have an externally accessible IP " << format_ip(pub_ip) << std::endl;
+			out << "therefore server will not be published; use `remote connect -no-external` to change this." << std::endl;
 
 			ips.clear();
 			ips.push_back(pub_ip);
@@ -293,7 +293,7 @@ void remote_connect(bool debug, bool no_external, bool no_publish, bool randomiz
 		}
 		else if (debug)
 		{
-			*out2 << "External address " << format_ip(pub_ip) << ":" << pub_port << " does not match private IPs and port " << enet_port << std::endl;
+			out << "External address " << format_ip(pub_ip) << ":" << pub_port << " does not match private IPs and port " << enet_port << std::endl;
 		}
 	}
 
@@ -335,15 +335,15 @@ void remote_connect(bool debug, bool no_external, bool no_publish, bool randomiz
 	    rawptr += publish_name.length();
 
 	    if (debug)
-	    	*out2 << "Publishing server with name " << publish_name << " and password hash " << pwd_hash << std::endl;
+	    	out << "Publishing server with name " << publish_name << " and password hash " << pwd_hash << std::endl;
 	}
 
-	*out2 << COLOR_LIGHTGREEN << "Scan the following QR code with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
+	out << COLOR_LIGHTGREEN << "Scan the following QR code with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
 #ifdef WIN32
 
 #endif
 
-    show_qrcode_with_data(rawdata, rawsz);
+    show_qrcode_with_data(out, rawdata, rawsz);
     delete[] rawdata;
 
     // So that any messages from another thread during connection don't interrupt QR code output

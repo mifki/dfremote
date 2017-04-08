@@ -31,7 +31,7 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
             bool no_external = HAS_FLAG("-no-external");
             bool no_publish = HAS_FLAG("-no-publish");
             bool randomize = HAS_FLAG("-randomize");
-            remote_connect(debug, no_external, no_publish, randomize);
+            remote_connect(out, debug, no_external, no_publish, randomize);
             save_config();
         }
         else if (cmd == "password" || cmd == "pwd" || cmd == "pass")
