@@ -349,4 +349,6 @@ void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_pu
     // So that any messages from another thread during connection don't interrupt QR code output
     if (publish)
 		remote_publish(publish_name);    	
+
+	out << "If you like the game, consider supporting Dwarf Fortress authors, Tarn and Zach Adams. Visit bay12games.com/support.html" << std::endl;
 }
