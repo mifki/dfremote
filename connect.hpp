@@ -258,8 +258,14 @@ void show_qrcode_with_data(color_ostream &out, uint8_t *rawdata, int rawsz)
 	output_qrcode(out, data, width);
 }
 
-void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_publish, bool randomize)
+void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_publish, bool randomize, bool firewall)
 {
+#ifdef WIN32
+	check_open_firewall(&out, enet_port);
+#endif
+	if (firewall)
+		return;
+
 	if (!remote_start())
 	{
 		out << COLOR_RED << "Error starting Remote server, can not proceed" << std::endl;
@@ -339,9 +345,6 @@ void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_pu
 	}
 
 	out << COLOR_LIGHTGREEN << "Scan the following QR code with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
-#ifdef WIN32
-
-#endif
 
     show_qrcode_with_data(out, rawdata, rawsz);
     delete[] rawdata;
