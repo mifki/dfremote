@@ -1988,6 +1988,7 @@ local handlers = {
         [34] = unit_get_health,
         [35] = unit_customize,
         [36] = unit_get_inventory_and_spatters,
+        [37] = unit_get_skills2,
 
         [40] = unit_get_assigned_animals,
         [41] = unit_get_assign_animal_choices,
