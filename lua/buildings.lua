@@ -159,9 +159,10 @@ function building_query_selected(bldid)
     if not constructed then
         local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed) --hint:df.building_actual
 
-        local cjob = bld.jobs[0]
-        local active = cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working
-        local suspended = cjob.flags.suspend
+        --todo: how can there be no construction job (found in logs)?
+        local cjob = #bld.jobs > 0 and bld.jobs[0]
+        local active = cjob and (cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working)
+        local suspended = cjob and cjob.flags.suspend
 
         --todo: 'Construction initiated.' - when?
         local stagename
