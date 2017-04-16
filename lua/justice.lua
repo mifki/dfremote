@@ -24,10 +24,10 @@ function justice_get_data()
 		local function process_crimes(ret, cases)
 			for i,v in ipairs(C_ws_cases(ws)) do
 				local victim = df.unit.find(v.victim)
-				local victim_name = victim and unit_fulltitle(victim) or mp.NIL
+				local victim_name = v.victim ~= -1 and unit_fulltitle(victim) or '' --todo: mp.NIL here and check in the app
 
 				local convict = df.unit.find(v.convicted)
-				local convict_name = convict and unit_fulltitle(convict) or mp.NIL
+				local convict_name = v.convicted ~= -1 and unit_fulltitle(convict) or mp.NIL
 
 				local accused = {}
 				local accused_cnt = 0
@@ -88,25 +88,25 @@ function justice_get_crime_details(crimeid)
 	end
 
 	local victim = df.unit.find(v.victim)
-	local victim_name = victim and unit_fulltitle(victim) or mp.NIL
+	local victim_name = v.victim ~= -1 and unit_fulltitle(victim) or '' --todo: mp.NIL here and check in the app
 
 	local convict = df.unit.find(v.convicted)
-	local convict_name = convict and unit_fulltitle(convict) or mp.NIL
+	local convict_name = v.convicted ~= -1 and unit_fulltitle(convict) or mp.NIL
 
 	local witnesses = {}
 	for j,w in ipairs(v.reports) do
 		local witness = df.unit.find(w.witness)
-		local witness_name = witness and unit_fulltitle(witness) or mp.NIL
+		local witness_name = w.witness ~= -1 and unit_fulltitle(witness) or '' --todo: mp.NIL here and check in the app
 
 		local accused = df.unit.find(w.accuses)
-		local accused_name = accused and unit_fulltitle(accused) or mp.NIL
+		local accused_name = w.accuses ~= -1 and unit_fulltitle(accused) or mp.NIL
 
 		local event_str = format_date(w.event_year, w.event_time)
 		local report_str = format_date(w.report_year, w.report_time)
 
 		local found_body = C_crime_report_found_body(w)
 
-		table.insert(witnesses, { witness_name, witness and witness.id or -1, accused_name, accused and accused.id or -1, event_str, report_str, found_body })
+		table.insert(witnesses, { witness_name, w.witness, accused_name, w.accuses, event_str, report_str, found_body })
 	end
 
 	return { crime_type_names[v.mode+1], v.id, v.mode,

@@ -323,7 +323,7 @@ end
 --todo: this should probably return the colour as well
 function unit_fulltitle(unit)
     if not unit then
-        return '#no unit, please report#'
+        return '#invalid unit#'
     end
     
     local uname = unitname(unit)
