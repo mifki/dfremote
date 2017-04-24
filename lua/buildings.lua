@@ -232,7 +232,14 @@ function building_query_selected(bldid)
         end
 
         local moodinfo = building_workshop_get_mood(bld)
-        local workshop_type = (btype ~= df.building_type.Trap and bld.type or bld.trap_type)
+        local workshop_type = -1
+        --todo: --fixme: should pass type for furnaces as well, but app currently doesn't check building type
+        --               when comparing subtype, thus treating magma smelters and jeweler's workshops
+        if btype == df.building_type.Trap then
+            workshop_type = bld.trap_type
+        elseif btype == df.building_type.Workshop then
+            workshop_type = bld.type
+        end
 
         local profile_info = mp.NIL
         if have_noble('MANAGER') then
@@ -668,7 +675,7 @@ function building_workshop_get_jobchoices(bldid)
         table.insert(ret, { 'Link up a Gear Assembly', 'a', mp.NIL, 13, 0 })
         table.insert(ret, { 'Link up a Track Stop', 'T', mp.NIL, 14, 0 })
 
-    else
+    elseif bld._type == df.building_workshopst then
         local bld = bld --as:df.building_workshopst
         local wtype = bld.type
         
@@ -735,6 +742,10 @@ function building_workshop_get_jobchoices(bldid)
             jobchoices = {}
             ret = get_job_choices(ws, 0)
         end
+
+    else
+        jobchoices = {}
+        ret = get_job_choices(ws, 0)
     end
 
     return ret
