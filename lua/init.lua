@@ -871,6 +871,13 @@ function get_status()
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
             elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
                 name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
+            elseif bld._type == df.building_workshopst or bld._type == df.building_furnacest then
+                local jc = #bld.jobs
+                if jc == 0 then
+                    name = name .. ' (no jobs)'
+                else
+                    name = name .. ' (' .. jc .. ' ' .. (jc == 1 and 'job' or 'jobs') .. ')'
+                end
             end
 
             return 23, (bld and 1 or 0), name
