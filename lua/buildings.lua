@@ -272,7 +272,13 @@ function building_query_selected(bldid)
 
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
-        local ownerprof = owner and unitprof(owner) or '' --todo: unused because fulltitle already includes profession
+        if owner and owner.relations.spouse_id ~= -1 then
+            local owner2 = df.unit.find(owner.relations.spouse_id)
+            if owner2 then
+                ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
+            end
+        end
+        local ownerprof = mp.NIL --xxx: unused because fulltitle already includes profession (and becase of spouses)
         ret = { btype, genflags, bname, bld.is_room, ownername, ownerprof }
 
         if btype == df.building_type.Table then
