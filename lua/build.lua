@@ -62,28 +62,34 @@ function build_confirm(fast)
     -- Automatically select first (closest) item(s); break if wrong mode or nothing to select
     if istrue(fast) then
         if df.global.ui.main.mode == df.ui_sidebar_mode.Build and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
-            local continue
-            repeat
-                continue = false
-                for i,choice in ipairs(df.global.ui_build_selector.choices) do
-                    if choice:getNumCandidates() > 0 then
-                        df.global.ui_build_selector.sel_index = i
-                        gui.simulateInput(ws, K'SELECT')
-                        
-                        if df.global.ui_build_selector.building_type == -1 then
-                            if lastbldcmd ~= -1 then
-                                build(lastbldcmd)
-                            else
-                                df.global.ui.main.mode = df.ui_sidebar_mode.Default
-                            end
+            local req = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index]
+            local max = C_build_req_get_max(req)
+
+            -- disallow quick build for buildings where player can choose any number of items to use
+            if max == 0 then
+                local continue
+                repeat
+                    continue = false
+                    for i,choice in ipairs(df.global.ui_build_selector.choices) do
+                        if choice:getNumCandidates() > 0 then
+                            df.global.ui_build_selector.sel_index = i
+                            gui.simulateInput(ws, K'SELECT')
                             
-                            return {}
-                        else
-                            continue = true
+                            if df.global.ui_build_selector.building_type == -1 then
+                                if lastbldcmd ~= -1 then
+                                    build(lastbldcmd)
+                                else
+                                    df.global.ui.main.mode = df.ui_sidebar_mode.Default
+                                end
+                                
+                                return {}
+                            else
+                                continue = true
+                            end
                         end
                     end
-                end
-            until not continue
+                until not continue
+            end
         end
     end
 
