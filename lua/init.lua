@@ -1826,6 +1826,8 @@ local handlers = {
     [144] = {
         [1] = status_get_overview,
         [2] = status_get_health,
+
+        [10] = performance_skill_get_description,
     },
 
     [145] = {
@@ -1996,6 +1998,7 @@ local handlers = {
         [35] = unit_customize,
         [36] = unit_get_inventory_and_spatters,
         [37] = unit_get_skills2,
+        [38] = unit_get_skills3,
 
         [40] = unit_get_assigned_animals,
         [41] = unit_get_assign_animal_choices,
