@@ -499,6 +499,27 @@ function building_workshop_set_suspend(bldid, idx, value)
     return true    
 end
 
+--luacheck: in=number,number,bool
+function building_workshop_set_do_now(bldid, idx, value)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    if bld.jobs[idx].flags['do_now'] ~= istrue(value) then
+        df.global.ui_workshop_job_cursor = idx
+        gui.simulateInput(ws, K'BUILDJOB_NOW')
+    end
+
+    return true    
+end
+
 --luacheck: in=number,number
 function building_workshop_cancel(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()

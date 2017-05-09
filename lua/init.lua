@@ -1937,6 +1937,7 @@ local handlers = {
         [16] = building_workshop_profile_get,
         [17] = building_workshop_profile_set_minmax,
         [18] = building_workshop_profile_set_unit,
+        [19] = building_workshop_set_do_now,
 
         [30] = building_room_free,
         [31] = building_room_owner_get_candidates,
