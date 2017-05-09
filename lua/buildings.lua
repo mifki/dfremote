@@ -1107,59 +1107,6 @@ end
 
 --luacheck: in=number,number
 function building_room_owner_set(bldid, idx)
-    --[[local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        return
-    end
-
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
-    end
-
-    if not df.global.world.selected_building.is_room then
-        return
-    end    
-
-    local bld = df.global.world.selected_building
-    local btype = bld:getType()
-    local unitid = room_candidate_ids[idx+1]
-    local unit = (unitid ~= -1) and df.unit.find(unitid) or nil
-
-    if unit ~= nil then
-        -- reset squad use
-        --TODO: obviously this is required for some building types only
-        local eid = df.global.ui.main.fortress_entity.id
-
-        -- update squads
-        for i,squad in ipairs(df.global.world.squads.all) do
-            if squad.entity_id == eid then
-                utils.erase_sorted_key(squad.rooms, bld.id, 'building_id')
-
-                -- for weapon racks we need to remove from these fields as well
-                if btype == df.building_type.Weaponrack then
-                    utils.erase_sorted(squad.rack_training, bld.id)
-                    utils.erase_sorted(squad.rack_combat, bld.id)
-                end
-            end
-        end
-        
-        -- update room
-        -- game actually doesn't use this values, it uses from squad only
-        --bld.squads.resize(0)
-
-        --TODO: is this enough?
-        df.global.ui.equipment.update.buildings = true
-
-        -- reset additional flags for beds
-        if btype == df.building_type.Bed then
-            local bld = bld --as:df.building_bedst
-            bld.bed_flags.barracks = false
-            bld.bed_flags.dormitory = false
-        end
-    end
-
-    dfhack.buildings.setOwner(bld, unit)]]
-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
