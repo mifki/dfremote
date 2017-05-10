@@ -48,7 +48,7 @@ function building_workshop_get_mood(bld)
     end
 
     local uname = unitname(unit)
-    local prof = dfhack.units.getProfessionName(unit)
+    local prof = unitprof(unit)
 
     local demands = {}
     if unit.mood ~= df.mood_type.Fell then
@@ -1068,7 +1068,6 @@ function building_room_free(bldid)
     return true
 end
 
-local room_candidate_ids = {}
 --luacheck: in=number
 function building_room_owner_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
@@ -1106,18 +1105,67 @@ function building_room_owner_get_candidates(bldid)
     --todo: check that we have switched to the assignment mode
 
     local ret = {}
-    room_candidate_ids = {}
 
     for i,unit in ipairs(df.global.ui_building_assign_units) do
         if not unit then
             table.insert(ret, { 'Nobody', '', false })
-            table.insert(room_candidate_ids, -1)
         else
-            --todo: use unit_fullname ? how do we want to display them in the list ?
             local cname = unitname(unit)
-            local cprof = dfhack.units.getProfessionName(unit)
+            local cprof = unitprof(unit)
             table.insert(ret, { cname, cprof, unit.flags1.dead })        
-            table.insert(room_candidate_ids, unit.id)
+        end
+    end
+
+    df.global.ui_building_in_assign = false
+
+    return ret
+end
+
+--luacheck: in=number
+function building_room_owner_get_candidates2(bldid)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    if not df.global.world.selected_building.is_room then
+        error('not a room')
+    end
+
+    local keys = {
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+    }
+
+    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
+    --todo: don't know which of the following is required
+    ws:logic()
+    ws:render()
+
+    --todo: check that we have switched to the assignment mode
+
+    local ret = {}
+
+    for i,unit in ipairs(df.global.ui_building_assign_units) do
+        if not unit then
+            table.insert(ret, { 'Nobody', -1, 15, false })
+        else
+            local cname = unit_fulltitle(unit)
+            local cprofcolor = dfhack.units.getProfessionColor(unit)
+            table.insert(ret, { cname, unit.id, cprofcolor, unit.flags1.dead })        
         end
     end
 
@@ -1168,6 +1216,55 @@ function building_room_owner_set(bldid, idx)
     df.global.ui_building_in_assign = false    
 
     return true
+end
+
+--luacheck: in=number,number
+function building_room_owner_set2(bldid, id)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    if not df.global.world.selected_building.is_room then
+        error('not a room')
+    end
+
+    local keys = {
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+    }
+
+    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
+    --todo: don't know which of the following is required
+    ws:logic()
+    ws:render()
+
+    --todo: check that we have switched to the assignment mode    
+
+    for i,unit in ipairs(df.global.ui_building_assign_units) do
+        if (not unit and id == -1) or (unit and unit.id == id) then
+            df.global.ui_building_item_cursor = i
+            gui.simulateInput(ws, 'SELECT')
+            df.global.ui_building_in_assign = false -- just in case
+            return true
+        end
+    end
+
+    df.global.ui_building_in_assign = false
+    error('no candidate with id '..tostring(id))
 end
 
 --luacheck: in=number,number,number

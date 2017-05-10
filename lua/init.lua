@@ -1943,6 +1943,8 @@ local handlers = {
         [31] = building_room_owner_get_candidates,
         [32] = building_room_owner_set,
         [33] = building_room_set_squaduse,
+        [34] = building_room_owner_get_candidates2,
+        [35] = building_room_owner_set2,
 
         [40] = building_farm_set_crop,
         [41] = building_assign_get_candidates,
