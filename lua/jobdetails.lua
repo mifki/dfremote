@@ -1,6 +1,18 @@
 local detail_type_names = { 'Material', 'Image', 'Size', 'Decoration Type' }
 local decoration_type_titles = { 'Image', 'Covered', 'Hanging rings', 'Bands', 'Spikes' }
 
+local function select_artist_to_choose_image(imgws)
+	for j,w in ipairs(imgws.anon_1) do
+		if w == 5 then
+			imgws.category_idx = j
+			gui.simulateInput(imgws, K'SELECT')
+			break
+		end
+	end
+
+	imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+end
+
 --luacheck: in=number,number
 function job_details_get_types(bldid, idx)
 	if bldid == -2 then
@@ -38,8 +50,11 @@ function job_details_get_types(bldid, idx)
 				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
 	        elseif v == 3 then
-				cur = decoration_type_titles[job.hist_figure_id] or '#unknown#'
-
+        		if job.hist_figure_id == -1 then
+        			cur = 'Not set'
+    			else
+					cur = decoration_type_titles[job.hist_figure_id+1] or '#unknown#'
+				end
 			end
 
 			table.insert(list, { detail_type_names[v+1], i, v, cur })
@@ -96,11 +111,12 @@ function job_details_get_choices(bldid, jobidx, detidx)
 
 		elseif dtype == 3 then -- type
 			for i,v in ipairs(det.decoration_types) do
-				if v ~= 0 then -- image not supported
-					local title = decoration_type_titles[v+1]
-
-					table.insert(ret, { title, i --[[, mp.NIL]] })
+				local title = decoration_type_titles[v+1]
+				if v == 0 then
+					title = title .. ' (image customization is not supported)'
 				end
+
+				table.insert(ret, { title, i --[[, mp.NIL]] })
 			end
 		end
 
@@ -133,10 +149,15 @@ function job_details_set(bldid, jobidx, detidx, choiceidx)
 			det.mat_cursor = choiceidx
 		elseif dtype == 2 then -- size
 			det.size_cursor = choiceidx
-		elseif dtype == 3 then -- size
+		elseif dtype == 3 then -- decoration type
 			det.decoration_cursor = choiceidx
 		end
 		gui.simulateInput(ws, K'SELECT')
+		
+		local imgws = dfhack.gui.getCurViewscreen()
+		if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+			select_artist_to_choose_image(imgws)
+		end
 
 		return true
 	end)
@@ -168,9 +189,12 @@ function order_details_get_types(idx)
 				local creature = df.global.world.raws.creatures.all[race]
 				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-	        elseif v == 3 then
-				cur = decoration_type_titles[order.hist_figure_id]
-
+    		elseif v == 3 then
+        		if order.hist_figure_id == -1 then
+        			cur = 'Not set'
+    			else
+					cur = decoration_type_titles[order.hist_figure_id+1] or '#unknown#'
+				end
 			end
 
 			table.insert(list, { detail_type_names[v+1], i, v, cur })
@@ -222,11 +246,12 @@ function order_details_get_choices(idx, detidx)
 
 		elseif dtype == 3 then -- type
 			for i,v in ipairs(det.decoration_types) do
-				if v ~= 0 then -- image not supported
-					local title = decoration_type_titles[v+1]
-
-					table.insert(ret, { title, i --[[, mp.NIL]] })
+				local title = decoration_type_titles[v+1]
+				if v == 0 then
+					title = title .. ' (image customization is not supported)'
 				end
+
+				table.insert(ret, { title, i --[[, mp.NIL]] })
 			end
 		end
 
@@ -254,11 +279,16 @@ function order_details_set(idx, detidx, choiceidx)
 			det.mat_cursor = choiceidx
 		elseif dtype == 2 then -- size
 			det.size_cursor = choiceidx
-		elseif dtype == 3 then -- size
+		elseif dtype == 3 then -- decoration type
 			det.decoration_cursor = choiceidx
 		end
 		gui.simulateInput(ws, K'SELECT')
-
+		
+		local imgws = dfhack.gui.getCurViewscreen()
+		if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+			select_artist_to_choose_image(imgws)
+		end
+		
 		return true
 	end)
 end
@@ -276,15 +306,7 @@ local function ensure_images_loaded(bldid, idx)
 
 				local imgws = dfhack.gui.getCurViewscreen()
 				if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-					for j,w in ipairs(imgws.anon_1) do
-						if w == 5 then
-							imgws.category_idx = j
-							gui.simulateInput(imgws, K'SELECT')
-							break
-						end
-					end
-
-					imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+					select_artist_to_choose_image(imgws)
 				end
 
 				return
@@ -352,20 +374,29 @@ function job_details_image_get_choices(bldid, idx, imgtype)
 				local id = ent.resources.art_image_ids[i]
 				local subid = ent.resources.art_image_subids[i]
 				local _,chunk = utils.linear_index(df.global.world.art_image_chunks, id, 'id')
-				local _,img = utils.linear_index(chunk.images, subid, 'subid')
-
-				if img then
-					local name = translatename(img.name)
-					local name_eng = translatename(img.name, true)
-
-					local origin = kind
-					if v == 0 then
-						origin = kind .. ' symbol'
-					elseif v == 1 then
-						origin = kind .. ' comission'
+				
+				--todo: how can be no chunk (seen in log)?
+				if chunk then
+					local _,img = utils.linear_index(chunk.images, subid, 'subid')
+	
+					--todo: how can be no img?
+					if img then
+						local name = translatename(img.name)
+						local name_eng = translatename(img.name, true)
+	
+						local origin = kind
+						if v == 0 then
+							origin = kind .. ' symbol'
+						elseif v == 1 then
+							origin = kind .. ' comission'
+						end
+	
+						table.insert(ret, { name, { id, subid }, name_eng, origin })
+					else
+						print ('no img '..tostring(subid)..' in chunk '..tostring(id))
 					end
-
-					table.insert(ret, { name, { id, subid }, name_eng, origin })
+				else
+					print ('no chunk '..tostring(id))
 				end
 			end
 		end

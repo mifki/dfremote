@@ -50,7 +50,7 @@ function execute_with_nobles_screen(reset, fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_NOBLES')
 		local noblesws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_noblelistst
-
+		--todo: check that we have switched to nobles screen
 		--todo: why is this here? 
 		if reset then
 		    noblesws.mode = df.viewscreen_layer_noblelistst.T_mode.List
