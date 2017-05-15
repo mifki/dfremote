@@ -1100,7 +1100,7 @@ function m.unpacker (src)
     end
 end
 
-set_string'string_compat'
+set_string'string'
 set_integer'signed'
 if NUMBER_INTEGRAL then
     set_number'integer'
