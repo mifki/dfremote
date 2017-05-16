@@ -323,7 +323,7 @@ end
 --todo: this should probably return the colour as well
 function unit_fulltitle(unit)
     if not unit then
-        return '#no unit, please report#'
+        return '#invalid unit#'
     end
     
     local uname = unitname(unit)
@@ -1258,6 +1258,160 @@ function unit_get_skills(unitid)
 end
 
 --luacheck: in=number
+function unit_get_skills2(unitid)
+    local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit '..tostring(unitid))
+    end
+
+    local common_skills = {}
+    local perfomance_skills = mp.NIL
+
+    local tmp = {}
+    for i,v in ipairs(skill_class_names) do
+        table.insert(tmp, { v, {} })
+    end
+
+    local skills = unit.status.current_soul.skills
+
+    for i,v in ipairs(skills) do
+        local class = df.job_skill.attrs[v.id].type
+        table.insert(tmp[class+1][2], { v.id, v.rating, istrue(v.rusty) })
+    end
+
+    for i,v in ipairs(tmp) do
+        if #v[2] > 0 then
+            table.insert(common_skills, v)
+        end
+    end
+
+    if df_ver >= 4200 then --dfver:4200-
+        local perf = unit.status.current_soul.perfomance_skills
+        if perf then
+            perfomance_skills = {}
+            local tmp
+
+            -- instruments
+            tmp = {}
+            for i,v in ipairs(perf.musical_instruments) do
+                local inst = df.global.world.raws.itemdefs.instruments[v.id]
+                table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), v.rating })
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- poetic
+            tmp = {}
+            for i,v in ipairs(perf.poetic_forms) do
+                local form = df.poetic_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- musical
+            tmp = {}
+            for i,v in ipairs(perf.musical_forms) do
+                local form = df.musical_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- dance
+            tmp = {}
+            for i,v in ipairs(perf.dance_forms) do
+                local form = df.dance_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+        end
+    end
+
+    return { common_skills, perfomance_skills }
+end
+
+--luacheck: in=number
+function unit_get_skills3(unitid)
+    local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit '..tostring(unitid))
+    end
+
+    local common_skills = {}
+    local perfomance_skills = mp.NIL
+
+    local tmp = {}
+    for i,v in ipairs(skill_class_names) do
+        table.insert(tmp, { v, {} })
+    end
+
+    local skills = unit.status.current_soul.skills
+
+    for i,v in ipairs(skills) do
+        local class = df.job_skill.attrs[v.id].type
+        table.insert(tmp[class+1][2], { v.id, v.rating, istrue(v.rusty) })
+    end
+
+    for i,v in ipairs(tmp) do
+        if #v[2] > 0 then
+            table.insert(common_skills, v)
+        end
+    end
+
+    if df_ver >= 4200 then --dfver:4200-
+        local perf = unit.status.current_soul.perfomance_skills
+        if perf then
+            perfomance_skills = {}
+            local tmp
+
+            -- instruments
+            tmp = {}
+            for i,v in ipairs(perf.musical_instruments) do
+                local inst = df.global.world.raws.itemdefs.instruments[v.id]
+                table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), { 0, v.id }, v.rating })
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- poetic
+            tmp = {}
+            for i,v in ipairs(perf.poetic_forms) do
+                local form = df.poetic_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 1, v.id }, v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- musical
+            tmp = {}
+            for i,v in ipairs(perf.musical_forms) do
+                local form = df.musical_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 2, v.id }, v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+
+            -- dance
+            tmp = {}
+            for i,v in ipairs(perf.dance_forms) do
+                local form = df.dance_form.find(v.id)
+                if form then
+                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 3, v.id }, v.rating })
+                end
+            end
+            table.insert(perfomance_skills, tmp)
+        end
+    end
+
+    return { common_skills, perfomance_skills }
+end
+
+--luacheck: in=number
 function unit_get_health(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
@@ -1273,7 +1427,7 @@ function unit_get_health(unitid)
     gui.simulateInput(unitws, K'UNITVIEW_HEALTH')
     df.delete(unitws)
 
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_unit_healthst
     if ws._type ~= df.viewscreen_layer_unit_healthst then
         error('can not switch to health screen')
     end
@@ -1415,3 +1569,5 @@ end
 -- if screen_main()._type == df.viewscreen_dwarfmodest then
 --     print(pcall(function() return json:encode(units_list_dwarves()) end))
 -- end
+
+--print(pcall(function() return json:encode(unit_get_skills2(2158)) end))

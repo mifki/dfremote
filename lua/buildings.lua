@@ -48,7 +48,7 @@ function building_workshop_get_mood(bld)
     end
 
     local uname = unitname(unit)
-    local prof = dfhack.units.getProfessionName(unit)
+    local prof = unitprof(unit)
 
     local demands = {}
     if unit.mood ~= df.mood_type.Fell then
@@ -159,9 +159,10 @@ function building_query_selected(bldid)
     if not constructed then
         local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed) --hint:df.building_actual
 
-        local cjob = bld.jobs[0]
-        local active = cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working
-        local suspended = cjob.flags.suspend
+        --todo: how can there be no construction job (found in logs)?
+        local cjob = #bld.jobs > 0 and bld.jobs[0]
+        local active = cjob and (cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working)
+        local suspended = cjob and cjob.flags.suspend
 
         --todo: 'Construction initiated.' - when?
         local stagename
@@ -231,7 +232,14 @@ function building_query_selected(bldid)
         end
 
         local moodinfo = building_workshop_get_mood(bld)
-        local workshop_type = (btype ~= df.building_type.Trap and bld.type or bld.trap_type)
+        local workshop_type = -1
+        --todo: --fixme: should pass type for furnaces as well, but app currently doesn't check building type
+        --               when comparing subtype, thus treating magma smelters and jeweler's workshops
+        if btype == df.building_type.Trap then
+            workshop_type = bld.trap_type
+        elseif btype == df.building_type.Workshop then
+            workshop_type = bld.type
+        end
 
         local profile_info = mp.NIL
         if have_noble('MANAGER') then
@@ -264,7 +272,13 @@ function building_query_selected(bldid)
 
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
-        local ownerprof = owner and unitprof(owner) or '' --todo: unused because fulltitle already includes profession
+        if owner and owner.relations.spouse_id ~= -1 then
+            local owner2 = df.unit.find(owner.relations.spouse_id)
+            if owner2 then
+                ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
+            end
+        end
+        local ownerprof = mp.NIL --xxx: unused because fulltitle already includes profession (and becase of spouses)
         ret = { btype, genflags, bname, bld.is_room, ownername, ownerprof }
 
         if btype == df.building_type.Table then
@@ -485,6 +499,27 @@ function building_workshop_set_suspend(bldid, idx, value)
     return true    
 end
 
+--luacheck: in=number,number,bool
+function building_workshop_set_do_now(bldid, idx, value)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    if bld.jobs[idx].flags['do_now'] ~= istrue(value) then
+        df.global.ui_workshop_job_cursor = idx
+        gui.simulateInput(ws, K'BUILDJOB_NOW')
+    end
+
+    return true    
+end
+
 --luacheck: in=number,number
 function building_workshop_cancel(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
@@ -667,7 +702,7 @@ function building_workshop_get_jobchoices(bldid)
         table.insert(ret, { 'Link up a Gear Assembly', 'a', mp.NIL, 13, 0 })
         table.insert(ret, { 'Link up a Track Stop', 'T', mp.NIL, 14, 0 })
 
-    else
+    elseif bld._type == df.building_workshopst then
         local bld = bld --as:df.building_workshopst
         local wtype = bld.type
         
@@ -734,6 +769,10 @@ function building_workshop_get_jobchoices(bldid)
             jobchoices = {}
             ret = get_job_choices(ws, 0)
         end
+
+    else
+        jobchoices = {}
+        ret = get_job_choices(ws, 0)
     end
 
     return ret
@@ -1029,7 +1068,6 @@ function building_room_free(bldid)
     return true
 end
 
-local room_candidate_ids = {}
 --luacheck: in=number
 function building_room_owner_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
@@ -1067,18 +1105,67 @@ function building_room_owner_get_candidates(bldid)
     --todo: check that we have switched to the assignment mode
 
     local ret = {}
-    room_candidate_ids = {}
 
     for i,unit in ipairs(df.global.ui_building_assign_units) do
         if not unit then
             table.insert(ret, { 'Nobody', '', false })
-            table.insert(room_candidate_ids, -1)
         else
-            --todo: use unit_fullname ? how do we want to display them in the list ?
             local cname = unitname(unit)
-            local cprof = dfhack.units.getProfessionName(unit)
+            local cprof = unitprof(unit)
             table.insert(ret, { cname, cprof, unit.flags1.dead })        
-            table.insert(room_candidate_ids, unit.id)
+        end
+    end
+
+    df.global.ui_building_in_assign = false
+
+    return ret
+end
+
+--luacheck: in=number
+function building_room_owner_get_candidates2(bldid)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    if not df.global.world.selected_building.is_room then
+        error('not a room')
+    end
+
+    local keys = {
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+    }
+
+    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
+    --todo: don't know which of the following is required
+    ws:logic()
+    ws:render()
+
+    --todo: check that we have switched to the assignment mode
+
+    local ret = {}
+
+    for i,unit in ipairs(df.global.ui_building_assign_units) do
+        if not unit then
+            table.insert(ret, { 'Nobody', -1, 15, false })
+        else
+            local cname = unit_fulltitle(unit)
+            local cprofcolor = dfhack.units.getProfessionColor(unit)
+            table.insert(ret, { cname, unit.id, cprofcolor, unit.flags1.dead })        
         end
     end
 
@@ -1089,59 +1176,6 @@ end
 
 --luacheck: in=number,number
 function building_room_owner_set(bldid, idx)
-    --[[local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        return
-    end
-
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        return
-    end
-
-    if not df.global.world.selected_building.is_room then
-        return
-    end    
-
-    local bld = df.global.world.selected_building
-    local btype = bld:getType()
-    local unitid = room_candidate_ids[idx+1]
-    local unit = (unitid ~= -1) and df.unit.find(unitid) or nil
-
-    if unit ~= nil then
-        -- reset squad use
-        --TODO: obviously this is required for some building types only
-        local eid = df.global.ui.main.fortress_entity.id
-
-        -- update squads
-        for i,squad in ipairs(df.global.world.squads.all) do
-            if squad.entity_id == eid then
-                utils.erase_sorted_key(squad.rooms, bld.id, 'building_id')
-
-                -- for weapon racks we need to remove from these fields as well
-                if btype == df.building_type.Weaponrack then
-                    utils.erase_sorted(squad.rack_training, bld.id)
-                    utils.erase_sorted(squad.rack_combat, bld.id)
-                end
-            end
-        end
-        
-        -- update room
-        -- game actually doesn't use this values, it uses from squad only
-        --bld.squads.resize(0)
-
-        --TODO: is this enough?
-        df.global.ui.equipment.update.buildings = true
-
-        -- reset additional flags for beds
-        if btype == df.building_type.Bed then
-            local bld = bld --as:df.building_bedst
-            bld.bed_flags.barracks = false
-            bld.bed_flags.dormitory = false
-        end
-    end
-
-    dfhack.buildings.setOwner(bld, unit)]]
-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
@@ -1182,6 +1216,55 @@ function building_room_owner_set(bldid, idx)
     df.global.ui_building_in_assign = false    
 
     return true
+end
+
+--luacheck: in=number,number
+function building_room_owner_set2(bldid, id)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error('wrong screen '..tostring(ws._type))
+    end
+
+    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    if not df.global.world.selected_building.is_room then
+        error('not a room')
+    end
+
+    local keys = {
+        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
+        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
+        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
+        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
+        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
+        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
+        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
+        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+    }
+
+    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
+    --todo: don't know which of the following is required
+    ws:logic()
+    ws:render()
+
+    --todo: check that we have switched to the assignment mode    
+
+    for i,unit in ipairs(df.global.ui_building_assign_units) do
+        if (not unit and id == -1) or (unit and unit.id == id) then
+            df.global.ui_building_item_cursor = i
+            gui.simulateInput(ws, 'SELECT')
+            df.global.ui_building_in_assign = false -- just in case
+            return true
+        end
+    end
+
+    df.global.ui_building_in_assign = false
+    error('no candidate with id '..tostring(id))
 end
 
 --luacheck: in=number,number,number

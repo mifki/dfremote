@@ -871,6 +871,13 @@ function get_status()
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
             elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
                 name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
+            elseif bld._type == df.building_workshopst or bld._type == df.building_furnacest then
+                local jc = #bld.jobs
+                if jc == 0 then
+                    name = name .. ' (no jobs)'
+                else
+                    name = name .. ' (' .. jc .. ' ' .. (jc == 1 and 'job' or 'jobs') .. ')'
+                end
             end
 
             return 23, (bld and 1 or 0), name
@@ -1819,6 +1826,8 @@ local handlers = {
     [144] = {
         [1] = status_get_overview,
         [2] = status_get_health,
+
+        [10] = performance_skill_get_description,
     },
 
     [145] = {
@@ -1928,11 +1937,14 @@ local handlers = {
         [16] = building_workshop_profile_get,
         [17] = building_workshop_profile_set_minmax,
         [18] = building_workshop_profile_set_unit,
+        [19] = building_workshop_set_do_now,
 
         [30] = building_room_free,
         [31] = building_room_owner_get_candidates,
         [32] = building_room_owner_set,
         [33] = building_room_set_squaduse,
+        [34] = building_room_owner_get_candidates2,
+        [35] = building_room_owner_set2,
 
         [40] = building_farm_set_crop,
         [41] = building_assign_get_candidates,
@@ -1988,6 +2000,8 @@ local handlers = {
         [34] = unit_get_health,
         [35] = unit_customize,
         [36] = unit_get_inventory_and_spatters,
+        [37] = unit_get_skills2,
+        [38] = unit_get_skills3,
 
         [40] = unit_get_assigned_animals,
         [41] = unit_get_assign_animal_choices,

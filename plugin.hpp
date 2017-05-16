@@ -62,19 +62,21 @@ void allocate_buffers(int tiles)
 
 void free_buffers()
 {
-    free(gscreen_origin);
-    free(gscreentexpos_origin);
-    free(gscreentexpos_addcolor_origin);
-    free(gscreentexpos_grayscale_origin);
-    free(gscreentexpos_cf_origin);
-    free(gscreentexpos_cbr_origin);
+#define FREE(a) { free(a); a = NULL; }
 
-    free(mscreen_origin);
-    free(mscreentexpos_origin);
-    free(mscreentexpos_addcolor_origin);
-    free(mscreentexpos_grayscale_origin);
-    free(mscreentexpos_cf_origin);
-    free(mscreentexpos_cbr_origin);
+    FREE(gscreen_origin);
+    FREE(gscreentexpos_origin);
+    FREE(gscreentexpos_addcolor_origin);
+    FREE(gscreentexpos_grayscale_origin);
+    FREE(gscreentexpos_cf_origin);
+    FREE(gscreentexpos_cbr_origin);
+
+    FREE(mscreen_origin);
+    FREE(mscreentexpos_origin);
+    FREE(mscreentexpos_addcolor_origin);
+    FREE(mscreentexpos_grayscale_origin);
+    FREE(mscreentexpos_cf_origin);
+    FREE(mscreentexpos_cbr_origin);
 }
 
 DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)

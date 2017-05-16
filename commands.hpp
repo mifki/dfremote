@@ -24,6 +24,17 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
             remote_unpublish();
             save_config();
         }
+        else if (cmd == "connect")
+        {
+#define HAS_FLAG(f) (std::find(args.begin()+1, args.end(), f) != args.end())
+            bool debug = HAS_FLAG("-debug");
+            bool no_external = HAS_FLAG("-no-external");
+            bool no_publish = HAS_FLAG("-no-publish");
+            bool randomize = HAS_FLAG("-randomize");
+            bool firewall = HAS_FLAG("-firewall");
+            remote_connect(out, debug, no_external, no_publish, randomize, firewall);
+            save_config();
+        }
         else if (cmd == "password" || cmd == "pwd" || cmd == "pass")
         {
             if (args.size() == 2)

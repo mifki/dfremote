@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <zlib.h>
 
 #if defined(WIN32)
@@ -164,7 +165,7 @@ static int enet_port = 1235;
 static bool debug;
 
 static string publish_name;
-static long last_publish_attempt;
+static enet_uint32 last_publish_attempt;
 static bool mediation_connected;
 
 static std::string pwd_hash = "";
@@ -175,9 +176,12 @@ std::list<ENetPacket*> outgoing;
 
 static ENetPeer *client_peer = NULL;
 static ENetPeer *mediation_peer = NULL;
+static ENetPeer *ip_check_peer = NULL;
 static ENetHost *server;
+static ENetAddress ext_addr;
 
 std::string client_addr;
+bool ip_check_done;
 
 static int timer_timeout = -1;
 static string timer_fn;
@@ -190,7 +194,7 @@ static void patch_rendering(bool enable_lower_levels)
     static bool ready = false;
     static unsigned char orig[MAX_PATCH_LEN];
 
-    long addr = p_render_lower_levels.addr;
+    intptr_t addr = p_render_lower_levels.addr;
     #ifdef WIN32
         addr += Core::getInstance().vinfo->getRebaseDelta();
     #endif
@@ -225,6 +229,11 @@ std::string hash_password(std::string &pwd)
         q = sha256(q);
 
     return q;
+}
+
+bool verify_pwd(string pwdhash)
+{
+    return (pwd_hash.size() == 0 || pwd_hash == pwdhash);
 }
 
 void resend_outgoing()
@@ -854,8 +863,23 @@ void process_mediation_cmd(const unsigned char *mdata, int msz)
     {
         ENetAddress *clientaddr = (ENetAddress*)&mdata[4];
 
-        *out2 << "mediation server asked to connect to client at " << address2ip(clientaddr) << ":" << clientaddr->port << std::endl;
+        *out2 << "Mediation server asked to connect to client at " << address2ip(clientaddr) << ":" << clientaddr->port << std::endl;
         enet_host_connect (server, clientaddr, 2, 0);
+    }
+}
+
+void process_ip_check_cmd(const unsigned char *mdata, int msz)
+{
+    if (msz != 4 + sizeof(ENetAddress))
+        return;
+
+    if (*(unsigned int*)&mdata[0] == 'RETA')
+    {
+        ENetAddress *retaddr = (ENetAddress*)&mdata[4];
+
+        //*out2 << "mediation server returned our public address " << address2ip(retaddr) << ":" << retaddr->port << std::endl;
+        ext_addr = *retaddr;
+        ip_check_done = true;
     }
 }
 
@@ -874,6 +898,14 @@ void send_publish_cmd()
 
     ENetPacket *packet = enet_packet_create (buf, sz, ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(mediation_peer, 0, packet);
+}
+
+void send_ip_check_cmd()
+{
+    *(unsigned int*)&buf[0] = 'GETA';
+
+    ENetPacket *packet = enet_packet_create (buf, 4, ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send(ip_check_peer, 0, packet);
 }
 
 void generate_new_server_token()
@@ -915,9 +947,14 @@ void enthreadmain(ENetHost *server)
 
                 if (event.peer == mediation_peer)
                 {
-                    *out2 << "mediation peer connected" << std::endl;
+                    // *out2 << "mediation peer connected" << std::endl;
                     mediation_connected = true;
                     send_publish_cmd();
+                }
+                else if (event.peer == ip_check_peer)
+                {
+                    // *out2 << "ip check peer connected" << std::endl;
+                    send_ip_check_cmd();
                 }
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
@@ -927,6 +964,9 @@ void enthreadmain(ENetHost *server)
 
                     if (event.peer == mediation_peer)
                         process_mediation_cmd(event.packet->data, event.packet -> dataLength);
+
+                    else if (event.peer == ip_check_peer)
+                        process_ip_check_cmd(event.packet->data, event.packet -> dataLength);
 
                     else if (event.peer != client_peer || mdata[0] == 0x01)
                     {
@@ -946,7 +986,7 @@ void enthreadmain(ENetHost *server)
                             string ver((const char*)mdata + 7, verlen);
                             string hash((const char*)mdata + 7 + verlen + 1, hashlen);
 
-                            if (pwd_hash.size() && pwd_hash != hash)
+                            if (!verify_pwd(hash))
                             {
                                 *out2 << "invalid password from " << address2ip(&event.peer->address) << std::endl;
 
@@ -1155,10 +1195,10 @@ void enthreadmain(ENetHost *server)
     enet_host_destroy(server);
 }
 
-void remote_start()
+bool remote_start()
 {
     if (remote_on)
-        return;
+        return true;
 
 #if defined(WIN32)
     //check_open_firewall(out2, enet_port);
@@ -1179,7 +1219,7 @@ void remote_start()
     if (!server)
     {
         *out2 << "Error starting DF Remote Server" << std::endl;
-        return;
+        return false;
     }
 
     *out2 << COLOR_LIGHTGREEN << "Dwarf Fortress Remote server listening on port " << enet_port << std::endl;
@@ -1196,6 +1236,7 @@ void remote_start()
     remote_on = true;
 
     enthread = new tthread::thread((void (*)(void *))enthreadmain, server);
+    return true;
 }
 
 void remote_unload_lua()
@@ -1305,11 +1346,6 @@ void set_timer(int timeout, string fn)
     timer_fn = fn;
 }
 
-bool verify_pwd(string pwdhash)
-{
-    return (pwd_hash.size() == 0 || pwd_hash == pwdhash);
-}
-
 bool check_wtoken(unsigned int wtoken)
 {
     bool match = (wtoken == world_token);
@@ -1364,6 +1400,7 @@ static void init_dummy_gfx(int count)
 }
 
 #include "config.hpp"
+#include "connect.hpp"
 #include "commands.hpp"
 
 static std::string custom_command(std::string data)

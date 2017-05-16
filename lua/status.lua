@@ -136,4 +136,73 @@ function status_get_health(include_healthy)
     end)
 end
 
+--luacheck: in=number[]
+function performance_skill_get_description(_id)
+    local type = _id[1]
+    local id = _id[2]
+
+    local text = ''
+
+    -- instrument
+    if type == 0 then
+        local inst = df.global.world.raws.itemdefs.instruments[id]
+
+        text = inst.description:gsub('  ', ' ')
+    end
+
+    local unit = df.unit:new()
+
+    local scr = df.viewscreen_unitlistst:new()
+
+    local act = df.activity_entry:new()
+    act.id = 9999999
+    act.type = 8
+
+    df.global.world.activities.all:insert(#df.global.world.activities.all, act)
+
+    unit.social_activities:insert(0,9999999)
+
+    local event = df.activity_event_performancest:new()
+    event.type = type
+    event.event = id
+
+    act.events:insert(0,event)
+
+    scr.units[0]:insert(0, unit)
+    scr.jobs[0]:insert(0, nil)
+
+    scr.page = 0
+    scr.cursor_pos[0] = 0
+
+    gui.simulateInput(scr, 'UNITJOB_VIEW_JOB')
+
+    df.global.world.activities.all:erase(#df.global.world.activities.all-1)
+    scr.units[0]:erase(0)
+    unit:delete()
+    event:delete()
+    act:delete()
+    scr:delete()
+
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
+
+    if ws._type ~= df.viewscreen_textviewerst then
+        error('can not switch to form description screen')
+    end
+
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+    local text = ''
+    
+    for i,v in ipairs(ws.src_text) do
+        if #v.value > 0 then
+            text = text .. dfhack.df2utf(v.value:gsub('%[B]', '[P]', 1)) .. ' '
+        end
+    end
+
+    text = text:gsub('  ', ' ')
+
+    return { text }
+end
+
 --print(pcall(function() return json:encode(status_get_health()) end))
+--print(pcall(function() return json:encode(performance_skill_get_description({1,2})) end))
