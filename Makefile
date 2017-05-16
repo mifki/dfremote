@@ -35,7 +35,8 @@ ifeq ($(shell uname -s), Darwin)
 	CFLAGS += -Wno-tautological-compare
 	LDFLAGS += -framework Security -undefined dynamic_lookup #-mmacosx-version-min=10.6 
 else
-	CFLAGS += -std=c++0x
+	CXX = g++-$(GCCVER)
+	CFLAGS += -std=c++0x -fPIC
 endif
 
 

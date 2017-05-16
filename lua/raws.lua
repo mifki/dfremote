@@ -292,7 +292,7 @@ function raws_apply_creature_gfx(zmsgpackdata)
     end
 
     deflatelua.inflate_zlib{input=zmsgpackdata,output=appenddata}    
-    local data = mp.unpack(msgpackdata)
+    local data = mp.unpack(msgpackdata) --a--s:{1:'string'}[]
 
     if not data then
         return true
@@ -307,7 +307,7 @@ function raws_apply_creature_gfx(zmsgpackdata)
         if raw then
             local gfx = raw.graphics
             for j=2,#v do
-                local def = v[j]
+                local def = v[j] --as:{1:'string',2:'string',3:'number',4:'bool'}
                 local type = def[1]
                 local code = def[2]
                 local tex = def[3]
