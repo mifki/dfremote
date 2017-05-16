@@ -622,7 +622,7 @@ function m.unpacker (src)
     end
 end
 
-set_string'string_compat'
+set_string'string'
 set_integer'unsigned'
 if #pack('n', 0.0) == 4 then
     m.small_lua = true

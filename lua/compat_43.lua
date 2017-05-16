@@ -87,18 +87,3 @@ end
 function C_lever_target_type_set(val)
 	df.global.ui_lever_target_type = val
 end
-
-
-
-
-if df_ver < 4305 then --dfver:4300-4304
-	function C_job_details_setting_detail_type(det)
-		return det.setting_deatil_type
-	end
-
-else --dfver:4305-4399
-	function C_job_details_setting_detail_type(det)
-		return det.setting_detail_type
-	end
-	
-end

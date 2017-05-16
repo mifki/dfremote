@@ -427,8 +427,8 @@ function embark_embark()
 	ws = dfhack.gui.getCurViewscreen()
 
 	-- We're still on the embark map screen, likely a message box is displayed
-	if ws._type == df.viewscreen_choose_start_sitest then
-		if ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal then --hint:df.viewscreen_choose_start_sitest
+	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
+		if C_check_embark_warning_flags(ws) then
 			--todo: should return this message to the app instead of accepting silently
 			gui.simulateInput(ws, K'SELECT')
 			ws = dfhack.gui.getCurViewscreen()

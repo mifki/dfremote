@@ -86,6 +86,12 @@ using df::global::init;
 using df::global::d_init;
 using df::global::gview;
 
+#if defined(DF_04024) || defined(DF_04303)
+    #define TEXPOS_TYPE int32_t
+#else
+    #define TEXPOS_TYPE long
+#endif
+
 static bool enabled;
 static color_ostream *out2;
 
@@ -99,8 +105,8 @@ static int gmenu_w;
 // Buffers for map rendering
 static uint8_t *gscreen;
 static uint8_t *gscreen_origin;
-static long *gscreentexpos;
-static long *gscreentexpos_origin;
+static TEXPOS_TYPE *gscreentexpos;
+static TEXPOS_TYPE *gscreentexpos_origin;
 static int8_t *gscreentexpos_addcolor;
 static int8_t *gscreentexpos_addcolor_origin;
 static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
@@ -110,8 +116,8 @@ static uint8_t *gscreentexpos_grayscale_origin, *gscreentexpos_cf_origin, *gscre
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
 static uint8_t *mscreen_origin;
-static long *mscreentexpos;
-static long *mscreentexpos_origin;
+static TEXPOS_TYPE *mscreentexpos;
+static TEXPOS_TYPE *mscreentexpos_origin;
 static int8_t *mscreentexpos_addcolor;
 static int8_t *mscreentexpos_addcolor_origin;
 static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;

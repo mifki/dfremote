@@ -302,7 +302,7 @@ function unit_fullprof(unit)
         prof = prof .. ' ' ..unit.curse.name
     end
 
-    local ownerid = unit.relations.pet_owner_id
+    local ownerid = C_unit_pet_owner_id(unit)
     local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 
     if not owner and unit.flags1.tame then
@@ -1265,7 +1265,7 @@ function unit_get_skills2(unitid)
     end
 
     local common_skills = {}
-    local perfomance_skills = mp.NIL
+    local performance_skills = mp.NIL
 
     local tmp = {}
     for i,v in ipairs(skill_class_names) do
@@ -1286,9 +1286,9 @@ function unit_get_skills2(unitid)
     end
 
     if df_ver >= 4200 then --dfver:4200-
-        local perf = unit.status.current_soul.perfomance_skills
+        local perf = C_unit_soul_performance_skills(unit.status.current_soul)
         if perf then
-            perfomance_skills = {}
+            performance_skills = {}
             local tmp
 
             -- instruments
@@ -1297,7 +1297,7 @@ function unit_get_skills2(unitid)
                 local inst = df.global.world.raws.itemdefs.instruments[v.id]
                 table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), v.rating })
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- poetic
             tmp = {}
@@ -1307,7 +1307,7 @@ function unit_get_skills2(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- musical
             tmp = {}
@@ -1317,7 +1317,7 @@ function unit_get_skills2(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- dance
             tmp = {}
@@ -1327,11 +1327,11 @@ function unit_get_skills2(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
         end
     end
 
-    return { common_skills, perfomance_skills }
+    return { common_skills, performance_skills }
 end
 
 --luacheck: in=number
@@ -1342,7 +1342,7 @@ function unit_get_skills3(unitid)
     end
 
     local common_skills = {}
-    local perfomance_skills = mp.NIL
+    local performance_skills = mp.NIL
 
     local tmp = {}
     for i,v in ipairs(skill_class_names) do
@@ -1363,9 +1363,9 @@ function unit_get_skills3(unitid)
     end
 
     if df_ver >= 4200 then --dfver:4200-
-        local perf = unit.status.current_soul.perfomance_skills
+        local perf = C_unit_soul_performance_skills(unit.status.current_soul)
         if perf then
-            perfomance_skills = {}
+            performance_skills = {}
             local tmp
 
             -- instruments
@@ -1374,7 +1374,7 @@ function unit_get_skills3(unitid)
                 local inst = df.global.world.raws.itemdefs.instruments[v.id]
                 table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), { 0, v.id }, v.rating })
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- poetic
             tmp = {}
@@ -1384,7 +1384,7 @@ function unit_get_skills3(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), { 1, v.id }, v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- musical
             tmp = {}
@@ -1394,7 +1394,7 @@ function unit_get_skills3(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), { 2, v.id }, v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
 
             -- dance
             tmp = {}
@@ -1404,11 +1404,11 @@ function unit_get_skills3(unitid)
                     table.insert(tmp, { dfhack.TranslateName(form.name, true), { 3, v.id }, v.rating })
                 end
             end
-            table.insert(perfomance_skills, tmp)
+            table.insert(performance_skills, tmp)
         end
     end
 
-    return { common_skills, perfomance_skills }
+    return { common_skills, performance_skills }
 end
 
 --luacheck: in=number
@@ -1520,7 +1520,7 @@ function unit_get_assigned_animals(unitid)
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
-            if work and unit.relations.pet_owner_id == unitid then
+            if work and C_unit_pet_owner_id(unit) == unitid then
                 local name = unit_fulltitle(unit)
 
                 table.insert(ret, { name, unit.id, unit.sex })
@@ -1539,7 +1539,7 @@ function unit_get_assign_animal_choices(unitid)
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
-            if work and unit.relations.pet_owner_id == -1 then
+            if work and C_unit_pet_owner_id(unit) == -1 then
                 local name = unit_fulltitle(unit)
 
                 table.insert(ret, { name, unit.id, unit.sex })
@@ -1561,7 +1561,7 @@ function unit_assign_animals(unitid, animalids)
         local animal = df.unit.find(v)
 
         if animal then
-            animal.relations.pet_owner_id = unit.id
+            C_unit_set_pet_owner_id(animal, unit.id)
         end
     end
 end
