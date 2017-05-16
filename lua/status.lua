@@ -141,13 +141,12 @@ function performance_skill_get_description(_id)
     local type = _id[1]
     local id = _id[2]
 
-    local text = ''
-
     -- instrument
     if type == 0 then
         local inst = df.global.world.raws.itemdefs.instruments[id]
+        local text = inst.description:gsub('  ', ' ')
 
-        text = inst.description:gsub('  ', ' ')
+        return { text }
     end
 
     local unit = df.unit:new()
@@ -171,7 +170,7 @@ function performance_skill_get_description(_id)
     scr.units[0]:insert(0, unit)
     scr.jobs[0]:insert(0, nil)
 
-    scr.page = 0
+    scr.page = df.viewscreen_unitlist_page.Citizens
     scr.cursor_pos[0] = 0
 
     gui.simulateInput(scr, 'UNITJOB_VIEW_JOB')
