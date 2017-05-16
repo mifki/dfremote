@@ -237,7 +237,7 @@ function orders_get()
 	return ret
 end
 
---luacheck: in=number,number,number
+--luacheck: in=number,number,bool
 function orders_set(section, idx, val)
 	section = section + 1
 	idx = idx + 1
