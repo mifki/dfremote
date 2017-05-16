@@ -171,7 +171,7 @@ end
 
 --luacheck: in=bool
 function routes_get_list(withpoints)
-	allpoints = istrue(allpoints)
+	withpoints = istrue(withpoints)
 	
 	local ret = {}
 
