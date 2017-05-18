@@ -308,6 +308,7 @@ function location_retire(id)
 		for i,loc in ipairs(ws.locations) do
 			if loc and loc.id == id then
 				gui.simulateInput(ws, K'LOCATION_RETIRE')
+				return true
 			end
 
 			gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
