@@ -19,7 +19,7 @@ function animals_get()
 
 			local prof = dfhack.units.getProfessionName(unit) --xxx: no nobles, so always capitalized, no need to use unitprof()
 			local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
-			local ownerid = unit.relations.pet_owner_id
+			local ownerid = C_unit_pet_owner_id(unit)
 			local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 			local ownername = owner and (unitname(owner) .. ', ' .. unitprof(owner)) or false
 
@@ -94,7 +94,7 @@ function animals_get2()
 
 				local prof = unitprof(unit)
 				local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
-				local ownerid = unit.relations.pet_owner_id
+				local ownerid = C_unit_pet_owner_id(unit)
 				local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 				local ownername = owner and unit_fulltitle(owner) or mp.NIL
 

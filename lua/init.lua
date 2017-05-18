@@ -1,7 +1,7 @@
 remote_version = require 'remote.version'
 
 json = require 'remote.JSON'
-mp = require 'remote.MessagePack'
+mp = math.frexp and require 'remote.MessagePack' or require 'remote.MessagePack53'
 _ = require 'remote.underscore'
 
 gui = require 'gui'
@@ -192,12 +192,12 @@ local function coordInTree(tree, x, y, z)
         local z3 = tree.pos.z - tree.tree_info.roots_depth
         
         if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
-            local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1))
+            local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
             return (t.trunk or t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 or t.twigs) and t or nil
         end
         
         if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
-            local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1))
+            local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
             return r.trunk and r or nil
         end
 end
@@ -1201,7 +1201,7 @@ function save_game()
     end
 end
 
---luacheck: in=
+--luacheck: in=string
 function dfaas_save_game(pwd)
     if not native.verify_pwd(pwd or '') then
         return false
@@ -1213,7 +1213,7 @@ function dfaas_save_game(pwd)
     return true
 end
 
---luacheck: in=
+--luacheck: in=string
 function dfaas_save_done(pwd)
     if not native.verify_pwd(pwd or '') then
         return false

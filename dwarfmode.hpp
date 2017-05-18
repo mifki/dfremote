@@ -33,7 +33,7 @@ void render_remote_map()
     int tdimy = gps->dimy;
 
     uint8_t *sctop                     = gps->screen;
-    int32_t *screentexpostop           = gps->screentexpos;
+    TEXPOS_TYPE *screentexpostop       = gps->screentexpos;
     int8_t *screentexpos_addcolortop   = gps->screentexpos_addcolor;
     uint8_t *screentexpos_grayscaletop = gps->screentexpos_grayscale;
     uint8_t *screentexpos_cftop        = gps->screentexpos_cf;

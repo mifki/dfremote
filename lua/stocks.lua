@@ -263,7 +263,7 @@ function group_can_melt(group)
     return true
 end
 
---luacheck: in=number[],number,number
+--luacheck: in=number[],number,bool
 function stocks_group_action(groupid, action, value)
     local type = groupid[1]
     local subtype = groupid[2]
@@ -271,6 +271,8 @@ function stocks_group_action(groupid, action, value)
     local mat_index = groupid[4]
 
     local data = native.itemcache_get().cats[type]
+
+    value = istrue(value)
 
     for i,v in ipairs(data.groups_index) do
         if v.subtype == subtype and v.mat_type == mat_type and v.mat_index == mat_index then

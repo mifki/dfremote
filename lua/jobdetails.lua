@@ -82,7 +82,7 @@ function job_details_get_choices(bldid, jobidx, detidx)
 			error('unsupported detail type '..tostring(dtype))
 		end
 
-		if det.setting_deatil_type == -1 then
+		if C_job_details_setting_detail_type(det) == -1 then
 			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
 			gui.simulateInput(ws, K'SELECT')
 		end
@@ -140,7 +140,7 @@ function job_details_set(bldid, jobidx, detidx, choiceidx)
 
 		--todo: modify job.hist_figure_id which holds the detail setting directly ?
 
-		if det.setting_deatil_type == -1 then
+		if C_job_details_setting_detail_type(det) == -1 then
 			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
 			gui.simulateInput(ws, K'SELECT')
 		end
@@ -217,7 +217,7 @@ function order_details_get_choices(idx, detidx)
 			error('unsupported detail type '..tostring(dtype))
 		end
 
-		if det.setting_deatil_type == -1 then
+		if C_job_details_setting_detail_type(det) == -1 then
 			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
 			gui.simulateInput(ws, K'SELECT')
 		end
@@ -270,7 +270,7 @@ function order_details_set(idx, detidx, choiceidx)
 
 		--todo: modify job.hist_figure_id which holds the detail setting directly ?
 
-		if det.setting_deatil_type == -1 then
+		if C_job_details_setting_detail_type(det) == -1 then
 			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
 			gui.simulateInput(ws, K'SELECT')
 		end

@@ -54,6 +54,7 @@
 #include "df/d_init.h"
 #include "df/renderer.h"
 #include "df/interfacest.h"
+#include "df/world.h"
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/viewscreen_topicmeeting_takerequestsst.h"
 #include "df/viewscreen_topicmeetingst.h"
@@ -74,6 +75,7 @@
     return timeVal.tv_sec*1000*1000+timeVal.tv_usec;
 }*/
 
+using namespace DFHack;
 using df::global::world;
 using std::string;
 using std::vector;
@@ -83,6 +85,12 @@ using df::global::ui;
 using df::global::init;
 using df::global::d_init;
 using df::global::gview;
+
+#if defined(DF_04024) || defined(DF_04303)
+    #define TEXPOS_TYPE int32_t
+#else
+    #define TEXPOS_TYPE long
+#endif
 
 static bool enabled;
 static color_ostream *out2;
@@ -97,8 +105,8 @@ static int gmenu_w;
 // Buffers for map rendering
 static uint8_t *gscreen;
 static uint8_t *gscreen_origin;
-static int32_t *gscreentexpos;
-static int32_t *gscreentexpos_origin;
+static TEXPOS_TYPE *gscreentexpos;
+static TEXPOS_TYPE *gscreentexpos_origin;
 static int8_t *gscreentexpos_addcolor;
 static int8_t *gscreentexpos_addcolor_origin;
 static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
@@ -108,8 +116,8 @@ static uint8_t *gscreentexpos_grayscale_origin, *gscreentexpos_cf_origin, *gscre
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
 static uint8_t *mscreen_origin;
-static int32_t *mscreentexpos;
-static int32_t *mscreentexpos_origin;
+static TEXPOS_TYPE *mscreentexpos;
+static TEXPOS_TYPE *mscreentexpos_origin;
 static int8_t *mscreentexpos_addcolor;
 static int8_t *mscreentexpos_addcolor_origin;
 static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;

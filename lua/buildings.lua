@@ -151,10 +151,10 @@ function building_query_selected(bldid)
     local curstage = bld:getBuildStage()
     local maxstage = bld:getMaxBuildStage()
     local constructed = (curstage == maxstage)
-    local workshop = (btype == df.building_type.Workshop or btype == df.building_type.Furnace
-        or btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate))
+    local workshop_like = (btype == df.building_type.Workshop or btype == df.building_type.Furnace
+        or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
 
-    local genflags = packbits(removing, forbidden, actual, constructed, workshop)
+    local genflags = packbits(removing, forbidden, actual, constructed, workshop_like)
 
     if not constructed then
         local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed) --hint:df.building_actual
@@ -216,7 +216,7 @@ function building_query_selected(bldid)
             table.insert(ret, bld.pump_manually)
         end
     
-    elseif workshop then
+    elseif workshop_like then
         local jobs = {}
         for i,job in ipairs(bld.jobs) do
             local title = jobname(job)
@@ -235,9 +235,9 @@ function building_query_selected(bldid)
         local workshop_type = -1
         --todo: --fixme: should pass type for furnaces as well, but app currently doesn't check building type
         --               when comparing subtype, thus treating magma smelters and jeweler's workshops
-        if btype == df.building_type.Trap then
+        if btype == df.building_type.Trap then --as:bld=df.building_trapst
             workshop_type = bld.trap_type
-        elseif btype == df.building_type.Workshop then
+        elseif btype == df.building_type.Workshop then --as:bld=df.building_workshopst
             workshop_type = bld.type
         end
 
@@ -272,8 +272,8 @@ function building_query_selected(bldid)
 
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
-        if owner and owner.relations.spouse_id ~= -1 then
-            local owner2 = df.unit.find(owner.relations.spouse_id)
+        if owner and C_unit_spouse_id(owner) ~= -1 then
+            local owner2 = df.unit.find(C_unit_spouse_id(owner))
             if owner2 then
                 ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
             end
@@ -668,7 +668,7 @@ end
 local glasses = { 'green glass', 'clear glass', 'crystal glass' }
 
 function building_workshop_get_jobchoices(bldid)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_dwarfmodest
     if ws._type ~= df.viewscreen_dwarfmodest then
         error('wrong screen '..tostring(ws._type))
     end
@@ -1607,7 +1607,7 @@ function link_targets_get()
     local linked_ids = {}
     for i,v in ipairs(trigger.linked_mechanisms) do
         for j,w in ipairs(v.general_refs) do
-            if w._type == df.general_ref_building_holderst then
+            if w._type == df.general_ref_building_holderst then --as:w=df.general_ref_building_holderst
                 utils.insert_sorted(linked_ids, w.building_id)
                 break
             end

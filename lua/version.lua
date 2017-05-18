@@ -1,1 +1,1 @@
-return '1.7.1-dev'
+return '1.8.1-dev'

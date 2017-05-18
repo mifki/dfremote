@@ -483,7 +483,7 @@ function get_sell_items(civ_id)
 	if df_ver >= 4200 then --dfver:4200-
 		table.insert(cats,
 		{
-			'Sheet', 62, res.organic.anon_1, f2, --todo: not in entity_sell_category enum
+			'Sheet', 62, C_entity_organic_resources_parchment(res.organic), f2, --todo: not in entity_sell_category enum
 			function (mi) return (#mi.material.prefix>0 and (mi.material.prefix .. ' ') or '') .. mi.material.state_name.Solid .. ' sheet' end, false
 		})
 
