@@ -36,7 +36,7 @@ void core_suspend_fast()
     while(!*frames)
     {
 #ifdef WIN32
-        __asm { nop }
+        __nop();
 #else
         asm volatile ("nop");
 #endif        
