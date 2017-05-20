@@ -37,3 +37,12 @@ end
 function C_location_finder_search_y(finder)
 	return finder.search_y
 end
+
+function C_embark_get_profile_name(ws, idx)
+	--xxx: ws.choices is holding a list of profiles, but the structure is unknown. the first field is string and is the name
+	--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily
+	local ptr = ws.choices[idx]
+	local name = df.reinterpret_cast(df.interaction,ptr).name
+
+	return name
+end

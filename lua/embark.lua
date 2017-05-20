@@ -110,12 +110,9 @@ function embark_get_overview()
 
 		local profiles = {}
 
-		--xxx: ws.choices is holding the list of profiles, but the structure is unknown. the first field is string and is the name
-		--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily
-		for i,v in ipairs(ws.choices) do
-			if ws.choice_types[i] == 2 then
-				local name = df.reinterpret_cast(df.interaction,v).name
-
+		for i,v in ipairs(ws.choice_types) do
+			if v == 2 then
+				local name = C_embark_get_profile_name(ws, i)
 				table.insert(profiles, { name })
 			end
 		end
@@ -488,7 +485,7 @@ function embark_play(idx)
 
 	if idx == -1 then
 		ws.choice = 0
-	elseif idx >= 0 and idx < #ws.choices - 2 then
+	elseif idx >= 0 and idx < #ws.choice_types - 2 then
 		ws.choice = idx + 2
 	else
 		return
