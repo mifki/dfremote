@@ -141,7 +141,7 @@ function embark_get_reclaim_sites()
 		return {}
 	end
 
-	ws.finder.search_x = -1
+	C_location_finder_set_search_x(ws.finder, -1)
 	ws.finder.finder_state = -1
 
 	local ret = {}
@@ -271,7 +271,7 @@ function embark_finder_find(w, h, params)
 	end
 
 	ws.page = df.viewscreen_choose_start_sitest.T_page.Find
-	ws.finder.search_x = -1
+	C_location_finder_set_search_x(ws.finder, -1)
 	ws.finder.finder_state = -1
 
 	ws.finder.options.DimensionX = w
@@ -297,11 +297,11 @@ function embark_finder_status()
 		return nil
 	end]]
 
-	if ws.finder.search_x ~= -1 then
+	if C_location_finder_search_x(ws.finder) ~= -1 then
 		local w = math.floor(df.global.world.world_data.world_width / 16) + 1
 		local h = math.floor(df.global.world.world_data.world_height / 16) + 1
 		local total = w * h
-		local cur = ws.finder.search_x * w + ws.finder.search_y + 1
+		local cur = C_location_finder_search_x(ws.finder) * w + C_location_finder_search_y(ws.finder) + 1
 		if cur > total then cur = total end
 		return { 'searching', cur, total } --todo: include cur/max
 	end
@@ -339,7 +339,7 @@ function embark_finder_next()
 	--todo: handle case when there's no search - return any
 	--todo: handle case if we're in reclaim mode
 
-	if ws.finder.search_x ~= -1 or ws.finder.finder_state < 1 then
+	if C_location_finder_search_x(ws.finder) ~= -1 or ws.finder.finder_state < 1 then
 		return nil
 	end
 
@@ -384,7 +384,7 @@ function embark_finder_clear()
 		return
 	end
 
-	ws.finder.search_x = -1
+	C_location_finder_set_search_x(ws.finder, -1)
 	ws.finder.finder_state = -1
 end
 
@@ -395,7 +395,7 @@ function embark_finder_stop()
 		return
 	end
 
-	ws.finder.search_x = -1
+	C_location_finder_set_search_x(ws.finder, -1)
 
 	return embark_finder_status()
 end
@@ -443,7 +443,7 @@ function embark_reclaim(idx)
 		return
 	end
 
-	ws.finder.search_x = -1
+	C_location_finder_set_search_x(ws.finder, -1)
 	ws.finder.finder_state = -1
 	ws.page = df.viewscreen_choose_start_sitest.T_page.Biome
 	ws.reclaim_idx = idx

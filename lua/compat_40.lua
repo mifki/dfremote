@@ -87,3 +87,15 @@ function C_lever_target_type_set(val)
 		df.reinterpret_cast('int8_t', dfhack.internal.getAddress('ui_workshop_in_add')+1).value = val
 	end	
 end
+
+function C_location_finder_search_x(finder)
+	return finder.search_x
+end
+
+function C_location_finder_set_search_x(finder, val)
+	finder.search_x = val
+end
+
+function C_location_finder_search_y(finder)
+	return finder.search_y
+end

@@ -25,3 +25,15 @@ end
 function C_check_embark_warning_flags(ws)
 	return ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal
 end
+
+function C_location_finder_search_x(finder)
+	return finder.search_x
+end
+
+function C_location_finder_set_search_x(finder, val)
+	finder.search_x = val
+end
+
+function C_location_finder_search_y(finder)
+	return finder.search_y
+end
