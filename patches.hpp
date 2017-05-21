@@ -13,7 +13,7 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
     if (!nops[0])
         memset(nops, 0x90, sizeof(nops));
 
-    long addr = p.addr;
+    intptr_t addr = p.addr;
     #ifdef WIN32
         addr += Core::getInstance().vinfo->getRebaseDelta();
     #endif
