@@ -1,7 +1,7 @@
 #define MAX_PATCH_LEN 32
 
 struct patchdef {
-    unsigned long addr;
+    intptr_t addr;
     int len;
     bool hasdata;
     unsigned char data[MAX_PATCH_LEN];
