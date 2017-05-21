@@ -125,8 +125,8 @@ static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscre
 
 #include "patches.hpp"
 
-#ifdef WIN32
-    // On Windows there's no parameter pointing to the map_renderer structure
+#if defined(WIN32) && !defined(_WIN64)
+    // On Windows 32bit there's no parameter pointing to the map_renderer structure
     typedef void (_stdcall *RENDER_MAP)(int);
 #else
     typedef void (*RENDER_MAP)(void*, int);
@@ -134,7 +134,7 @@ static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscre
 
 RENDER_MAP _render_map;
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_WIN64)
     #define render_map() _render_map(0)
 #else
     #define render_map() _render_map(df::global::map_renderer, 0)
