@@ -61,3 +61,14 @@ function C_embark_get_profile_name(ws, idx)
 	return name
 end
 
+function C_build_req_get_required(req)
+	return req.count_required
+end
+
+function C_build_req_get_max(req)
+	return req.count_max
+end
+
+function C_build_req_get_provided(req)
+	return req.count_provided
+end
