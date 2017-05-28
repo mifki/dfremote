@@ -96,6 +96,9 @@ function manager_new_order(idx, amount)
 	local ot = order_templates[idx + 1] --as:{reaction_name:string,hist_figure_id:number,job_type:'df.job_type',item_type:'df.item_type',item_subtype:number,mat_type:number,mat_index:number,item_category_whole:number,material_category_whole:number}
 	local o = df.manager_order:new()
 
+	o.id = df.global.world.manager_order_next_id
+	df.global.world.manager_order_next_id = df.global.world.manager_order_next_id + 1
+
 	o.reaction_name = ot.reaction_name
 	o.hist_figure_id = ot.hist_figure_id
 	o.job_type = ot.job_type
