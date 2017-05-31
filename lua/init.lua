@@ -2166,7 +2166,7 @@ function matching_version(clientver, apply)
         
         --todo: don't use _silent if debug is on
         dfhack.run_command_silent('multilevel 0')
-        dfhack.run_command_silent('disable confirm')
+        dfhack.run_command_silent('disable confirm gui/extended-status')
         --dfhack.run_command_silent('disable autolabor')
         dfhack.run_command_silent('unload workflow menu-mouse dwarfmonitor automaterial')
         --xxx: the way close_all() works causes crash when mousequery calls Gui::getFocusString(Core::getTopViewscreen())
