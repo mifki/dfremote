@@ -174,7 +174,255 @@ function read_trader_reply()
     return dfhack.df2utf(reply), dfhack.df2utf(mood)
 end
 
--- exact copy of Item::getValue() but also accepts caravan_state, race and quantity
+local function _match_mat_vec(mat_vec, idx, mat_type, mat_index)
+    return mat_type == mat_vec.mat_type[idx] and mat_index == mat_vec.mat_index[idx]
+end
+local function _match_basic_mat(mat_indices, idx, mat_type, mat_index)
+    return mat_type == 0 and mat_index == mat_indices[idx]
+end
+local function _match_item_type_subtype(type, subtypes, idx, item_type, item_subtype)
+    return item_type == type and item_subtype == subtypes[idx]
+end
+
+local sell_category_matchers = {
+    [df.entity_sell_category.Leather] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.leather, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.ClothPlant] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.fiber, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.ClothSilk] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.silk, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Crafts] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.crafts, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Wood] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.wood, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.MetalBars] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_basic_mat (entity.resources.metals, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.SmallCutGems] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_basic_mat (entity.resources.gems, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.LargeCutGems] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_basic_mat (entity.resources.gems, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.StoneBlocks] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_basic_mat (entity.resources.stones, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Seeds] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.seeds, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Anvils] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.metal.anvil, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Weapons] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.WEAPON, entity.resources.weapon_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.TrainingWeapons] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.WEAPON, entity.resources.training_weapon_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Ammo] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+    if item_type == df.item_type.AMMO then
+        print('matching '..item_subtype..'  idx='..idx)
+    end
+        return _match_item_type_subtype (df.item_type.AMMO, entity.resources.ammo_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.TrapComponents] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.TRAPCOMP, entity.resources.trapcomp_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.DiggingImplements] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.WEAPON, entity.resources.digger_type, idx, item_type, item_subtype)
+    end,
+
+    [df.entity_sell_category.Bodywear] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.ARMOR, entity.resources.armor_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Headwear] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.HELM, entity.resources.helm_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Handwear] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.GLOVES, entity.resources.gloves_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Footwear] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.SHOES, entity.resources.shoes_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Legwear] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.PANTS, entity.resources.pants_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Shields] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.SHIELD, entity.resources.shield_type, idx, item_type, item_subtype)
+    end,
+
+    [df.entity_sell_category.Toys] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.TOY, entity.resources.toy_type, idx, item_type, item_subtype)
+    end,
+    [df.entity_sell_category.Instruments] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.INSTRUMENT, entity.resources.instrument_type, idx, item_type, item_subtype)
+    end,
+
+        --[[{
+            'Pets', df.entity_sell_category.Pets, res.animals.pet_races, f00,
+            function (i) return df.global.world.raws.creatures.all[res.animals.pet_races[i] ].caste[res.animals.pet_castes[i] ].caste_name[0] end, false
+        },  ]]
+
+    [df.entity_sell_category.Drinks] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.booze, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Cheese] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.cheese, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Powders] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.powders, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Extracts] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.extracts, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Meat] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.meat, idx, mat_type, mat_index)
+    end,
+        --[[{
+            'Fish', df.entity_sell_category.Fish, res.fish_races, f00,
+            function (i) return df.global.world.raws.creatures.all[res.fish_races[i] ].caste[res.fish_castes[i] ].caste_name[0] end, true
+        },  ]]
+
+    [df.entity_sell_category.Plants] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.plants, idx, mat_type, mat_index)
+    end,
+
+        --todo: FruitsNuts, GardenVegetables, MeatFishRecipes, OtherRecipes,
+
+    [df.entity_sell_category.Stone] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_basic_mat (entity.resources.stones, idx, mat_type, mat_index)
+    end,
+
+
+    [df.entity_sell_category.Cages] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.cages, idx, mat_type, mat_index)
+    end,
+    
+    [df.entity_sell_category.BagsLeather] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.leather, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.BagsPlant] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.fiber, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.BagsSilk] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.silk, idx, mat_type, mat_index)
+    end,
+    
+    [df.entity_sell_category.ThreadPlant] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.fiber, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.ThreadSilk] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.silk, idx, mat_type, mat_index)
+    end,
+    
+    [df.entity_sell_category.RopesPlant] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.fiber, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.RopesSilk] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.silk, idx, mat_type, mat_index)
+    end,
+    
+    [df.entity_sell_category.Barrels] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.barrels, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.FlasksWaterskins] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.flasks, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Quivers] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.quivers, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Backpacks] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.backpacks, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Sand] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.sand, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Glass] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.glass, idx, mat_type, mat_index)
+    end,
+
+        --[[
+       
+            'Miscellaneous', df.entity_sell_category.Miscellaneous, res.wood_products.material.mat_type, f00,
+            function (i)
+                local mi = dfhack.matinfo.decode(res.wood_products.material.mat_type[i], res.wood_products.material.mat_index[i])
+                if res.wood_products.item_type[i] == df.item_type.LIQUID_MISC then
+                    return mi.material.state_name.Liquid
+                end
+
+                if res.wood_products.item_type[i] == df.item_type.BAR then
+                    if mi.material.id == 'COAL' then
+                        return res.wood_products.material.mat_index[i] == 1 and 'Charcoal' or 'Coke'
+                    end
+
+                    return mi.material.state_name.Solid
+                end
+
+                return '?!'
+            end, false
+        },]]
+
+    [df.entity_sell_category.Buckets] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.barrels, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Splints] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.barrels, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.Crutches] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.barrels, idx, mat_type, mat_index)
+    end,
+
+
+        --[[{
+            'Eggs', df.entity_sell_category.Eggs, res.egg_races, f00,
+            function (i) return df.global.world.raws.creatures.all[res.egg_races[i] ].caste[res.egg_castes[i] ].caste_name[0] .. ' egg' end, true
+        },  ]]
+
+    [df.entity_sell_category.BagsYarn] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.wool, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.RopesYarn] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.wool, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.ClothYarn] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.wool, idx, mat_type, mat_index)
+    end,
+    [df.entity_sell_category.ThreadYarn] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.wool, idx, mat_type, mat_index)
+    end,
+
+    [df.entity_sell_category.Tools] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_item_type_subtype (df.item_type.TOOL, entity.resources.tool_type, idx, item_type, item_subtype)
+    end,
+
+    [df.entity_sell_category.Clay] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.clay, idx, mat_type, mat_index)
+    end,
+}
+
+if df_ver >= 4200 then --dfver:4200-
+    --df.entity_sell_category.Parchment
+    sell_category_matchers[df.entity_sell_category.Clay+1] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (C_entity_organic_resources_parchment(entity.resources.organic), idx, mat_type, mat_index)
+    end
+    --df.entity_sell_category.CupsMugsGoblets
+    sell_category_matchers[df.entity_sell_category.Clay+2] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.misc_mat.crafts, idx, mat_type, mat_index)
+    end
+end    
+
+-- exact copy of Item::getValue() but also applies entity, race and caravan modifications, and qty
 function item_value_for_caravan(item, caravan, entity, creature, qty)
     local item_type = item:getType()
     local item_subtype = item:getSubtype()
@@ -240,7 +488,7 @@ function item_value_for_caravan(item, caravan, entity, creature, qty)
     -- Add improvement values
     local impValue = item:getThreadDyeValue(caravan) + item:getImprovementsValue(caravan)
     if item_type == df.item_type.AMMO then -- Ammo improvements are worth less
-        impValue = impValue / 30
+        impValue = math.floor(impValue / 30)
     end
     value = value + impValue
 
@@ -290,25 +538,64 @@ function item_value_for_caravan(item, caravan, entity, creature, qty)
     return math.floor(value)
 end
 
-function item_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
+function item_price_for_caravan(item, caravan, entity, creature, qty, pricetable_buy, pricetable_sell)
     local value = item_value_for_caravan(item, caravan, entity, creature, qty)
 
-    if not pricetable then
-        return value
-    end
+    local item_type = item:getType()
+    local item_subtype = item:getSubtype()
+    local mat_type = item:getMaterial()
+    local mat_subtype = item:getMaterialIndex()
 
-    local reqs = pricetable.items
-    for i=0, #pricetable.items.item_type-1 do
-        if item:getType() == reqs.item_type[i] and (reqs.item_subtype[i] == -1 or item:getSubtype() == reqs.item_subtype[i]) then
-            local not_any = false
-            for i,v in ipairs(reqs.mat_cats[i]) do
-                if v then
-                    not_any = true
+    if pricetable_buy then
+        local reqs = pricetable_buy.items
+        for i,v in ipairs(reqs.item_type) do
+            if item_type == reqs.item_type[i] and (reqs.item_subtype[i] == -1 or item_subtype == reqs.item_subtype[i]) then
+                local matched = false
+                
+                if reqs.mat_types[i] ~= -1 then
+                    matched = mat_type == reqs.mat_types[i] and mat_subtype == reqs.mat_indices[i]
+                
+                else
+                    local any_cat = true
+                    for i,v in ipairs(reqs.mat_cats[i]) do
+                        if v then
+                            any_cat = false
+                            break
+                        end
+                    end
+
+                    matched = any_cat or dfhack.matinfo.matches(dfhack.matinfo.decode(mat_type, mat_index), reqs.mat_cats[i])
+                end
+
+                if matched then
+                    value = math.floor(value * (pricetable_buy.price[i]/128))
+                    print('adjusted to '..value)
                     break
                 end
+
             end
-            if not not_any or dfhack.matinfo.matches(dfhack.matinfo.decode(item.mat_type, item.mat_index), reqs.mat_cats[i]) then
-                return math.floor(value * (pricetable.price[i]/128))
+        end
+    end
+
+    if pricetable_sell then
+        for i,v in ipairs(pricetable_sell.price) do
+            local matcher = sell_category_matchers[i]
+
+            if matcher then
+                local matched = false
+                
+                for j,adj in ipairs(v) do
+                    if matcher(entity, j, item_type, item_subtype, mat_type, mat_index) then
+                        value = math.floor(value * (adj/128))
+                        matched = true
+                        print('matched '..itemname(item,0,true))
+                        break
+                    end
+                end
+
+                if matched then
+                    break
+                end
             end
         end
     end
@@ -316,8 +603,8 @@ function item_price_for_caravan(item, caravan, entity, creature, qty, pricetable
     return value
 end
 
-function item_or_container_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
-    local value = item_price_for_caravan(item, caravan, entity, creature, qty, pricetable)
+function item_or_container_price_for_caravan(item, caravan, entity, creature, qty, pricetable_buy, pricetable_sell)
+    local value = item_price_for_caravan(item, caravan, entity, creature, qty, pricetable_buy, pricetable_sell)
     --[[if qty and qty > 0 then
         value = value / item.stack_size * qty
     end]]
@@ -326,7 +613,7 @@ function item_or_container_price_for_caravan(item, caravan, entity, creature, qt
         if ref:getType() == df.general_ref_type.CONTAINS_ITEM then
             local ref = ref --as:df.general_ref_contains_itemst
             local item2 = df.item.find(ref.item_id)
-            value = value + item_price_for_caravan(item2, caravan, entity, creature, nil, pricetable)
+            value = value + item_price_for_caravan(item2, caravan, entity, creature, nil, pricetable_buy, pricetable_sell)
         
         elseif ref:getType() == df.general_ref_type.CONTAINS_UNIT then
             local ref = ref --as:df.general_ref_contains_unitst
@@ -352,12 +639,12 @@ function depot_calculate_profit()
     local trader_profit = 0
     for i,t in ipairs(ws.trader_selected) do
         if istrue(t) then
-            trader_profit = trader_profit - item_or_container_price_for_caravan(ws.trader_items[i], ws.caravan, ws.entity, creature, ws.trader_count[i], ws.caravan.buy_prices) --nil --ws.caravan.sell_prices)
+            trader_profit = trader_profit - item_or_container_price_for_caravan(ws.trader_items[i], ws.caravan, ws.entity, creature, ws.trader_count[i], ws.caravan.buy_prices, ws.caravan.sell_prices)
         end
     end
     for i,t in ipairs(ws.broker_selected) do
         if istrue(t) then
-            trader_profit = trader_profit + item_or_container_price_for_caravan(ws.broker_items[i], ws.caravan, ws.entity, creature, ws.broker_count[i], ws.caravan.buy_prices)
+            trader_profit = trader_profit + item_or_container_price_for_caravan(ws.broker_items[i], ws.caravan, ws.entity, creature, ws.broker_count[i], ws.caravan.buy_prices, ws.caravan.sell_prices)
         end
     end
         
@@ -451,14 +738,13 @@ function depot_trade_get_items(their)
     local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
     local sel = their and ws.trader_selected or ws.broker_selected
     local counts = their and ws.trader_count or ws.broker_count
-    local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
     local creature = df.global.world.raws.creatures.all[ws.entity.race]
 
     local ret = {}
 
     for i,item in ipairs(items) do
         local title = itemname(item, 0, true)
-        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
+        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, ws.caravan.buy_prices, ws.caravan.sell_prices)
 
         local inner = is_contained(item)
         local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN) --as:df.general_ref_entity_stolenst
@@ -484,14 +770,13 @@ function depot_trade_get_items2(their)
     local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
     local sel = their and ws.trader_selected or ws.broker_selected
     local counts = their and ws.trader_count or ws.broker_count
-    local prices = ws.caravan.buy_prices --their and nil or ws.caravan.buy_prices --ws.caravan.sell_prices
     local creature = df.global.world.raws.creatures.all[ws.entity.race]
 
     local ret = {}
 
     for i,item in ipairs(items) do
         local title = itemname(item, 0, true)
-        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, prices)
+        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, ws.caravan.buy_prices, ws.caravan.sell_prices)
 
         local inner = is_contained(item)
         local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN) --as:df.general_ref_entity_stolenst
@@ -614,3 +899,16 @@ function depot_access()
 
     return df.global.ui.main.mode == df.ui_sidebar_mode.DepotAccess
 end
+
+print(pcall(function() return json:encode(depot_trade_get_items(true)) end))
+print(pcall(function() return json:encode(depot_calculate_profit()) end))
+
+--[[pcall(function() 
+    for i,v in ipairs(dfhack.gui.getCurViewscreen().caravan.sell_prices.items.priority) do
+        for j,w in ipairs(w) do
+            if w ~= 0 then
+                print (i)
+            end
+        end
+    end
+end)]]
