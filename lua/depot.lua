@@ -615,7 +615,7 @@ function item_price_for_caravan(item, caravan, entity, creature, qty, pricetable
         end
     end
 
-    if pricetable_sell and not matched then
+    if pricetable_sell then
         local sell_cats = item_type_to_sell_category[item_type]
         if sell_cats then
             for i,v in ipairs(sell_cats) do
@@ -652,7 +652,7 @@ function item_or_container_price_for_caravan(item, caravan, entity, creature, qt
         if ref:getType() == df.general_ref_type.CONTAINS_ITEM then
             local ref = ref --as:df.general_ref_contains_itemst
             local item2 = df.item.find(ref.item_id)
-            value = value + item_price_for_caravan(item2, caravan, entity, creature, nil, pricetable_buy, pricetable_sell)
+            value = value + item_or_container_price_for_caravan(item2, caravan, entity, creature, nil, pricetable_buy, pricetable_sell)
         
         elseif ref:getType() == df.general_ref_type.CONTAINS_UNIT then
             local ref = ref --as:df.general_ref_contains_unitst
@@ -939,15 +939,5 @@ function depot_access()
     return df.global.ui.main.mode == df.ui_sidebar_mode.DepotAccess
 end
 
-print(pcall(function() return json:encode(depot_trade_get_items(true)) end))
-print(pcall(function() return json:encode(depot_calculate_profit()) end))
-
---[[pcall(function() 
-    for i,v in ipairs(dfhack.gui.getCurViewscreen().caravan.sell_prices.items.priority) do
-        for j,w in ipairs(w) do
-            if w ~= 0 then
-                print (i)
-            end
-        end
-    end
-end)]]
+--print(pcall(function() return json:encode(depot_trade_get_items(false)) end))
+--print(pcall(function() return json:encode(depot_calculate_profit()) end))
