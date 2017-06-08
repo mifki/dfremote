@@ -2117,6 +2117,19 @@ local handlers = {
     }
 }
 
+local function _check_utf8(o)
+    if type(o) == 'string' then
+        if not pcall(function() o:utf8len() end) then
+            error('invalid utf8 string '..dfhack.df2utf(o))
+        end
+
+    elseif type(o) == 'table' then
+        for i,v in ipairs(o) do
+            _check_utf8(v)
+        end
+    end
+end
+
 function handle_command(cmd, subcmd, seq, data, foreign)
     --print(cmd,subcmd,seq)
 
@@ -2136,6 +2149,11 @@ function handle_command(cmd, subcmd, seq, data, foreign)
         end
         
         if ok then
+            local a,b = pcall(function() _check_utf8(ret) end)
+            if not a then
+                return true, generrseqstr(seq) .. b .. ' ' .. cmd .. ' ' .. subcmd
+            end
+            
             return true, genrespseqstr(seq) .. (cmd < 128 and (ret or '') or mp.pack(ret))    
         else
             return true, generrseqstr(seq) .. err
