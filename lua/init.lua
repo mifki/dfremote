@@ -1177,26 +1177,23 @@ function pause_game(pause)
     df.global.pause_state = istrue(pause)
 end
 
+function restore_autobackup()
+    if df.global.ui.main.autosave_request and dfhack.isMapLoaded() then
+        native.set_timer(1, 'restore_autobackup')
+    else
+        df.global.d_init.flags4.AUTOBACKUP = true
+    end
+end
+
 -- from quicksave.lua
 --luacheck: in=
 function save_game()
-    local ui_main = df.global.ui.main
-    local flags4 = df.global.d_init.flags4
-
-    local function restore_autobackup()
-        if ui_main.autosave_request and dfhack.isMapLoaded() then
-            dfhack.timeout(10, 'frames', restore_autobackup)
-        else
-            flags4.AUTOBACKUP = true
-        end
-    end
-
     -- Request auto-save
-    ui_main.autosave_request = true
+    df.global.ui.main.autosave_request = true
 
     -- And since it will overwrite the backup, disable it temporarily
-    if flags4.AUTOBACKUP then
-        flags4.AUTOBACKUP = false
+    if df.global.d_init.flags4.AUTOBACKUP then
+        df.global.d_init.flags4.AUTOBACKUP = false
         restore_autobackup()
     end
 end
