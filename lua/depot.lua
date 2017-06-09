@@ -158,7 +158,7 @@ function read_trader_reply()
                     for i=2,df.global.gps.dimx-2 do
                         local char = df.global.gps.screen[(i*df.global.gps.dimy+j)*4]
 
-                        if not (char == 32 and mood:byte(#mood) == 32) then
+                        if char ~= 0 and not (char == 32 and mood:byte(#mood) == 32) then
                             mood = mood .. string.char(char)
                         end
                     end
