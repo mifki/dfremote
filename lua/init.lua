@@ -2117,7 +2117,7 @@ local handlers = {
 local function _check_utf8(o)
     if type(o) == 'string' then
         if not pcall(function() o:utf8len() end) then
-            error('invalid utf8 string '..dfhack.df2utf(o))
+            error('invalid utf8 string')-- '..dfhack.df2utf(o))
         end
 
     elseif type(o) == 'table' then

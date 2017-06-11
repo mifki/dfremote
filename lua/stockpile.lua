@@ -1392,7 +1392,7 @@ function building_stockpile_getsettings_level3(l1, l2)
 
     local ret = {}
     for i,v in ipairs(titles) do
-        table.insert(ret, { v, list[idx_fn(i)] })
+        table.insert(ret, { dfhack.df2utf(v), list[idx_fn(i)] })
     end
 
     return ret
