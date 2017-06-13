@@ -568,8 +568,10 @@ bool send_map_updates(send_func sendfunc, void *conn)
         // long t2 = enet_time_get2();
         // *out2 << (t2-t1) << std::endl;
 
+        int top = lua_gettop(L);
         Lua::PushModulePublic(*out2, L, "remote", "get_status_ext");
         lua_pushinteger(L, needs_sync);
+        
         if (Lua::SafeCall(*out2, L, 1, 4, true))
         {
             int status1 = lua_tointeger(L, -4);
@@ -618,6 +620,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 }
             }
         }
+        
+        lua_settop(L, top);
     }
 
     unsigned char *emptyb = b;
@@ -830,6 +834,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
     FastCoreSuspender suspend;
 
+    int top = lua_gettop(L);
     Lua::PushModulePublic(*out2, L, "remote", "handle_command");
     lua_pushinteger(L, cmd);
     lua_pushinteger(L, subcmd);
@@ -858,6 +863,8 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
         sendfunc(buf, b-buf, conn);
     }
+    
+    lua_settop(L, top);
 }
 
 void process_mediation_cmd(const unsigned char *mdata, int msz)
@@ -1014,11 +1021,13 @@ void enthreadmain(ENetHost *server)
                                 *out2 << "client connected from " << address2ip(&event.peer->address) << std::endl;
 
                                 const char *server_ver = NULL;
+                                int top = lua_gettop(L);
                                 Lua::PushModulePublic(*out2, L, "remote", "matching_version");
                                 lua_pushlstring(L, ver.c_str(), ver.size());
                                 lua_pushboolean(L, true);
                                 if (Lua::SafeCall(*out2, L, 2, 1, false))
                                     server_ver = lua_tolstring(L, -1, NULL);
+                                lua_settop(L, top);
 
                                 //TODO: disconnect peer if !server_ver, matching_version should return nil if version string is invalid
                                 if (!server_ver)
@@ -1325,9 +1334,11 @@ bool remote_print_version()
 {
     const char *s = NULL;
 
+    int top = lua_gettop(L);
     Lua::PushModulePublic(*out2, L, "remote", "get_version");
     if (Lua::SafeCall(*out2, L, 0, 1, false))
         s = lua_tolstring(L, -1, NULL);
+    lua_settop(L, top);
 
     if (s)
     {
