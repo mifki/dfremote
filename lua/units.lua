@@ -174,7 +174,13 @@ function unit_get_order(unit)
     end
 
     local month = math.floor(df.global.cur_year_tick / 33600)
+    
+    if #squad.schedule <= squad.cur_alert_idx then
+        return nil
+    end
+    
     local sched_orders = squad.schedule[squad.cur_alert_idx][month].orders
+    
     if #sched_orders > 0 then
         return sched_orders[0].order
     end
