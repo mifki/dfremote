@@ -459,7 +459,7 @@ if df_ver >= 4200 then --dfver:4200-
     end
 end    
 
--- copy of Item::getValue() but also applies entity, race and caravan modifications, agreements adjustment, and custom qty
+-- copy of Items::getValue() but also applies entity, race and caravan modifications, agreements adjustment, and custom qty
 function item_value_for_caravan(item, caravan, entity, creature, adjustment, qty)
     local item_type = item:getType()
     local item_subtype = item:getSubtype()
@@ -471,6 +471,21 @@ function item_value_for_caravan(item, caravan, entity, creature, adjustment, qty
     if item_type == df.item_type.CHEESE then
         --todo: seems to be wrong in dfhack's getItemBaseValue() ?
         value = 10
+    
+    elseif item_type == df.item_type.SHEET then
+        value = 5
+        local mi = dfhack.matinfo.decode(mat_type, mat_index)
+        if mi then
+            value = value * mi.material.material_value
+        end
+    
+    elseif item_type == df.item_type.INSTRUMENT and item_subtype < #df.global.world.raws.itemdefs.instruments then
+        value = df.global.world.raws.itemdefs.instruments[item_subtype].value
+        local mi = dfhack.matinfo.decode(mat_type, mat_index)
+        if mi then
+            value = value * mi.material.material_value
+        end
+    
     else
         value = dfhack.items.getItemBaseValue(item_type, item_subtype, mat_type, mat_index)
     end
@@ -939,5 +954,5 @@ function depot_access()
     return df.global.ui.main.mode == df.ui_sidebar_mode.DepotAccess
 end
 
---print(pcall(function() return json:encode(depot_trade_get_items(false)) end))
+--print(pcall(function() return json:encode(depot_trade_get_items(true)) end))
 --print(pcall(function() return json:encode(depot_calculate_profit()) end))
