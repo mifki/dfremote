@@ -201,6 +201,8 @@ function building_query_selected(bldid)
         or btype == df.building_type.AxleHorizontal or btype == df.building_type.GearAssembly or btype == df.building_type.Rollers
         or btype == df.building_type.ScrewPump then
         local machine = df.machine.find(bld.machine.machine_id)
+        
+        --todo: need to handle if no machine
 
         local ttype = dfhack.maps.getTileType(bld.centerx, bld.centery, bld.z)
         local stable_foundation = (ttype ~= df.tiletype.OpenSpace)
@@ -1833,31 +1835,19 @@ function building_assign(bldid, objid, objtype, on)
     ws:logic()
     ws:render()
 
-    --[[local single = (btype == df.building_type.Chain)
-    for i,v in ipairs(df.global.ui_building_assign_units) do
-        if (not v and unitid == -1) or (v and v.id == unitid) then
-            if single or istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
-                df.global.ui_building_item_cursor = i
-                gui.simulateInput(ws, K'SELECT')
-            end
-
-            if single then
-                break
-            end
-        end
-    end]]
-
     local vect = nil
     if objtype == 0 then
         vect = df.global.ui_building_assign_units
     elseif objtype == 1 then
         vect = df.global.ui_building_assign_items
     end
+    
+    local single = btype == df.building_type.Chain
 
     if vect then
         for i,v in ipairs(vect) do
             if v and v.id == objid then
-                if istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
+                if single or istrue(df.global.ui_building_assign_is_marked[i]) ~= on then
                     df.global.ui_building_item_cursor = i
                     local ws = dfhack.gui.getCurViewscreen()
                     gui.simulateInput(ws, K'SELECT')
