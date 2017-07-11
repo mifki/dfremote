@@ -102,7 +102,6 @@ function waypoints_place_point(name, comment)
         return
     end
 
-    --todo: convert to screen_
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.NotesPoints then
     	return
     end
@@ -132,17 +131,17 @@ function waypoints_delete_point(id)
         return
     end
 
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.NotesPoints then
-    	return
-    end
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, K'D_NOTE')
 
-	for i,v in ipairs(df.global.ui.waypoints.points) do
-		if v.id == id then
-			df.global.ui.waypoints.cur_point_index = i
-			gui.simulateInput(ws, K'D_NOTE_DELETE')
-			break
+		for i,v in ipairs(df.global.ui.waypoints.points) do
+			if v.id == id then
+				df.global.ui.waypoints.cur_point_index = i
+				gui.simulateInput(ws, K'D_NOTE_DELETE')
+				break
+			end
 		end
-	end
+	end)
 end
 
 --luacheck: in=number
@@ -214,23 +213,20 @@ function route_delete(id)
         return
     end
 
-    --todo: convert to screen_
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.NotesPoints then
-    	return
-    end
-
-    df.global.ui.main.mode = df.ui_sidebar_mode.NotesRoutes
-    df.global.ui.waypoints.in_edit_waypts_mode = false
-
-	for i,v in ipairs(df.global.ui.waypoints.routes) do
-		if v.id == id then
-			df.global.ui.waypoints.sel_route_idx = i
-			gui.simulateInput(ws, K'D_NOTE_ROUTE_DELETE')
-			break
+	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+		gui.simulateInput(ws, K'D_NOTE')
+		
+	    df.global.ui.main.mode = df.ui_sidebar_mode.NotesRoutes
+	    df.global.ui.waypoints.in_edit_waypts_mode = false
+	
+		for i,v in ipairs(df.global.ui.waypoints.routes) do
+			if v.id == id then
+				df.global.ui.waypoints.sel_route_idx = i
+				gui.simulateInput(ws, K'D_NOTE_ROUTE_DELETE')
+				break
+			end
 		end
-	end
-
-	df.global.ui.main.mode = df.ui_sidebar_mode.NotesPoints
+	end)
 end
 
 --luacheck: in=number,string
