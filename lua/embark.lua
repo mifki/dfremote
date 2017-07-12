@@ -532,5 +532,7 @@ function embark_back_to_map()
 
 	ws.parent.breakdown_level = df.interface_breakdown_types.NONE
 	ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+	C_reset_embark_warning_flags(ws.parent)
 end
 

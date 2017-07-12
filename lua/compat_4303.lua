@@ -26,6 +26,13 @@ function C_check_embark_warning_flags(ws)
 	return ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_normal
 end
 
+function C_reset_embark_warning_flags(ws)
+	ws.in_embark_aquifer = false
+	ws.in_embark_salt = false
+	ws.in_embark_large = false
+	ws.in_embark_normal = false
+end
+
 function C_location_finder_search_x(finder)
 	return finder.search_x
 end

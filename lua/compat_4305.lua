@@ -27,6 +27,14 @@ function C_check_embark_warning_flags(ws)
 	return ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_narrow or ws.in_embark_civ_dying
 end
 
+function C_reset_embark_warning_flags(ws)
+	ws.in_embark_aquifer = false
+	ws.in_embark_salt = false
+	ws.in_embark_large = false
+	ws.in_embark_narrow = false
+	ws.in_embark_civ_dying = false
+end
+
 function C_location_finder_search_x(finder)
 	if dfhack.VERSION == '0.43.05-r1' then
 		return finder.anon_1
