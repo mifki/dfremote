@@ -90,6 +90,9 @@ function embark_get_overview()
 	local ws = dfhack.gui.getCurViewscreen()
 
 	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
+		-- just in case
+		C_reset_embark_warning_flags(ws)
+
 		local civs = {}
 		for i,civ in ipairs(ws.available_civs) do
 			local name = dfhack.df2utf(dfhack.TranslateName(civ.name, true))
@@ -289,6 +292,9 @@ function embark_finder_status()
 	if ws._type ~= df.viewscreen_choose_start_sitest then
 		error('wrong screen '..tostring(ws._type))
 	end
+
+	-- just in case
+	C_reset_embark_warning_flags(ws)
 
 	--[[if ws.page ~= df.viewscreen_choose_start_sitest.T_page.Find then
 		return nil
