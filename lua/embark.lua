@@ -87,7 +87,7 @@ end
 
 --luacheck: in=
 function embark_get_overview()
-	local ws = dfhack.gui.getCurViewscreen()
+	local ws = dfhack.gui.getCurViewscreen(true)
 
 	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
 		-- just in case
@@ -540,5 +540,7 @@ function embark_back_to_map()
 	ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
 	C_reset_embark_warning_flags(ws.parent)
+	
+	--todo: app reloads data straight away, while the screen will change only the next tick
 end
 
