@@ -103,7 +103,7 @@ function zone_information_get(bldid, mode)
             gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                error('can not switch to zone info mode')
+                error('can not switch to zone info mode (selected zone '..tostring(df.global.ui_sidebar_menus.zone.selected.id)..' req zone '..tostring(bldid)..' flags '..tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole)..')')
             end
 
             local list = {}
@@ -126,7 +126,7 @@ function zone_information_get(bldid, mode)
             gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                error('can not switch to zone info mode')
+                error('can not switch to zone info mode (selected zone '..tostring(df.global.ui_sidebar_menus.zone.selected.id)..' req zone '..tostring(bldid)..' flags '..tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole)..')')
             end
 
             local list = {}
