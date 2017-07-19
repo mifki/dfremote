@@ -11,48 +11,45 @@ function location_find_by_id(id)
 	return nil
 end
 
---todo: use list from the locations screen
 --luacheck: in=
 function locations_get_list()
-	local site = df.world_site.find(df.global.ui.site_id)
+	return execute_with_locations_screen(function(ws)
+		local site = df.world_site.find(df.global.ui.site_id)
 
-	local list = {}
+		local list = {}
 
-	for i,loc in ipairs(site.buildings) do
-		local ltype = loc:getType()
+		for j,loc in ipairs(ws.locations) do
+			if loc then
+				local ltype = loc:getType()
 
-		-- if not retired
-		if not loc.flags[1] and
-		   (ltype == df.abstract_building_type.TEMPLE or ltype == df.abstract_building_type.INN_TAVERN or
-		   ltype == df.abstract_building_type.LIBRARY) then
+				local allow_residents = loc.flags[5]
+				local allow_outsiders = loc.flags[4]
+				local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
 
-			local allow_residents = loc.flags[5]
-			local allow_outsiders = loc.flags[4]
-			local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
+				local item = { locname(loc), loc.id, ltype, mode }
 
-			local item = { locname(loc), loc.id, ltype, mode }
+				if ltype == df.abstract_building_type.TEMPLE then
+					local loc = loc --as:df.abstract_building_templest
+					local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)
+					local deity_name = deity and hfname(deity, true) or mp.NIL
 
-			if ltype == df.abstract_building_type.TEMPLE then
-				local loc = loc --as:df.abstract_building_templest
-				local deity = loc.deity ~= -1 and df.historical_figure.find(loc.deity)
-				local deity_name = deity and hfname(deity, true) or mp.NIL
+					table.insert(item, deity_name)
+				end
 
-				table.insert(item, deity_name)
+				table.insert(list, item)
 			end
-
-			table.insert(list, item)
 		end
-	end
 
-	local site_occupations_count = 0
-	local group_id = df.global.ui.group_id
-	for i,v in ipairs(df.global.world.occupations.all) do
-		if v.anon_1 == group_id and v.unit_id ~= -1 then
-			site_occupations_count = site_occupations_count + 1
+		local site_occupations_count = 0
+		local group_id = df.global.ui.group_id
+		for i,v in ipairs(df.global.world.occupations.all) do
+			if v.anon_1 == group_id and v.unit_id ~= -1 then
+				site_occupations_count = site_occupations_count + 1
+			end
 		end
-	end
 
-	return { list, { translatename(site.name), site_occupations_count } }
+		return { list, { translatename(site.name, true), site_occupations_count } }
+	end)
 end
 
 local function count_buildings(loc, count_type)
