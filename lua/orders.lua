@@ -188,7 +188,13 @@ local function simulate_orders_globals()
         local x2 = x + 3
 
         local function t(row, dx, ch)
-        	return string.char(df.global.gps.screen[((x+dx)*df.global.gps.dimy+(y+row))*4]) == ch
+        	local offset = ((x+dx)*df.global.gps.dimy+(y+row))*4
+        	if offset < 0 then
+        		error('screen offset < 0 ('..
+                    ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
+                    ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) .. ')')
+    		end
+        	return string.char(df.global.gps.screen[offset]) == ch
         end
 
         local ret = {}

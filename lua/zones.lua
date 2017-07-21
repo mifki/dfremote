@@ -100,10 +100,18 @@ function zone_information_get(bldid, mode)
 
     if mode == df.building_civzonest.T_zone_flags.pen_pasture then
         return execute_with_selected_zone(bldid, function(ws)
+            local ox = df.global.window_x
+            local oy = df.global.window_y
             gui.simulateInput(ws, K'CIVZONE_PEN_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                error('can not switch to zone info mode (selected zone '..tostring(df.global.ui_sidebar_menus.zone.selected.id)..' req zone '..tostring(bldid)..' flags '..tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole)..')')
+                local jumped = df.global.window_x ~= ox or df.global.window_y ~= oy
+                error('can not switch to zone info mode (sel ' .. tostring(df.global.ui_sidebar_menus.zone.selected.id) .. 
+                    ' req ' .. tostring(bldid) .. 
+                    ' flags ' .. tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole) ..
+                    ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
+                    ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) ..
+                    ' jumped ' .. tostring(jumped) .. ')')
             end
 
             local list = {}
@@ -123,10 +131,18 @@ function zone_information_get(bldid, mode)
     
     if mode == df.building_civzonest.T_zone_flags.pit_pond then
         return execute_with_selected_zone(bldid, function(ws)
+            local ox = df.global.window_x
+            local oy = df.global.window_y
             gui.simulateInput(ws, K'CIVZONE_POND_OPTIONS')
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
-                error('can not switch to zone info mode (selected zone '..tostring(df.global.ui_sidebar_menus.zone.selected.id)..' req zone '..tostring(bldid)..' flags '..tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole)..')')
+                local jumped = df.global.window_x ~= ox or df.global.window_y ~= oy
+                error('can not switch to zone info mode (sel ' .. tostring(df.global.ui_sidebar_menus.zone.selected.id) .. 
+                    ' req ' .. tostring(bldid) .. 
+                    ' flags ' .. tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole) ..
+                    ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
+                    ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) ..
+                    ' jumped ' .. tostring(jumped) .. ')')
             end
 
             local list = {}

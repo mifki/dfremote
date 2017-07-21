@@ -22,7 +22,7 @@ end
 function execute_with_selected_zone(bldid, fn)
 	if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and
 	   df.global.ui_sidebar_menus.zone.selected and df.global.ui_sidebar_menus.zone.selected.id == bldid then
-		return fn(screen_main(), zone)
+		return fn(screen_main(), df.global.ui_sidebar_menus.zone.selected)
 	end
 
 	return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws)
