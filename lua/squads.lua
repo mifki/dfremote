@@ -91,10 +91,9 @@ function squads_get_info()
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        df.global.ui.main.mode = df.ui_sidebar_mode.Default
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        reset_main()
         gui.simulateInput(ws, K'D_SQUADS')
-        --return nil
     end
 
 	-- this is to update order titles in some cases
@@ -135,8 +134,8 @@ function squads_cancel_order(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -156,8 +155,8 @@ function squads_order_move(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -177,8 +176,8 @@ function squads_order_attack_list(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -200,8 +199,8 @@ function squads_order_attack_rect(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -223,8 +222,8 @@ function squads_order_attack_map(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -244,8 +243,8 @@ function squads_attack_list_get(idx)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     local squadsui = df.global.ui.squads
@@ -271,8 +270,8 @@ function squads_attack_list_confirm(idxs)
         error('wrong screen '..tostring(ws._type))
     end
 
-    if df.global.ui.main.mode ~= 1 then
-        error('wrong mode')
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
+        error('wrong mode '..tostring(df.global.ui.main.mode))
     end
 
     local squadsui = df.global.ui.squads

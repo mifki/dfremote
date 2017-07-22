@@ -866,8 +866,14 @@ function get_status()
                     end
                 end
             end
+        
+            local curstage = bld:getBuildStage()
+            local maxstage = bld:getMaxBuildStage()
+            local constructed = (curstage == maxstage)
 
-            if bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
+            if not constructed then        
+                name = name .. ' (not built)'
+            elseif bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
             elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
                 name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
@@ -2183,7 +2189,7 @@ function matching_version(clientver, apply)
         dfhack.run_command_silent('multilevel 0')
         dfhack.run_command_silent('disable confirm gui/extended-status')
         --dfhack.run_command_silent('disable autolabor')
-        dfhack.run_command_silent('unload workflow menu-mouse dwarfmonitor automaterial')
+        dfhack.run_command_silent('unload workflow menu-mouse dwarfmonitor automaterial embark-tools')
         --xxx: the way close_all() works causes crash when mousequery calls Gui::getFocusString(Core::getTopViewscreen())
         dfhack.run_command_silent('unload mousequery')
         
