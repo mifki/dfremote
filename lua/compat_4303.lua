@@ -33,18 +33,6 @@ function C_reset_embark_warning_flags(ws)
 	ws.in_embark_normal = false
 end
 
-function C_location_finder_search_x(finder)
-	return finder.search_x
-end
-
-function C_location_finder_set_search_x(finder, val)
-	finder.search_x = val
-end
-
-function C_location_finder_search_y(finder)
-	return finder.search_y
-end
-
 function C_embark_get_profile_name(ws, idx)
 	--xxx: ws.choices is holding a list of profiles, but the structure is unknown. the first field is string and is the name
 	--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily
@@ -74,4 +62,8 @@ function C_build_req_get_provided(req)
 	req = df.reinterpret_cast(df.ui_build_item_req, addr+4)
 
 	return req.count_provided
+end
+
+function C_location_finder(finder)
+	return finder
 end

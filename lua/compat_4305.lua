@@ -35,30 +35,6 @@ function C_reset_embark_warning_flags(ws)
 	ws.in_embark_civ_dying = false
 end
 
-function C_location_finder_search_x(finder)
-	if dfhack.VERSION == '0.43.05-r1' then
-		return finder.anon_1
-	end
-
-	return finder.search_x
-end
-
-function C_location_finder_set_search_x(finder, val)
-	if dfhack.VERSION == '0.43.05-r1' then
-		finder.anon_1 = val
-	end
-
-	finder.search_x = val
-end
-
-function C_location_finder_search_y(finder)
-	if dfhack.VERSION == '0.43.05-r1' then
-		return finder.search_x
-	end
-
-	return finder.search_y
-end
-
 function C_embark_get_profile_name(ws, idx)
 	--xxx: ws.choices is holding a list of profiles, but the structure is unknown. the first field is string and is the name
 	--xxx: so we reinterpret pointers as some other class that has string name as first field, just to access it from Lua easily
@@ -79,4 +55,14 @@ end
 
 function C_build_req_get_provided(req)
 	return req.count_provided
+end
+
+function C_location_finder(finder)
+	if dfhack.VERSION == '0.43.05-r1' then
+		local size,addr = finder:sizeof()
+		local _finder = df.reinterpret_cast(df.viewscreen_choose_start_sitest.T_finder, addr-4) --as:df.viewscreen_choose_start_sitest.T_finder
+		return _finder
+	end
+
+	return finder
 end
