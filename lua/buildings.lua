@@ -2019,7 +2019,8 @@ function building_goto(bldid)
     gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     recenter_view(bld.centerx, bld.centery, bld.z)
-    --return {jobbld.centerx,jobbld.centery,jobbld.z}
+
+    return true
 end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))

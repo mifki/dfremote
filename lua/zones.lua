@@ -259,3 +259,27 @@ function zone_remove(bldid)
         df.global.ui_sidebar_menus.zone.remove = false
     end)
 end
+
+--luacheck: in=number
+function zone_goto(bldid)
+    local bld = df.building.find(bldid)
+
+    if not bld then
+        return
+    end
+
+    --todo: reset main
+    df.global.ui.main.mode = df.ui_sidebar_mode.Zones
+
+    df.global.cursor.x = bld.centerx
+    df.global.cursor.y = bld.centery
+    df.global.cursor.z = bld.z-1
+
+    local ws = dfhack.gui.getCurViewscreen()
+    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
+
+    recenter_view(bld.centerx, bld.centery, bld.z)
+
+    return true
+end

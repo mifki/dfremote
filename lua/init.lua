@@ -1656,6 +1656,7 @@ local handlers = {
         [5] = zone_information_set,
         [6] = zone_assign,
         [7] = zone_remove,
+        [8] = zone_goto,
     },
 
     [132] = {
