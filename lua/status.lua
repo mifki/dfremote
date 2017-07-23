@@ -57,7 +57,7 @@ function get_unit_counts()
         { 'Dwarven Children', c.CHILD, 4 },
         { 'Fishery Workers', c.FISHERY_WORKER, 1 },
         { 'Farmers', c.FARMER, 6 },
-        { 'Engeneers', c.ENGINEER, 4+8 },
+        { 'Engineers', c.ENGINEER, 4+8 },
     }
      
     local ret_animal = {    
