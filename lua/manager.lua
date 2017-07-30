@@ -14,7 +14,7 @@ function ordertitle(o)
 	local title = utils.call_with_string(btn, 'getLabel')
 	df.delete(btn)
 
-	return title
+	return dfhack.df2utf(title)
 end
 
 --luacheck: in=
