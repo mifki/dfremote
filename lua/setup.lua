@@ -231,8 +231,6 @@ function setup_get_mapinfo(wtoken)
 
     close_all()
     reset_main()
-    
-    dfhack.run_command_silent('repeat -cancel warn-starving')
 
     if #df.global.world.status.announcements > 0 then
         lastann = df.global.world.status.announcements[#df.global.world.status.announcements-1].id
