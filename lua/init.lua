@@ -191,14 +191,23 @@ local function coordInTree(tree, x, y, z)
         local z2 = tree.pos.z + tree.tree_info.body_height
         local z3 = tree.pos.z - tree.tree_info.roots_depth
         
-        if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
-            local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
-            return (t.trunk or t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 or t.twigs) and t or nil
-        end
+        local ok,ret = pcall(function()
+            if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
+                local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
+                return (t.trunk or t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 or t.twigs) and t or nil
+            end
+            
+            if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
+                local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
+                return r.trunk and r or nil
+            end
+        end)
         
-        if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
-            local r = tree.tree_info.roots[z1-z-1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
-            return r.trunk and r or nil
+        if ok then
+            return ret
+        else
+            print(ret)
+            return nil
         end
 end
 
