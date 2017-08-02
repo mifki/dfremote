@@ -215,7 +215,7 @@ function execute_with_petitions_screen(fn)
 		gui.simulateInput(ws, K'D_PETITIONS')
 		local petitionsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_petitionsst
 		if petitionsws._type ~= df.viewscreen_petitionsst then
-			error('wrong screen '..tostring(petitionsws._type))
+			error(errmsg_wrongscreen(petitionsws))
 		end
 
 		local ok,ret = pcall(fn, petitionsws)
@@ -263,7 +263,7 @@ function execute_with_locations_for_building(bldid, fn)
 	--todo: convert this to execute_with_selected
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
@@ -283,7 +283,7 @@ end
 function execute_with_job_details(bldid, idx, fn)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -344,7 +344,7 @@ function execute_with_rooms_screen(fn)
 		gui.simulateInput(ws, K'D_ROOMS')
 		local roomsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_buildinglistst
 		if roomsws._type ~= df.viewscreen_buildinglistst then
-			error('wrong screen '..tostring(roomsws._type))
+			error(errmsg_wrongscreen(roomsws))
 		end
 
 		local ok,ret = pcall(fn, roomsws)

@@ -428,7 +428,7 @@ function job_details_set_image(bldid, idx, imgtype, id)
 
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then

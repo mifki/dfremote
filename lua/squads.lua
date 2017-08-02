@@ -88,7 +88,7 @@ end
 function squads_get_info()
     local ws = screen_main() --dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
@@ -131,11 +131,11 @@ end
 function squads_cancel_order(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -152,11 +152,11 @@ end
 function squads_order_move(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -173,11 +173,11 @@ end
 function squads_order_attack_list(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -196,11 +196,11 @@ end
 function squads_order_attack_rect(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -219,11 +219,11 @@ end
 function squads_order_attack_map(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     for i=0,#df.global.ui.squads.sel_squads-1 do
@@ -240,11 +240,11 @@ end
 function squads_attack_list_get(idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     local squadsui = df.global.ui.squads
@@ -267,11 +267,11 @@ end
 function squads_attack_list_confirm(idxs)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error('wrong mode '..tostring(df.global.ui.main.mode))
+        error(errmsg_wrongmode())
     end
 
     local squadsui = df.global.ui.squads

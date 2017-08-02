@@ -34,7 +34,7 @@ end
 function depot_movegoods_get()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -69,7 +69,7 @@ end
 function depot_movegoods_get2()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -685,7 +685,7 @@ end
 function depot_calculate_profit()
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     local creature = df.global.world.raws.creatures.all[ws.entity.race]    
@@ -784,7 +784,7 @@ end
 function depot_trade_get_items(their)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     their = istrue(their)
@@ -816,7 +816,7 @@ end
 function depot_trade_get_items2(their)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     their = istrue(their)
@@ -944,7 +944,7 @@ end
 function depot_access()
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     reset_main()

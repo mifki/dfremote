@@ -134,7 +134,7 @@ end
 function embark_get_reclaim_sites()
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen '..tostring(ws._type))
+		error(errmsg_wrongscreen(ws))
 	end
 
 	if #df.global.world.world_data.old_sites == 0 then
@@ -217,7 +217,7 @@ end
 local function embark_site_info()
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen '..tostring(ws._type))
+		error(errmsg_wrongscreen(ws))
 	end
 
 	local loc = ws.location
@@ -293,7 +293,7 @@ end
 function embark_finder_status()
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen '..tostring(ws._type))
+		error(errmsg_wrongscreen(ws))
 	end
 
 	-- just in case
@@ -340,7 +340,7 @@ end
 function embark_finder_next()
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_choose_start_sitest
 	if ws._type ~= df.viewscreen_choose_start_sitest then
-		error('wrong screen '..tostring(ws._type))
+		error(errmsg_wrongscreen(ws))
 	end
 
 	--todo: handle case when there's no search matches
@@ -545,7 +545,7 @@ end
 function embark_back_to_map()
 	local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_setupdwarfgamest
 	if ws._type ~= df.viewscreen_setupdwarfgamest then
-		error('wrong screen '..tostring(ws._type))
+		error(errmsg_wrongscreen(ws))
 	end
 
 	ws.parent.breakdown_level = df.interface_breakdown_types.NONE

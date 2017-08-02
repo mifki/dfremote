@@ -222,7 +222,7 @@ function setup_get_mapinfo(wtoken)
             return
         end
         
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     --todo: detect world change here and reset cached designations, buildings, labors

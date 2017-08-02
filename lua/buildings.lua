@@ -117,7 +117,7 @@ end]]
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     local bld
@@ -672,7 +672,7 @@ local glasses = { 'green glass', 'clear glass', 'crystal glass' }
 function building_workshop_get_jobchoices(bldid)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_dwarfmodest
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -792,7 +792,7 @@ local jobs_trap = { K'HOTKEY_TRAP_PULL_LEVER', K'HOTKEY_TRAP_BRIDGE', K'HOTKEY_T
 function building_workshop_addjob(bldid, idx, rep)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1074,7 +1074,7 @@ end
 function building_room_owner_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1127,7 +1127,7 @@ end
 function building_room_owner_get_candidates2(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1180,7 +1180,7 @@ end
 function building_room_owner_set(bldid, idx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1224,7 +1224,7 @@ end
 function building_room_owner_set2(bldid, id)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1409,7 +1409,7 @@ end
 function building_room_set_squaduse(bldid, squadid, mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
@@ -1753,7 +1753,7 @@ local assign_animal_keys = {
 function building_assign_get_candidates(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then

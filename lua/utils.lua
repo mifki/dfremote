@@ -206,3 +206,17 @@ function list_select_item_by_id(ws, listidx, array, id)
 
     return idx
 end
+
+--[[function assert_screen(ws, t)
+    if ws._type ~= t then
+        error(errmsg_wrongscreen(ws))
+    end    
+end]]
+
+function errmsg_wrongscreen(ws)
+    return 'wrong screen ' .. tostring(ws._type) .. ' ' .. dfhack.gui.getCurFocus()
+end
+
+function errmsg_wrongmode()
+    return 'wrong mode ' .. tostring(df.global.ui.main.mode) .. ' ' .. dfhack.gui.getCurFocus()
+end

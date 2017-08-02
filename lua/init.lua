@@ -682,6 +682,17 @@ function get_status()
 
     local ws = dfhack.gui.getCurViewscreen()
 
+    -- get rid of any unexpected DFHack Lua screens, like warn-starving popups
+    if ws._type == df.viewscreen and ws.parent._type == df.viewscreen_dwarfmodest then
+        --xxx: limit to warn-starving popup for now to see what other screens will be logged
+        if dfhack.gui.getCurFocus() == 'dfhack/lua/warn-starving' then
+            local parent = ws.parent
+            parent.child = nil
+            ws:delete()
+            ws = parent
+        end
+    end
+
     if ws._type == df.viewscreen_export_regionst or ws._type == df.viewscreen_game_cleanerst then
         return 97, 0
     end

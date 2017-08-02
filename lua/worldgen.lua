@@ -7,7 +7,7 @@ function worldgen_status()
     end
 
     if ws._type ~= df.viewscreen_new_regionst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if ws.unk_b4 ~= 0 then
@@ -64,7 +64,7 @@ function worldgen_accept()
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     if istrue(ws.worldgen_paused) then
@@ -81,7 +81,7 @@ function worldgen_cancel()
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_new_regionst
 
     if ws._type ~= df.viewscreen_new_regionst then
-        error('wrong screen '..tostring(ws._type))
+        error(errmsg_wrongscreen(ws))
     end
 
     -- Loading raws, can't cancel
