@@ -21,7 +21,7 @@ function charptr_to_string(charptr)
 	return ret
 end
 
-function read_meeting_screen()
+function read_meeting_screen(dfmarkup)
     local text = ''
 	local nl = false
 	local actions = {}
@@ -68,7 +68,11 @@ function read_meeting_screen()
 				-- 	nl = true
 				-- end
 
-				text = text .. (#text > 0 and (nl and '</p><p align=justify>' or ' ') or '<p align=justify>') .. dfhack.df2utf(line)
+				if dfmarkup then
+					text = text .. (#text > 0 and (nl and '[P]' or ' ') or '[P]') .. dfhack.df2utf(line)
+				else
+					text = text .. (#text > 0 and (nl and '</p><p align=justify>' or ' ') or '<p align=justify>') .. dfhack.df2utf(line)
+				end
 				nl = false
 			end
 		else
@@ -76,17 +80,21 @@ function read_meeting_screen()
 		end
 	end
 
-	text = text .. '</p>'
+	if not dfmarkup then
+		text = text .. '</p>'
+	end
 
 	return text, reply, actions
 end
 
 --luacheck: in=
-function meeting_get()
-    local ws = dfhack.gui.getCurViewscreen()
-
+function meeting_get(dfmarkup)
+	dfmarkup = istrue(dfmarkup)
+	
     local text, actions, activity
     local reply = false
+
+    local ws = dfhack.gui.getCurViewscreen()
 
     if ws._type == df.viewscreen_textviewerst and ws.parent._type == df.viewscreen_meetingst then
     	local ws = ws --as:df.viewscreen_textviewerst
@@ -105,27 +113,23 @@ function meeting_get()
 
     	--todo: include all lines here! :)
     	if #ws.text > 0 then
-    		text = '<p align=justify>'
+    		text = dfmarkup and '[P]' or '<p align=justify>'
     		for i,v in ipairs(ws.text) do
-    			local line = dfhack.df2utf(v.value:gsub('%s+', ' '))
+    			local line = dfhack.df2utf(v.value)
 				
 				if text:sub(#text,#text) == '.' and line:find('^[A-Z]') then
-					text = text .. '</p><p align=justify>'
+					text = text .. (dfmarkup and '[P]' or '</p><p align=justify>')
 				end
     			
     			text = text .. line
     		end
-    		text = text .. '</p>'
-    		--ws.text[0].value
-
-    		text = text:gsub('The latest news from (%w+)', 'The latest news from <b>%1</b>')
-    		text = text:gsub('The %u%w+ %u%w+', '<i>%0</i>')
-    		text = text:gsub('The %u%w+ of %u%w+', '<i>%0</i>')
-    		--text = text:gsub('(%u.-) ', '<i>%1</i> ')
+    		if not dfmarkup then
+    			text = text .. '</p>'
+			end
 
     		actions = { 'Finish peeking in on conversation' }
     	else
-	    	text, reply, actions = read_meeting_screen()
+	    	text, reply, actions = read_meeting_screen(dfmarkup)
     	end
     end
 
@@ -138,7 +142,14 @@ function meeting_get()
 	local actor_fullname = actor_name .. ', ' .. unitprof(activity.unit_actor)
 	local noble_fullname = unitname(activity.unit_noble) .. ', ' .. unitprof(activity.unit_noble)
 
+	text = text:gsub('%s+', ' ')
 	text = text:gsub('^'..actor_name..': ', '')
+	if not dfmarkup then
+		text = text:gsub('The latest news from (%w+)', 'The latest news from <b>%1</b>')
+		text = text:gsub('The %u%w+ %u%w+', '<i>%0</i>')
+		text = text:gsub('The %u%w+ of %u%w+', '<i>%0</i>')
+		--text = text:gsub('(%u.-) ', '<i>%1</i> ')
+	end
 
 	return { text, actions, actor_fullname, noble_fullname, reply }
 end
