@@ -684,8 +684,10 @@ function get_status()
 
     -- get rid of any unexpected DFHack Lua screens, like warn-starving popups
     if ws._type == df.viewscreen and ws.parent._type == df.viewscreen_dwarfmodest then
-        --xxx: limit to warn-starving popup for now to see what other screens will be logged
-        if dfhack.gui.getCurFocus() == 'dfhack/lua/warn-starving' then
+        --xxx: limit to these screens for now to see what other screens will be logged
+        --xxx: we disable gui/extended-status but somehow still getting errors caused by its presence in the log
+        local focus = dfhack.gui.getCurFocus()
+        if focus == 'dfhack/lua/warn-starving' or focus == 'dfhack/lua/status_overlay' then
             local parent = ws.parent
             parent.child = nil
             ws:delete()

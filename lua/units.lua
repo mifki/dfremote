@@ -771,7 +771,7 @@ function unit_job_set_repeat(unitid, value)
     return true
 end
 
---luacheck: in=number,
+--luacheck: in=number
 function unit_job_cancel(unitid)
     local unit = df.unit.find(unitid)
     if not unit then
