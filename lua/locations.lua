@@ -425,9 +425,12 @@ function locations_add_get_deity_choices(bldid)
     			end
 
     			local spheres = {}
-    			for j,v in ipairs(hf.info.spheres) do
-    				table.insert(spheres, capitalize(df.sphere_type[v]:lower()))
-    			end
+    			-- got an error about .spheres being nil in the log
+    			if hf.info.spheres then
+	    			for j,v in ipairs(hf.info.spheres) do
+	    				table.insert(spheres, capitalize(df.sphere_type[v]:lower()))
+	    			end
+	    		end
 
     			table.insert(ret, { hfname(hf, true), hf.id, worshippers, spheres })
     		end
