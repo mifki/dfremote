@@ -535,7 +535,7 @@ function embark_play(idx)
         
         df.global.pause_state = true
 
-	    return { title, text }
+	    return { title, dfhack.df2utf(text) }
 	end
 
 	return { '' }
