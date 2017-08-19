@@ -238,8 +238,11 @@ local item_type_to_sell_category = {
     [df.item_type.CRUTCH] = { df.entity_sell_category.Crutches },
     [df.item_type.TOOL] = { df.entity_sell_category.Tools },
     [df.item_type.EGG] = { df.entity_sell_category.Eggs },
-    [df.item_type.SHEET] = { df.entity_sell_category.Parchment },
 }
+
+if df_ver >= 4200 then --dfver:4200-
+    item_type_to_sell_category[df.item_type.SHEET] = { df.entity_sell_category.Parchment }
+end
 
 local sell_category_matchers = {
     [df.entity_sell_category.Leather] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
