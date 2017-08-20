@@ -1903,7 +1903,7 @@ local handlers = {
         [1] = squads_get_info,
         [2] = squads_reset,
 
-        --todo: support multiple squads in the following commands
+        -- deprecated, accept indices
         [11] = squads_cancel_order,
         [12] = squads_order_move,
         [13] = squads_order_attack_list,
@@ -1911,7 +1911,16 @@ local handlers = {
         [15] = squads_attack_list_confirm,
         [16] = squads_order_attack_map,
         [17] = squads_order_attack_rect,
+        
         [18] = squad_set_alert,
+        
+        -- new, accept ids
+        [21] = squads_cancel_order2,
+        [22] = squads_order_move2,
+        [24] = squads_attack_list_get2,
+        [25] = squads_attack_list_confirm2,
+        [26] = squads_order_attack_map2,
+        [27] = squads_order_attack_rect2,
     },
 
     [162] = {

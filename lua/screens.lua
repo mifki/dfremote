@@ -1,17 +1,29 @@
 function screen_main()
-	return df.global.gview.view.child	
+	return df.global.gview.view.child
 end
 
---todo: transitions are not always required
+local function save_state()
+	return { mode=df.global.ui.main.mode }
+end
 
-function execute_with_main_mode(mode, fn)
+local function restore_state(state)
+	df.global.ui.main.mode = state.mode
+end
+
+function execute_with_main_mode(mode, fn, active_and_no_reset)
 	local ws = screen_main()
-	local q = df.global.ui.main.mode
+	if active_and_no_reset and ws.child then
+		error(errmsg_wrongscreen(ws))
+	end
+
+	local state = save_state()
 	df.global.ui.main.mode = mode
 
 	local ok,ret = pcall(fn, ws)
 
-    df.global.ui.main.mode = q
+	if not active_and_no_reset or not ok then
+    	restore_state(state)
+	end
 
 	if not ok then
 		error (ret)
@@ -27,7 +39,7 @@ function execute_with_selected_zone(bldid, fn)
 
 	return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws)
 		local zone = df.building.find(bldid)
-
+ 
 		-- we assume there will be a tile belonging to the zone on y1
 		local x = zone.x1
 		while x < zone.x2 do
