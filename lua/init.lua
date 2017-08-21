@@ -46,6 +46,7 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 require 'remote.hauling'
+require 'remote.3d'
 
 if df_ver >= 4200 then --dfver:4200-
     require 'remote.locations'
@@ -1847,6 +1848,10 @@ local handlers = {
     [142] = {
         --[1] = jobs_get_list,
         [2] = job_get_description,
+    },
+
+    [143] = {
+        [1] = threed_get_block_map,
     },
 
     [144] = {
