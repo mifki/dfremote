@@ -291,8 +291,8 @@ function process(x,y,z, basex, basey, basez, map)
 end
 
 function threed_get_block_map(blockx, blocky, z)
-    local minz = z-5
-    local maxz = z
+    local minz = df.global.window_z+z-5
+    local maxz = df.global.window_z+z
     local minx = blockx*16
     local miny = blocky*16
     local maxx = blockx*16+15
