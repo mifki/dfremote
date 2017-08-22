@@ -14,7 +14,6 @@ end
 
 --luacheck: in=
 function burrows_add()
-	--xxx: simulating input instead of clearing burrows.in_* flags manually
 	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_BURROWS')
 		gui.simulateInput(ws, K'D_BURROWS_ADD')
@@ -23,28 +22,22 @@ end
 
 --luacheck: in=number
 function burrow_delete(id)
-	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-		gui.simulateInput(ws, K'D_BURROWS')
+	for i,v in ipairs(df.global.ui.burrows.list) do
+		if v.id == id then
+			return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+				gui.simulateInput(ws, K'D_BURROWS')
 
-		local idx = -1
-		for i,v in ipairs(df.global.ui.burrows.list) do
-			if v.id == id then
-				idx = i
-				break
-			end
+				df.global.ui.burrows.sel_index = i
+				df.global.ui.burrows.sel_id = id
+				df.global.ui.burrows.in_confirm_delete = true
+		
+				gui.simulateInput(ws, K'MENU_CONFIRM')
+				return true
+			end)	
 		end
-
-		if idx == -1 then
-			return
-		end
-
-		df.global.ui.burrows.sel_index = idx
-		df.global.ui.burrows.sel_id = id
-		df.global.ui.burrows.in_confirm_delete = true
-
-		gui.simulateInput(ws, K'MENU_CONFIRM')
-	end)	
+	end
+	
+	error('no burrow '..tostring(id))
 end
 
 --luacheck: in=number
@@ -80,28 +73,21 @@ end
 
 --luacheck: in=number
 function burrow_start_edit(id)
-	local idx = -1
 	for i,v in ipairs(df.global.ui.burrows.list) do
 		if v.id == id then
-			idx = i
-			break
+			return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+				gui.simulateInput(ws, K'D_BURROWS')
+			
+				df.global.ui.burrows.sel_index = i
+				df.global.ui.burrows.sel_id = id
+			
+				gui.simulateInput(ws, K'D_BURROWS_DEFINE')
+				return true
+			end, true)
 		end
 	end
-
-	if idx == -1 then
-		return
-	end
-
-	local ws = dfhack.gui.getCurViewscreen()
-
-	reset_main()
-	--xxx: simulating input instead of clearing burrows.in_* flags manually
-	gui.simulateInput(ws, K'D_BURROWS')
-
-	df.global.ui.burrows.sel_index = idx
-	df.global.ui.burrows.sel_id = id
-
-	gui.simulateInput(ws, K'D_BURROWS_DEFINE')
+	
+	error('no burrow '..tostring(id))
 end
 
 --luacheck: in=
@@ -111,11 +97,7 @@ end
 
 --luacheck: in=bool
 function burrow_set_brush_mode(erase)
-	df.global.ui.burrows.sym_selector = istrue(erase) and 1 or 0
-
-    local _,addr1 = df.global.ui.burrows:_field('in_define_mode'):sizeof()
-	local _,addr2 = df.global.ui.burrows:_field('sym_selector'):sizeof()
-	dfhack.internal.memmove(addr1+1, addr2, 1)
+	df.global.ui.burrows.brush_erasing = istrue(erase) and 1 or 0
 end
 
 --todo: convert to screen_ functions
@@ -178,31 +160,20 @@ end
 
 --luacheck: in=number
 function burrow_zoom(id)
-	local b = df.burrow.find(id)
+	local idx,b = utils.linear_index(df.global.ui.burrows.list, id, 'id')
+	
 	if not b then
-		return
+		error('no burrow '..tostring(id))
 	end
 
 	if #b.block_x == 0 then
 		return
 	end
 
-	local idx = -1
-	for i,v in ipairs(df.global.ui.burrows.list) do
-		if v.id == id then
-			idx = i
-			break
-		end
-	end
-
-	if idx == -1 then
-		return
-	end
-
 	local ws = dfhack.gui.getCurViewscreen()
 
+	-- enter burrows mode so that the burrow is actually visible
 	reset_main()
-	--xxx: simulating input instead of clearing burrows.in_* flags manually
 	gui.simulateInput(ws, K'D_BURROWS')
 
 	df.global.ui.burrows.sel_index = idx

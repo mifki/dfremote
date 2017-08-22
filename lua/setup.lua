@@ -1,11 +1,10 @@
 local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:number}[]"}[]
     { 'Mine', 'd', df.interface_key.DESIGNATE_DIG },
     { 'Channel', 'h', df.interface_key.DESIGNATE_CHANNEL },
+    { 'Up Ramp', 'r', df.interface_key.DESIGNATE_RAMP },
     { 'Up Stair', 'u', df.interface_key.DESIGNATE_STAIR_UP },
     { 'Down Stair', 'j', df.interface_key.DESIGNATE_STAIR_DOWN },
-    { 'U/D Stair', 'i', df.interface_key.DESIGNATE_STAIR_UPDOWN },
-    { 'Up Ramp', 'r', df.interface_key.DESIGNATE_RAMP },
-    { 'Remove Up Stairs/Ramps', 'z', df.interface_key.DESIGNATE_DIG_REMOVE_STAIRS_RAMPS },
+    { 'Up-Down Stair', 'i', df.interface_key.DESIGNATE_STAIR_UPDOWN },
     { 'Chop Down Trees', 't', df.interface_key.DESIGNATE_CHOP },
     { 'Gather Plants', 'p', df.interface_key.DESIGNATE_PLANTS },
     { 'Smooth Stone', 's', df.interface_key.DESIGNATE_SMOOTH },
@@ -14,26 +13,28 @@ local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:
     { 'Carve Track', 'T', df.interface_key.DESIGNATE_TRACK },
     { 'Toggle Engravings', 'v', df.interface_key.DESIGNATE_TOGGLE_ENGRAVING },
     --{ 'Toggle Standard / Marking', 'M', df.interface_key.DESIGNATE_TOGGLE_MARKER },
-    { 'Remove Construction', 'n', df.interface_key.DESIGNATE_REMOVE_CONSTRUCTION },
-    { 'Remove Designation', 'x', df.interface_key.DESIGNATE_UNDO },    
 
-    { 'Set Building / Item Properties', 'b', df.interface_key.DESIGNATE_BITEM, {
-        { 'Reclaim Items / Buildings', 'c', df.interface_key.DESIGNATE_CLAIM },
-        { 'Forbid Items / Buildings', 'f', df.interface_key.DESIGNATE_UNCLAIM },
-        { 'Melt Items', 'm', df.interface_key.DESIGNATE_MELT },
+    { 'Item & Bld. Actions', 'b', df.interface_key.DESIGNATE_BITEM, {
+        { 'Reclaim', 'c', df.interface_key.DESIGNATE_CLAIM },
+        { 'Forbid', 'f', df.interface_key.DESIGNATE_UNCLAIM },
+        { 'Melt', 'm', df.interface_key.DESIGNATE_MELT },
         { 'Remove Melt', 'M', df.interface_key.DESIGNATE_NO_MELT },
-        { 'Dump Items', 'd', df.interface_key.DESIGNATE_DUMP },
+        { 'Dump', 'd', df.interface_key.DESIGNATE_DUMP },
         { 'Remove Dump', 'D', df.interface_key.DESIGNATE_NO_DUMP },
-        { 'Hide Items / Buildings', 'h', df.interface_key.DESIGNATE_HIDE },
-        { 'Unhide Items / Buildings', 'H', df.interface_key.DESIGNATE_NO_HIDE },
+        { 'Hide', 'h', df.interface_key.DESIGNATE_HIDE },
+        { 'Unhide', 'H', df.interface_key.DESIGNATE_NO_HIDE },
     } },
 
     { 'Set Traffic Areas', 'o', df.interface_key.DESIGNATE_TRAFFIC, {
-        { 'High Traffic Area', 'h', df.interface_key.DESIGNATE_TRAFFIC_HIGH },
-        { 'Normal Traffic Area', 'n', df.interface_key.DESIGNATE_TRAFFIC_NORMAL },
-        { 'Low Traffic Area', 'l', df.interface_key.DESIGNATE_TRAFFIC_LOW },
-        { 'Restricted Traffic Area', 'r', df.interface_key.DESIGNATE_TRAFFIC_RESTRICTED },
-    } }
+        { 'High Traffic', 'h', df.interface_key.DESIGNATE_TRAFFIC_HIGH },
+        { 'Normal Traffic', 'n', df.interface_key.DESIGNATE_TRAFFIC_NORMAL },
+        { 'Low Traffic', 'l', df.interface_key.DESIGNATE_TRAFFIC_LOW },
+        { 'Restricted', 'r', df.interface_key.DESIGNATE_TRAFFIC_RESTRICTED },
+    } },
+
+    { 'Remove\nDesignation', 'x', df.interface_key.DESIGNATE_UNDO },    
+    { 'Remove\nUp Stairs & Ramps', 'z', df.interface_key.DESIGNATE_DIG_REMOVE_STAIRS_RAMPS },
+    { 'Remove\nConstruction', 'n', df.interface_key.DESIGNATE_REMOVE_CONSTRUCTION },
 }
 
 --luacheck: in=
@@ -80,10 +81,18 @@ local function get_choices_build()
             break
         end
 
-        local title = utils.call_with_string(choice, 'getLabel'):gsub(' %(%d+%)$', '')
+        local title = dfhack.df2utf(utils.call_with_string(choice, 'getLabel'):gsub(' %(%d+%)$', ''))
         local key = dfhack.screen.getKeyDisplay(choice.hotkey_id)
         if key == '?' then
             key = ''
+        end
+        
+        if title == 'Traps/Levers' then
+            title = 'Traps & Levers'
+        elseif title == 'Up/Down Stair' then
+            title = 'Up-Down Stair'
+        elseif title == 'Wall/Floor/Stairs/Track' then
+            title = 'Constructions\nWall, Floor, Stairs, ...'
         end
 
         --todo: don't try to clone for category buttons
@@ -100,7 +109,7 @@ local function get_choices_build()
         end
 
         table.insert(building_btns, btnclone or 0)
-        table.insert(choices, { dfhack.df2utf(title), key, #building_btns, subchoices })
+        table.insert(choices, { title, key, #building_btns, subchoices })
     end
 
     return choices            
