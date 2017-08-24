@@ -789,8 +789,8 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
             wx = nx;
             wy = ny;
 
-            if (msz > 6)
-                *df::global::window_z = (mdata[5] | (mdata[6] << 8)); //TODO: wz =
+            if (msz > 5)
+                *df::global::window_z = mdata[5]; //TODO: wz =
 
             if (cmd == 31)
                 df::global::ui->follow_unit = -1;
