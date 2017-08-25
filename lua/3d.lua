@@ -176,7 +176,7 @@ function process(x,y,z, basex, basey, basez, map)
 					if btypename == 'roadpaved' then
 						for bx = bld.x1,bld.x2 do
 							for by = bld.y1,bld.y2 do
-								table.insert(map, { bx-minx,by-miny,zz, { 'building', 'pavement', {}, fg, bg } })
+								table.insert(map, { bx-basex,by-basey,zz, { 'building', 'pavement', {}, fg, bg } })
 							end
 						end
 					
@@ -189,7 +189,7 @@ function process(x,y,z, basex, basey, basez, map)
 						else
 							d = 'door-ns'
 						end
-						table.insert(map, { bld.x1-minx,bld.y1-miny,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', d, {bottom=1}, fg, bg } })
+						table.insert(map, { bld.x1-basex,bld.y1-basey,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', d, {bottom=1}, fg, bg } })
 					
 					elseif btypename == 'cabinet' then
 						local d
@@ -204,10 +204,10 @@ function process(x,y,z, basex, basey, basez, map)
 						else
 							d = 'cabinet'
 						end
-						table.insert(map, { bld.x1-minx,bld.y1-miny,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', d, {bottom=1}, fg, bg } })
+						table.insert(map, { bld.x1-basex,bld.y1-basey,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', d, {bottom=1}, fg, bg } })
 					
 					else
-						table.insert(map, { bld.x1-minx,bld.y1-miny,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', btypename, {bottom=1}, fg, bg } })
+						table.insert(map, { bld.x1-basex,bld.y1-basey,zz, { 'floor',{}, tilefloorcolor(x,y,z) }, { 'building', btypename, {bottom=1}, fg, bg } })
 					end
 				end
 
@@ -227,10 +227,10 @@ function process(x,y,z, basex, basey, basez, map)
 
 	elseif is_floor(t) then
 		local ef = {}
-		if x ~= minx and is_floor(tt(x-1,y,z)) then ef.w=1 end
-		if x ~= maxx and is_floor(tt(x+1,y,z)) then ef.e=1 end
-		if y ~= miny and is_floor(tt(x,y-1,z)) then ef.n=1 end
-		if y ~= maxy and is_floor(tt(x,y+1,z)) then ef.s=1 end
+		-- if x ~= minx and is_floor(tt(x-1,y,z)) then ef.w=1 end
+		-- if x ~= maxx and is_floor(tt(x+1,y,z)) then ef.e=1 end
+		-- if y ~= miny and is_floor(tt(x,y-1,z)) then ef.n=1 end
+		-- if y ~= maxy and is_floor(tt(x,y+1,z)) then ef.s=1 end
 
 		--[[local fg = -1
 		local bg = -1
@@ -291,7 +291,7 @@ function process(x,y,z, basex, basey, basez, map)
 end
 
 function threed_get_block_map(blockx, blocky, z)
-    local minz = df.global.window_z+z-5
+    local minz = df.global.window_z+z---5
     local maxz = df.global.window_z+z
     local minx = blockx*16
     local miny = blocky*16
@@ -307,6 +307,59 @@ function threed_get_block_map(blockx, blocky, z)
     		end
     	end
     end
+
+    return map    
+
+end
+
+local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
+
+function threed_get_block_map2(blockx, blocky, z)
+    local minz = df.global.window_z+z---5
+    local maxz = df.global.window_z+z
+    local minx = blockx*16
+    local miny = blocky*16
+    local maxx = blockx*16+15
+    local maxy = blocky*16+15
+
+    local map = {}
+
+    local z = df.global.window_z
+
+    local block = dfhack.maps.getBlock(blockx, blocky, z)
+
+	for x=0,15 do
+		for y=0,15 do
+			local d = block.designation[x][y]
+
+			if not d.hidden then
+				local tt = block.tiletype[x][y]
+				local tshape = df.tiletype.attrs[tt].shape
+				local tmat = df.tiletype.attrs[tt].material
+
+				if tmat ~= df.tiletype_material.AIR then
+	                local biome_offset_idx = block.region_offset[d.biome]
+	                local geolayer_idx = d.geolayer_index
+
+	                local offset = biome_region_offsets[biome_offset_idx+1]
+	                local rpos = { bit32.rshift(df.global.world.map.region_x,4) + offset[1], bit32.rshift(df.global.world.map.region_y,4) + offset[2] }
+	                local rbio = dfhack.maps.getRegionBiome(table.unpack(rpos))
+	                local geobiome = df.world_geo_biome.find(rbio.geo_index)
+	                local layer = geobiome.layers[geolayer_idx]
+	                local matinfo = dfhack.matinfo.decode(0, layer.mat_index)
+
+	                local floorcolor = matinfo.material.basic_color[0]
+
+
+					table.insert(map, {tshape, floorcolor })
+				else
+					table.insert(map, {0})
+				end
+			else
+				table.insert(map, {0})
+			end
+		end
+	end
 
     return map    
 
