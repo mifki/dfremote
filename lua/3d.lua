@@ -1,4 +1,5 @@
 local utils = require 'utils'
+local tilemat = require 'tile-material'
 
 function istrue(v)
     return v ~= nil and v ~= false and v ~= 0
@@ -314,6 +315,9 @@ end
 
 local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
 
+local neighbour_offets = { { 0,-1 }, { 1,0 }, {0,1}, {-1,0},  {1,-1}, {1,1}, {-1,1}, {-1,-1} }
+
+
 function threed_get_block_map2(blockx, blocky, z)
     local minz = df.global.window_z+z---5
     local maxz = df.global.window_z+z
@@ -326,38 +330,83 @@ function threed_get_block_map2(blockx, blocky, z)
 
     local z = df.global.window_z
 
-    local block = dfhack.maps.getBlock(blockx, blocky, z)
 
-	for x=0,15 do
-		for y=0,15 do
-			local d = block.designation[x][y]
+	for z = df.global.window_z, df.global.window_z-5,-1 do
+	    local block = dfhack.maps.getBlock(blockx, blocky, z)
+		local godown = true
+		for x=0,15 do
+			for y=0,15 do
+				local d = block.designation[x][y]
 
-			if not d.hidden then
-				local tt = block.tiletype[x][y]
-				local tshape = df.tiletype.attrs[tt].shape
-				local tmat = df.tiletype.attrs[tt].material
+				if not d.hidden then
+					local tti = block.tiletype[x][y]
+					local tshape = df.tiletype.attrs[tti].shape
+					local tmaterial = df.tiletype.attrs[tti].material
 
-				if tmat ~= df.tiletype_material.AIR then
-	                local biome_offset_idx = block.region_offset[d.biome]
-	                local geolayer_idx = d.geolayer_index
+					if tmaterial ~= df.tiletype_material.AIR then
+		                local biome_offset_idx = block.region_offset[d.biome]
+		                local geolayer_idx = d.geolayer_index
 
-	                local offset = biome_region_offsets[biome_offset_idx+1]
-	                local rpos = { bit32.rshift(df.global.world.map.region_x,4) + offset[1], bit32.rshift(df.global.world.map.region_y,4) + offset[2] }
-	                local rbio = dfhack.maps.getRegionBiome(table.unpack(rpos))
-	                local geobiome = df.world_geo_biome.find(rbio.geo_index)
-	                local layer = geobiome.layers[geolayer_idx]
-	                local matinfo = dfhack.matinfo.decode(0, layer.mat_index)
+		                local offset = biome_region_offsets[biome_offset_idx+1]
+		                local rpos = { bit32.rshift(df.global.world.map.region_x,4) + offset[1], bit32.rshift(df.global.world.map.region_y,4) + offset[2] }
+		                local rbio = dfhack.maps.getRegionBiome(table.unpack(rpos))
+		                local geobiome = df.world_geo_biome.find(rbio.geo_index)
+		                local layer = geobiome.layers[geolayer_idx]
+		                local matinfo = dfhack.matinfo.decode(0, layer.mat_index)
 
-	                local floorcolor = matinfo.material.basic_color[0]
+		                local floorcolor = matinfo.material.basic_color[0]+matinfo.material.basic_color[1]*8
+
+		                local tcolor = 0
+
+		                -- if tmat == df.tiletype_material.CONSTRUCTION then
+		                -- 	tcolor = tileconstmatinfo(blockx*16+x, blocky*16+y, z).material.basic_color[0]
+		                -- else
+		                local tmat = tilemat.GetTileMat(blockx*16+x, blocky*16+y, z)
+						local m = tmat and (tmat.material._type == 'vector<material*>' and tmat.material[0] or tmat.material) or nil
+		                 tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
+		                -- end
+
+		                --[[if tmaterial == df.tiletype_material.GRASS_DARK or tmaterial == df.tiletype_material.GRASS_LIGHT then
+		                	floorcolor = tcolor
+		                end]]
+
+		                if tmaterial == df.tiletype_material.GRASS_DARK then
+		                	floorcolor = 2
+		                elseif tmaterial == df.tiletype_material.GRASS_LIGHT then
+		                	floorcolor = 2+8
+		                elseif tmaterial == df.tiletype_material.FROZEN_LIQUID then
+		                	floorcolor = 15
+		                end
+
+	                	if tshape == df.tiletype_shape.RAMP and tmaterial ~= df.tiletype_material.CONSTRUCTION then
+	                		tcolor = floorcolor
+	                	end
 
 
-					table.insert(map, {tshape, floorcolor })
+		                --if tshape == df.tiletype_shape.WALL and tmaterial ~= df.tiletype_material.CONSTRUCTION then
+		                --	floorcolor = tcolor
+		                --end
+
+		                local neighbours = 0
+
+		                if tshape == df.tiletype_shape.RAMP then
+		                	for k,o in ipairs(neighbour_offets) do
+	                			neighbours = neighbours + bit(k-1, is_wall(tt(blockx*16+x+o[1], blocky*16+y+o[2], z)))
+		                	end
+		                end
+
+						table.insert(map, {tshape, floorcolor, tcolor, neighbours, d.flow_size})
+					else
+						godown = true
+						table.insert(map, {0})
+					end
 				else
-					table.insert(map, {0})
+					table.insert(map, {-1})
 				end
-			else
-				table.insert(map, {0})
 			end
+		end
+		if not godown then
+			break
 		end
 	end
 
