@@ -37,6 +37,11 @@ function tt(x,y,z)
 	return dfhack.maps.getTileType(x,y,z)
 end
 
+function td(x,y,z)
+	local b = dfhack.maps.getTileBlock(x,y,z)
+	return b and b.designation[x%16][y%16] or nil
+end
+
 local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
 
 function tileconstmatinfo(x,y,z)
@@ -338,7 +343,36 @@ function threed_get_block_map2(blockx, blocky, z)
 			for y=0,15 do
 				local d = block.designation[x][y]
 
-				if not d.hidden then
+				local hidden = d.hidden
+
+				if not hidden and z < df.global.window_z then
+					local h = true
+                        
+                    for oz = z+1, df.global.window_z do
+                    	local od0 = td(blockx*16+x, blocky*16+y, oz)
+                    	local od1 = td(blockx*16+x, blocky*16+y-1, oz)
+                    	local od2 = td(blockx*16+x, blocky*16+y+1, oz)
+                    	local od3 = td(blockx*16+x-1, blocky*16+y, oz)
+                    	local od4 = td(blockx*16+x+1, blocky*16+y, oz)
+
+                    	local tt0 = tt(blockx*16+x, blocky*16+y, oz)
+                    	local tt1 = tt(blockx*16+x, blocky*16+y-1, oz)
+                    	local tt2 = tt(blockx*16+x, blocky*16+y+1, oz)
+                    	local tt3 = tt(blockx*16+x-1, blocky*16+y, oz)
+                    	local tt4 = tt(blockx*16+x+1, blocky*16+y, oz)
+
+                    	if (not od0 or od0.hidden or df.tiletype.attrs[tt0].material ~= df.tiletype_material.AIR) and
+                    		(not od1 or od1.hidden or df.tiletype.attrs[tt1].material ~= df.tiletype_material.AIR) and
+                    		(not od2 or od2.hidden or df.tiletype.attrs[tt2].material ~= df.tiletype_material.AIR) and
+                    		(not od3 or od3.hidden or df.tiletype.attrs[tt3].material ~= df.tiletype_material.AIR) and
+                    		(not od4 or od4.hidden or df.tiletype.attrs[tt4].material ~= df.tiletype_material.AIR) then
+                    		hidden = true
+                    		break
+                    	end
+                    end 
+				end
+
+				if not hidden then
 					local tti = block.tiletype[x][y]
 					local tshape = df.tiletype.attrs[tti].shape
 					local tmaterial = df.tiletype.attrs[tti].material
@@ -370,6 +404,7 @@ function threed_get_block_map2(blockx, blocky, z)
 		                	floorcolor = tcolor
 		                end]]
 
+		                --todo: dry/dead grass
 		                if tmaterial == df.tiletype_material.GRASS_DARK then
 		                	floorcolor = 2
 		                elseif tmaterial == df.tiletype_material.GRASS_LIGHT then
@@ -395,10 +430,11 @@ function threed_get_block_map2(blockx, blocky, z)
 		                	end
 		                end
 
-						table.insert(map, {tshape, floorcolor, tcolor, neighbours, d.flow_size})
+						table.insert(map, {tshape, floorcolor, tcolor, neighbours, d.flow_size+bit(3, d.liquid_type)})
 					else
+						--todo: still need to send flow amount
 						godown = true
-						table.insert(map, {0})
+						table.insert(map, {0, d.flow_size+bit(3, d.liquid_type)})
 					end
 				else
 					table.insert(map, {-1})
