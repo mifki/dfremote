@@ -307,21 +307,7 @@ end
 
 --luacheck: in=number
 function squads_attack_list_get2(id)
-    local sqidx = squad_id2idx(id)
-    if sqidx == -1 then
-        error('no squad '..tostring(id))
-    end    
-
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-
-        df.global.ui.squads.sel_squads[sqidx] = true
-    
-        gui.simulateInput(ws, K'D_SQUADS_KILL')
-        ws:logic()
-        gui.simulateInput(ws, K'D_SQUADS_KILL_LIST')
-
+    local function _process()
         local ret = {}
     
         for i,unit in ipairs(df.global.ui.squads.kill_targets) do
@@ -330,11 +316,13 @@ function squads_attack_list_get2(id)
         end
     
         return ret
-    end)
-end
-
---luacheck: in=number,number[]
-function squads_attack_list_confirm2(id, targetids)
+    end
+    
+    -- attack in region, already in the right state
+    if df.global.ui.squads.in_kill_list then
+    	return _process()
+    end
+    
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
         error('no squad '..tostring(id))
@@ -350,6 +338,13 @@ function squads_attack_list_confirm2(id, targetids)
         ws:logic()
         gui.simulateInput(ws, K'D_SQUADS_KILL_LIST')
 
+        return _process()
+    end)
+end
+
+--luacheck: in=number,number[]
+function squads_attack_list_confirm2(id, targetids)
+    local function _process(ws)
         local targets = {}
         for i,v in ipairs(targetids) do
             targets[v] = true
@@ -357,9 +352,36 @@ function squads_attack_list_confirm2(id, targetids)
     
         for i,unit in ipairs(df.global.ui.squads.kill_targets) do
             df.global.ui.squads.sel_kill_targets[i] = targets[unit.id] and true or false
+            print('# '..tostring(targets[unit.id] and true or false))
         end
 
     	gui.simulateInput(ws, K'SELECT')
+    end
+    
+    -- attack in region, already in the right state
+    if df.global.ui.squads.in_kill_list then
+    	_process(screen_main())
+    	df.global.ui.main.mode = df.ui_sidebar_mode.Default
+    	
+    	return true
+    end
+    
+    local sqidx = squad_id2idx(id)
+    if sqidx == -1 then
+        error('no squad '..tostring(id))
+    end    
+
+    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+        squads_reset()
+        gui.simulateInput(ws, K'D_SQUADS')
+
+        df.global.ui.squads.sel_squads[sqidx] = true
+    
+        gui.simulateInput(ws, K'D_SQUADS_KILL')
+        ws:logic()
+        gui.simulateInput(ws, K'D_SQUADS_KILL_LIST')
+
+        _process(ws)
     
         return true
     end)
