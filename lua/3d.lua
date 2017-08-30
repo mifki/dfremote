@@ -322,8 +322,12 @@ local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-
 
 local neighbour_offets = { { 0,-1 }, { 1,0 }, {0,1}, {-1,0},  {1,-1}, {1,1}, {-1,1}, {-1,-1} }
 
-function is_empty(od, tt)
-	return not od or od.hidden or (df.tiletype.attrs[tt].material ~= df.tiletype_material.AIR and df.tiletype.attrs[tt].shape ~= df.tiletype_shape.BROOK_TOP)
+function is_obscuring1(od, tt)
+	return not od or od.hidden or (df.tiletype.attrs[tt].material ~= df.tiletype_material.TREE and df.tiletype.attrs[tt].material ~= df.tiletype_material.AIR and df.tiletype.attrs[tt].shape ~= df.tiletype_shape.BROOK_TOP)
+end
+
+function is_obscuring2(od, tt)
+	return not od or od.hidden or (df.tiletype.attrs[tt].material ~= df.tiletype_material.TREE and df.tiletype.attrs[tt].shape == df.tiletype_shape.WALL)
 end
 
 function threed_get_block_map2(blockx, blocky, z)
@@ -364,15 +368,11 @@ function threed_get_block_map2(blockx, blocky, z)
                     	local tt3 = tt(blockx*16+x-1, blocky*16+y, oz)
                     	local tt4 = tt(blockx*16+x+1, blocky*16+y, oz)
 
-                    	if is_empty(od0,tt0) and
-                    		--[[(not od1 or od1.hidden or df.tiletype.attrs[tt1].material ~= df.tiletype_material.AIR) and
-                    		(not od2 or od2.hidden or df.tiletype.attrs[tt2].material ~= df.tiletype_material.AIR) and
-                    		(not od3 or od3.hidden or df.tiletype.attrs[tt3].material ~= df.tiletype_material.AIR) and
-                    		(not od4 or od4.hidden or df.tiletype.attrs[tt4].material ~= df.tiletype_material.AIR) then]]
-                			(not od1 or od1.hidden or df.tiletype.attrs[tt1].material ~= df.tiletype_material.AIR) and
-                    		(not od2 or od2.hidden or df.tiletype.attrs[tt2].material ~= df.tiletype_material.AIR) and
-                    		(not od3 or od3.hidden or df.tiletype.attrs[tt3].material ~= df.tiletype_material.AIR) and
-                    		(not od4 or od4.hidden or df.tiletype.attrs[tt4].material ~= df.tiletype_material.AIR) then
+                    	if is_obscuring1(od0,tt0) and
+	                    	is_obscuring2(od1,tt1) and
+    	                	is_obscuring2(od2,tt2) and
+        	            	is_obscuring2(od3,tt3) and
+            	        	is_obscuring2(od4,tt4) then
                     		hidden = true
                     		break
                     	end
@@ -384,7 +384,7 @@ function threed_get_block_map2(blockx, blocky, z)
 					local tshape = df.tiletype.attrs[tti].shape
 					local tmaterial = df.tiletype.attrs[tti].material
 
-					if tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
+					if tmaterial ~= df.tiletype_material.TREE and tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
 		                local biome_offset_idx = block.region_offset[d.biome]
 		                local geolayer_idx = d.geolayer_index
 
