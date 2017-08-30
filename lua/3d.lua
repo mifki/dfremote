@@ -322,6 +322,9 @@ local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-
 
 local neighbour_offets = { { 0,-1 }, { 1,0 }, {0,1}, {-1,0},  {1,-1}, {1,1}, {-1,1}, {-1,-1} }
 
+function is_empty(od, tt)
+	return not od or od.hidden or (df.tiletype.attrs[tt].material ~= df.tiletype_material.AIR and df.tiletype.attrs[tt].shape ~= df.tiletype_shape.BROOK_TOP)
+end
 
 function threed_get_block_map2(blockx, blocky, z)
     local minz = df.global.window_z+z---5
@@ -336,7 +339,7 @@ function threed_get_block_map2(blockx, blocky, z)
     local z = df.global.window_z
 
 
-	for z = df.global.window_z, df.global.window_z-5,-1 do
+	for z = df.global.window_z, df.global.window_z-16,-1 do
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
 		local godown = true
 		for x=0,15 do
@@ -361,7 +364,7 @@ function threed_get_block_map2(blockx, blocky, z)
                     	local tt3 = tt(blockx*16+x-1, blocky*16+y, oz)
                     	local tt4 = tt(blockx*16+x+1, blocky*16+y, oz)
 
-                    	if (not od0 or od0.hidden or df.tiletype.attrs[tt0].material ~= df.tiletype_material.AIR) and
+                    	if is_empty(od0,tt0) and
                     		--[[(not od1 or od1.hidden or df.tiletype.attrs[tt1].material ~= df.tiletype_material.AIR) and
                     		(not od2 or od2.hidden or df.tiletype.attrs[tt2].material ~= df.tiletype_material.AIR) and
                     		(not od3 or od3.hidden or df.tiletype.attrs[tt3].material ~= df.tiletype_material.AIR) and
@@ -381,7 +384,7 @@ function threed_get_block_map2(blockx, blocky, z)
 					local tshape = df.tiletype.attrs[tti].shape
 					local tmaterial = df.tiletype.attrs[tti].material
 
-					if tmaterial ~= df.tiletype_material.AIR then
+					if tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
 		                local biome_offset_idx = block.region_offset[d.biome]
 		                local geolayer_idx = d.geolayer_index
 
@@ -415,7 +418,7 @@ function threed_get_block_map2(blockx, blocky, z)
 			                if tmaterial == df.tiletype_material.GRASS_DARK then
 			                	floorcolor = 2
 			                elseif tmaterial == df.tiletype_material.GRASS_LIGHT then
-			                	floorcolor = 2+8
+			                	floorcolor = 2 -- +8
 			                elseif tmaterial == df.tiletype_material.FROZEN_LIQUID then
 			                	floorcolor = 15
 			                end
@@ -428,6 +431,17 @@ function threed_get_block_map2(blockx, blocky, z)
 		                		floorcolor = tcolor
 		                	end
 
+		                	if true then
+		                		local block = dfhack.maps.getBlock(blockx, blocky, z-1)
+		                		local tti = block.tiletype[x][y]
+		                		local tshape = df.tiletype.attrs[tti].shape
+		                		local tmaterial = df.tiletype.attrs[tti].material
+
+		                		if tshape == df.tiletype_shape.WALL and tmaterial == df.tiletype_material.CONSTRUCTION then
+		                			local mat = tileconstmatinfo(blockx*16+x, blocky*16+y, z-1).material
+					                floorcolor = mat.basic_color[0] + mat.basic_color[1]*8
+		                		end
+		                	end
 
 			                --if tshape == df.tiletype_shape.WALL and tmaterial ~= df.tiletype_material.CONSTRUCTION then
 			                --	floorcolor = tcolor
