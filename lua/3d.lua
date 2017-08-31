@@ -331,7 +331,7 @@ function is_obscuring2(od, tt)
 end
 
 function threed_get_block_map2(blockx, blocky, z)
-    local minz = df.global.window_z+z---5
+    local minz = df.global.window_z-16
     local maxz = df.global.window_z+z
     local minx = blockx*16
     local miny = blocky*16
@@ -339,11 +339,8 @@ function threed_get_block_map2(blockx, blocky, z)
     local maxy = blocky*16+15
 
     local map = {}
-
-    local z = df.global.window_z
-
-
-	for z = df.global.window_z, df.global.window_z-16,-1 do
+local a = os.time()
+	for z = maxz, minz,-1 do
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
 		local godown = true
 		for x=0,15 do
@@ -402,13 +399,13 @@ function threed_get_block_map2(blockx, blocky, z)
 
 			                local tcolor = 0
 
-			                -- if tmat == df.tiletype_material.CONSTRUCTION then
-			                -- 	tcolor = tileconstmatinfo(blockx*16+x, blocky*16+y, z).material.basic_color[0]
-			                -- else
+			                if false and tmat == df.tiletype_material.CONSTRUCTION then
+			                	tcolor = 0 --tileconstmatinfo(blockx*16+x, blocky*16+y, z).material.basic_color[0]
+			                else
 			                local tmat = tilemat.GetTileMat(blockx*16+x, blocky*16+y, z)
 							local m = tmat and (tmat.material._type == 'vector<material*>' and tmat.material[0] or tmat.material) or nil
 			                 tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
-			                -- end
+			                end
 
 			                --[[if tmaterial == df.tiletype_material.GRASS_DARK or tmaterial == df.tiletype_material.GRASS_LIGHT then
 			                	floorcolor = tcolor
@@ -431,7 +428,7 @@ function threed_get_block_map2(blockx, blocky, z)
 		                		floorcolor = tcolor
 		                	end
 
-		                	if true then
+		                	if false then
 		                		local block = dfhack.maps.getBlock(blockx, blocky, z-1)
 		                		local tti = block.tiletype[x][y]
 		                		local tshape = df.tiletype.attrs[tti].shape
@@ -472,6 +469,27 @@ function threed_get_block_map2(blockx, blocky, z)
 		end
 	end
 
+if false then
+	for i,v in ipairs(df.global.world.constructions) do
+		local p = v.pos
+		if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
+			local x = v.pos.x - minx
+			local y = v.pos.y - miny
+			local z = maxz - p.z
+
+			local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+			local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+--			printall({x,y,z})
+--print(z*16*16 + y*16 + x
+			local m = map[z*16*16 + x*16 + y]
+			if m and #m > 2 then
+				m[3] = color
+			end
+		end
+	end
+end
+	local b = os.time()
+--print(b-a)
     return map    
 
 end
