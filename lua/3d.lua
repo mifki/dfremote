@@ -339,6 +339,7 @@ function threed_get_block_map2(blockx, blocky, z)
     local maxy = blocky*16+15
 
     local map = {}
+    local const = false
 local a = os.time()
 	for z = maxz, minz,-1 do
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
@@ -399,7 +400,7 @@ local a = os.time()
 
 			                local tcolor = 0
 
-			                if false and tmat == df.tiletype_material.CONSTRUCTION then
+			                if true and tmaterial == df.tiletype_material.CONSTRUCTION then
 			                	tcolor = 0 --tileconstmatinfo(blockx*16+x, blocky*16+y, z).material.basic_color[0]
 			                else
 			                local tmat = tilemat.GetTileMat(blockx*16+x, blocky*16+y, z)
@@ -418,6 +419,10 @@ local a = os.time()
 			                	floorcolor = 2 -- +8
 			                elseif tmaterial == df.tiletype_material.FROZEN_LIQUID then
 			                	floorcolor = 15
+			                end
+
+			                if tmaterial == df.tiletype_material.CONSTRUCTION then
+			                	const = true
 			                end
 
 		                	if tshape == df.tiletype_shape.RAMP and tmaterial ~= df.tiletype_material.CONSTRUCTION then
@@ -469,7 +474,7 @@ local a = os.time()
 		end
 	end
 
-if false then
+if true and const then
 	for i,v in ipairs(df.global.world.constructions) do
 		local p = v.pos
 		if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
@@ -481,12 +486,17 @@ if false then
 			local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
 --			printall({x,y,z})
 --print(z*16*16 + y*16 + x
-			local m = map[z*16*16 + x*16 + y]
+			local m = map[1 + z*16*16 + x*16 + y]
 			if m and #m > 2 then
 				m[3] = color
+				if m[1] == df.tiletype_shape.FLOOR then
+					m[2] = color
+				end
 			end
 		end
 	end
+else
+	--print('no const')
 end
 	local b = os.time()
 --print(b-a)
