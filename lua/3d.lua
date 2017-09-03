@@ -337,10 +337,9 @@ function threed_get_block_map2(blockx, blocky, z)
     local maxy = blocky*16+15
 
     local map = {}
-    local const = false
+    local const = 0
     local plants = 0
 
-local a = os.time()
 	for z = maxz, minz,-1 do
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
 		local godown = true
@@ -401,11 +400,28 @@ local a = os.time()
 			                local tcolor = 0
 
 			                if true and tmaterial == df.tiletype_material.CONSTRUCTION then
-			                	tcolor = 0 --tileconstmatinfo(blockx*16+x, blocky*16+y, z).material.basic_color[0]
+			                	const = const + 1
+			                	local v = df.construction.find({x=minx+x,y=miny+y,z=z})
+			                	if v then
+                					local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+									local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+
+									if mi.material.id:sub(1,6) == 'GLASS_' then
+										-- support transparent floor and walls only currently
+										if tshape == df.tiletype_shape.FLOOR or tshape == df.tiletype_shape.WALL then
+											color = 100 + color
+										end
+									end
+
+									tcolor = color
+									if tshape == df.tiletype_shape.FLOOR or df.tiletype.attrs[v.original_tile].shape == df.tiletype_shape.EMPTY then
+										floorcolor = color
+									end
+								end
 			                else
-			                local tmat = tilemat.GetTileMat(blockx*16+x, blocky*16+y, z)
-							local m = tmat and (tmat.material._type == 'vector<material*>' and tmat.material[0] or tmat.material) or nil
-			                 tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
+				                local tmat = tilemat.GetTileMat(blockx*16+x, blocky*16+y, z)
+								local m = tmat and (tmat.material._type == 'vector<material*>' and tmat.material[0] or tmat.material) or nil
+								tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
 			                end
 
 			                --todo: dry/dead grass
@@ -423,13 +439,9 @@ local a = os.time()
 			                	tcolor = df.tiletype.attrs[tti].special == df.tiletype_special.DEAD and 6 or 2
 			                end
 
-			                if tmaterial == df.tiletype_material.CONSTRUCTION then
-			                	const = const + 1
+			                if tmaterial == df.tiletype_material.PLANT then
+			                	plants = plants + 1
 			                end
-
-			                -- if tmaterial == df.tiletype_material.PLANT then
-			                -- 	plants = plants + 1
-			                -- end
 
 		                	if tshape == df.tiletype_shape.RAMP and tmaterial ~= df.tiletype_material.CONSTRUCTION then
 		                		tcolor = floorcolor
@@ -474,38 +486,36 @@ local a = os.time()
 		end
 	end
 
-if true and const then
-	for i,v in ipairs(df.global.world.constructions) do
-		local p = v.pos
-		if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
-			local x = v.pos.x - minx
-			local y = v.pos.y - miny
-			local z = maxz - p.z
+	if false and const > 0 then
+		for i,v in ipairs(df.global.world.constructions) do
+			local p = v.pos
+			if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
+				local x = v.pos.x - minx
+				local y = v.pos.y - miny
+				local z = maxz - p.z
 
-			local m = map[1 + z*16*16 + x*16 + y]
-			if m and #m > 2 then
-				local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
-				local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+				local m = map[1 + z*16*16 + x*16 + y]
+				if m and #m > 2 then
+					local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+					local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
 
-				if mi.material.id:sub(1,6) == 'GLASS_' then
-					-- support transparent floor and walls only currently
-					if m[1] == df.tiletype_shape.FLOOR or m[1] == df.tiletype_shape.WALL then
-						color = 100 + color
+					if mi.material.id:sub(1,6) == 'GLASS_' then
+						-- support transparent floor and walls only currently
+						if m[1] == df.tiletype_shape.FLOOR or m[1] == df.tiletype_shape.WALL then
+							color = 100 + color
+						end
 					end
-				end
 
-				m[3] = color
-				if m[1] == df.tiletype_shape.FLOOR or df.tiletype.attrs[v.original_tile].shape == df.tiletype_shape.EMPTY then
-					m[2] = color
+					m[3] = color
+					if m[1] == df.tiletype_shape.FLOOR or df.tiletype.attrs[v.original_tile].shape == df.tiletype_shape.EMPTY then
+						m[2] = color
+					end
 				end
 			end
 		end
 	end
-else
-	--print('no const')
-end
 
-	if plants > 0 then
+	if false and plants > 0 then
 		for _, v in ipairs(df.global.world.plants.all) do
 	        if v.tree_info == nil then
 
@@ -518,8 +528,6 @@ end
 					local mi = dfhack.matinfo.decode(419, v.material)
 					local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
 
-		--			printall({x,y,z})
-		--print(z*16*16 + y*16 + x
 					local m = map[1 + z*16*16 + x*16 + y]
 					if m and #m > 2 then
 						m[3] = color
@@ -529,8 +537,5 @@ end
 	    end	
 	end
 
-	local b = os.time()
---print(b-a)
-    return map    
-
+    return map
 end
