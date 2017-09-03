@@ -45,11 +45,9 @@ end
 local biome_region_offsets = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
 
 function tileconstmatinfo(x,y,z)
-	for i,v in ipairs(df.global.world.constructions) do
-		local pos = v.pos
-		if pos.x == x and pos.y == y and pos.z == z then
-			return dfhack.matinfo.decode(v.mat_type, v.mat_index)
-		end
+	local const = df.construction.find({x=x,y=y,z=z})
+	if const then
+		return dfhack.matinfo.decode(v.mat_type, v.mat_index)
 	end
 
 	return nil
@@ -340,6 +338,8 @@ function threed_get_block_map2(blockx, blocky, z)
 
     local map = {}
     local const = false
+    local plants = 0
+
 local a = os.time()
 	for z = maxz, minz,-1 do
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
@@ -382,11 +382,11 @@ local a = os.time()
 					local tshape = df.tiletype.attrs[tti].shape
 					local tmaterial = df.tiletype.attrs[tti].material
 
-					if tmaterial ~= df.tiletype_material.TREE and tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
+					if tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
 		                local biome_offset_idx = block.region_offset[d.biome]
 		                local geolayer_idx = d.geolayer_index
 
-		                if biome_offset_idx == 255 then
+		                if biome_offset_idx >= 9 then
 		                	table.insert(map, {0, 0})
 		                else
 			                local offset = biome_region_offsets[biome_offset_idx+1]
@@ -408,29 +408,31 @@ local a = os.time()
 			                 tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
 			                end
 
-			                --[[if tmaterial == df.tiletype_material.GRASS_DARK or tmaterial == df.tiletype_material.GRASS_LIGHT then
-			                	floorcolor = tcolor
-			                end]]
-
 			                --todo: dry/dead grass
 			                if tmaterial == df.tiletype_material.GRASS_DARK then
 			                	floorcolor = 2
 			                elseif tmaterial == df.tiletype_material.GRASS_LIGHT then
 			                	floorcolor = 2 -- +8
+			                elseif tmaterial == df.tiletype_material.GRASS_DEAD then
+			                	floorcolor = 6
+			                elseif tmaterial == df.tiletype_material.GRASS_DRY then
+			                	floorcolor = 6
 			                elseif tmaterial == df.tiletype_material.FROZEN_LIQUID then
 			                	floorcolor = 15
+			                elseif tmaterial == df.tiletype_material.PLANT then
+			                	tcolor = df.tiletype.attrs[tti].special == df.tiletype_special.DEAD and 6 or 2
 			                end
 
 			                if tmaterial == df.tiletype_material.CONSTRUCTION then
-			                	const = true
+			                	const = const + 1
 			                end
+
+			                -- if tmaterial == df.tiletype_material.PLANT then
+			                -- 	plants = plants + 1
+			                -- end
 
 		                	if tshape == df.tiletype_shape.RAMP and tmaterial ~= df.tiletype_material.CONSTRUCTION then
 		                		tcolor = floorcolor
-		                	end
-
-		                	if tshape == df.tiletype_shape.FLOOR and tmaterial == df.tiletype_material.CONSTRUCTION then
-		                		floorcolor = tcolor
 		                	end
 
 		                	if false then
@@ -445,19 +447,17 @@ local a = os.time()
 		                		end
 		                	end
 
-			                --if tshape == df.tiletype_shape.WALL and tmaterial ~= df.tiletype_material.CONSTRUCTION then
-			                --	floorcolor = tcolor
-			                --end
+		                	if tshape == df.tiletype_shape.BRANCH or tshape == df.tiletype_shape.TWIG then
+		                		floorcolor = -1
+		                		tcolor = 2
+		                	end
 
-			                local neighbours = 0
+		                	if (tshape == df.tiletype_shape.WALL or tshape == df.tiletype_shape.RAMP) and tmaterial == df.tiletype_material.TREE then
+		                		floorcolor = 6
+		                		tcolor = 6
+		                	end
 
-			                if tshape == df.tiletype_shape.RAMP then
-			                	for k,o in ipairs(neighbour_offets) do
-		                			neighbours = neighbours + bit(k-1, is_wall(tt(blockx*16+x+o[1], blocky*16+y+o[2], z)))
-			                	end
-			                end
-
-							table.insert(map, {tshape, floorcolor, tcolor, neighbours, d.flow_size+bit(3, d.liquid_type)})
+							table.insert(map, {tshape, floorcolor, tcolor, d.flow_size+bit(3, d.liquid_type)})
 						end
 					else
 						--todo: still need to send flow amount
@@ -482,14 +482,20 @@ if true and const then
 			local y = v.pos.y - miny
 			local z = maxz - p.z
 
-			local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
-			local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
---			printall({x,y,z})
---print(z*16*16 + y*16 + x
 			local m = map[1 + z*16*16 + x*16 + y]
 			if m and #m > 2 then
+				local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+				local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+
+				if mi.material.id:sub(1,6) == 'GLASS_' then
+					-- support transparent floor and walls only currently
+					if m[1] == df.tiletype_shape.FLOOR or m[1] == df.tiletype_shape.WALL then
+						color = 100 + color
+					end
+				end
+
 				m[3] = color
-				if m[1] == df.tiletype_shape.FLOOR then
+				if m[1] == df.tiletype_shape.FLOOR or df.tiletype.attrs[v.original_tile].shape == df.tiletype_shape.EMPTY then
 					m[2] = color
 				end
 			end
@@ -498,6 +504,31 @@ if true and const then
 else
 	--print('no const')
 end
+
+	if plants > 0 then
+		for _, v in ipairs(df.global.world.plants.all) do
+	        if v.tree_info == nil then
+
+				local p = v.pos
+				if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
+					local x = v.pos.x - minx
+					local y = v.pos.y - miny
+					local z = maxz - p.z
+
+					local mi = dfhack.matinfo.decode(419, v.material)
+					local color = mi.material.basic_color[0] + mi.material.basic_color[1]*8
+
+		--			printall({x,y,z})
+		--print(z*16*16 + y*16 + x
+					local m = map[1 + z*16*16 + x*16 + y]
+					if m and #m > 2 then
+						m[3] = color
+					end
+				end
+	        end
+	    end	
+	end
+
 	local b = os.time()
 --print(b-a)
     return map    
