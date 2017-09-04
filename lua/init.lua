@@ -1852,7 +1852,6 @@ local handlers = {
 
     [143] = {
         [1] = threed_get_block_map,
-        [1] = threed_get_block_map2,
     },
 
     [144] = {
