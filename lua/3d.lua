@@ -126,7 +126,38 @@ function is_obscuring2(od, tt)
 	return not od or od.hidden or (df.tiletype.attrs[tt].material ~= df.tiletype_material.TREE and df.tiletype.attrs[tt].shape == df.tiletype_shape.WALL)
 end
 
-function threed_get_block_map(blockx, blocky, z)
+local function compare(a,b)
+    if a < b then
+        return -1
+    elseif a > b then
+        return 1
+    else
+        return 0
+    end
+end
+
+local function _cmp(t1, t2)
+	local r = compare(t1[1], t2[1])
+	if r ~= 0 then
+		return r
+	end
+
+	r = compare(t1[2], t2[2])
+	if r ~= 0 then
+		return r
+	end
+
+	r = compare(t1[3], t2[3])
+	if r ~= 0 then
+		return r
+	end
+
+	r = compare(t1[4], t2[4])
+
+	return r
+end
+
+function threed_get_block_map(blockx, blocky, z, dict)
     local minz = df.global.window_z-16
     local maxz = df.global.window_z+z
     local minx = blockx*16
@@ -139,8 +170,12 @@ function threed_get_block_map(blockx, blocky, z)
     local plants = 0
 
 	for z = maxz, minz,-1 do
+		local slice = {}
 	    local block = dfhack.maps.getBlock(blockx, blocky, z)
 		local godown = true
+		local allhidden = true
+		local allair = true
+
 		for x=0,15 do
 			for y=0,15 do
 				local d = block.designation[x][y]
@@ -175,16 +210,18 @@ function threed_get_block_map(blockx, blocky, z)
 				end
 
 				if not hidden then
+					allhidden = false
 					local tti = block.tiletype[x][y]
 					local tshape = df.tiletype.attrs[tti].shape
 					local tmaterial = df.tiletype.attrs[tti].material
 
 					if tmaterial ~= df.tiletype_material.AIR and tshape ~= df.tiletype_shape.BROOK_TOP then
+						allair = false
 		                local biome_offset_idx = block.region_offset[d.biome]
 		                local geolayer_idx = d.geolayer_index
 
 		                if biome_offset_idx >= 9 then
-		                	table.insert(map, {0, 0})
+		                	table.insert(slice, {0, 0})
 		                else
 			                local offset = biome_region_offsets[biome_offset_idx+1]
 			                local rpos = { bit32.rshift(df.global.world.map.region_x,4) + offset[1], bit32.rshift(df.global.world.map.region_y,4) + offset[2] }
@@ -222,7 +259,6 @@ function threed_get_block_map(blockx, blocky, z)
 								tcolor = m and (m.basic_color[0]+m.basic_color[1]*8) or 0
 			                end
 
-			                --todo: dry/dead grass
 			                if tmaterial == df.tiletype_material.GRASS_DARK then
 			                	floorcolor = 2
 			                elseif tmaterial == df.tiletype_material.GRASS_LIGHT then
@@ -245,18 +281,6 @@ function threed_get_block_map(blockx, blocky, z)
 		                		tcolor = floorcolor
 		                	end
 
-		                	if false then
-		                		local block = dfhack.maps.getBlock(blockx, blocky, z-1)
-		                		local tti = block.tiletype[x][y]
-		                		local tshape = df.tiletype.attrs[tti].shape
-		                		local tmaterial = df.tiletype.attrs[tti].material
-
-		                		if tshape == df.tiletype_shape.WALL and tmaterial == df.tiletype_material.CONSTRUCTION then
-		                			local mat = tileconstmatinfo(blockx*16+x, blocky*16+y, z-1).material
-					                floorcolor = mat.basic_color[0] + mat.basic_color[1]*8
-		                		end
-		                	end
-
 		                	if tshape == df.tiletype_shape.BRANCH or tshape == df.tiletype_shape.TWIG then
 		                		floorcolor = -1
 		                		tcolor = 2
@@ -267,24 +291,50 @@ function threed_get_block_map(blockx, blocky, z)
 		                		tcolor = 6
 		                	end
 
-							table.insert(map, {tshape, floorcolor, tcolor, d.flow_size+bit(3, d.liquid_type)})
+							local t = d.flow_size > 0 and {tshape, floorcolor, tcolor, d.flow_size+bit(3, d.liquid_type)} or {tshape, floorcolor, tcolor}
+
+		                	if dict then
+		                		local item = utils.binsearch(dict, t, 1, _cmp)
+		                		if not item then
+		                			item = { t, #dict+1 }
+		                			utils.insert_sorted(dict, item, 1, _cmp)
+		                		end
+		                		table.insert(slice, item[2])
+		                	else
+		                		table.insert(slice, t)
+		                	end
 						end
 					else
 						--todo: still need to send flow amount
 						godown = true
-						table.insert(map, {0, d.flow_size+bit(3, d.liquid_type)})
+						if d.flow_size > 0 then
+							allair = false
+							table.insert(slice, {0, d.flow_size+bit(3, d.liquid_type)})
+						else
+							table.insert(slice, 0)
+						end
+						
 					end
 				else
-					table.insert(map, {-1})
+					table.insert(slice, -1)
 				end
 			end
 		end
+
+		if allhidden then
+			table.insert(map, {-1})
+		elseif allair then
+			table.insert(map, {0})
+		else
+			table.insert(map, slice)
+		end
+
 		if not godown then
 			break
 		end
 	end
 
-	if false and const > 0 then
+	--[[if false and const > 0 then
 		for i,v in ipairs(df.global.world.constructions) do
 			local p = v.pos
 			if p.z >= minz and p.z <= maxz and p.x >= minx and p.x <= maxx and p.y >= miny and p.y <= maxy then
@@ -333,7 +383,42 @@ function threed_get_block_map(blockx, blocky, z)
 				end
 	        end
 	    end	
-	end
+	end]]
 
     return map
 end
+
+local function upload(path, content)
+	local l = require'plugins.luasocket'
+
+	local s = l.tcp:connect('assets.mifki.com.s3.amazonaws.com', 80)
+	s:setBlocking(true)
+	s:setTimeout(10)
+	s:send('PUT '..path..' HTTP/1.1\nHost: assets.mifki.com.s3.amazonaws.com\nConnection: close\nContent-Length:'..tostring(#content)..'\nx-amz-acl: public-read\n\n'..content..'\n')
+
+	print (s:receive('*l'))
+end
+
+local function test_upload_map()
+	local json=require'json'
+	local key = 'test'
+
+	local dict = {}
+	local combined = {}
+
+	for j=0,df.global.world.map.y_count_block-1 do
+		for i=0,df.global.world.map.x_count_block-1 do
+			local b = threed_get_block_map(i, j, 0)
+			table.insert(combined, b)
+		end
+	end
+
+	local info = { 1, df.global.world.map.x_count_block, df.global.world.map.y_count_block }
+	--local jsondata = mp.pack({dict, combined})
+	local jsondata = mp.pack({ info, combined })
+	
+	print ('uploading '..tostring(math.floor(#jsondata/1024))..' Kb...')
+	upload('/df3dview/maps/'..key..'/combined.mp', jsondata)
+end
+
+-- test_upload_map()
