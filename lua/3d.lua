@@ -152,8 +152,6 @@ local function _cmp(t1, t2)
 		return r
 	end
 
-	r = compare(t1[4], t2[4])
-
 	return r
 end
 
@@ -182,7 +180,7 @@ function threed_get_block_map(blockx, blocky, z, dict)
 
 				local hidden = d.hidden
 
-				if not hidden and z < df.global.window_z then
+				--[[if not hidden and z < df.global.window_z then
 					local h = true
                         
                     for oz = z+1, df.global.window_z do
@@ -207,7 +205,7 @@ function threed_get_block_map(blockx, blocky, z, dict)
                     		break
                     	end
                     end 
-				end
+				end]]
 
 				if not hidden then
 					allhidden = false
@@ -293,7 +291,7 @@ function threed_get_block_map(blockx, blocky, z, dict)
 
 							local t = d.flow_size > 0 and {tshape, floorcolor, tcolor, d.flow_size+bit(3, d.liquid_type)} or {tshape, floorcolor, tcolor}
 
-		                	if dict then
+		                	if dict and #t == 3 then
 		                		local item = utils.binsearch(dict, t, 1, _cmp)
 		                		if not item then
 		                			item = { t, #dict+1 }
@@ -322,9 +320,9 @@ function threed_get_block_map(blockx, blocky, z, dict)
 		end
 
 		if allhidden then
-			table.insert(map, {-1})
+			table.insert(map, -1)
 		elseif allair then
-			table.insert(map, {0})
+			table.insert(map, 0)
 		else
 			table.insert(map, slice)
 		end
@@ -399,26 +397,35 @@ local function upload(path, content)
 	print (s:receive('*l'))
 end
 
+local seasons = { 'Spring', 'Summer', 'Autumn', 'Winter' }
+local seasonparts = { 'Early ', 'Mid-', 'Late ' }
+local site_ranks = { 'Outpost', 'Hamlet', 'Village', 'Town', 'City', 'Metropolis' }
 local function test_upload_map()
-	local json=require'json'
-	local key = 'test'
+	local json = require'json'
+	local key = 'test2'
 
-	local dict = {}
+	local dict = nil --{}
 	local combined = {}
 
 	for j=0,df.global.world.map.y_count_block-1 do
 		for i=0,df.global.world.map.x_count_block-1 do
-			local b = threed_get_block_map(i, j, 0)
+			local b = threed_get_block_map(i, j, 0, dict)
 			table.insert(combined, b)
 		end
 	end
 
-	local info = { 1, df.global.world.map.x_count_block, df.global.world.map.y_count_block }
-	--local jsondata = mp.pack({dict, combined})
-	local jsondata = mp.pack({ info, combined })
-	
-	print ('uploading '..tostring(math.floor(#jsondata/1024))..' Kb...')
-	upload('/df3dview/maps/'..key..'/combined.mp', jsondata)
+    local site = df.world_site.find(df.global.ui.site_id)
+    local is_mountainhome = have_noble('MONARCH') --todo: what if monarch dies? there should be more correct way
+    local site_title = (is_mountainhome and 'Mountainhome' or site_ranks[df.global.ui.fortress_rank+1]) .. ' ' .. translatename(site.name) .. ', "' .. dfhack.TranslateName(site.name, true) .. '"'
+
+    local month = math.floor(df.global.cur_year_tick / TU_PER_MONTH)
+    local datestr = format_date(df.global.cur_year, df.global.cur_year_tick) .. ', ' .. seasonparts[month%3+1] .. seasons[math.floor(month/3)+1]	
+
+	local info = { 1, df.global.world.map.x_count_block, df.global.world.map.y_count_block, site_title, datestr }
+	local mpdata = mp.pack({ info, combined, dict })
+
+	print ('uploading '..tostring(math.floor(#mpdata/1024))..' Kb...')
+	upload('/df3dview/maps/'..key..'/combined.mp', mpdata)
 end
 
 -- test_upload_map()
