@@ -332,6 +332,18 @@ function threed_get_block_map(blockx, blocky, z, dict)
 		end
 	end
 
+	local blds = {}
+	for i,v in ipairs(df.global.world.buildings.all) do
+		if v.z >= minz and v.z <= maxz and v.centerx >= minx and v.centerx <= maxx and v.centery >= miny and v.centery <= maxy then
+			local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+			local color = mi and (mi.material.basic_color[0] + mi.material.basic_color[1]*8) or 0
+
+			table.insert(blds, { v.centerx-minx, v.centery-miny, maxz-v.z, v:getType(), v:getSubtype(), color })
+		end
+	end
+
+	table.insert(map, blds)
+
 	--[[if false and const > 0 then
 		for i,v in ipairs(df.global.world.constructions) do
 			local p = v.pos
