@@ -200,13 +200,16 @@ function building_query_selected(bldid)
     elseif btype == df.building_type.Windmill or btype == df.building_type.WaterWheel or btype == df.building_type.AxleVertical
         or btype == df.building_type.AxleHorizontal or btype == df.building_type.GearAssembly or btype == df.building_type.Rollers
         or btype == df.building_type.ScrewPump then
-        local machine = df.machine.find(bld.machine.machine_id)
-        
-        --todo: need to handle if no machine
 
+        local machine = df.machine.find(bld.machine.machine_id)
         local ttype = dfhack.maps.getTileType(bld.centerx, bld.centery, bld.z)
         local stable_foundation = (ttype ~= df.tiletype.OpenSpace)
-        ret = { btype, genflags, bname, machine.cur_power, machine.min_power, machine.flags.whole, stable_foundation }
+
+        ret = {
+            btype, genflags, bname,
+            machine and machine.cur_power or -1, machine and machine.min_power or -1, machine and machine.flags.whole or 0,
+            stable_foundation
+        }
 
         if btype == df.building_type.Rollers or btype == df.building_type.ScrewPump then
             local bld = bld --as:df.building_rollersst
