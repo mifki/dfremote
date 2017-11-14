@@ -318,8 +318,8 @@ function squads_attack_list_get2(id)
         return ret
     end
     
-    -- attack in region, already in the right state
-    if df.global.ui.squads.in_kill_list then
+    -- already in target selection after attack in region mode
+    if df.global.ui.squads.in_kill_list and df.global.ui.squads.in_kill_rect then
     	return _process()
     end
     
@@ -358,8 +358,8 @@ function squads_attack_list_confirm2(id, targetids)
     	gui.simulateInput(ws, K'SELECT')
     end
     
-    -- attack in region, already in the right state
-    if df.global.ui.squads.in_kill_list then
+    -- already in target selection after attack in region mode
+    if df.global.ui.squads.in_kill_list and df.global.ui.squads.in_kill_rect then
     	_process(screen_main())
     	df.global.ui.main.mode = df.ui_sidebar_mode.Default
     	
@@ -372,7 +372,6 @@ function squads_attack_list_confirm2(id, targetids)
     end    
 
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
         gui.simulateInput(ws, K'D_SQUADS')
 
         df.global.ui.squads.sel_squads[sqidx] = true
