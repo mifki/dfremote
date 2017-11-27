@@ -370,7 +370,7 @@ function execute_with_rooms_screen(fn)
 	end)
 end
 
-function execute_with_hauling_menu(fn)
+function execute_with_hauling_menu(fn, active_and_no_reset)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_HAULING')
 		if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
@@ -383,5 +383,5 @@ function execute_with_hauling_menu(fn)
 			error (ret)
 		end
 		return ret
-	end)
+	end, active_and_no_reset)
 end

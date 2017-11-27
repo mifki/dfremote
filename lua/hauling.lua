@@ -73,7 +73,7 @@ function hauling_vehicle_get_choices(routeid)
 						local item = df.item.find(vehicle.item_id)
 						local itemname = item and itemname(item, 1, true)
 
-						table.insert(ret, { itemname, item.id })
+						table.insert(ret, { itemname, vehicle.id, item.id })
 					end
 				end
 
@@ -98,7 +98,7 @@ function hauling_vehicle_assign(routeid, vehicleid)
 				
 				local ret = {}
 				for j,vehicle in ipairs(df.global.ui.hauling.vehicles) do
-					if (not vehicle and vehicleid == -1) or (vehicle.id == vehicleid) then
+					if (not vehicle and vehicleid == -1) or (vehicle and vehicle.id == vehicleid) then
 						df.global.ui.hauling.cursor_vehicle = j
 						gui.simulateInput(ws, K'SELECT')
 						return true
@@ -113,5 +113,47 @@ function hauling_vehicle_assign(routeid, vehicleid)
 	end)
 end
 
--- print(pcall(function()return json:encode(hauling_vehicle_get_choices(1))end))
--- print(pcall(function()return json:encode(hauling_vehicle_assign(1,1))end))
+--luacheck: in=
+function hauling_route_new()
+	return execute_with_hauling_menu(function(ws)
+		gui.simulateInput(ws, K'D_HAULING_NEW_ROUTE')
+	end)
+end
+
+--luacheck: in=number,string
+function hauling_route_set_name(id,name)
+	local route = df.hauling_route.find(id)
+
+	if not route then
+		error('no route '..tostring(id))
+	end
+
+	route.name = name
+end
+
+--luacheck: in=number
+function hauling_route_start_edit(id)
+	for i,v in ipairs(df.global.ui.hauling.view_routes) do
+		if v.id == id then
+			return execute_with_hauling_menu(function(ws)
+				df.global.ui.hauling.cursor_top = i
+				return true
+			end, true)
+		end
+	end
+	
+	error('no route '..tostring(id))
+end
+
+--luacheck: in=
+function hauling_route_end_edit()
+	reset_main()
+end
+
+-- print(pcall(function()return json:encode(hauling_get_routes())end))
+--print(pcall(function()return json:encode(hauling_route_info(2))end))
+--print(pcall(function()return json:encode(hauling_vehicle_get_choices(2))end))
+--print(pcall(function()return json:encode(hauling_vehicle_assign(2,48))end))
+--print(pcall(function()return json:encode(hauling_route_new())end))
+--print(pcall(function()return json:encode(hauling_route_set_name(130,''))end))
+-- print(pcall(function()return json:encode(hauling_route_start_edit(2,''))end))
