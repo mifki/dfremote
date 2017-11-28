@@ -1870,6 +1870,7 @@ local handlers = {
         [2] = hauling_route_info,
         [3] = hauling_route_delete,
         [4] = hauling_route_delete_stop,
+        [5] = hauling_route_add,
     },
 
     [148] = {

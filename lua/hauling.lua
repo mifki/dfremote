@@ -114,7 +114,7 @@ function hauling_vehicle_assign(routeid, vehicleid)
 end
 
 --luacheck: in=
-function hauling_route_new()
+function hauling_route_add()
 	return execute_with_hauling_menu(function(ws)
 		gui.simulateInput(ws, K'D_HAULING_NEW_ROUTE')
 	end)
