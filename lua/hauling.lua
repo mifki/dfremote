@@ -42,7 +42,31 @@ function hauling_route_delete(id)
 end
 
 --luacheck: in=number,number
-function hauling_route_delete_stop(routeid, stopid)
+function hauling_stop_add()
+	local ws = dfhack.gui.getCurViewscreen()
+	if ws._type ~= df.viewscreen_dwarfmodest then
+		error(errmsg_wrongscreen(ws))
+	end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
+    	error('invalid mode '..tostring(df.global.ui.main.mode))
+    end
+
+    local hauling = df.global.ui.hauling
+        
+    if hauling.routes == 0 then
+    	error('no routes')
+    end
+
+    --todo: don't add two stops in one place
+
+    gui.simulateInput(ws, K'D_HAULING_NEW_STOP')
+
+    return true
+end
+
+--luacheck: in=number,number
+function hauling_stop_delete(routeid, stopid)
 	return execute_with_hauling_menu(function(ws)
 		for i,v in ipairs(df.global.ui.hauling.view_stops) do
 			if v.id == stopid and df.global.ui.hauling.view_routes[i].id == routeid then
@@ -52,6 +76,35 @@ function hauling_route_delete_stop(routeid, stopid)
 			end
 		end
 	end)
+end
+
+--luacheck: in=
+function hauling_stop_delete_current()
+	local ws = dfhack.gui.getCurViewscreen()
+	if ws._type ~= df.viewscreen_dwarfmodest then
+		error(errmsg_wrongscreen(ws))
+	end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
+    	error('invalid mode '..tostring(df.global.ui.main.mode))
+    end
+
+    local hauling = df.global.ui.hauling
+        
+    if not hauling.view_stops[hauling.cursor_top] then
+    	error('no stop selected')
+    end
+
+    --todo: make sure the same route stays selected after deleting a stop
+    local was_last = hauling.cursor_top == #hauling.view_stops-1 or not hauling.view_stops[hauling.cursor_top+1]
+
+    gui.simulateInput(ws, K'D_HAULING_REMOVE')
+
+    if hauling.view_stops[hauling.cursor_top] and not was_last then
+    	hauling.cursor_top = hauling.cursor_top - 1
+    end
+
+    return true
 end
 
 --luacheck: in=number

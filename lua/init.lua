@@ -130,6 +130,10 @@ function reset_main()
         df.global.ui.main.mode = df.ui_sidebar_mode.Default
         df.global.ui.waypoints.in_edit_waypts_mode = false
         df.global.ui.waypoints.in_edit_name_mode = false
+        df.global.ui.hauling.in_stop = false
+        df.global.ui.hauling.in_advanced_cond = false
+        df.global.ui.hauling.in_assign_vehicle = false
+        df.global.ui.hauling.in_name = false
         squads_reset()
     end    
 end
@@ -1002,6 +1006,43 @@ function get_status()
         end
     end
 
+    if mainmode == df.ui_sidebar_mode.Hauling then
+        local hauling = df.global.ui.hauling
+        
+        if #hauling.routes > 0 then
+            local sel_route = hauling.view_routes[hauling.cursor_top]
+            local sel_stop = hauling.view_stops[hauling.cursor_top]
+            
+            -- find a stop closest to the cursor
+            --[[local cursor = df.global.cursor
+            local mindist = 9999
+            for i,stop in ipairs(sel_route.stops) do
+                if stop.pos.z == cursor.z then
+                    local dist = math.abs(cursor.x-stop.pos.x) + math.abs(cursor.y-stop.pos.y)
+                    if dist < mindist then
+                        sel_stop = stop
+                        mindist = dist
+                    end
+                end
+            end
+
+            -- and select in in hauling ui so that it's flashing on the map
+            if sel_stop then
+                for i,stop in ipairs(hauling.view_stops) do
+                    if stop == sel_stop then
+                        hauling.cursor_top = i
+                        break
+                    end
+                end
+            end]]
+
+            return 76, packbits(sel_stop and 1 or 0), { routename(sel_route), sel_stop and stopname(sel_stop) or mp.NIL }
+        
+        else
+            return 75, 0
+        end
+    end
+
     --end    
 
     if df.global.ui.follow_unit ~= -1 then
@@ -1516,6 +1557,34 @@ function set_cursor_pos(data)
             gui.simulateInput(ws, K'CURSOR_UP_Z')        
         end
     end
+
+    if df.global.ui.main.mode == df.ui_sidebar_mode.Hauling then
+        local hauling = df.global.ui.hauling
+        
+        if #hauling.routes > 0 then
+            local cur_route = hauling.view_routes[hauling.cursor_top]
+            local cur_stop = nil
+            
+            -- find a stop closest to the cursor
+            local cursor = df.global.cursor
+            for i,stop in ipairs(cur_route.stops) do
+                if stop.pos.x == cursor.x and stop.pos.y == cursor.y and stop.pos.z == cursor.z then
+                    cur_stop = stop
+                    break
+                end
+            end
+
+            -- and select in in hauling ui so that it's flashing on the map
+            if cur_stop then
+                for i,stop in ipairs(hauling.view_stops) do
+                    if stop == cur_stop then
+                        hauling.cursor_top = i
+                        break
+                    end
+                end
+            end
+        end
+    end
 end
 
 --luacheck: in=string
@@ -1869,8 +1938,10 @@ local handlers = {
         [1] = hauling_get_routes,
         [2] = hauling_route_info,
         [3] = hauling_route_delete,
-        [4] = hauling_route_delete_stop,
+        [4] = hauling_stop_delete,
         [5] = hauling_route_add,
+        [6] = hauling_stop_add,
+        [7] = hauling_stop_delete_current,
     },
 
     [148] = {
