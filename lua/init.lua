@@ -1011,32 +1011,10 @@ function get_status()
         
         if #hauling.routes > 0 then
             local sel_route = hauling.view_routes[hauling.cursor_top]
+            local has_stops = sel_route and #sel_route.stops > 0
             local sel_stop = hauling.view_stops[hauling.cursor_top]
-            
-            -- find a stop closest to the cursor
-            --[[local cursor = df.global.cursor
-            local mindist = 9999
-            for i,stop in ipairs(sel_route.stops) do
-                if stop.pos.z == cursor.z then
-                    local dist = math.abs(cursor.x-stop.pos.x) + math.abs(cursor.y-stop.pos.y)
-                    if dist < mindist then
-                        sel_stop = stop
-                        mindist = dist
-                    end
-                end
-            end
 
-            -- and select in in hauling ui so that it's flashing on the map
-            if sel_stop then
-                for i,stop in ipairs(hauling.view_stops) do
-                    if stop == sel_stop then
-                        hauling.cursor_top = i
-                        break
-                    end
-                end
-            end]]
-
-            return 76, packbits(sel_stop and 1 or 0), { routename(sel_route), sel_stop and stopname(sel_stop) or mp.NIL }
+            return 76, packbits(has_stops, sel_stop and 1 or 0), { routename(sel_route), sel_stop and stopname(sel_stop) or mp.NIL }
         
         else
             return 75, 0
@@ -1942,6 +1920,8 @@ local handlers = {
         [5] = hauling_route_add,
         [6] = hauling_stop_add,
         [7] = hauling_stop_delete_current,
+        [8] = hauling_reorder_stops,
+        [9] = hauling_route_start_edit,
     },
 
     [148] = {

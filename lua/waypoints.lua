@@ -273,12 +273,14 @@ end
 function route_reorder_points(id, fromidx, toidx)
 	local route = route_find_by_id(id)
 	if not route then
-		return
+		error('no route '..tostring(id))
 	end
 	
 	local ptid = route.points[fromidx]
     route.points:erase(fromidx)
     route.points:insert(toidx, ptid)
+
+    return true
 end
 
 --luacheck: in=number,number

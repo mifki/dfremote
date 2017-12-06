@@ -203,6 +203,20 @@ function hauling_route_end_edit()
 	reset_main()
 end
 
+--luacheck: in=number,number,number
+function hauling_reorder_stops(id, fromidx, toidx)
+	local route = df.hauling_route.find(id)
+	if not route then
+		error('no hauling route '..tostring(id))
+	end
+	
+	local stop = route.stops[fromidx]
+    route.stops:erase(fromidx)
+    route.stops:insert(toidx, stop)
+
+    return true
+end
+
 -- print(pcall(function()return json:encode(hauling_get_routes())end))
 --print(pcall(function()return json:encode(hauling_route_info(2))end))
 --print(pcall(function()return json:encode(hauling_vehicle_get_choices(2))end))
