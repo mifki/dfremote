@@ -184,12 +184,46 @@ function hauling_route_set_name(id,name)
 	route.name = name
 end
 
---luacheck: in=number
-function hauling_route_start_edit(id)
-	for i,v in ipairs(df.global.ui.hauling.view_routes) do
-		if v.id == id then
+--luacheck: in=number,bool
+function hauling_route_start_edit(id, zoom)
+	zoom = istrue(zoom)
+
+	for i,route in ipairs(df.global.ui.hauling.view_routes) do
+		if route.id == id then
 			return execute_with_hauling_menu(function(ws)
 				df.global.ui.hauling.cursor_top = i
+
+				if zoom and #route.stops > 0 then
+					local minx = 999
+					local miny = 999
+					local maxx = 0
+					local maxy = 0
+					local bz = route.stops[0].pos.z
+
+					for j,stop in ipairs(route.stops) do
+						local pos = stop.pos
+						if pos.z == bz then
+							if pos.x < minx then
+								minx = pos.x
+							end
+							if pos.x > maxx then
+								maxx = pos.x
+							end
+							if pos.y < miny then
+								miny = pos.y
+							end
+							if pos.y > maxy then
+								maxy = pos.y
+							end
+						end
+					end
+
+					local cx = math.floor((minx+maxx)/2)
+					local cy = math.floor((miny+maxy)/2)
+
+					recenter_view(cx, cy, bz)	
+				end
+
 				return true
 			end, true)
 		end
