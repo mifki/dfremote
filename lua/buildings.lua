@@ -433,7 +433,24 @@ function building_query_selected(bldid)
         local bld = bld --as:df.building_stockpilest
         local area = (bld.x2-bld.x1+1)*(bld.y2-bld.y1+1)
 
-        ret = { btype, genflags, bname, area, bld.max_barrels, bld.max_bins, bld.max_wheelbarrows }
+        local give = {}
+        local take = {}
+        local links = { give, take }
+
+        for i,v in ipairs(bld.links.give_to_pile) do
+            table.insert(give, { bldname(v), v.id })
+        end
+        for i,v in ipairs(bld.links.take_from_pile) do
+            table.insert(take, { bldname(v), v.id })
+        end
+        for i,v in ipairs(bld.links.give_to_workshop) do
+            table.insert(give, { bldname(v), v.id })
+        end
+        for i,v in ipairs(bld.links.take_from_workshop) do
+            table.insert(take, { bldname(v), v.id })
+        end
+
+        ret = { btype, genflags, bname, area, bld.max_barrels, bld.max_bins, bld.max_wheelbarrows, links, bld.use_links_only }
 
     elseif btype == df.building_type.SiegeEngine then
         local bld = bld --as:df.building_siegeenginest

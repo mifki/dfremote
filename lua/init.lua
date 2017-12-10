@@ -135,6 +135,7 @@ function reset_main()
         df.global.ui.hauling.in_assign_vehicle = false
         df.global.ui.hauling.in_name = false
         squads_reset()
+        stockpile_linking = nil
     end    
 end
 
@@ -873,6 +874,12 @@ function get_status()
     if mainmode == df.ui_sidebar_mode.QueryBuilding then
         if df.global.ui_building_in_resize then
             return 101, 0
+        end
+
+        if stockpile_linking then
+            local bld = df.global.world.selected_building
+            local can_link = bld and bld:canLinkToStockpile() or false
+            return 27, can_link and 1 or 0
         end
 
         local bld = df.global.world.selected_building
@@ -1877,12 +1884,17 @@ local handlers = {
     },
 
     [140] = {
-        [1] = building_stockpile_setmax,
-        [2] = building_stockpile_getsettings,
-        [3] = building_stockpile_setenabled,
-        [4] = building_stockpile_setflag,
+        [1] = building_stockpile_set_max,
+        [2] = building_stockpile_get_settings,
+        [3] = building_stockpile_set_enabled,
+        [4] = building_stockpile_set_flag,
         [5] = building_stockpile_create,
-        [6] = building_stockpile_getsettings_level3,
+        [6] = building_stockpile_get_settings_level3,
+        [7] = building_stockpile_linking_begin,
+        [8] = building_stockpile_linking_cancel,
+        [9] = building_stockpile_linking_ok,
+        [10] = building_stockpile_set_linksonly,
+        [11] = building_stockpile_delete_link,
     },
 
     [141] = {

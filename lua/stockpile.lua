@@ -1032,7 +1032,7 @@ function inorganic_titles()
 end
 
 --todo: should cache this
-function stockpile_settings_schema()
+local function stockpile_settings_schema()
     local ret =
     {
         {
@@ -1291,7 +1291,7 @@ function stockpile_settings_schema()
 end
 
 --luacheck: in=
-function building_stockpile_getsettings()
+function building_stockpile_get_settings()
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1362,7 +1362,7 @@ function building_stockpile_getsettings()
 end
 
 --luacheck: in=number,number
-function building_stockpile_getsettings_level3(l1, l2)
+function building_stockpile_get_settings_level3(l1, l2)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1400,7 +1400,7 @@ end
 
 --todo: support passing path as the first param
 --luacheck: in=
-function building_stockpile_setenabled(...)
+function building_stockpile_set_enabled(...)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1496,7 +1496,7 @@ function building_stockpile_setenabled(...)
 end
 
 --luacheck: in=number,number,bool
-function building_stockpile_setflag(group, flag, enabled)
+function building_stockpile_set_flag(group, flag, enabled)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1538,7 +1538,7 @@ function building_stockpile_setflag(group, flag, enabled)
 end
 
 --luacheck: in=number,number,number
-function building_stockpile_setmax(barrels, bins, wheelbarrows)
+function building_stockpile_set_max(barrels, bins, wheelbarrows)
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1566,4 +1566,116 @@ function building_stockpile_create()
 
     local ws = dfhack.gui.getCurViewscreen()
     gui.simulateInput(ws, K'D_STOCKPILES')    
+end
+
+local stockpile_cursor_x
+local stockpile_cursor_y
+local stockpile_cursor_z
+stockpile_linking = nil
+
+--luacheck: in=
+function building_stockpile_linking_begin()
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
+        error('not a stockpile '..tostring(bld))
+    end
+
+    stockpile_cursor_x = df.global.cursor.x
+    stockpile_cursor_y = df.global.cursor.y
+    stockpile_cursor_z = df.global.cursor.z
+
+    stockpile_linking = bld
+
+    return true
+end
+
+--luacheck: in=
+function building_stockpile_linking_ok()
+    local ws = dfhack.gui.getCurViewscreen()
+
+    stockpile_linking = nil
+
+    df.global.cursor.x = stockpile_cursor_x
+    df.global.cursor.y = stockpile_cursor_y
+    df.global.cursor.z = stockpile_cursor_z - 1
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
+
+    return true
+end
+
+--luacheck: in=
+function building_stockpile_linking_cancel()
+    local ws = dfhack.gui.getCurViewscreen()
+
+    stockpile_linking = nil
+
+    df.global.cursor.x = stockpile_cursor_x
+    df.global.cursor.y = stockpile_cursor_y
+    df.global.cursor.z = stockpile_cursor_z - 1
+    gui.simulateInput(ws, K'CURSOR_UP_Z')
+
+    return true
+end
+
+--luacheck: in=number
+function building_stockpile_set_linksonly(mode)
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
+        error('not a stockpile '..tostring(bld))
+    end
+
+    --todo: make sure the value is valid
+    bld.use_links_only = istrue(mode) and 1 or 0
+
+    return true
+end
+
+--luacheck: in=number
+function building_stockpile_delete_link(id)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
+        error('not a stockpile '..tostring(bld))
+    end
+
+    local pos = 0
+    for j,w in pairs(bld.links) do --as:df.building[]
+        for i,v in ipairs(w) do
+            if v.id == id then
+                df.global.ui_building_item_cursor = pos
+                gui.simulateInput(ws, K'BUILDJOB_STOCKPILE_DELETE_CHILD')
+                return true
+            end
+
+            pos = pos + 1
+        end
+    end
+
+    error('no such link '..tostring(id))
 end
