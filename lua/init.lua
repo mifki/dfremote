@@ -879,7 +879,9 @@ function get_status()
         if stockpile_linking then
             local bld = df.global.world.selected_building
             local can_link = bld and bld:canLinkToStockpile() or false
-            return 27, can_link and 1 or 0
+            local targetname = bld and bldname(bld) or mp.NIL
+
+            return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(stockpile_linking), targetname }
         end
 
         local bld = df.global.world.selected_building

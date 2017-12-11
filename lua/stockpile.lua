@@ -1571,10 +1571,11 @@ end
 local stockpile_cursor_x
 local stockpile_cursor_y
 local stockpile_cursor_z
+stockpile_linking_mode = nil
 stockpile_linking = nil
 
 --luacheck: in=
-function building_stockpile_linking_begin()
+function building_stockpile_linking_begin(mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1593,6 +1594,7 @@ function building_stockpile_linking_begin()
     stockpile_cursor_y = df.global.cursor.y
     stockpile_cursor_z = df.global.cursor.z
 
+    stockpile_linking_mode = mode
     stockpile_linking = bld
 
     return true
