@@ -1572,9 +1572,9 @@ local stockpile_cursor_x
 local stockpile_cursor_y
 local stockpile_cursor_z
 stockpile_linking_mode = nil
-stockpile_linking = nil
+stockpile_linking_source = nil
 
---luacheck: in=
+--luacheck: in=number
 function building_stockpile_linking_begin(mode)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -1595,36 +1595,85 @@ function building_stockpile_linking_begin(mode)
     stockpile_cursor_z = df.global.cursor.z
 
     stockpile_linking_mode = mode
-    stockpile_linking = bld
+    stockpile_linking_source = bld
 
     return true
 end
 
---luacheck: in=
-function building_stockpile_linking_ok()
+local function restore_after_linking()
     local ws = dfhack.gui.getCurViewscreen()
 
-    stockpile_linking = nil
+    stockpile_linking_source = nil
 
     df.global.cursor.x = stockpile_cursor_x
     df.global.cursor.y = stockpile_cursor_y
     df.global.cursor.z = stockpile_cursor_z - 1
     gui.simulateInput(ws, K'CURSOR_UP_Z')
 
+    recenter_view(stockpile_cursor_x, stockpile_cursor_y, stockpile_cursor_z)
+end
+
+function stockpile_can_link(bld)
+    return (bld:canLinkToStockpile() or (bld._type == df.building_stockpilest and bld ~= stockpile_linking_source))    
+end
+
+--luacheck: in=
+function building_stockpile_linking_ok()
+    if not stockpile_linking_source then
+        error('not linking stockpile')
+    end
+
+    local bld = df.global.world.selected_building
+    if not bld then
+        error('no selected building or not')
+    end
+
+    if not stockpile_can_link(bld) then
+        error('can not link')
+    end
+
+    local links = stockpile_linking_source.links
+
+    if bld._type == df.building_stockpilest then --as:bld=df.building_stockpilest
+        if stockpile_linking_mode == 1 then
+            -- forward
+            utils.erase_sorted(links.take_from_pile, bld, 'id')
+            utils.insert_sorted(links.give_to_pile, bld, 'id')
+
+            -- and reverse
+            utils.erase_sorted(bld.links.give_to_pile, stockpile_linking_source, 'id')
+            utils.insert_sorted(bld.links.take_from_pile, stockpile_linking_source, 'id')
+        else
+            -- forward
+            utils.erase_sorted(links.give_to_pile, bld, 'id')
+            utils.insert_sorted(links.take_from_pile, bld, 'id')
+
+            -- and reverse
+            utils.erase_sorted(bld.links.take_from_pile, stockpile_linking_source, 'id')
+            utils.insert_sorted(bld.links.give_to_pile, stockpile_linking_source, 'id')
+        end
+
+    else
+        if stockpile_linking_mode == 1 then
+            utils.erase_sorted(links.take_from_workshop, bld, 'id')
+            utils.insert_sorted(links.give_to_workshop, bld, 'id')
+        else
+            utils.erase_sorted(links.give_to_workshop, bld, 'id')
+            utils.insert_sorted(links.take_from_workshop, bld, 'id')
+        end
+    end
+
+    restore_after_linking()
     return true
 end
 
 --luacheck: in=
 function building_stockpile_linking_cancel()
-    local ws = dfhack.gui.getCurViewscreen()
+    if not stockpile_linking_source then
+        error('not linking stockpile')
+    end
 
-    stockpile_linking = nil
-
-    df.global.cursor.x = stockpile_cursor_x
-    df.global.cursor.y = stockpile_cursor_y
-    df.global.cursor.z = stockpile_cursor_z - 1
-    gui.simulateInput(ws, K'CURSOR_UP_Z')
-
+    restore_after_linking()
     return true
 end
 

@@ -135,7 +135,7 @@ function reset_main()
         df.global.ui.hauling.in_assign_vehicle = false
         df.global.ui.hauling.in_name = false
         squads_reset()
-        stockpile_linking = nil
+        stockpile_linking_source = nil
     end    
 end
 
@@ -876,12 +876,12 @@ function get_status()
             return 101, 0
         end
 
-        if stockpile_linking then
+        if stockpile_linking_source then
             local bld = df.global.world.selected_building
-            local can_link = bld and bld:canLinkToStockpile() or false
-            local targetname = bld and bldname(bld) or mp.NIL
+            local targetname = bld and bldname(bld) or mp.NIL            
+            local can_link = bld and stockpile_can_link(bld) or false
 
-            return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(stockpile_linking), targetname }
+            return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(stockpile_linking_source), targetname }
         end
 
         local bld = df.global.world.selected_building
@@ -891,7 +891,6 @@ function get_status()
             if bld._type == df.building_trapst and df.global.ui_workshop_in_add then
                 local linkmode = C_lever_target_type_get()
                 if linkmode ~= -1 then
-
                     if linkmode == string.byte('t') or linkmode == string.byte('l') then
                         local enough = (linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2) or
                                        (linkmode == string.byte('l') and #df.global.ui_building_assign_items >= 1) or false
