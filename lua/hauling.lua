@@ -1,14 +1,24 @@
 --luacheck: in=
 function hauling_get_routes()
-	local ret = {}
+	return execute_with_hauling_menu(function(ws)
+		local ret = {}
 
-	for i,route in ipairs(df.global.ui.hauling.routes) do
-		local name = routename(route)
+		for i,route in ipairs(df.global.ui.hauling.routes) do
+			local name = routename(route)
 
-		table.insert(ret, { name, route.id })
-	end
+			local bad = false
+			for j,w in ipairs(df.global.ui.hauling.view_bad) do
+				if df.global.ui.hauling.view_routes[j] == route and istrue(w) then
+					bad = true
+					break
+				end
+			end
 
-	return ret
+			table.insert(ret, { name, route.id, bad })
+		end
+
+		return ret
+	end)
 end
 
 --luacheck: in=number
@@ -25,7 +35,16 @@ function hauling_route_info(id)
 		table.insert(stops, { stopname(v), v.id })
 	end
 
-	return { routename(route), route.id, stops }
+	local vehicle_info = mp.NIL
+	if #route.vehicle_ids > 0 then
+		--todo: can be > 1 vehicle ?!
+		local vehicle = df.vehicle.find(route.vehicle_ids[0])
+		local stop_idx = route.vehicle_stops[0]
+
+		vehicle_info = { stop_idx }
+	end
+
+	return { routename(route), route.id, stops, vehicle_info }
 end
 
 --luacheck: in=number
