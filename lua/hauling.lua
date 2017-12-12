@@ -29,22 +29,42 @@ function hauling_route_info(id)
 		error('no route '..tostring(id))
 	end
 
-	local stops = {}
-	for i,v in ipairs(route.stops) do
-		--todo: df.global.ui.hauling.view_bad
-		table.insert(stops, { stopname(v), v.id })
-	end
+	return execute_with_hauling_menu(function(ws)
+		local stops = {}
+		for i,v in ipairs(df.global.ui.hauling.view_stops) do
+			if v and df.global.ui.hauling.view_routes[i] == route then
+				table.insert(stops, { stopname(v), v.id, istrue(df.global.ui.hauling.view_bad[i]) })
+			end
+		end
 
-	local vehicle_info = mp.NIL
-	if #route.vehicle_ids > 0 then
-		--todo: can be > 1 vehicle ?!
-		local vehicle = df.vehicle.find(route.vehicle_ids[0])
-		local stop_idx = route.vehicle_stops[0]
+		local vehicle_info = { -1, -1, -1 }
+		if #route.vehicle_ids > 0 then
+			--todo: can be > 1 vehicle ?!
+			local vehicle = df.vehicle.find(route.vehicle_ids[0])
+			local vehicle_item = vehicle and df.item.find(vehicle.item_id)
+			if vehicle_item then
+				local vehicle_stop_id = route.stops[route.vehicle_stops[0]].id
 
-		vehicle_info = { stop_idx }
-	end
+				local on_stop = false
 
-	return { routename(route), route.id, stops, vehicle_info }
+				local contained_volume = 0
+				for i,ref in ipairs(vehicle_item.general_refs) do
+					if ref._type == df.general_ref_contains_itemst then
+						local item = df.item.find(ref.item_id)
+						if item then
+							contained_volume = contained_volume + item:getVolume()
+						end
+					end
+				end
+
+				local fullness = math.ceil(contained_volume / 50000 * 100)
+
+				vehicle_info = { vehicle_stop_id, on_stop, fullness }
+			end
+		end
+
+		return { routename(route), route.id, stops, vehicle_info }
+	end)
 end
 
 --luacheck: in=number
@@ -262,16 +282,23 @@ function hauling_reorder_stops(id, fromidx, toidx)
 	if not route then
 		error('no hauling route '..tostring(id))
 	end
-	
+
+	--todo: use UI ?
+
+	--todo: can be > 1 vehicle ?!
+	local vehicle_stop = route.stops[route.vehicle_stops[0]]
+
 	local stop = route.stops[fromidx]
     route.stops:erase(fromidx)
     route.stops:insert(toidx, stop)
 
+    route.vehicle_stops[0] = utils.linear_index(route.stops, vehicle_stop)
+
     return true
 end
 
--- print(pcall(function()return json:encode(hauling_get_routes())end))
---print(pcall(function()return json:encode(hauling_route_info(2))end))
+--print(pcall(function()return json:encode(hauling_get_routes())end))
+--print(pcall(function()return json:encode(hauling_route_info(1))end))
 --print(pcall(function()return json:encode(hauling_vehicle_get_choices(2))end))
 --print(pcall(function()return json:encode(hauling_vehicle_assign(2,48))end))
 --print(pcall(function()return json:encode(hauling_route_new())end))
