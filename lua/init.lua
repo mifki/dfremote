@@ -1935,6 +1935,7 @@ local handlers = {
         [7] = hauling_stop_delete_current,
         [8] = hauling_reorder_stops,
         [9] = hauling_route_start_edit,
+        [10] = hauling_stop_info,
     },
 
     [148] = {

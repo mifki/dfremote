@@ -68,6 +68,15 @@ function hauling_route_info(id)
 end
 
 --luacheck: in=number
+function hauling_stop_info(id)
+	local route = df.hauling_route.find(id)
+
+	if not route then
+		error('no route '..tostring(id))
+	end
+end
+
+--luacheck: in=number
 function hauling_route_delete(id)
 	execute_with_hauling_menu(function(ws)
 		for i,v in ipairs(df.global.ui.hauling.view_routes) do
