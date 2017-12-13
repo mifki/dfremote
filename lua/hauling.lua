@@ -68,12 +68,26 @@ function hauling_route_info(id)
 end
 
 --luacheck: in=number
-function hauling_stop_info(id)
-	local route = df.hauling_route.find(id)
+function hauling_stop_info(routeid, stopid)
+	local route = df.hauling_route.find(routeid)
 
 	if not route then
-		error('no route '..tostring(id))
+		error('no route '..tostring(routeid))
 	end
+
+	local _,stop = utils.linear_index(route.stops, stopid, 'id')
+
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end
+
+	local conditions = {}
+
+	for i,v in ipairs(stop.conditions) do
+		table.insert(conditions, { v.direction, v.mode, v.load_percent, v.timeout/1200, v.flags.whole });
+	end
+
+	return { stopname(stop), stop.id, conditions }
 end
 
 --luacheck: in=number
