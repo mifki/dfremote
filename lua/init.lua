@@ -1936,6 +1936,10 @@ local handlers = {
         [8] = hauling_reorder_stops,
         [9] = hauling_route_start_edit,
         [10] = hauling_stop_info,
+        [11] = hauling_stop_delete_condition,
+        [12] = hauling_vehicle_get_choices,
+        [13] = hauling_vehicle_assign,
+        [14] = hauling_stop_delete_link,
     },
 
     [148] = {

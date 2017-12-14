@@ -37,7 +37,7 @@ function hauling_route_info(id)
 			end
 		end
 
-		local vehicle_info = { -1, -1, -1 }
+		local vehicle_info
 		if #route.vehicle_ids > 0 then
 			--todo: can be > 1 vehicle ?!
 			local vehicle = df.vehicle.find(route.vehicle_ids[0])
@@ -59,15 +59,15 @@ function hauling_route_info(id)
 
 				local fullness = math.ceil(contained_volume / 50000 * 100)
 
-				vehicle_info = { vehicle_stop_id, on_stop, fullness }
+				vehicle_info = { itemname(vehicle_item, 1, true), vehicle_item.id, vehicle_stop_id, on_stop, fullness }
 			end
 		end
 
-		return { routename(route), route.id, stops, vehicle_info }
+		return { routename(route), route.id, stops, vehicle_info or mp.NIL }
 	end)
 end
 
---luacheck: in=number
+--luacheck: in=number,number
 function hauling_stop_info(routeid, stopid)
 	local route = df.hauling_route.find(routeid)
 
@@ -82,12 +82,62 @@ function hauling_stop_info(routeid, stopid)
 	end
 
 	local conditions = {}
-
 	for i,v in ipairs(stop.conditions) do
 		table.insert(conditions, { v.direction, v.mode, v.load_percent, v.timeout/1200, v.flags.whole });
 	end
 
-	return { stopname(stop), stop.id, conditions }
+	local stockpiles = {}
+	for i,v in ipairs(stop.stockpiles) do
+		local bld = df.building.find(v.building_id)
+		local name = bld and bldname(bld) or '#unknown stockpile#' --todo: handle -1 differently?
+
+		table.insert(stockpiles, { name, v.building_id });
+	end
+
+	return { stopname(stop), stop.id, conditions, stockpiles }
+end
+
+--luacheck: in=number,number,number
+function hauling_stop_delete_condition(routeid, stopid, idx)
+	local route = df.hauling_route.find(routeid)
+
+	if not route then
+		error('no route '..tostring(routeid))
+	end
+
+	for i,stop in ipairs(route.stops) do
+		if stop.id == stopid then
+			stop.conditions:erase(idx)
+			return true
+		end
+	end
+
+	error('no stop '..tostring(stopid))
+end
+
+--luacheck: in=number,number,number
+function hauling_stop_delete_link(routeid, stopid, idx)
+	local route = df.hauling_route.find(routeid)
+
+	if not route then
+		error('no route '..tostring(routeid))
+	end
+
+	for i,stop in ipairs(route.stops) do
+		if stop.id == stopid then
+			stop.stockpiles:erase(idx)
+			--[[for j,link in ipairs(stop.stockpiles) do
+				if link.building_id == buildingid then
+					stop.stockpiles:erase(j)
+					return true
+				end
+			end]]
+
+			error('no stockpile link '..tostring(buildingid))
+		end
+	end
+
+	error('no stop '..tostring(stopid))
 end
 
 --luacheck: in=number
@@ -183,12 +233,14 @@ function hauling_vehicle_get_choices(routeid)
 				local ret = {}
 				for i,vehicle in ipairs(df.global.ui.hauling.vehicles) do
 					if not vehicle then
-						table.insert(ret, { 'None', -1 })
+						table.insert(ret, { 'None', -1, -1, mp.NIL })
+					
 					else
 						local item = df.item.find(vehicle.item_id)
 						local itemname = item and itemname(item, 1, true)
+						local assigned_route = vehicle.route_id ~= -1 and df.hauling_route.find(vehicle.route_id)
 
-						table.insert(ret, { itemname, vehicle.id, item.id })
+						table.insert(ret, { itemname, vehicle.id, item.id, assigned_route and routename(assigned_route) or mp.NIL })
 					end
 				end
 
@@ -318,6 +370,39 @@ function hauling_reorder_stops(id, fromidx, toidx)
     route.vehicle_stops[0] = utils.linear_index(route.stops, vehicle_stop)
 
     return true
+end
+
+hauling_linking = nil
+
+--luacheck: in=number,number
+function hauling_stop_linking_begin(routeid, stopid)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    -- if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
+    --     error('no selected building')
+    -- end
+
+    -- stockpile_cursor_x = df.global.cursor.x
+    -- stockpile_cursor_y = df.global.cursor.y
+    -- stockpile_cursor_z = df.global.cursor.z
+
+    -- stockpile_linking_mode = mode
+    -- stockpile_linking_source = bld
+
+    hauling_linking = { routeid=routeid, stopid=stopid }
+
+    return true	
+end
+
+--luacheck: in=
+function hauling_stop_linking_ok()
+end
+
+--luacheck: in=
+function hauling_stop_linking_cancel()
 end
 
 --print(pcall(function()return json:encode(hauling_get_routes())end))
