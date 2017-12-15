@@ -43,7 +43,7 @@ function hauling_route_info(id)
 			local vehicle = df.vehicle.find(route.vehicle_ids[0])
 			local vehicle_item = vehicle and df.item.find(vehicle.item_id)
 			if vehicle_item then
-				local vehicle_stop_id = route.stops[route.vehicle_stops[0]].id
+				local vehicle_stop_id = route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]].id or -1
 
 				local on_stop = false
 
@@ -91,7 +91,7 @@ function hauling_stop_info(routeid, stopid)
 		local bld = df.building.find(v.building_id)
 		local name = bld and bldname(bld) or '#unknown stockpile#' --todo: handle -1 differently?
 
-		table.insert(stockpiles, { name, v.building_id });
+		table.insert(stockpiles, { name, v.building_id, v.mode.whole });
 	end
 
 	return { stopname(stop), stop.id, conditions, stockpiles }
@@ -181,7 +181,7 @@ end
 function hauling_stop_delete(routeid, stopid)
 	return execute_with_hauling_menu(function(ws)
 		for i,v in ipairs(df.global.ui.hauling.view_stops) do
-			if v.id == stopid and df.global.ui.hauling.view_routes[i].id == routeid then
+			if v and v.id == stopid and df.global.ui.hauling.view_routes[i].id == routeid then
 				df.global.ui.hauling.cursor_top = i
 				gui.simulateInput(ws, K'D_HAULING_REMOVE')
 				return true
@@ -448,6 +448,21 @@ function hauling_stop_linking_cancel()
     local ret = { hauling_linking_source.routeid, hauling_linking_source.stopid }
     restore_after_hauling_linking()
     return ret
+end
+
+function hauling_stop_get_item_settings(routeid, stopid)
+	local route = df.hauling_route.find(routeid)
+	if not route then
+		error('no hauling route '..tostring(routeid))
+	end
+
+	local _,stop = utils.linear_index(route.stops, stopid, 'id')
+
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end
+
+	return stockpile_get_settings_internal(stop.settings)
 end
 
 --print(pcall(function()return json:encode(hauling_get_routes())end))

@@ -218,7 +218,7 @@ local function furniture_type_titles()
     }
 end
 
-function gem_to_mat_idx(pos)
+local function gem_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_GEM then
@@ -233,7 +233,7 @@ function gem_to_mat_idx(pos)
 end
 
 --todo: game uses plural when in Gems group and singular when in Finished Goods group
-function gem_titles()
+local function gem_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_GEM then
@@ -245,7 +245,7 @@ function gem_titles()
     return ret
 end
 
-function stoneclay_to_mat_idx(pos)
+local function stoneclay_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE then
@@ -259,7 +259,7 @@ function stoneclay_to_mat_idx(pos)
     return ret
 end
 
-function stoneclay_titles()
+local function stoneclay_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE then
@@ -271,7 +271,7 @@ function stoneclay_titles()
     return ret
 end
 
-function metal_to_mat_idx(pos)
+local function metal_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_METAL then
@@ -285,7 +285,7 @@ function metal_to_mat_idx(pos)
     return ret
 end
 
-function metal_titles()
+local function metal_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_METAL then
@@ -297,7 +297,7 @@ function metal_titles()
     return ret
 end
 
-function metalore_to_mat_idx(pos)
+local function metalore_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.flags.METAL_ORE then
@@ -311,7 +311,7 @@ function metalore_to_mat_idx(pos)
     return ret
 end
 
-function metalore_titles()
+local function metalore_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.flags.METAL_ORE then
@@ -323,7 +323,7 @@ function metalore_titles()
     return ret
 end
 
-function economic_to_mat_idx(pos)
+local function economic_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE and not v.flags.METAL_ORE and #v.economic_uses>0 then
@@ -337,7 +337,7 @@ function economic_to_mat_idx(pos)
     return ret
 end
 
-function economic_titles()
+local function economic_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE and not v.flags.METAL_ORE and #v.economic_uses>0 then
@@ -349,7 +349,7 @@ function economic_titles()
     return ret
 end
 
-function otherstone_to_mat_idx(pos)
+local function otherstone_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE and not v.material.flags.NO_STONE_STOCKPILE and not v.flags.METAL_ORE and #v.economic_uses==0 then
@@ -363,7 +363,7 @@ function otherstone_to_mat_idx(pos)
     return ret
 end
 
-function otherstone_titles()
+local function otherstone_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.material.flags.IS_STONE and not v.material.flags.NO_STONE_STOCKPILE and not v.flags.METAL_ORE and #v.economic_uses==0 then
@@ -376,7 +376,7 @@ function otherstone_titles()
 end
 
 --todo: is this the right way?
-function clay_to_mat_idx(pos)
+local function clay_to_mat_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.flags.SOIL and #v.material.reaction_product.id>0 and v.material.reaction_product.id[0].value=='FIRED_MAT' then
@@ -391,7 +391,7 @@ function clay_to_mat_idx(pos)
 end
 
 --todo: is this the right way?
-function clay_titles()
+local function clay_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.inorganics) do
         if v.flags.SOIL and #v.material.reaction_product.id>0 and v.material.reaction_product.id[0].value=='FIRED_MAT' then
@@ -403,7 +403,7 @@ function clay_titles()
     return ret
 end
 
-function animal_to_creature_idx(pos)
+local function animal_to_creature_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.creatures.all) do
         --todo: is this correct?
@@ -419,7 +419,7 @@ function animal_to_creature_idx(pos)
 end
 
 --todo: game uses plural when in Animals group and singular when in Refuse group
-function animal_titles()
+local function animal_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.creatures.all) do
         --todo: is this correct?
@@ -1290,24 +1290,7 @@ local function stockpile_settings_schema()
     return ret
 end
 
---luacheck: in=
-function building_stockpile_get_settings()
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    local bld = df.global.world.selected_building --as:df.building_stockpilest
-    if bld._type ~= df.building_stockpilest then
-        error('not a stockpile '..tostring(bld))
-    end
-
-    local ss = bld.settings
-
+function stockpile_get_settings_internal(ss)
     local ret = {}
     for i,toplevel in ipairs(stockpile_settings_schema()) do
         local toplevel_name = toplevel[1]
@@ -1359,6 +1342,25 @@ function building_stockpile_get_settings()
     table.insert(ret, flags)
 
     return ret
+end
+
+--luacheck: in=
+function building_stockpile_get_settings()
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
+        error('not a stockpile '..tostring(bld))
+    end
+
+    return stockpile_get_settings_internal(bld.settings)
 end
 
 --luacheck: in=number,number
@@ -1568,11 +1570,12 @@ function building_stockpile_create()
     gui.simulateInput(ws, K'D_STOCKPILES')    
 end
 
--- local stockpile_cursor_x
--- local stockpile_cursor_y
--- local stockpile_cursor_z
 stockpile_linking_mode = nil
 stockpile_linking_source = nil
+
+function restore_after_stockpile_linking()
+    stockpile_linking_source = nil
+end
 
 --luacheck: in=number
 function building_stockpile_linking_begin(mode)
@@ -1590,31 +1593,14 @@ function building_stockpile_linking_begin(mode)
         error('not a stockpile '..tostring(bld))
     end
 
-    -- stockpile_cursor_x = df.global.cursor.x
-    -- stockpile_cursor_y = df.global.cursor.y
-    -- stockpile_cursor_z = df.global.cursor.z
-
     stockpile_linking_mode = mode
-    stockpile_linking_source = bld
+    stockpile_linking_source = bld.id
 
     return true
 end
 
-function restore_after_stockpile_linking()
-    local ws = dfhack.gui.getCurViewscreen()
-
-    stockpile_linking_source = nil
-
-    -- df.global.cursor.x = stockpile_cursor_x
-    -- df.global.cursor.y = stockpile_cursor_y
-    -- df.global.cursor.z = stockpile_cursor_z - 1
-    -- gui.simulateInput(ws, K'CURSOR_UP_Z')
-
-    -- recenter_view(stockpile_cursor_x, stockpile_cursor_y, stockpile_cursor_z)
-end
-
 function stockpile_can_link(bld)
-    return (bld:canLinkToStockpile() or (bld._type == df.building_stockpilest and bld ~= stockpile_linking_source))    
+    return (bld:canLinkToStockpile() or (bld._type == df.building_stockpilest and bld.id ~= stockpile_linking_source))
 end
 
 --luacheck: in=
@@ -1622,6 +1608,11 @@ function building_stockpile_linking_ok()
     if not stockpile_linking_source then
         error('not linking stockpile')
     end
+
+    local pile = df.building.find(stockpile_linking_source)
+    if not pile then
+        error('no stockpile '..tostring(stockpile_linking_source))
+    end    
 
     local bld = df.global.world.selected_building
     if not bld then
@@ -1632,7 +1623,7 @@ function building_stockpile_linking_ok()
         error('can not link '..tostring(bld))
     end
 
-    local links = stockpile_linking_source.links
+    local links = pile.links
 
     if bld._type == df.building_stockpilest then --as:bld=df.building_stockpilest
         if stockpile_linking_mode == 1 then
@@ -1641,16 +1632,16 @@ function building_stockpile_linking_ok()
             utils.insert_sorted(links.give_to_pile, bld, 'id')
 
             -- and reverse
-            utils.erase_sorted(bld.links.give_to_pile, stockpile_linking_source, 'id')
-            utils.insert_sorted(bld.links.take_from_pile, stockpile_linking_source, 'id')
+            utils.erase_sorted(bld.links.give_to_pile, pile, 'id')
+            utils.insert_sorted(bld.links.take_from_pile, pile, 'id')
         else
             -- forward
             utils.erase_sorted(links.give_to_pile, bld, 'id')
             utils.insert_sorted(links.take_from_pile, bld, 'id')
 
             -- and reverse
-            utils.erase_sorted(bld.links.take_from_pile, stockpile_linking_source, 'id')
-            utils.insert_sorted(bld.links.give_to_pile, stockpile_linking_source, 'id')
+            utils.erase_sorted(bld.links.take_from_pile, pile, 'id')
+            utils.insert_sorted(bld.links.give_to_pile, pile, 'id')
         end
 
     else
@@ -1663,7 +1654,7 @@ function building_stockpile_linking_ok()
         end
     end
 
-    local ret = { stockpile_linking_source.id }
+    local ret = { stockpile_linking_source }
     restore_after_stockpile_linking()
     return ret
 end
@@ -1674,7 +1665,7 @@ function building_stockpile_linking_cancel()
         error('not linking stockpile')
     end
 
-    local ret = { stockpile_linking_source.id }
+    local ret = { stockpile_linking_source }
     restore_after_stockpile_linking()
     return ret
 end

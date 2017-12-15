@@ -876,34 +876,54 @@ function get_status()
         end
     end
 
+    if stockpile_linking_source then
+        local bld = df.global.world.selected_building
+        local targetname = bld and bldname(bld) or mp.NIL            
+        local can_link = bld and stockpile_can_link(bld) or false
+
+        local pile = df.building.find(stockpile_linking_source)
+        if not pile then
+            stockpile_linking_source = nil
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
+            mainmode = df.ui_sidebar_mode.Default
+            goto continue_checks
+        end
+
+        return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(pile), targetname }
+    end
+
+    if hauling_linking_source then
+        local bld = df.global.world.selected_building
+        local targetname = bld and bldname(bld) or mp.NIL            
+        local can_link = bld and bld._type == df.building_stockpilest or false
+
+        --todo: check that route/stop stils exist
+        local route = df.hauling_route.find(hauling_linking_source.routeid)
+        if not route then
+            hauling_linking_source = nil
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
+            mainmode = df.ui_sidebar_mode.Default
+            goto continue_checks
+        end
+        local _,stop = utils.linear_index(route.stops, hauling_linking_source.stopid, 'id')
+        if not stop then
+            hauling_linking_source = nil
+            df.global.ui.main.mode = df.ui_sidebar_mode.Default
+            mainmode = df.ui_sidebar_mode.Default
+            goto continue_checks
+        end
+
+        return 115, can_link and 1 or 0, { routename(route), stopname(stop), targetname }
+    end    
+
+    ::continue_checks::
+
     --[q]uery building
     if mainmode == df.ui_sidebar_mode.QueryBuilding then
         if df.global.ui_building_in_resize then
             return 101, 0
         end
-
-        if stockpile_linking_source then
-            local bld = df.global.world.selected_building
-            local targetname = bld and bldname(bld) or mp.NIL            
-            local can_link = bld and stockpile_can_link(bld) or false
-
-            --todo: check that stockpile stils exists            
-
-            return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(stockpile_linking_source), targetname }
-        end
-
-        if hauling_linking_source then
-            local bld = df.global.world.selected_building
-            local targetname = bld and bldname(bld) or mp.NIL            
-            local can_link = bld and bld._type == df.building_stockpilest or false
-
-            --todo: check that route/stop stils exist
-            local route = df.hauling_route.find(hauling_linking_source.routeid)
-            local _,stop = utils.linear_index(route.stops, hauling_linking_source.stopid, 'id')
-
-            return 115, can_link and 1 or 0, { routename(route), stopname(stop), targetname }
-        end
-
+        
         local bld = df.global.world.selected_building
         if bld then
             local name = bldname(bld)

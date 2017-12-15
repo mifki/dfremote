@@ -112,7 +112,6 @@ end]]
 
 --xxx: most of the functions below can operate on the currently selected building only
 --xxx: this function will try to transition to [q]uery mode and select the passed building
---xxx: currently this is used only to transition from loo[k] mode
 --luacheck: in=number
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
@@ -137,7 +136,7 @@ function building_query_selected(bldid)
         df.global.cursor.y = bld.y1
         df.global.cursor.z = bld.z-1
         gui.simulateInput(ws, K'CURSOR_UP_Z')
-        --todo: need to call recenter_view() ?
+        recenter_view(bld.centerx, bld.centery, bld.z)
     end
 
     local btype = bld:getType()
