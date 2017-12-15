@@ -136,7 +136,8 @@ function building_query_selected(bldid)
         df.global.cursor.x = bld.x1
         df.global.cursor.y = bld.y1
         df.global.cursor.z = bld.z-1
-        gui.simulateInput(ws, K'CURSOR_UP_Z')        
+        gui.simulateInput(ws, K'CURSOR_UP_Z')
+        --todo: need to call recenter_view() ?
     end
 
     local btype = bld:getType()

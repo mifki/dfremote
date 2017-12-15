@@ -372,7 +372,11 @@ function hauling_reorder_stops(id, fromidx, toidx)
     return true
 end
 
-hauling_linking = nil
+hauling_linking_source = nil
+
+function restore_after_hauling_linking()
+    hauling_linking_source = nil
+end
 
 --luacheck: in=number,number
 function hauling_stop_linking_begin(routeid, stopid)
@@ -381,28 +385,69 @@ function hauling_stop_linking_begin(routeid, stopid)
         error(errmsg_wrongscreen(ws))
     end
 
-    -- if df.global.ui.main.mode ~= df.ui_sidebar_mode.Hauling then
-    --     error('no selected building')
-    -- end
+	local route = df.hauling_route.find(routeid)
+	if not route then
+		error('no hauling route '..tostring(routeid))
+	end
 
-    -- stockpile_cursor_x = df.global.cursor.x
-    -- stockpile_cursor_y = df.global.cursor.y
-    -- stockpile_cursor_z = df.global.cursor.z
+	local _,stop = utils.linear_index(route.stops, stopid, 'id')
 
-    -- stockpile_linking_mode = mode
-    -- stockpile_linking_source = bld
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end
 
-    hauling_linking = { routeid=routeid, stopid=stopid }
+	query_building()
+    hauling_linking_source = { routeid=route.id, stopid=stop.id }
 
     return true	
 end
 
 --luacheck: in=
 function hauling_stop_linking_ok()
+    if not hauling_linking_source then
+        error('not linking hauling stop')
+    end
+
+    local bld = df.global.world.selected_building
+    if bld._type ~= df.building_stockpilest then
+    	error('not a stockpile '..tostring(bld))
+    end
+
+	local route = df.hauling_route.find(hauling_linking_source.routeid)
+	if not route then
+		error('no hauling route '..tostring(hauling_linking_source.routeid))
+	end
+
+	local _,stop = utils.linear_index(route.stops, hauling_linking_source.stopid, 'id')
+
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end    
+
+    local link = df.route_stockpile_link:new()
+    link.building_id = bld.id
+    link.mode.take = true
+
+    stop.stockpiles:insert('#', link)
+
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
+
+    local ret = { hauling_linking_source.routeid, hauling_linking_source.stopid }
+    restore_after_hauling_linking()
+    return ret
 end
 
 --luacheck: in=
 function hauling_stop_linking_cancel()
+    if not hauling_linking_source then
+        error('not linking hauling stop')
+    end
+
+    df.global.ui.main.mode = df.ui_sidebar_mode.Default
+
+    local ret = { hauling_linking_source.routeid, hauling_linking_source.stopid }
+    restore_after_hauling_linking()
+    return ret
 end
 
 --print(pcall(function()return json:encode(hauling_get_routes())end))
@@ -411,4 +456,4 @@ end
 --print(pcall(function()return json:encode(hauling_vehicle_assign(2,48))end))
 --print(pcall(function()return json:encode(hauling_route_new())end))
 --print(pcall(function()return json:encode(hauling_route_set_name(130,''))end))
--- print(pcall(function()return json:encode(hauling_route_start_edit(2,''))end))
+-- print(pcall(function()return json:encode(hauling_route_start_edit(2,true))end))

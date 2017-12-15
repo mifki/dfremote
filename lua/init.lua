@@ -135,7 +135,13 @@ function reset_main()
         df.global.ui.hauling.in_assign_vehicle = false
         df.global.ui.hauling.in_name = false
         squads_reset()
-        stockpile_linking_source = nil
+
+        if stockpile_linking_source then
+            restore_after_stockpile_linking()
+        end
+        if hauling_linking_source then
+            restore_after_hauling_linking()
+        end
     end    
 end
 
@@ -881,7 +887,21 @@ function get_status()
             local targetname = bld and bldname(bld) or mp.NIL            
             local can_link = bld and stockpile_can_link(bld) or false
 
+            --todo: check that stockpile stils exists            
+
             return 110+stockpile_linking_mode, can_link and 1 or 0, { bldname(stockpile_linking_source), targetname }
+        end
+
+        if hauling_linking_source then
+            local bld = df.global.world.selected_building
+            local targetname = bld and bldname(bld) or mp.NIL            
+            local can_link = bld and bld._type == df.building_stockpilest or false
+
+            --todo: check that route/stop stils exist
+            local route = df.hauling_route.find(hauling_linking_source.routeid)
+            local _,stop = utils.linear_index(route.stops, hauling_linking_source.stopid, 'id')
+
+            return 115, can_link and 1 or 0, { routename(route), stopname(stop), targetname }
         end
 
         local bld = df.global.world.selected_building
@@ -1940,6 +1960,9 @@ local handlers = {
         [12] = hauling_vehicle_get_choices,
         [13] = hauling_vehicle_assign,
         [14] = hauling_stop_delete_link,
+        [15] = hauling_stop_linking_begin,
+        [16] = hauling_stop_linking_ok,
+        [17] = hauling_stop_linking_cancel,
     },
 
     [148] = {

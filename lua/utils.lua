@@ -148,8 +148,8 @@ function routename(route)
     return (#route.name > 0) and route.name or ('Route ' .. tostring(route.id))
 end
 
-function stopname(route)
-    return (#route.name > 0) and route.name or ('Stop ' .. tostring(route.id))
+function stopname(stop)
+    return (#stop.name > 0) and stop.name or ('Stop ' .. tostring(stop.id))
 end
 
 function alertname(alert)

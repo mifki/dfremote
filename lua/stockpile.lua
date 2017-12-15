@@ -1568,9 +1568,9 @@ function building_stockpile_create()
     gui.simulateInput(ws, K'D_STOCKPILES')    
 end
 
-local stockpile_cursor_x
-local stockpile_cursor_y
-local stockpile_cursor_z
+-- local stockpile_cursor_x
+-- local stockpile_cursor_y
+-- local stockpile_cursor_z
 stockpile_linking_mode = nil
 stockpile_linking_source = nil
 
@@ -1590,9 +1590,9 @@ function building_stockpile_linking_begin(mode)
         error('not a stockpile '..tostring(bld))
     end
 
-    stockpile_cursor_x = df.global.cursor.x
-    stockpile_cursor_y = df.global.cursor.y
-    stockpile_cursor_z = df.global.cursor.z
+    -- stockpile_cursor_x = df.global.cursor.x
+    -- stockpile_cursor_y = df.global.cursor.y
+    -- stockpile_cursor_z = df.global.cursor.z
 
     stockpile_linking_mode = mode
     stockpile_linking_source = bld
@@ -1600,17 +1600,17 @@ function building_stockpile_linking_begin(mode)
     return true
 end
 
-local function restore_after_linking()
+function restore_after_stockpile_linking()
     local ws = dfhack.gui.getCurViewscreen()
 
     stockpile_linking_source = nil
 
-    df.global.cursor.x = stockpile_cursor_x
-    df.global.cursor.y = stockpile_cursor_y
-    df.global.cursor.z = stockpile_cursor_z - 1
-    gui.simulateInput(ws, K'CURSOR_UP_Z')
+    -- df.global.cursor.x = stockpile_cursor_x
+    -- df.global.cursor.y = stockpile_cursor_y
+    -- df.global.cursor.z = stockpile_cursor_z - 1
+    -- gui.simulateInput(ws, K'CURSOR_UP_Z')
 
-    recenter_view(stockpile_cursor_x, stockpile_cursor_y, stockpile_cursor_z)
+    -- recenter_view(stockpile_cursor_x, stockpile_cursor_y, stockpile_cursor_z)
 end
 
 function stockpile_can_link(bld)
@@ -1625,11 +1625,11 @@ function building_stockpile_linking_ok()
 
     local bld = df.global.world.selected_building
     if not bld then
-        error('no selected building or not')
+        error('no selected building')
     end
 
     if not stockpile_can_link(bld) then
-        error('can not link')
+        error('can not link '..tostring(bld))
     end
 
     local links = stockpile_linking_source.links
@@ -1663,8 +1663,9 @@ function building_stockpile_linking_ok()
         end
     end
 
-    restore_after_linking()
-    return true
+    local ret = { stockpile_linking_source.id }
+    restore_after_stockpile_linking()
+    return ret
 end
 
 --luacheck: in=
@@ -1673,8 +1674,9 @@ function building_stockpile_linking_cancel()
         error('not linking stockpile')
     end
 
-    restore_after_linking()
-    return true
+    local ret = { stockpile_linking_source.id }
+    restore_after_stockpile_linking()
+    return ret
 end
 
 --luacheck: in=number
