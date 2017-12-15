@@ -1,5 +1,7 @@
-SYMBOL_MALE = '♂'
-SYMBOL_FEMALE = '♀'
+SYMBOL_MALE_UTF = '♂'
+SYMBOL_FEMALE_UTF = '♀'
+SYMBOL_MALE_DF = dfhack.utf2df(SYMBOL_MALE_UTF)
+SYMBOL_FEMALE_DF = dfhack.utf2df(SYMBOL_FEMALE_UTF)
 
 function istrue(v)
     return v ~= nil and v ~= false and v ~= 0
@@ -86,7 +88,7 @@ end
 
 function bldname(bld)
     local name = dfhack.df2utf(utils.call_with_string(bld, 'getName'))
-    name = name:gsub('\\f', SYMBOL_FEMALE):gsub('\\m', SYMBOL_MALE)
+    name = name:gsub('\\f', SYMBOL_FEMALE_UTF):gsub('\\m', SYMBOL_MALE_UTF)
     return string.utf8capitalize(name)
 end
 

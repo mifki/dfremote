@@ -450,7 +450,9 @@ function hauling_stop_linking_cancel()
     return ret
 end
 
-function hauling_stop_get_item_settings(routeid, stopid)
+function hauling_stop_edit_item_settings(routeid, stopid)
+	stockpile_editing_settings = nil
+	
 	local route = df.hauling_route.find(routeid)
 	if not route then
 		error('no hauling route '..tostring(routeid))
@@ -462,7 +464,9 @@ function hauling_stop_get_item_settings(routeid, stopid)
 		error('no stop '..tostring(stopid))
 	end
 
-	return stockpile_get_settings_internal(stop.settings)
+	stockpile_editing_settings = stop.settings
+
+	return true
 end
 
 --print(pcall(function()return json:encode(hauling_get_routes())end))

@@ -835,9 +835,9 @@ function organic_fish_titles()
             local caste = raw.caste[indexes[i]]
             local t = capitalize(caste.caste_name[0])
             if caste.gender == 0 then
-                t = t .. ', ' .. SYMBOL_FEMALE
+                t = t .. ', ' .. SYMBOL_FEMALE_DF
             elseif caste.gender == 1 then
-                t = t .. ', ' .. SYMBOL_MALE
+                t = t .. ', ' .. SYMBOL_MALE_DF
             end
             table.insert(ret, t)
         end
@@ -858,9 +858,9 @@ function organic_rawfish_titles()
             local caste = raw.caste[indexes[i]]
             local t = 'Unprepared Raw ' .. capitalize(caste.caste_name[0])
             if caste.gender == 0 then
-                t = t .. ', ' .. SYMBOL_FEMALE
+                t = t .. ', ' .. SYMBOL_FEMALE_DF
             elseif caste.gender == 1 then
-                t = t .. ', ' .. SYMBOL_MALE
+                t = t .. ', ' .. SYMBOL_MALE_DF
             end
             table.insert(ret, t)
         end
@@ -1290,7 +1290,12 @@ local function stockpile_settings_schema()
     return ret
 end
 
-function stockpile_get_settings_internal(ss)
+stockpile_editing_settings = nil
+
+--luacheck: in=
+function building_stockpile_get_settings()
+    local ss = stockpile_editing_settings
+
     local ret = {}
     for i,toplevel in ipairs(stockpile_settings_schema()) do
         local toplevel_name = toplevel[1]
@@ -1345,7 +1350,9 @@ function stockpile_get_settings_internal(ss)
 end
 
 --luacheck: in=
-function building_stockpile_get_settings()
+function building_stockpile_edit_settings()
+    stockpile_editing_settings = nil
+
     local ws = screen_main()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -1360,26 +1367,14 @@ function building_stockpile_get_settings()
         error('not a stockpile '..tostring(bld))
     end
 
-    return stockpile_get_settings_internal(bld.settings)
+    stockpile_editing_settings = bld.settings
+
+    return true
 end
 
 --luacheck: in=number,number
 function building_stockpile_get_settings_level3(l1, l2)
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    local bld = df.global.world.selected_building --as:df.building_stockpilest
-    if bld._type ~= df.building_stockpilest then
-        error('not a stockpile '..tostring(bld))
-    end
-
-    local ss = bld.settings
+    local ss = stockpile_editing_settings
 
     local toplevel = stockpile_settings_schema()[l1+1]
     local toplevel_field = toplevel[2]
@@ -1403,25 +1398,11 @@ end
 --todo: support passing path as the first param
 --luacheck: in=
 function building_stockpile_set_enabled(...)
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    local bld = df.global.world.selected_building --as:df.building_stockpilest
-    if bld._type ~= df.building_stockpilest then
-        error('not a stockpile '..tostring(bld))
-    end
-
     local path = table.pack(...) --as:number[]
     local enabled = istrue(path[#path])
     path[#path] = nil
 
-    local ss = bld.settings
+    local ss = stockpile_editing_settings
 
     if #path == 1 then
         local p1 = path[1]
@@ -1499,23 +1480,9 @@ end
 
 --luacheck: in=number,number,bool
 function building_stockpile_set_flag(group, flag, enabled)
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    local bld = df.global.world.selected_building --as:df.building_stockpilest
-    if bld._type ~= df.building_stockpilest then
-        error('not a stockpile '..tostring(bld))
-    end
-
     enabled = istrue(enabled)
 
-    local ss = bld.settings
+    local ss = stockpile_editing_settings
 
     if group == 100 then
         if flag == 0 then

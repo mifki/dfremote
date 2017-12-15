@@ -1936,6 +1936,7 @@ local handlers = {
         [9] = building_stockpile_linking_ok,
         [10] = building_stockpile_set_linksonly,
         [11] = building_stockpile_delete_link,
+        [12] = building_stockpile_edit_settings,
     },
 
     [141] = {
@@ -1983,6 +1984,7 @@ local handlers = {
         [15] = hauling_stop_linking_begin,
         [16] = hauling_stop_linking_ok,
         [17] = hauling_stop_linking_cancel,
+        [18] = hauling_stop_edit_item_settings,
     },
 
     [148] = {
