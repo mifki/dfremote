@@ -1985,6 +1985,7 @@ local handlers = {
         [16] = hauling_stop_linking_ok,
         [17] = hauling_stop_linking_cancel,
         [18] = hauling_stop_edit_item_settings,
+        [19] = hauling_stop_save_condition,
     },
 
     [148] = {

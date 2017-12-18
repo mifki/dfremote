@@ -469,6 +469,32 @@ function hauling_stop_edit_item_settings(routeid, stopid)
 	return true
 end
 
+function hauling_stop_save_condition(routeid, stopid, idx, values)
+	local route = df.hauling_route.find(routeid)
+	if not route then
+		error('no hauling route '..tostring(routeid))
+	end
+
+	local _,stop = utils.linear_index(route.stops, stopid, 'id')
+
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end
+
+	local cond
+	if idx == -1 then
+		cond = df.stop_depart_condition:new()
+		stop.conditions:insert('#', cond)
+	else
+		cond = stop.conditions[idx]
+	end
+
+--table.insert(conditions, { v.direction, v.mode, v.load_percent, v.timeout/1200, v.flags.whole });
+	cond.direction = values[1]
+
+	return true
+end
+
 --print(pcall(function()return json:encode(hauling_get_routes())end))
 --print(pcall(function()return json:encode(hauling_route_info(1))end))
 --print(pcall(function()return json:encode(hauling_vehicle_get_choices(2))end))
