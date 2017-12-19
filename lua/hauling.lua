@@ -491,6 +491,10 @@ function hauling_stop_save_condition(routeid, stopid, idx, values)
 
 --table.insert(conditions, { v.direction, v.mode, v.load_percent, v.timeout/1200, v.flags.whole });
 	cond.direction = values[1]
+	cond.mode = values[2]
+	cond.load_percent = values[3]
+	cond.timeout = values[4] * 1200
+	cond.flags.whole = values[5]
 
 	return true
 end
