@@ -1569,6 +1569,13 @@ function set_cursor_pos(data)
             df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
             df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
         end
+        
+        if df.global.ui.main.mode == df.ui_sidebar_mode.DesignateMine
+        and df.global.selection_rect.start_x ~= -30000 then
+            if df.global.ui_sidebar_menus.designation.priority ~= 4000 then
+                df.global.ui_sidebar_menus.designation.priority_set = true
+            end
+        end
 
         local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
         local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE 

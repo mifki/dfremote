@@ -96,7 +96,7 @@ function location_get_info(id)
 		for i,occ in ipairs(df.global.world.occupations.all) do
 			if occ.anon_1 == group_id and occ.unit_id ~= -1 then
 				local unit = df.unit.find(occ.unit_id)
-				local unitname = unit and unit_fulltitle(unit) or '#unknown unit#'
+				local unitname = unit and unitname(unit) or '#unknown unit#'
 
 				local pos = #occupations + 1
 				for j,v in ipairs(occupations) do
@@ -189,7 +189,7 @@ function location_get_info(id)
 				
 				for i,occ in ipairs(loc.occupations) do
 					local unit = occ.unit_id ~= -1 and df.unit.find(occ.unit_id) or nil
-					local unitname = occ.unit_id ~= -1 and (unit and unit_fulltitle(unit) or '#unknown unit#') or mp.NIL
+					local unitname = occ.unit_id ~= -1 and (unit and unitname(unit) or '#unknown unit#') or mp.NIL
 
 					-- grouping by occupation type, and not allowing >1 unassigned occupation of one type
 					local pos = #occupations + 1

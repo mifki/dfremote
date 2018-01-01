@@ -35,6 +35,8 @@ local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:
     { 'Remove\nDesignation', 'x', df.interface_key.DESIGNATE_UNDO },    
     { 'Remove\nUp Stairs & Ramps', 'z', df.interface_key.DESIGNATE_DIG_REMOVE_STAIRS_RAMPS },
     { 'Remove\nConstruction', 'n', df.interface_key.DESIGNATE_REMOVE_CONSTRUCTION },
+    
+    { 'Toggle Markers', 'M', df.interface_key.DESIGNATE_TOGGLE_MARKER },
 }
 
 --luacheck: in=

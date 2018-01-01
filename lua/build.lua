@@ -213,11 +213,20 @@ local track_stop_friction_values = { 10, 50, 500, 10000, 50000 }
 
 --luacheck: in=
 function build_options_get()
-    if df.global.ui.main.mode == df.ui_sidebar_mode.DesignateMine then
-        return { -3, df.global.ui_sidebar_menus.designation.mine_mode }
+    local mainmode = df.global.ui.main.mode
+    
+    if mainmode == df.ui_sidebar_mode.DesignateMine or
+       mainmode == df.ui_sidebar_mode.DesignateChannel then
+           
+        local d = df.global.ui_sidebar_menus.designation
+        
+        return {
+            mainmode == df.ui_sidebar_mode.DesignateMine and -3 or -4,
+            d.mine_mode, mainmode, math.floor(d.priority / 1000), d.marker_only
+        }
     end
 
-    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
+    if mainmode == df.ui_sidebar_mode.Zones then
          local zonemode = df.global.ui_sidebar_menus.zone.mode
          --local selzone = df.global.ui_sidebar_menus.zone.selected
          --local selzone_name = selzone and ('Activity Zone #'..tostring(selzone.zone_num)) or  mp.NIL
@@ -225,7 +234,7 @@ function build_options_get()
          return { df.building_type.Civzone, zonemode --[[, selzone_name, selzone_id]] }
     end
     
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
+    if mainmode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
         return
     end
 
@@ -284,13 +293,21 @@ end
 
 --luacheck: in=number,number
 function build_options_set(option, value)
-    if df.global.ui.main.mode == df.ui_sidebar_mode.DesignateMine then
+    local mainmode = df.global.ui.main.mode
+
+    if mainmode == df.ui_sidebar_mode.DesignateMine then
+        local d = df.global.ui_sidebar_menus.designation
+
         if option == 1 then
-            df.global.ui_sidebar_menus.designation.mine_mode = value
+            d.mine_mode = value
+        elseif option == 2 then
+            d.priority = value * 1000
+        elseif option == 3 then
+            d.marker_only = istrue(value)
         end
     end
     
-    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
+    if mainmode == df.ui_sidebar_mode.Zones then
          local oldzonemode = df.global.ui_sidebar_menus.zone.mode
          local started = (oldzonemode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle and df.global.selection_rect.start_x ~= -30000) or df.global.ui_building_in_resize
 
@@ -322,7 +339,7 @@ function build_options_set(option, value)
          return
     end
 
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
+    if mainmode ~= df.ui_sidebar_mode.Build or df.global.ui_build_selector.building_type == -1 or df.global.ui_build_selector.stage ~= 1 then
         return
     end
 
