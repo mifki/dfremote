@@ -123,7 +123,10 @@ function unit_query_selected(unitid)
     local is_citizen = dfhack.units.isCitizen(unit) 
     local can_edit_labors = is_citizen and unit.profession ~= df.profession.CHILD and unit.profession ~= df.profession.BABY
 
-    local flags = (is_citizen and 1 or 0) + (can_edit_labors and 2 or 0)
+    local histfig = df.historical_figure.find(unit.hist_figure_id)
+    local has_kills = histfig and histfig.info.kills ~= nil
+
+    local flags = packbits(is_citizen, can_edit_labors, has_kills)
 
     local effects = unit_get_effects(unit)
 
@@ -908,17 +911,16 @@ function unit_get_thoughts(unitid, is_histfig)
     end
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
-    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
-
     if ws._type ~= df.viewscreen_textviewerst then
         error('can not switch to thoughts screen')
     end
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     local text = ''
     
     for i,v in ipairs(ws.src_text) do
         if #v.value > 0 then
-            text = text .. dfhack.df2utf(v.value:gsub('%[B]', '[P]', 1)) .. ' '
+            text = text .. dfhack.df2utf(v.value:gsub('%[P]', '[B]')) .. ' '
         end
     end
 
@@ -1570,6 +1572,37 @@ function unit_assign_animals(unitid, animalids)
             C_unit_set_pet_owner_id(animal, unit.id)
         end
     end
+end
+
+--luacheck: in=number
+function unit_get_kills(unitid)
+local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit '..tostring(unitid))
+    end
+
+    local unitws = df.viewscreen_unitst:new()
+    unitws.unit = unit
+    gui.simulateInput(unitws, K'UNITVIEW_KILLS')
+    df.delete(unitws)
+
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
+    if ws._type ~= df.viewscreen_textviewerst then
+        error('can not switch to kills screen')
+    end
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+    local text = ''
+    
+    for i,v in ipairs(ws.src_text) do
+        if #v.value > 0 then
+            text = text .. dfhack.df2utf(v.value) .. ' '
+        end
+    end
+
+    text = text:gsub('  ', ' ')
+
+    return { text }
 end
 
 -- if screen_main()._type == df.viewscreen_dwarfmodest then

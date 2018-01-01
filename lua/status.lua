@@ -194,7 +194,7 @@ function performance_skill_get_description(_id)
     
     for i,v in ipairs(ws.src_text) do
         if #v.value > 0 then
-            text = text .. dfhack.df2utf(v.value:gsub('%[B]', '[P]', 1)) .. ' '
+            text = text .. dfhack.df2utf(v.value) .. ' '
         end
     end
 

@@ -2159,6 +2159,7 @@ local handlers = {
         [36] = unit_get_inventory_and_spatters,
         [37] = unit_get_skills2,
         [38] = unit_get_skills3,
+        [39] = unit_get_kills,
 
         [40] = unit_get_assigned_animals,
         [41] = unit_get_assign_animal_choices,
