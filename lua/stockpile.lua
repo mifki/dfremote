@@ -1612,12 +1612,24 @@ function building_stockpile_linking_ok()
         end
 
     else
+        local profile = bld.profile
+
         if stockpile_linking_mode == 1 then
+            -- forward
             utils.erase_sorted(links.take_from_workshop, bld, 'id')
             utils.insert_sorted(links.give_to_workshop, bld, 'id')
+        
+            -- and reverse
+            utils.erase_sorted(profile.links.give_to_pile, pile, 'id')
+            utils.insert_sorted(profile.links.take_from_pile, pile, 'id')
         else
+            -- forward
             utils.erase_sorted(links.give_to_workshop, bld, 'id')
             utils.insert_sorted(links.take_from_workshop, bld, 'id')
+
+            -- and reverse
+            utils.erase_sorted(profile.links.take_from_pile, pile, 'id')
+            utils.insert_sorted(profile.links.give_to_pile, pile, 'id')
         end
     end
 
