@@ -211,19 +211,39 @@ end
 
 local track_stop_friction_values = { 10, 50, 500, 10000, 50000 }
 
+function designation_supports_prio_marker(mainmode)
+    return mainmode == df.ui_sidebar_mode.DesignateMine or
+           mainmode == df.ui_sidebar_mode.DesignateUpStair or
+           mainmode == df.ui_sidebar_mode.DesignateUpDownStair or
+           mainmode == df.ui_sidebar_mode.DesignateChannel or
+           mainmode == df.ui_sidebar_mode.DesignateDownStair or
+           mainmode == df.ui_sidebar_mode.DesignateUpRamp or
+           mainmode == df.ui_sidebar_mode.DesignateRemoveRamps or
+           mainmode == df.ui_sidebar_mode.DesignateRemoveConstruction or
+           mainmode == df.ui_sidebar_mode.DesignateChopTrees or
+           mainmode == df.ui_sidebar_mode.DesignateGatherPlants or
+           mainmode == df.ui_sidebar_mode.DesignateSmooth or
+           mainmode == df.ui_sidebar_mode.DesignateEngrave or
+           mainmode == df.ui_sidebar_mode.DesignateCarveFortification or
+           mainmode == df.ui_sidebar_mode.DesignateCarveTrack
+end
+
+function designation_supports_modes(mainmode)
+    return mainmode == df.ui_sidebar_mode.DesignateMine or
+           mainmode == df.ui_sidebar_mode.DesignateUpStair or
+           mainmode == df.ui_sidebar_mode.DesignateUpDownStair or
+           mainmode == df.ui_sidebar_mode.DesignateDownStair or
+           mainmode == df.ui_sidebar_mode.DesignateUpRamp
+end
+
 --luacheck: in=
 function build_options_get()
     local mainmode = df.global.ui.main.mode
     
-    if mainmode == df.ui_sidebar_mode.DesignateMine or
-       mainmode == df.ui_sidebar_mode.DesignateChannel then
-           
+    if designation_supports_prio_marker(mainmode) then           
         local d = df.global.ui_sidebar_menus.designation
-        
-        return {
-            mainmode == df.ui_sidebar_mode.DesignateMine and -3 or -4,
-            d.mine_mode, mainmode, math.floor(d.priority / 1000), d.marker_only
-        }
+
+        return { designation_supports_modes(mainmode) and -3 or -4, d.mine_mode, mainmode, math.floor(d.priority / 1000), d.marker_only }
     end
 
     if mainmode == df.ui_sidebar_mode.Zones then
@@ -295,7 +315,7 @@ end
 function build_options_set(option, value)
     local mainmode = df.global.ui.main.mode
 
-    if mainmode == df.ui_sidebar_mode.DesignateMine then
+    if designation_supports_prio_marker(mainmode) then           
         local d = df.global.ui_sidebar_menus.designation
 
         if option == 1 then
