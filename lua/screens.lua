@@ -298,7 +298,7 @@ function execute_with_job_details(bldid, idx, fn)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -312,14 +312,20 @@ function execute_with_job_details(bldid, idx, fn)
     df.global.ui_workshop_job_cursor = idx
 
     gui.simulateInput(ws, K'BUILDJOB_DETAILS')
-    
+
     --xxx: this is (temporarily?) done in calling fns to distinguish between error and no details when needed
     --[[if df.global.ui_sidebar_menus.job_details.job == nil then
     	error('could not transition to job detail settings')
     end]]
 
-	local ok,ret = pcall(fn, ws) 
+	local ok,ret = pcall(fn, ws, bld.jobs[idx]) 
 	
+	-- if a viewscreen_image_creatorst has automatically been open, close it
+    local ws2 = dfhack.gui.getCurViewscreen()
+    if ws2._type == df.viewscreen_image_creatorst then
+    	ws2.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+    end
+
 	df.global.ui_sidebar_menus.job_details.job = nil
 
 	if not ok then
@@ -335,9 +341,19 @@ function execute_with_order_details(idx, fn)
 
 	    gui.simulateInput(ws, K'MANAGER_DETAILS')
 	    
-	    local detws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_workquota_detailsst
+	    local detws = dfhack.gui.getCurViewscreen()
 	    if detws._type ~= df.viewscreen_workquota_detailsst then
 	    	error('could not switch to order details screen '..tostring(detws._type))
+	    end
+
+	    --xxx: if an order has an image detail only, the order of screens will be weird:
+	    --xxx: manager->viewscreen_image_creatorst->viewscreen_workquota_detailsst
+	    --xxx: let's destroy the last screen now in that case, so that we always continue
+	    --xxx: either with a valid viewscreen_workquota_detailsst or with a viewscreen_image_creatorst
+	    if detws.parent._type == df.viewscreen_image_creatorst then
+	    	detws = detws.parent
+	    	detws.child:delete()
+	    	detws.child = nil
 	    end
 
 		local ok,ret = pcall(fn, detws) 

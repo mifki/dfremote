@@ -2,436 +2,437 @@ local detail_type_names = { 'Material', 'Image', 'Size', 'Decoration Type' }
 local decoration_type_titles = { 'Image', 'Covered', 'Hanging rings', 'Bands', 'Spikes' }
 
 local function select_artist_to_choose_image(imgws)
-	for j,w in ipairs(imgws.anon_1) do
-		if w == 5 then
-			imgws.category_idx = j
-			gui.simulateInput(imgws, K'SELECT')
-			break
-		end
-	end
+    for j,w in ipairs(imgws.anon_1) do
+        if w == 5 then
+            imgws.category_idx = j
+            gui.simulateInput(imgws, K'SELECT')
+            break
+        end
+    end
 
-	imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+    imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 end
 
 --luacheck: in=number,number
 function job_details_get_types(bldid, idx)
-	if bldid == -2 then
-		return order_details_get_types(idx)
-	end
+    if bldid == -2 then
+        return order_details_get_types(idx)
+    end
 
-	return execute_with_job_details(bldid, idx, function(ws)
-		local list = {}
+    return execute_with_job_details(bldid, idx, function(ws, job)
+        local jobtitle = jobname(job)
+        local list = {}
 
-		local job = df.global.ui_sidebar_menus.job_details.job
+        if df.global.ui_sidebar_menus.job_details.job == job then
+            --0-material, 1-image, 2-size, 3-type
+            for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
+                local cur = ''
 
-		if not job then
-			return { {}, mp.NIL }
-		end
+                if v == 0 then
+                    local mat_type = job.mat_type
+                    local mat_index = job.mat_index
+                    
+                    local mi = dfhack.matinfo.decode(mat_type, mat_index)
+                    if mi then --todo: use material_category instead
+                        local mat = mi.material
+                        cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+                    end
 
-		local jobtitle = jobname(job)
+                elseif v == 2 then
+                    local race = job.hist_figure_id ~= -1 and job.hist_figure_id or df.global.ui.race_id
+                    local creature = df.global.world.raws.creatures.all[race]
+                    cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-		--0-material, 1-image, 2-size, 3-type
-		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
-			local cur = ''
+                elseif v == 3 then
+                    if job.hist_figure_id == -1 then
+                        cur = 'Not set'
+                    else
+                        cur = decoration_type_titles[job.hist_figure_id+1] or '#unknown#'
+                    end
+                end
 
-			if v == 0 then
-				local mat_type = job.mat_type
-				local mat_index = job.mat_index
-				
-				local mi = dfhack.matinfo.decode(mat_type, mat_index)
-				if mi then --todo: use material_category instead
-					local mat = mi.material
-		            cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
-		        end
+                table.insert(list, { detail_type_names[v+1], i, v, cur })
+            end
+        end
 
-	        elseif v == 2 then
-	        	local race = job.hist_figure_id ~= -1 and job.hist_figure_id or df.global.ui.race_id
-				local creature = df.global.world.raws.creatures.all[race]
-				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
+        --todo: pass not just job title, include e.g. 'for <race>' for armor, etc.
 
-	        elseif v == 3 then
-        		if job.hist_figure_id == -1 then
-        			cur = 'Not set'
-    			else
-					cur = decoration_type_titles[job.hist_figure_id+1] or '#unknown#'
-				end
-			end
-
-			table.insert(list, { detail_type_names[v+1], i, v, cur })
-		end
-
-		--todo: pass not just job title, include e.g. 'for <race>' for armor, etc.
-
-		return { list, jobtitle }
-	end)
+        return { list, jobtitle }
+    end)
 end
 
 --luacheck: in=number,number,number
 function job_details_get_choices(bldid, jobidx, detidx)
-	if bldid == -2 then
-		return order_details_get_choices(jobidx, detidx)
-	end
+    if bldid == -2 then
+        return order_details_get_choices(jobidx, detidx)
+    end
 
-	return execute_with_job_details(bldid, jobidx, function(ws)
-		local ret = {}
-		
-		local det = df.global.ui_sidebar_menus.job_details
+    return execute_with_job_details(bldid, jobidx, function(ws)
+        local ret = {}
+        
+        local det = df.global.ui_sidebar_menus.job_details
 
-		local dtype = det.detail_type[detidx]
-		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
-			error('unsupported detail type '..tostring(dtype))
-		end
+        local dtype = det.detail_type[detidx]
+        if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+            error('unsupported detail type '..tostring(dtype))
+        end
 
-		if C_job_details_setting_detail_type(det) == -1 then
-			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
-			gui.simulateInput(ws, K'SELECT')
-		end
-		
-		-- using _visible instead of _all because they're already sorted - available mats on top
-		if dtype == 0 then -- material
-			for i,v in ipairs(det.mat_type_visible) do
-				local mat_type = v
-				local mat_index = det.mat_index_visible[i]
-				local mat_amount = det.mat_amount_visible[i]
-				
-				local mi = dfhack.matinfo.decode(mat_type, mat_index)
-				local mat = mi.material
-	            local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
-				
-				table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
-			end
-		
-		elseif dtype == 2 then -- size
-			for i,v in ipairs(det.sizes_visible) do
-				local creature = df.global.world.raws.creatures.all[v]
-				local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+            gui.simulateInput(ws, K'SELECT')
+        end
+        
+        -- using _visible instead of _all because they're already sorted - available mats on top
+        if dtype == 0 then -- material
+            for i,v in ipairs(det.mat_type_visible) do
+                local mat_type = v
+                local mat_index = det.mat_index_visible[i]
+                local mat_amount = det.mat_amount_visible[i]
+                
+                local mi = dfhack.matinfo.decode(mat_type, mat_index)
+                local mat = mi.material
+                local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+                
+                table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
+            end
+        
+        elseif dtype == 2 then -- size
+            for i,v in ipairs(det.sizes_visible) do
+                local creature = df.global.world.raws.creatures.all[v]
+                local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-				table.insert(ret, { title, i --[[, mp.NIL]] })
-			end			
+                table.insert(ret, { title, i --[[, mp.NIL]] })
+            end         
 
-		elseif dtype == 3 then -- type
-			for i,v in ipairs(det.decoration_types) do
-				local title = decoration_type_titles[v+1]
-				if v == 0 then
-					title = title .. ' (image customization is not supported)'
-				end
+        elseif dtype == 3 then -- type
+            for i,v in ipairs(det.decoration_types) do
+                local title = decoration_type_titles[v+1]
+                if v == 0 then
+                    title = title .. ' (image customization is not supported)'
+                end
 
-				table.insert(ret, { title, i --[[, mp.NIL]] })
-			end
-		end
+                table.insert(ret, { title, i --[[, mp.NIL]] })
+            end
+        end
 
-		return ret
-	end)
+        return ret
+    end)
 end
 
 --luacheck: in=number,number,number,number
 function job_details_set(bldid, jobidx, detidx, choiceidx)
-	if bldid == -2 then
-		return order_details_set(jobidx, detidx, choiceidx)
-	end
+    if bldid == -2 then
+        return order_details_set(jobidx, detidx, choiceidx)
+    end
 
-	return execute_with_job_details(bldid, jobidx, function(ws)
-		local det = df.global.ui_sidebar_menus.job_details
+    return execute_with_job_details(bldid, jobidx, function(ws)
+        local det = df.global.ui_sidebar_menus.job_details
 
-		local dtype = det.detail_type[detidx]
-		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
-			error('unsupported detail type '..tostring(dtype))
-		end
+        local dtype = det.detail_type[detidx]
+        if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+            error('unsupported detail type '..tostring(dtype))
+        end
 
-		--todo: modify job.hist_figure_id which holds the detail setting directly ?
+        --todo: modify job.hist_figure_id which holds the detail setting directly ?
 
-		if C_job_details_setting_detail_type(det) == -1 then
-			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
-			gui.simulateInput(ws, K'SELECT')
-		end
-		
-		if dtype == 0 then -- material
-			det.mat_cursor = choiceidx
-		elseif dtype == 2 then -- size
-			det.size_cursor = choiceidx
-		elseif dtype == 3 then -- decoration type
-			det.decoration_cursor = choiceidx
-		end
-		gui.simulateInput(ws, K'SELECT')
-		
-		local imgws = dfhack.gui.getCurViewscreen()
-		if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-			select_artist_to_choose_image(imgws)
-		end
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+            gui.simulateInput(ws, K'SELECT')
+        end
+        
+        if dtype == 0 then -- material
+            det.mat_cursor = choiceidx
+        elseif dtype == 2 then -- size
+            det.size_cursor = choiceidx
+        elseif dtype == 3 then -- decoration type
+            det.decoration_cursor = choiceidx
+        end
+        gui.simulateInput(ws, K'SELECT')
+        
+        -- local imgws = dfhack.gui.getCurViewscreen()
+        -- if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+        --     select_artist_to_choose_image(imgws)
+        -- end
 
-		return true
-	end)
+        return true
+    end)
 end
 
 function order_details_get_types(idx)
-	return execute_with_order_details(idx, function(ws)
-		local list = {}
+    return execute_with_order_details(idx, function(ws)
+        local list = {}
 
-		local order = df.global.world.manager_orders[idx]
-		local ordertitle = ordertitle(order)
+        local order = df.global.world.manager_orders[idx]
+        local ordertitle = ordertitle(order)
 
-		--0-material, 1-image, 2-size, 3-type
-		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
-			local cur = ''
+        --0-material, 1-image, 2-size, 3-type
+        for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
+            local cur = ''
 
-			if v == 0 then
-				local mat_type = order.mat_type
-				local mat_index = order.mat_index
-				
-				local mi = dfhack.matinfo.decode(mat_type, mat_index)
-				if mi then --todo: use material_category instead
-					local mat = mi.material
-		            cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
-		        end
+            if v == 0 then
+                local mat_type = order.mat_type
+                local mat_index = order.mat_index
+                
+                local mi = dfhack.matinfo.decode(mat_type, mat_index)
+                if mi then --todo: use material_category instead
+                    local mat = mi.material
+                    cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+                end
 
-	        elseif v == 2 then
-	        	local race = order.hist_figure_id ~= -1 and order.hist_figure_id or df.global.ui.race_id
-				local creature = df.global.world.raws.creatures.all[race]
-				cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
+            elseif v == 2 then
+                local race = order.hist_figure_id ~= -1 and order.hist_figure_id or df.global.ui.race_id
+                local creature = df.global.world.raws.creatures.all[race]
+                cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-    		elseif v == 3 then
-        		if order.hist_figure_id == -1 then
-        			cur = 'Not set'
-    			else
-					cur = decoration_type_titles[order.hist_figure_id+1] or '#unknown#'
-				end
-			end
+            elseif v == 3 then
+                if order.hist_figure_id == -1 then
+                    cur = 'Not set'
+                else
+                    cur = decoration_type_titles[order.hist_figure_id+1] or '#unknown#'
+                end
+            end
 
-			table.insert(list, { detail_type_names[v+1], i, v, cur })
-		end
+            table.insert(list, { detail_type_names[v+1], i, v, cur })
+        end
 
-		--todo: pass not just order title, include e.g. 'for <race>' for armor, etc.
+        --todo: pass not just order title, include e.g. 'for <race>' for armor, etc.
 
-		return { list, ordertitle }
-	end)
+        return { list, ordertitle }
+    end)
 end
 
 function order_details_get_choices(idx, detidx)
-	return execute_with_order_details(idx, function(ws)
-		local ret = {}
-		
-		local det = df.global.ui_sidebar_menus.job_details
+    return execute_with_order_details(idx, function(ws)
+        local ret = {}
+        
+        local det = df.global.ui_sidebar_menus.job_details
 
-		local dtype = det.detail_type[detidx]
-		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
-			error('unsupported detail type '..tostring(dtype))
-		end
+        local dtype = det.detail_type[detidx]
+        if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+            error('unsupported detail type '..tostring(dtype))
+        end
 
-		if C_job_details_setting_detail_type(det) == -1 then
-			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
-			gui.simulateInput(ws, K'SELECT')
-		end
-		
-		-- using _visible instead of _all because they're already sorted - available mats on top
-		if dtype == 0 then -- material
-			for i,v in ipairs(det.mat_type_visible) do
-				local mat_type = v
-				local mat_index = det.mat_index_visible[i]
-				local mat_amount = det.mat_amount_visible[i]
-				
-				local mi = dfhack.matinfo.decode(mat_type, mat_index)
-				local mat = mi.material
-	            local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
-				
-				table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
-			end
-		
-		elseif dtype == 2 then -- size
-			for i,v in ipairs(det.sizes_visible) do
-				local creature = df.global.world.raws.creatures.all[v]
-				local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+            gui.simulateInput(ws, K'SELECT')
+        end
+        
+        -- using _visible instead of _all because they're already sorted - available mats on top
+        if dtype == 0 then -- material
+            for i,v in ipairs(det.mat_type_visible) do
+                local mat_type = v
+                local mat_index = det.mat_index_visible[i]
+                local mat_amount = det.mat_amount_visible[i]
+                
+                local mi = dfhack.matinfo.decode(mat_type, mat_index)
+                local mat = mi.material
+                local title = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
+                
+                table.insert(ret, { title, i--[[{ mat_type, mat_index }]], mat_amount })
+            end
+        
+        elseif dtype == 2 then -- size
+            for i,v in ipairs(det.sizes_visible) do
+                local creature = df.global.world.raws.creatures.all[v]
+                local title = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-				table.insert(ret, { title, i --[[, mp.NIL]] })
-			end			
+                table.insert(ret, { title, i --[[, mp.NIL]] })
+            end         
 
-		elseif dtype == 3 then -- type
-			for i,v in ipairs(det.decoration_types) do
-				local title = decoration_type_titles[v+1]
-				if v == 0 then
-					title = title .. ' (image customization is not supported)'
-				end
+        elseif dtype == 3 then -- type
+            for i,v in ipairs(det.decoration_types) do
+                local title = decoration_type_titles[v+1]
+                if v == 0 then
+                    title = title .. ' (image customization is not supported)'
+                end
 
-				table.insert(ret, { title, i --[[, mp.NIL]] })
-			end
-		end
+                table.insert(ret, { title, i --[[, mp.NIL]] })
+            end
+        end
 
-		return ret
-	end)
+        return ret
+    end)
 end
 
 function order_details_set(idx, detidx, choiceidx)
-	return execute_with_order_details(idx, function(ws)
-		local det = df.global.ui_sidebar_menus.job_details
+    return execute_with_order_details(idx, function(ws)
+        local det = df.global.ui_sidebar_menus.job_details
 
-		local dtype = det.detail_type[detidx]
-		if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
-			error('unsupported detail type '..tostring(dtype))
-		end
+        local dtype = det.detail_type[detidx]
+        if dtype ~= 0 and dtype ~= 2 and dtype ~= 3 then -- Material, size, type
+            error('unsupported detail type '..tostring(dtype))
+        end
 
-		--todo: modify job.hist_figure_id which holds the detail setting directly ?
+        --todo: modify job.hist_figure_id which holds the detail setting directly ?
 
-		if C_job_details_setting_detail_type(det) == -1 then
-			df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
-			gui.simulateInput(ws, K'SELECT')
-		end
-		
-		if dtype == 0 then -- material
-			det.mat_cursor = choiceidx
-		elseif dtype == 2 then -- size
-			det.size_cursor = choiceidx
-		elseif dtype == 3 then -- decoration type
-			det.decoration_cursor = choiceidx
-		end
-		gui.simulateInput(ws, K'SELECT')
-		
-		local imgws = dfhack.gui.getCurViewscreen()
-		if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-			select_artist_to_choose_image(imgws)
-		end
-		
-		return true
-	end)
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
+            gui.simulateInput(ws, K'SELECT')
+        end
+        
+        if dtype == 0 then -- material
+            det.mat_cursor = choiceidx
+        elseif dtype == 2 then -- size
+            det.size_cursor = choiceidx
+        elseif dtype == 3 then -- decoration type
+            det.decoration_cursor = choiceidx
+        end
+        gui.simulateInput(ws, K'SELECT')
+        
+        -- local imgws = dfhack.gui.getCurViewscreen()
+        -- if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+        --     select_artist_to_choose_image(imgws)
+        -- end
+        
+        return true
+    end)
 end
 
 local function ensure_images_loaded(bldid, idx)
-	if #df.global.world.art_image_chunks > 0 then
-		return
-	end
+    if #df.global.world.art_image_chunks > 0 then
+     return
+    end
 
-	local function process(ws)
-		for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
-			if v == 1 then
-				df.global.ui_sidebar_menus.job_details.detail_cursor = i
-				gui.simulateInput(ws, K'SELECT')
+    local function process(ws)
+        local det = df.global.ui_sidebar_menus.job_details
 
-				local imgws = dfhack.gui.getCurViewscreen()
-				if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-					select_artist_to_choose_image(imgws)
-				end
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            for i,v in ipairs(det.detail_type) do
+                if v == 1 then
+                    det.detail_cursor = i
+                    gui.simulateInput(ws, K'SELECT')
+                    break
+                end
+            end
+        end
 
-				return
-			end
-		end		
-	end
+        local imgws = dfhack.gui.getCurViewscreen()
+        if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+            select_artist_to_choose_image(imgws)
+        end
+    end
 
-	if bldid == -2 then
-		execute_with_order_details(idx, function(ws)
-			process(ws)
-		end)
-
-		return
-	end
-
-	execute_with_job_details(bldid, idx, function(ws)
-		process(ws)
-	end)	
+    if bldid == -2 then
+        execute_with_order_details(idx, function(ws)
+            process(ws)
+        end)
+    else
+        execute_with_job_details(bldid, idx, function(ws)
+            process(ws)
+        end)    
+    end
 end
 
 --luacheck: in=number,number,number
 function job_details_image_get_choices(bldid, idx, imgtype)
-	if imgtype == 1 then -- Site
-		local ret = {}
+    if imgtype == 1 then -- Site
+        local ret = {}
 
-		for i,v in ipairs(df.global.world.world_data.sites) do
-			if not v.flags.Undiscovered then
-				local name = translatename(v.name)
-				local name_eng = translatename(v.name, true)
-				
-				table.insert(ret, { name, v.id, name_eng })
-			end
-		end
+        for i,v in ipairs(df.global.world.world_data.sites) do
+            if not v.flags.Undiscovered then
+                local name = translatename(v.name)
+                local name_eng = translatename(v.name, true)
+                
+                table.insert(ret, { name, v.id, name_eng })
+            end
+        end
 
-		table.sort(ret, function(a,b) return a[1] < b[1] end)
-		return ret
-	end
+        table.sort(ret, function(a,b) return a[1] < b[1] end)
+        return ret
+    end
 
-	if imgtype == 2 then -- Entity
-		local ret = {}
+    if imgtype == 2 then -- Entity
+        local ret = {}
 
-		for i,v in ipairs(df.global.world.entities.all) do
-			local name = translatename(v.name)
-			if #name > 0 then
-				local name_eng = translatename(v.name, true)
-				
-				table.insert(ret, { name, v.id, name_eng })
-			end
-		end
+        for i,v in ipairs(df.global.world.entities.all) do
+            local name = translatename(v.name)
+            if #name > 0 then
+                local name_eng = translatename(v.name, true)
+                
+                table.insert(ret, { name, v.id, name_eng })
+            end
+        end
 
-		table.sort(ret, function(a,b) return a[1] < b[1] end)
-		return ret
-	end
+        table.sort(ret, function(a,b) return a[1] < b[1] end)
+        return ret
+    end
 
-	if imgtype == 3 then
-		ensure_images_loaded(bldid, idx)
+    if imgtype == 3 then
+        ensure_images_loaded(bldid, idx)
 
-		local ret = {}
+        local ret = {}
 
-		local group = df.historical_entity.find(df.global.ui.group_id)
-		local civ = df.historical_entity.find(df.global.ui.civ_id)
+        local group = df.historical_entity.find(df.global.ui.group_id)
+        local civ = df.historical_entity.find(df.global.ui.civ_id)
 
-		local function process(ent, kind)
-			for i,v in ipairs(ent.resources.art_image_types) do
-				local id = ent.resources.art_image_ids[i]
-				local subid = ent.resources.art_image_subids[i]
-				local _,chunk = utils.linear_index(df.global.world.art_image_chunks, id, 'id')
-				
-				--todo: how can be no chunk (seen in log)?
-				if chunk then
-					local _,img = utils.linear_index(chunk.images, subid, 'subid')
-	
-					--todo: how can be no img?
-					if img then
-						local name = translatename(img.name)
-						local name_eng = translatename(img.name, true)
-	
-						local origin = kind
-						if v == 0 then
-							origin = kind .. ' symbol'
-						elseif v == 1 then
-							origin = kind .. ' comission'
-						end
-	
-						table.insert(ret, { name, { id, subid }, name_eng, origin })
-					else
-						print ('no img '..tostring(subid)..' in chunk '..tostring(id))
-					end
-				else
-					print ('no chunk '..tostring(id))
-				end
-			end
-		end
+        local function process(ent, kind)
+            for i,v in ipairs(ent.resources.art_image_types) do
+                local id = ent.resources.art_image_ids[i]
+                local subid = ent.resources.art_image_subids[i]
+                local _,chunk = utils.linear_index(df.global.world.art_image_chunks, id, 'id')
+                
+                --todo: how can be no chunk (seen in log)?
+                if chunk then
+                    local _,img = utils.linear_index(chunk.images, subid, 'subid')
+    
+                    --todo: how can be no img?
+                    if img then
+                        local name = translatename(img.name)
+                        local name_eng = translatename(img.name, true)
+    
+                        local origin = kind
+                        if v == 0 then
+                            origin = kind .. ' symbol'
+                        elseif v == 1 then
+                            origin = kind .. ' comission'
+                        end
+    
+                        table.insert(ret, { name, { id, subid }, name_eng, origin })
+                    else
+                        print ('no img '..tostring(subid)..' in chunk '..tostring(id))
+                    end
+                else
+                    print ('no chunk '..tostring(id))
+                end
+            end
+        end
 
-		process(group, 'Group')
-		process(civ, 'Civ.')
-	
-		return ret
-	end
+        process(group, 'Group')
+        process(civ, 'Civ.')
+    
+        return ret
+    end
 end
 
 --luacheck: in=number,number,number,number
 function job_details_set_image(bldid, idx, imgtype, id)
-	if bldid == -2 then
-		local order = df.global.world.manager_orders[idx]
+    if bldid == -2 then
+        local order = df.global.world.manager_orders[idx]
 
-	    order.art_spec.type = imgtype
-	    if type(id) == 'table' then
-	    	local spec = id --as:number[]
-	    	order.art_spec.id = spec[1]
-	    	order.art_spec.subid = spec[2]
-	    else
-	    	order.art_spec.id = id
-	    	order.art_spec.subid = -1
-	    end
+        order.art_spec.type = imgtype
+        if type(id) == 'table' then
+            local spec = id --as:number[]
+            order.art_spec.id = spec[1]
+            order.art_spec.subid = spec[2]
+        else
+            order.art_spec.id = id
+            order.art_spec.subid = -1
+        end
 
-	    return true
-	end
+        return true
+    end
 
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected_building')
     end
 
@@ -439,19 +440,19 @@ function job_details_set_image(bldid, idx, imgtype, id)
     --todo: check bld.id == bldid
 
     if idx < 0 or idx > #bld.jobs then
-    	error('invalid job idx '..tostring(idx))
+        error('invalid job idx '..tostring(idx))
     end
 
     local job = bld.jobs[idx]
 
     job.art_spec.type = imgtype
     if type(id) == 'table' then
-    	local spec = id --as:number[]
-    	job.art_spec.id = spec[1]
-    	job.art_spec.subid = spec[2]
+        local spec = id --as:number[]
+        job.art_spec.id = spec[1]
+        job.art_spec.subid = spec[2]
     else --as:id=number
-    	job.art_spec.id = id
-    	job.art_spec.subid = -1
+        job.art_spec.id = id
+        job.art_spec.subid = -1
     end
 
     return true
