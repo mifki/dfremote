@@ -13,6 +13,76 @@ local function select_artist_to_choose_image(imgws)
     imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 end
 
+local function ensure_images_loaded(bldid, idx)
+    if #df.global.world.art_image_chunks > 0 then
+        return
+    end
+
+    local function process(ws)
+        local det = df.global.ui_sidebar_menus.job_details
+
+        -- select a detail type if it hasn't been selected as the only available
+        if C_job_details_setting_detail_type(det) == -1 then
+            for i,v in ipairs(det.detail_type) do
+                if v == 1 then
+                    det.detail_cursor = i
+                    gui.simulateInput(ws, K'SELECT')
+                    break
+                end
+            end
+        end
+
+        local imgws = dfhack.gui.getCurViewscreen()
+        if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
+            select_artist_to_choose_image(imgws)
+        end
+    end
+
+    if bldid == -2 then
+        execute_with_order_details(idx, function(ws)
+            process(ws)
+        end)
+    else
+        execute_with_job_details(bldid, idx, function(ws)
+            process(ws)
+        end)    
+    end
+end
+
+local function get_chosen_image_title(art_spec, bldid, idx)
+    local imgtype = art_spec.type
+    if imgtype == -1 then -- n one
+        return 'Allow artist to choose'
+
+    elseif imgtype == 0 then -- histfig
+        local hf = df.historical_figure.find(art_spec.id)
+        return hf and ('Related to ' .. quotedname(hf.name)) or '#invalid histfig #'
+
+    elseif imgtype == 1 then -- site 
+        local site = df.world_site.find(art_spec.id)
+        return site and ('Related to ' .. quotedname(site.name)) or '#invalid site#'
+
+    elseif imgtype == 2 then -- entity
+        local ent = df.historical_entity.find(art_spec.id)
+        return ent and ('Related to ' .. quotedname(ent.name)) or '#invalid entity#'
+
+    elseif imgtype == 3 then -- image
+        ensure_images_loaded(bldid, idx)
+        
+        local _,chunk = utils.linear_index(df.global.world.art_image_chunks, art_spec.id, 'id')
+        if chunk then
+            local _,img = utils.linear_index(chunk.images, art_spec.subid, 'subid')
+            if img then
+                return quotedname(img.name)
+            end
+        end
+
+        return '#invalid image#'
+    end
+
+    return '#unknown type#'
+end
+
 --luacheck: in=number,number
 function job_details_get_types(bldid, idx)
     if bldid == -2 then
@@ -28,7 +98,7 @@ function job_details_get_types(bldid, idx)
             for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
                 local cur = ''
 
-                if v == 0 then
+                if v == 0 then -- material
                     local mat_type = job.mat_type
                     local mat_index = job.mat_index
                     
@@ -38,12 +108,15 @@ function job_details_get_types(bldid, idx)
                         cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
                     end
 
-                elseif v == 2 then
+                elseif v == 1 then -- image
+                    cur = get_chosen_image_title(job.art_spec, bldid, idx)
+
+                elseif v == 2 then -- size
                     local race = job.hist_figure_id ~= -1 and job.hist_figure_id or df.global.ui.race_id
                     local creature = df.global.world.raws.creatures.all[race]
                     cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-                elseif v == 3 then
+                elseif v == 3 then -- type
                     if job.hist_figure_id == -1 then
                         cur = 'Not set'
                     else
@@ -171,7 +244,7 @@ function order_details_get_types(idx)
         for i,v in ipairs(df.global.ui_sidebar_menus.job_details.detail_type) do
             local cur = ''
 
-            if v == 0 then
+            if v == 0 then -- material
                 local mat_type = order.mat_type
                 local mat_index = order.mat_index
                 
@@ -181,12 +254,15 @@ function order_details_get_types(idx)
                     cur = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0]):utf8capitalize()
                 end
 
-            elseif v == 2 then
+            elseif v == 1 then -- image
+                cur = get_chosen_image_title(order.art_spec, -2, idx)
+
+            elseif v == 2 then -- size
                 local race = order.hist_figure_id ~= -1 and order.hist_figure_id or df.global.ui.race_id
                 local creature = df.global.world.raws.creatures.all[race]
                 cur = dfhack.df2utf(creature.name[1]):utf8capitalize()
 
-            elseif v == 3 then
+            elseif v == 3 then -- type
                 if order.hist_figure_id == -1 then
                     cur = 'Not set'
                 else
@@ -292,42 +368,6 @@ function order_details_set(idx, detidx, choiceidx)
     end)
 end
 
-local function ensure_images_loaded(bldid, idx)
-    if #df.global.world.art_image_chunks > 0 then
-     return
-    end
-
-    local function process(ws)
-        local det = df.global.ui_sidebar_menus.job_details
-
-        -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
-            for i,v in ipairs(det.detail_type) do
-                if v == 1 then
-                    det.detail_cursor = i
-                    gui.simulateInput(ws, K'SELECT')
-                    break
-                end
-            end
-        end
-
-        local imgws = dfhack.gui.getCurViewscreen()
-        if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-            select_artist_to_choose_image(imgws)
-        end
-    end
-
-    if bldid == -2 then
-        execute_with_order_details(idx, function(ws)
-            process(ws)
-        end)
-    else
-        execute_with_job_details(bldid, idx, function(ws)
-            process(ws)
-        end)    
-    end
-end
-
 --luacheck: in=number,number,number
 function job_details_image_get_choices(bldid, idx, imgtype)
     if imgtype == 1 then -- Site
@@ -376,11 +416,9 @@ function job_details_image_get_choices(bldid, idx, imgtype)
                 local subid = ent.resources.art_image_subids[i]
                 local _,chunk = utils.linear_index(df.global.world.art_image_chunks, id, 'id')
                 
-                --todo: how can be no chunk (seen in log)?
                 if chunk then
                     local _,img = utils.linear_index(chunk.images, subid, 'subid')
     
-                    --todo: how can be no img?
                     if img then
                         local name = translatename(img.name)
                         local name_eng = translatename(img.name, true)
@@ -393,9 +431,11 @@ function job_details_image_get_choices(bldid, idx, imgtype)
                         end
     
                         table.insert(ret, { name, { id, subid }, name_eng, origin })
+
                     else
                         print ('no img '..tostring(subid)..' in chunk '..tostring(id))
                     end
+
                 else
                     print ('no chunk '..tostring(id))
                 end

@@ -174,6 +174,10 @@ function jobname(job)
     return dfhack.df2utf(dfhack.job.getName(job)):utf8capitalize()
 end
 
+function quotedname(name)
+    return translatename(name) .. ', "' .. translatename(name, true) .. '"'
+end
+
 function pos2table(pos)
     return (pos.x ~= -30000) and { pos.x, pos.y, pos.z } or mp.NIL
 end
