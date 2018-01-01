@@ -370,7 +370,23 @@ end
 
 --luacheck: in=number,number,number
 function job_details_image_get_choices(bldid, idx, imgtype)
-    if imgtype == 1 then -- Site
+    if imgtype == 0 then -- histfig
+        local ret = {}
+
+        for i,v in ipairs(df.global.world.history.figures) do
+            if v.race ~= -1 and v.name.has_name then
+                local name = translatename(v.name)
+                local name_eng = translatename(v.name, true)
+                
+                table.insert(ret, { name, v.id, name_eng })
+            end
+        end
+
+        table.sort(ret, function(a,b) return a[1] < b[1] end)
+        return ret        
+    end
+
+    if imgtype == 1 then -- site
         local ret = {}
 
         for i,v in ipairs(df.global.world.world_data.sites) do
@@ -386,7 +402,7 @@ function job_details_image_get_choices(bldid, idx, imgtype)
         return ret
     end
 
-    if imgtype == 2 then -- Entity
+    if imgtype == 2 then -- entity
         local ret = {}
 
         for i,v in ipairs(df.global.world.entities.all) do
@@ -402,7 +418,7 @@ function job_details_image_get_choices(bldid, idx, imgtype)
         return ret
     end
 
-    if imgtype == 3 then
+    if imgtype == 3 then -- existing image
         ensure_images_loaded(bldid, idx)
 
         local ret = {}
@@ -497,3 +513,5 @@ function job_details_set_image(bldid, idx, imgtype, id)
 
     return true
 end
+
+-- print(pcall(function() return json:encode(job_details_image_get_choices(-2,0,0)) end))
