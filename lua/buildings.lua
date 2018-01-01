@@ -465,7 +465,10 @@ function building_query_selected(bldid)
     elseif btype == df.building_type.Hive then
         local bld = bld --as:df.building_hivest
         local hiveflags = bld.hive_flags.whole
-        ret = { btype, genflags, bname, hiveflags }
+
+        local has_access = building_hive_has_access()
+
+        ret = { btype, genflags, bname, hiveflags, has_access }
 
     elseif btype == df.building_type.AnimalTrap then
         local bld = bld --as:df.building_animaltrapst
@@ -1889,7 +1892,7 @@ function building_well_is_active()
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1902,6 +1905,29 @@ function building_well_is_active()
 
     local ch = df.global.gps.screen[(x*df.global.gps.dimy+2)*4]
     return string.char(ch) == 'A'
+end
+
+--todo: make this work not only for the currently selected building
+--luacheck: in=
+function building_hive_has_access()
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        return
+    end
+
+    local x = df.global.gps.dimx - 2 - 30 + 1
+    if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+        x = x - (23 + 1)
+    end
+
+    x = x + 1
+
+    local ch = df.global.gps.screen[(x*df.global.gps.dimy+9)*4]
+    return string.char(ch) == 'O'
 end
 
 --luacheck: in=number
