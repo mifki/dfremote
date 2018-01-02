@@ -794,7 +794,16 @@ function get_status()
 
     -- zones [i]
     if mainmode == df.ui_sidebar_mode.Zones then
-        if df.global.ui_sidebar_menus.zone.selected and not df.global.ui_building_in_resize then
+        if df.global.ui_sidebar_menus.zone.remove then
+            if df.global.selection_rect.start_x == -30000 then
+                return 65, 0
+            else
+                local dx = math.abs(df.global.cursor.x - df.global.selection_rect.start_x) + 1
+                local dy = math.abs(df.global.cursor.y - df.global.selection_rect.start_y) + 1
+                local dz = math.abs(df.global.cursor.z - df.global.selection_rect.start_z) + 1
+                return 65, 1, { dx, dy, dz }
+            end
+        elseif df.global.ui_sidebar_menus.zone.selected and not df.global.ui_building_in_resize then
             local zone = df.global.ui_sidebar_menus.zone.selected
             local info = { zonename(zone), zone.zone_flags.whole }
             return 64, 1, info
@@ -1679,6 +1688,11 @@ local original_designation_mode = nil
 function designate_toggle_erase()
     local mainmode = df.global.ui.main.mode
     local modestr = df.ui_sidebar_mode[mainmode] or ''
+
+    if mainmode == df.ui_sidebar_mode.Zones then
+        df.global.ui_sidebar_menus.zone.remove = not df.global.ui_sidebar_menus.zone.remove
+        return true
+    end
 
     if mainmode ~= df.ui_sidebar_mode.DesignateRemoveDesignation and
        modestr:sub(1,#'Designate') == 'Designate' and
