@@ -526,6 +526,15 @@ function get_look_list(detailed)
                 title = ttcaption(tt)
             end
 
+            if detailed then
+                for i,v in ipairs(df.global.world.engravings) do
+                    if v.pos.x == x and v.pos.y == y and v.pos.z == z then
+                        data = { i }
+                        break
+                    end
+                end
+            end
+
             color = 1
 
         elseif t == df.ui_look_list.T_items.T_type.Flow then
@@ -1712,6 +1721,60 @@ function designate_toggle_erase()
     return false
 end
 
+--luacheck: in=number
+function engraving_get_description(id)
+    local en = df.engraving.find(id)
+    if not en then
+        error('no engraving '..tostring(bldid))
+    end
+
+    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_dwarfmodest
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    local function _process()
+        for i,v in ipairs(df.global.ui_look_list.items) do
+            if v.type == df.ui_look_list.T_items.T_type.Floor then
+                df.global.ui_look_cursor = i
+                
+                gui.simulateInput(ws, K'SELECT')
+
+                local textws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_textviewerst
+                if textws._type ~= df.viewscreen_textviewerst then
+                    error('can not switch to description screen')
+                end
+                textws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+                local text = ''
+                
+                for i,v in ipairs(textws.src_text) do
+                    if #v.value > 0 then
+                        text = text .. dfhack.df2utf(v.value) .. ' '
+                    end
+                end
+
+                text = text:gsub('  ', ' ')
+
+                local title = dfhack.df2utf(textws.title)
+
+                return { title, text }
+            end
+        end
+
+        error('no floor?')
+    end
+
+    local cur = df.global.cursor
+
+    if df.global.ui.main.mode == df.ui_sidebar_mode.LookAround and cur.x == en.pos.x and cur.y == en.pos.y and cur.z == en.pos.z then
+        return _process()
+    end
+
+    --todo: this.
+    error('not supported')
+end
+
 --luacheck: in=
 function close_legends()
     if screen_main()._type ~= df.viewscreen_legendsst then
@@ -2016,6 +2079,8 @@ local handlers = {
         [1] = query_building,
         [2] = query_unit,
         [3] = query_look,
+
+        [10] = engraving_get_description,
     },
 
     [150] = {
