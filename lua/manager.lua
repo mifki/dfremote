@@ -31,7 +31,7 @@ function manager_get_orders()
 			maxw = o.max_workshops
 		end
 
-		table.insert(orders, { title, o.amount_left, o.amount_total, C_manager_order_is_validated(o), maxw })
+		table.insert(orders, { title, o.amount_left, o.amount_total, o.status.whole, maxw, #o.item_conditions+#o.order_conditions })
 	end
 
 	return { orders, have_manager }
