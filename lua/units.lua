@@ -384,6 +384,8 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
     local jobtitle = unit.job.current_job and jobname(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
     if unit.job.current_job and unit.job.current_job.flags['repeat'] and not norepeatsuffix then
         jobtitle = jobtitle .. '/R'
+    elseif unit.job.current_job and unit.job.current_job.flags['by_manager'] and not norepeatsuffix then
+        jobtitle = jobtitle .. '/O'
     end
 
     if not unit.job.current_job then
@@ -471,7 +473,7 @@ end
 local function unitlist_process_citizen(unit)
     local fullname = unit_fulltitle(unit)
 
-    local jobtitle,jobcolor,jobkind  = unit_jobtitle(unit, true)
+    local jobtitle,jobcolor,jobkind  = unit_jobtitle(unit)
 
     local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building_holderst
     local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
@@ -566,7 +568,6 @@ function units_list_other()
             local fullname = unit_fulltitle(unit)
             local profcolor = dfhack.units.getProfessionColor(unit)                        
             local right, rightcolor
-
 
             if unit_testflagcurse(unit, 'CRAZED') or unit.mood == df.mood_type.Berserk then
                 right = 'Berserk'
