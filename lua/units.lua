@@ -357,10 +357,7 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                     --todo: what is free_units and are all of free_units also in units ?
                     for j,v in ipairs(ev.participants.free_units) do
                         if v == unit.id then
-                            local s = df.new 'string'
-                            ev:getName(unit.id, s)
-                            local jobtitle = dfhack.df2utf(s.value)
-                            s:delete()
+                            local jobtitle = actevname(ev, unit.id)
 
                             --[[if #unit.anon_4 > 0 then
                                 local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
@@ -419,14 +416,10 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         end
 
         if #unit.military.individual_drills > 0 then
-            local act_id = unit.military.individual_drills[0] --todo: what if there are > 1 ? 
+            local act_id = unit.military.individual_drills[0]
             local act = df.activity_entry.find(act_id)
             if act and #act.events > 0 then
-                local s = df.new 'string'
-                act.events[0]:getName(unit.id, s)
-                jobtitle = dfhack.df2utf(s.value)
-                s:delete()
-
+                jobtitle = actevname(act.events[#act.events-1], unit.id)
                 jobcolor = 14
             else
                 --todo: else
@@ -437,21 +430,26 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
 
             if s and s.cur_alert_idx ~= 0 then
                 local sqpos = s.positions[unit.military.squad_position]
-                local act_id = sqpos.activities[0]
-                local ev_id = sqpos.events[2]
-                if ev_id == -1 then ev_id = sqpos.events[1] end
-                if ev_id == -1 then ev_id = sqpos.events[0] end
-                local act = act_id ~= -1 and ev_id ~= -1 and df.activity_entry.find(act_id)
+                local activities,events = C_squad_position_activities_events(sqpos)
+                
+                local act_id = -1
+                local ev_id = -1
+
+                for i,v in ripairs(events) do
+                    if activities[i] ~= -1 and events[i] ~= -1  then
+                        act_id = activities[i]
+                        ev_id = events[i]
+                        break
+                    end
+                end
+                
+                local act = df.activity_entry.find(act_id)
                 local ev = act and utils.binsearch(act.events, ev_id, 'event_id')
 
                 if ev then
-                    local s = df.new 'string'
-                    ev:getName(unit.id, s)
-                    jobtitle = dfhack.df2utf(s.value)
-                    s:delete()
-
+                    jobtitle = actevname(ev, unit.id)
                     jobcolor = 14
-
+                
                 elseif unit.profession ~= unit.profession2 then
                     jobtitle = 'Soldier (no activity)'
                     jobcolor = 6
@@ -631,6 +629,9 @@ function units_list_other()
             end
 
             local activity,actcolor = unit_jobtitle(unit, false, true)
+            if not activity and unit.flags3[31] then
+                activity,actcolor = 'No Activity', 14
+            end
             table.insert(ret, { fullname, unit.id, right, 0, pos2table(unit.pos), mp.NIL, profcolor, rightcolor, activity or mp.NIL, actcolor or 0 })
         end
     
@@ -1201,7 +1202,7 @@ function unit_get_inventory_and_spatters(unitid)
         local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
         if mi then
             local spattersize = ''
-            for k,w in ripairs_tbl(item_spatter_sizes) do
+            for k,w in ripairs(item_spatter_sizes) do
                 if v.size >= w[1] then
                     spattersize = ' ' .. w[2]
                     break
@@ -1610,4 +1611,4 @@ end
 --     print(pcall(function() return json:encode(units_list_dwarves()) end))
 -- end
 
---print(pcall(function() return json:encode(unit_get_skills2(2158)) end))
+-- print(pcall(function() return json:encode(unit_jobtitle(df.unit.find(3690))) end))

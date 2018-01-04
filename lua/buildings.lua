@@ -1972,7 +1972,7 @@ function buildings_get_list()
             if info then
                 local quality = bld:getRoomValue(unit)
             
-                for i,v in ripairs_tbl(room_quality_table) do
+                for i,v in ripairs(room_quality_table) do
                     if quality >= v[1] then
                         title = bldname(bld) .. ', ' .. v[info.qidx]
                         break
@@ -2019,7 +2019,7 @@ function buildings_get_list2()
                 if info then
                     local quality = bld:getRoomValue(unit)
                 
-                    for i,v in ripairs_tbl(room_quality_table) do
+                    for i,v in ripairs(room_quality_table) do
                         if quality >= v[1] then
                             title = v[info.qidx]
                             descr = bldname(bld)

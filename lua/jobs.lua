@@ -52,11 +52,11 @@ function job_get_description(unitid)
         local jobbldref = unit.job.current_job and dfhack.job.getGeneralRef(unit.job.current_job, df.general_ref_type.BUILDING_HOLDER) --as:df.general_ref_building
         local jobbld = jobbldref and df.building.find(jobbldref.building_id) or nil
         if jobbld then
-            text = text .. '[P][C:7:0:1]Location: [C:3:0:1]' .. bldname(jobbld)
+            text = text .. '[B][C:7:0:1]Location: [C:3:0:1]' .. bldname(jobbld)
         end        
 
         if job.flags['repeat'] or job.flags.suspend then
-            text = text .. '[P][C:7:0:1]'
+            text = text .. '[B][C:7:0:1]'
             if job.flags['repeat'] then
                 text = text .. '[C:1:0:0]Repeating    ' --todo: color
             end
@@ -66,9 +66,9 @@ function job_get_description(unitid)
         end
 
         if #job.items > 0 then
-            text = text .. '[P][C:7:0:1]Items:'
+            text = text .. '[B][C:7:0:1]Items:'
             for i,v in ipairs(job.items) do
-                text = text .. '[B][C:6:0:1]' .. itemname(v.item, 3, true)
+                text = text .. '[P][C:6:0:1]' .. itemname(v.item, 3, true)
             end
         end
 

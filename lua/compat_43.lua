@@ -65,3 +65,7 @@ end
 function C_lever_target_type_set(val)
 	df.global.ui_lever_target_type = val
 end
+
+function C_squad_position_activities_events(sqpos)
+	return { sqpos.activities[1], sqpos.activities[2], sqpos.events[0] }, { sqpos.events[1], sqpos.events[2], sqpos.unk_118 }
+end

@@ -132,7 +132,7 @@ local function find_owned_room(unit, t, req)
         end
     end
 
-    for i,v in ripairs_tbl(room_quality_table) do
+    for i,v in ripairs(room_quality_table) do
         if maxq >= v[1] then
             return v[info.qidx], maxq
         end
@@ -434,7 +434,7 @@ function noble_get_reqs(code, unitid)
 
     local function process_pos(pos, reqsq, reqs)
         if pos.required_office > reqsq[1] then
-            for i,v in ripairs_tbl(room_quality_table) do
+            for i,v in ripairs(room_quality_table) do
                 if pos.required_office >= v[1] then
                     reqs[1] = v[4]
                     break
@@ -444,7 +444,7 @@ function noble_get_reqs(code, unitid)
         end
 
         if pos.required_bedroom > reqsq[2] then
-            for i,v in ripairs_tbl(room_quality_table) do
+            for i,v in ripairs(room_quality_table) do
                 if pos.required_bedroom >= v[1] then
                     reqs[2] = v[2]
                     break
@@ -454,7 +454,7 @@ function noble_get_reqs(code, unitid)
         end
 
         if pos.required_dining > reqsq[3] then
-            for i,v in ripairs_tbl(room_quality_table) do
+            for i,v in ripairs(room_quality_table) do
                 if pos.required_dining >= v[1] then
                     reqs[3] = v[3]
                     break
@@ -464,7 +464,7 @@ function noble_get_reqs(code, unitid)
         end
 
         if pos.required_tomb > reqsq[4] then
-            for i,v in ripairs_tbl(room_quality_table) do
+            for i,v in ripairs(room_quality_table) do
                 if pos.required_tomb >= v[1] then
                     reqs[4] = v[5]
                     break

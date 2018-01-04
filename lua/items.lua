@@ -174,7 +174,7 @@ function item_query(itemid)
             local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
             if mi then
                 local spattersize = ''
-                for k,w in ripairs_tbl(item_spatter_sizes) do
+                for k,w in ripairs(item_spatter_sizes) do
                     if v.size >= w[1] then
                         spattersize = ' ' .. w[2]
                         break

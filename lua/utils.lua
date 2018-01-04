@@ -32,24 +32,24 @@ function packbits(...)
     return v
 end
 
-function ripairs(t)
-  local function ripairs_it(t,i)
+local function _ripairs_it_v(t,i)
     i=i-1
     if i < 0 then return nil end
-    local v=t[i]
-    return i,v
-  end
-  return ripairs_it, t, #t
+    return i,t[i]
 end
 
-function ripairs_tbl(t)
-  local function ripairs_it(t,i)
+local function _ripairs_it_tbl(t,i)
     i=i-1
     if i < 1 then return nil end
-    local v=t[i]
-    return i,v
-  end
-  return ripairs_it, t, #t+1
+    return i,t[i]
+end
+
+function ripairs(t)
+    if type(t) == 'table' then
+        return _ripairs_it_tbl, t, #t+1
+    else
+        return _ripairs_it_v, t, #t
+    end
 end
 
 function capitalize(str)
@@ -176,6 +176,15 @@ end
 
 function quotedname(name)
     return translatename(name) .. ', "' .. translatename(name, true) .. '"'
+end
+
+function actevname(ev, unitid)
+    local s = df.new 'string'
+    ev:getName(unitid, s)
+    local ret = dfhack.df2utf(s.value)
+    s:delete()
+
+    return ret
 end
 
 function pos2table(pos)
