@@ -342,6 +342,23 @@ function unit_fulltitle(unit)
     return fullname
 end
 
+local needs_for_event_types = {
+    [df.activity_event_type.Socialize] = { df.need_type.Socialize, df.need_type.Excitement, df.need_type.BeCreative },
+    [df.activity_event_type.Worship] = { df.need_type.PrayOrMedidate },
+}
+
+local function has_important_need(unit, need_types)
+    for j,w in ipairs(need_types) do
+        for i,v in ipairs(unit.status.current_soul.personality.needs) do
+            if v.id == w and v.focus_level <= -10000 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function unit_jobtitle(unit, norepeatsuffix, activityonly)
     --todo: if there's an activity and a job, the game will show the job
     if df_ver >= 4200 then --dfver:4200-
@@ -353,16 +370,19 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                 local participants = ev:getParticipantInfo()
 
                 --todo: what is free_units and are all of free_units also in units? which one to use?
-                for j,v in ipairs(ev.participants.free_units) do
+                for j,v in ipairs(participants.free_units) do
                     -- game shows the topmost event if no match found for the unit
-                    if v == unit.id or j == 0 then
+                    if v == unit.id or i == 0 then
                         local jobtitle = actevname(ev, unit.id)
                         local jobcolor = 10
+
+                        local need_types = needs_for_event_types[act.events[0]:getType()]
+                        local important = need_types and has_important_need(unit, need_types)
                         
-                        -- if false then
-                        --     jobtitle = jobtitle .. '!'
-                        --     jobcolor = 13
-                        -- end
+                        if important then
+                            jobtitle = jobtitle .. '!'
+                            jobcolor = 13
+                        end
 
                         return jobtitle, jobcolor, 2
                     end
@@ -423,15 +443,11 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         if #unit.military.individual_drills > 0 then
             local act_id = unit.military.individual_drills[0]
             local act = df.activity_entry.find(act_id)
+            
             if act and #act.events > 0 then
                 local ev = act.events[#act.events-1]
                 jobtitle = actevname(ev, unit.id)
-
-                --xxx: book reading and probably others are stored here too and should be green
-                --xxx: more types to be added as discovered, or find a proper way to distinguish
-                local evtype = ev:getType()
-                jobcolor = (evtype == df.activity_event_type.Read) and 10 or 14
-
+                jobcolor = 10
             else
                 --todo: else
             end
@@ -462,8 +478,8 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                     jobcolor = 14
                 
                 elseif unit.profession ~= unit.profession2 then
-                    jobtitle = 'Soldier (no activity)'
-                    jobcolor = 6
+                    -- jobtitle = 'Soldier (no activity)'
+                    -- jobcolor = 6
                 end
             end
         end
@@ -634,7 +650,11 @@ function units_list_other()
             end
 
             if unit.flags1.caged then
-                right = right .. ' (Caged)'
+                if unit.flags1.active_invader or unit.flags1.invader_origin then
+                    right = 'Caged Prisoner'
+                else
+                    right = right .. ' (Caged)'
+                end
             elseif unit.flags1.chained then
                 right = right .. ' (Chained)'
             end
@@ -1622,4 +1642,4 @@ end
 --     print(pcall(function() return json:encode(units_list_dwarves()) end))
 -- end
 
--- print(pcall(function() return json:encode(unit_jobtitle(df.unit.find(3690))) end))
+-- print(pcall(function() return json:encode(unit_jobtitle(df.unit.find(655))) end))
