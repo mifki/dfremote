@@ -343,29 +343,28 @@ function unit_fulltitle(unit)
 end
 
 function unit_jobtitle(unit, norepeatsuffix, activityonly)
-    local jobcolor = 11
-    local onbreak = is_onbreak(unit)
-
+    --todo: if there's an activity and a job, the game will show the job
     if df_ver >= 4200 then --dfver:4200-
         if #unit.social_activities > 0 then
-            local actid = unit.social_activities[0] --todo: use 0 or last ?
+            local actid = unit.social_activities[0]
 
             local act = df.activity_entry.find(actid)
             for i,ev in ripairs(act.events) do
-                --todo: where's the participants structure in activity_event_harassmentst ?
-                if ev._type ~= df.activity_event_harassmentst then
-                    --todo: what is free_units and are all of free_units also in units ?
-                    for j,v in ipairs(ev.participants.free_units) do
-                        if v == unit.id then
-                            local jobtitle = actevname(ev, unit.id)
+                local participants = ev:getParticipantInfo()
 
-                            --[[if #unit.anon_4 > 0 then
-                                local occ = df.reinterpret_cast(df.occupation, unit.anon_4[0])
-                                jobtitle = jobtitle .. '!'
-                            end]]
+                --todo: what is free_units and are all of free_units also in units? which one to use?
+                for j,v in ipairs(ev.participants.free_units) do
+                    -- game shows the topmost event if no match found for the unit
+                    if v == unit.id or j == 0 then
+                        local jobtitle = actevname(ev, unit.id)
+                        local jobcolor = 10
+                        
+                        -- if false then
+                        --     jobtitle = jobtitle .. '!'
+                        --     jobcolor = 13
+                        -- end
 
-                            return jobtitle, 10, 2
-                        end
+                        return jobtitle, jobcolor, 2
                     end
                 end
             end
@@ -378,7 +377,10 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
         return nil
     end
 
+    local onbreak = is_onbreak(unit)
     local jobtitle = unit.job.current_job and jobname(unit.job.current_job) or (onbreak and 'On Break' or 'No Job')
+    local jobcolor = 11
+
     if unit.job.current_job and unit.job.current_job.flags['repeat'] and not norepeatsuffix then
         jobtitle = jobtitle .. '/R'
     elseif unit.job.current_job and unit.job.current_job.flags['by_manager'] and not norepeatsuffix then
@@ -404,12 +406,15 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
                 if rc ~= 0 then
                     jobtitle = 'Soldier (' .. reason_titles[rc+1] .. ')'
                     jobcolor = 6
-                else
-                    jobtitle = dfhack.df2utf(utils.call_with_string(o, 'getDescription'))
-    
+
+                    --xxx: that's how it seems to be in the game - orders with reasons are always shown
+                    --xxx: but for others the current activity is shown instead if exists
                     if o._type ~= df.squad_order_trainst then
                         return jobtitle, jobcolor, 1
                     end
+
+                else
+                    jobtitle = dfhack.df2utf(utils.call_with_string(o, 'getDescription'))    
                 end
 
             end
@@ -419,8 +424,14 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
             local act_id = unit.military.individual_drills[0]
             local act = df.activity_entry.find(act_id)
             if act and #act.events > 0 then
-                jobtitle = actevname(act.events[#act.events-1], unit.id)
-                jobcolor = 14
+                local ev = act.events[#act.events-1]
+                jobtitle = actevname(ev, unit.id)
+
+                --xxx: book reading and probably others are stored here too and should be green
+                --xxx: more types to be added as discovered, or find a proper way to distinguish
+                local evtype = ev:getType()
+                jobcolor = (evtype == df.activity_event_type.Read) and 10 or 14
+
             else
                 --todo: else
             end
