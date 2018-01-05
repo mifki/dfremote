@@ -22,7 +22,7 @@ function justice_get_data()
     	local ws = ws --as:df.viewscreen_justicest
     	
 		local function process_crimes(ret, cases)
-			for i,v in ipairs(C_ws_cases(ws)) do
+			for i,v in ipairs(ws.cases) do
 				local victim = df.unit.find(v.victim)
 				local victim_name = v.victim ~= -1 and unit_fulltitle(victim) or '' --todo: mp.NIL here and check in the app
 
@@ -152,7 +152,7 @@ end
 
 local function focus_crime(ws, crimeid)
 	local idx = -1
-	for i,v in ipairs(C_ws_cases(ws)) do
+	for i,v in ipairs(ws.cases) do
 		if v.id == crimeid then
 			idx = i
 			break
@@ -161,7 +161,7 @@ local function focus_crime(ws, crimeid)
 
 	if idx == -1 then
 		gui.simulateInput(ws, K'CHANGETAB')
-		for i,v in ipairs(C_ws_cases(ws)) do
+		for i,v in ipairs(ws.cases) do
 			if v.id == crimeid then
 				idx = i
 				break
@@ -173,9 +173,9 @@ local function focus_crime(ws, crimeid)
 		return nil
 	end
 
-	C_ws_set_sel_idx_current(ws, idx)
+	ws.sel_idx_current = idx
 
-	return C_ws_cases(ws)[idx]
+	return ws.cases[idx]
 end
 
 --luacheck: in=number,bool,bool

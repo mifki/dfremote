@@ -1272,10 +1272,7 @@ local function stockpile_settings_schema()
                 { 'Usable', 'usable' }, { 'Unusable', 'unusable' }
             }
         },
-    }
 
-    if df_ver >= 4200 then --dfver:4200-
-        table.insert(ret,
         {
             'Sheet', 'sheet',
             {
@@ -1284,8 +1281,8 @@ local function stockpile_settings_schema()
             },
             {
             }
-        })
-    end
+        },
+    }
 
     return ret
 end

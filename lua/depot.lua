@@ -238,11 +238,8 @@ local item_type_to_sell_category = {
     [df.item_type.CRUTCH] = { df.entity_sell_category.Crutches },
     [df.item_type.TOOL] = { df.entity_sell_category.Tools },
     [df.item_type.EGG] = { df.entity_sell_category.Eggs },
+    [df.item_type.SHEET] = { df.entity_sell_category.Parchment },
 }
-
-if df_ver >= 4200 then --dfver:4200-
-    item_type_to_sell_category[df.item_type.SHEET] = { df.entity_sell_category.Parchment }
-end
 
 local sell_category_matchers = {
     [df.entity_sell_category.Leather] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
@@ -449,18 +446,17 @@ local sell_category_matchers = {
     [df.entity_sell_category.Clay] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
         return _match_mat_vec (entity.resources.misc_mat.clay, idx, mat_type, mat_index)
     end,
-}
 
-if df_ver >= 4200 then --dfver:4200-
     --df.entity_sell_category.Parchment
-    sell_category_matchers[df.entity_sell_category.Clay+1] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+    [df.entity_sell_category.Clay+1] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
         return _match_mat_vec (C_entity_organic_resources_parchment(entity.resources.organic), idx, mat_type, mat_index)
-    end
+    end,
+    
     --df.entity_sell_category.CupsMugsGoblets
-    sell_category_matchers[df.entity_sell_category.Clay+2] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
+    [df.entity_sell_category.Clay+2] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
         return _match_mat_vec (entity.resources.misc_mat.crafts, idx, mat_type, mat_index)
-    end
-end    
+    end,
+}
 
 -- copy of Items::getValue() but also applies entity, race and caravan modifications, agreements adjustment, and custom qty
 function item_value_for_caravan(item, caravan, entity, creature, adjustment, qty)

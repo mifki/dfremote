@@ -489,21 +489,17 @@ function get_sell_items(civ_id)
 			'Clay', df.entity_sell_category.Clay, res.misc_mat.clay, f2,
 			function (mi) return mi.material.state_name.Solid end, false
 		},
-	}
 
-	if df_ver >= 4200 then --dfver:4200-
-		table.insert(cats,
 		{
 			'Sheet', 62, C_entity_organic_resources_parchment(res.organic), f2, --todo: not in entity_sell_category enum
 			function (mi) return (#mi.material.prefix>0 and (mi.material.prefix .. ' ') or '') .. mi.material.state_name.Solid .. ' sheet' end, false
-		})
+		},
 
-		table.insert(cats,
 		{
 			'Cups / Mugs / Goblets', 63, res.misc_mat.crafts, f2, --todo: not in entity_sell_category enum
 			function (mi) return (mi.creature and mi.creature.name[0] .. ' ' or '') ..  mi.material.state_name.Solid .. ' crafts' end, false
-		})
-	end
+		},
+	}
 
 	return cats
 end
@@ -746,11 +742,8 @@ local mat_cat_names = { --as:string[]
 	[shft(df.dfhack_material_category.horn)] = 'horn',
 	[shft(df.dfhack_material_category.pearl)] = 'pearl',
 	[shft(df.dfhack_material_category.yarn)] = 'yarn',
+	[shft(df.dfhack_material_category.strand)] = 'strand',
 }
-
-if df_ver >= 4200 then --dfver:4200-
-	mat_cat_names[shft(df.dfhack_material_category.strand)] = 'strand'
-end
 
 function process_buy_agreement(reqs)
 	local ret = {}

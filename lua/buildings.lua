@@ -99,17 +99,6 @@ local function bait_idx(t)
     return 0
 end
 
---[[local function building_location_name(bld)
-    local loc
-    if df_ver >= 4200 then --dfver:4200-
-        if bld.is_room and bld.location_id ~= -1 then
-            loc = location_find_by_id(bld.location_id)
-        end
-    end
-
-    return loc and locname(loc) or mp.NIL    
-end]]
-
 --xxx: most of the functions below can operate on the currently selected building only
 --xxx: this function will try to transition to [q]uery mode and select the passed building
 --luacheck: in=number
@@ -291,12 +280,10 @@ function building_query_selected(bldid)
             table.insert(ret, bld.table_flags.meeting_hall)
             
             local lname = mp.NIL
-            if df_ver >= 4200 then --dfver:4200-
-                if bld.is_room and bld.location_id ~= -1 then
-                    local loc = location_find_by_id(bld.location_id)
-                    if loc then
-                        lname = locname(loc)
-                    end
+            if bld.is_room and bld.location_id ~= -1 then
+                local loc = location_find_by_id(bld.location_id)
+                if loc then
+                    lname = locname(loc)
                 end
             end
             table.insert(ret, lname)
@@ -308,13 +295,11 @@ function building_query_selected(bldid)
 
             -- some operations on bedrooms are unavailable if the bed is in a tavern
             local lname, is_tavern = mp.NIL, false
-            if df_ver >= 4200 then --dfver:4200-
-                if bld.is_room and bld.location_id ~= -1 then
-                    local loc = location_find_by_id(bld.location_id)
-                    if loc then
-                        lname = locname(loc) 
-                        is_tavern = loc._type == df.abstract_building_inn_tavernst
-                    end
+            if bld.is_room and bld.location_id ~= -1 then
+                local loc = location_find_by_id(bld.location_id)
+                if loc then
+                    lname = locname(loc) 
+                    is_tavern = loc._type == df.abstract_building_inn_tavernst
                 end
             end
             table.insert(ret, lname)
@@ -656,24 +641,22 @@ function get_job_choices(ws, level)
             end
             
         else
-            if df_ver >= 4200 then --dfver:4200-
-                if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
-                    local rid = btn.reaction_name:sub(6)
-                    local found = false
-                    for i,v in ipairs(df.global.world.raws.itemdefs.instruments) do
+            if btn.job_type == df.job_type.CustomReaction and btn.reaction_name:sub(1,5) == 'MAKE_' then
+                local rid = btn.reaction_name:sub(6)
+                local found = false
+                for i,v in ipairs(df.global.world.raws.itemdefs.instruments) do
+                    if v.id == rid then
+                        descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
+                        found = true
+                        break
+                    end
+                end
+                if not found then
+                    for i,v in ipairs(df.global.world.raws.itemdefs.tools) do
                         if v.id == rid then
                             descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
                             found = true
                             break
-                        end
-                    end
-                    if not found then
-                        for i,v in ipairs(df.global.world.raws.itemdefs.tools) do
-                            if v.id == rid then
-                                descr = dfhack.df2utf(v.description:gsub('%s+', ' '))
-                                found = true
-                                break
-                            end
                         end
                     end
                 end
@@ -841,7 +824,7 @@ function building_workshop_addjob(bldid, idx, rep)
             ws:logic() --to initialize / switch to add job menu
             gui.simulateInput(ws, jobs_trap[idx+1])
 
-            if df.global.ui_workshop_in_add and C_lever_target_type_get() ~= -1 then
+            if df.global.ui_workshop_in_add and df.global.ui_lever_target_type ~= -1 then
                 recenter_view(df.global.cursor.x, df.global.cursor.y, df.global.cursor.z)
             end
         end
@@ -1623,7 +1606,7 @@ function link_targets_get()
         [string.byte'T'] = 'TRAP',
     }
 
-    local linkmode = C_lever_target_type_get()
+    local linkmode = df.global.ui_lever_target_type
     local id = modes_to_ids[linkmode]
     if not id then
         return
@@ -1670,7 +1653,7 @@ function link_target_confirm(fast)
     
     -- Automatically select first two mechanisms
     if istrue(fast) then
-        local linkmode = C_lever_target_type_get()
+        local linkmode = df.global.ui_lever_target_type
 
         -- If the mode is right, the same building is still selected, linkmode is right, and we have enough mechanisms to select
         if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding and df.global.ui_workshop_in_add
@@ -1721,7 +1704,7 @@ function link_mechanisms_get()
         return
     end
 
-    local linkmode = C_lever_target_type_get()
+    local linkmode = df.global.ui_lever_target_type
     if linkmode ~= string.byte('t') and linkmode ~= string.byte('l') then
         return
     end

@@ -2,7 +2,7 @@ local function animal_is_geldable(unit)
 	local bparts = df.global.world.raws.creatures.all[unit.race].caste[unit.caste].body_info.body_parts
 
 	for i,v in ipairs(bparts) do
-		if C_body_part_geldable(v) then
+		if v.flags.GELDABLE then
 			return true
 		end
 	end
@@ -25,7 +25,7 @@ function animals_get()
 
 			local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 			local adoptable = not caste.flags.ADOPTS_OWNER
-			local available = C_unit_available_for_adoption(unit)
+			local available = unit.flags3.available_for_adoption
 			local slaughter = unit.flags2.slaughter
 
 			local geld = C_unit_geld(unit)
@@ -42,19 +42,18 @@ function animals_get()
 			local training = (trainable_war or trainable_hunting) and df.training_assignment.find(unit.id)
 			local trainer = (training and training.trainer_id ~= -1) and df.unit.find(training.trainer_id) or nil
 			local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or mp.NIL
-			local training_flags = training and C_training_assignment_get_flags(training)
 			local trainerid = 0
 
 			if trainer then
 				trainerid = trainer.id
-			elseif training_flags and training_flags.any_trainer then
+			elseif training and training.flags.any_trainer then
 				trainerid = 1
-			elseif training_flags and training_flags.any_unassigned_trainer then
+			elseif training and training.flags.any_unassigned_trainer then
 				trainerid = 2
 			end
 				
-			local train_war = training_flags and training_flags.train_war
-			local train_hunt = training_flags and training_flags.train_hunt
+			local train_war = training and training.flags.train_war
+			local train_hunt = training and training.flags.train_hunt
 
 			local flags = bit(0,work) + bit(1,adoptable) + bit(2,available) + bit(3,trainable_war) + bit(4,trainable_hunting)
 						+ bit(5,slaughter) + bit(6,train_war) + bit(7,train_hunt)
@@ -80,11 +79,11 @@ function animals_get2()
 				if item._type == df.item_petst then -- just in case
 					local title = itemname(item, 0, true)
 
-					local ownerid = C_pet_ownerid(item)
+					local ownerid = item.owner_id
 					local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 					local ownername = owner and unit_fulltitle(owner) or mp.NIL
 
-					local flags = bit(1,true) + bit(2,C_pet_available(item)) + bit(12,true)
+					local flags = bit(1,true) + bit(2,item.pet_flags.available_for_adoption) + bit(12,true)
 
 					table.insert(ret, { title, item.id, 0, ownername, flags, mp.NIL, 0 })
 				end
@@ -100,7 +99,7 @@ function animals_get2()
 
 				local caste = df.creature_raw.find(unit.race).caste[unit.caste]
 				local adoptable = not caste.flags.ADOPTS_OWNER
-				local available = C_unit_available_for_adoption(unit)
+				local available = unit.flags3.available_for_adoption
 				local slaughter = unit.flags2.slaughter
 
 				local geld = C_unit_geld(unit)
@@ -117,19 +116,18 @@ function animals_get2()
 				local training = (trainable_war or trainable_hunting) and df.training_assignment.find(unit.id)
 				local trainer = (training and training.trainer_id ~= -1) and df.unit.find(training.trainer_id) or nil
 				local trainername = trainer and (unitname(trainer) .. ', ' .. unitprof(trainer)) or mp.NIL
-				local training_flags = training and C_training_assignment_get_flags(training)
 				local trainerid = 0
 	
 				if trainer then
 					trainerid = trainer.id
-				elseif training_flags and training_flags.any_trainer then
+				elseif training and training.flags.any_trainer then
 					trainerid = 1
-				elseif training_flags and training_flags.any_unassigned_trainer then
+				elseif training and training.flags.any_unassigned_trainer then
 					trainerid = 2
 				end
 					
-				local train_war = training_flags and training_flags.train_war
-				local train_hunt = training_flags and training_flags.train_hunt
+				local train_war = training and training.flags.train_war
+				local train_hunt = training and training.flags.train_hunt
 
 				local flags = bit(0,work) + bit(1,adoptable) + bit(2,available) + bit(3,trainable_war) + bit(4,trainable_hunting)
 							+ bit(5,slaughter) + bit(6,train_war) + bit(7,train_hunt)
@@ -182,7 +180,7 @@ function animals_set_available(unitid, val, is_vermin)
 			error('no item or wrong item type ' .. (item and tostring(item) or tostring(unitid)))
 		end
 
-		C_pet_set_available(item, val)
+		item.pet_flags.available_for_adoption = val
 
 		return true
 	end
@@ -193,7 +191,7 @@ function animals_set_available(unitid, val, is_vermin)
 		error('no unit '..tostring(unitid))
 	end
 
-	C_unit_set_available_for_adoption(unit, val)
+	unit.flags3.available_for_adoption = val
 
 	return true
 end
@@ -212,13 +210,10 @@ function animals_train_war(unitid, val)
 		training.animal_id = unit.id
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
-
-	local training_flags = C_training_assignment_get_flags(training)
 	
-	training_flags.train_war = true
-	training_flags.train_hunt = false
+	training.flags.train_war = true
+	training.flags.train_hunt = false
 	
-	C_training_assignment_set_flags(training, training_flags)
 	return true
 end
 
@@ -236,13 +231,10 @@ function animals_train_hunting(unitid, val)
 		training.animal_id = unit.id
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
+	
+	training.flags.train_war = false
+	training.flags.train_hunt = true
 
-	local training_flags = C_training_assignment_get_flags(training)
-	
-	training_flags.train_war = false
-	training_flags.train_hunt = true
-	
-	C_training_assignment_set_flags(training, training_flags)
 	return true
 end
 
@@ -286,22 +278,19 @@ function animals_trainer_set(animalid, trainerid)
 		utils.insert_sorted(df.global.ui.equipment.training_assignments, training, 'animal_id')
 	end
 	
-	local training_flags = C_training_assignment_get_flags(training)
-
 	if trainerid == 1 then
-		training_flags.any_trainer = true
-		training_flags.any_unassigned_trainer = false
+		training.flags.any_trainer = true
+		training.flags.any_unassigned_trainer = false
 		training.trainer_id = -1
 	elseif trainerid == 2 then
-		training_flags.any_trainer = false
-		training_flags.any_unassigned_trainer = true
+		training.flags.any_trainer = false
+		training.flags.any_unassigned_trainer = true
 		training.trainer_id = -1
 	else
-		training_flags.any_trainer = false
-		training_flags.any_unassigned_trainer = false
+		training.flags.any_trainer = false
+		training.flags.any_unassigned_trainer = false
 		training.trainer_id = trainerid
 	end
 
-	C_training_assignment_set_flags(training, training_flags)
 	return true
 end

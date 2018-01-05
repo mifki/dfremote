@@ -361,37 +361,32 @@ end
 
 function unit_jobtitle(unit, norepeatsuffix, activityonly)
     --todo: if there's an activity and a job, the game will show the job
-    if df_ver >= 4200 then --dfver:4200-
-        if #unit.social_activities > 0 then
-            local actid = unit.social_activities[0]
+    if #unit.social_activities > 0 then
+        local actid = unit.social_activities[0]
 
-            local act = df.activity_entry.find(actid)
-            for i,ev in ripairs(act.events) do
-                local participants = ev:getParticipantInfo()
+        local act = df.activity_entry.find(actid)
+        for i,ev in ripairs(act.events) do
+            local participants = ev:getParticipantInfo()
 
-                --todo: what is free_units and are all of free_units also in units? which one to use?
-                for j,v in ipairs(participants.free_units) do
-                    -- game shows the topmost event if no match found for the unit
-                    if v == unit.id or i == 0 then
-                        local jobtitle = actevname(ev, unit.id)
-                        local jobcolor = 10
+            --todo: what is free_units and are all of free_units also in units? which one to use?
+            for j,v in ipairs(participants.free_units) do
+                -- game shows the topmost event if no match found for the unit
+                if v == unit.id or i == 0 then
+                    local jobtitle = actevname(ev, unit.id)
+                    local jobcolor = 10
 
-                        local need_types = needs_for_event_types[act.events[0]:getType()]
-                        local important = need_types and has_important_need(unit, need_types)
-                        
-                        if important then
-                            jobtitle = jobtitle .. '!'
-                            jobcolor = 13
-                        end
-
-                        return jobtitle, jobcolor, 2
+                    local need_types = needs_for_event_types[act.events[0]:getType()]
+                    local important = need_types and has_important_need(unit, need_types)
+                    
+                    if important then
+                        jobtitle = jobtitle .. '!'
+                        jobcolor = 13
                     end
+
+                    return jobtitle, jobcolor, 2
                 end
             end
-        
-        elseif activityonly then
-            return nil
-        end
+        end    
 
     elseif activityonly then
         return nil
@@ -911,11 +906,7 @@ function unit_get_thoughts(unitid, is_histfig)
         unitlistws.units[0]:insert(0, unit)
         unitlistws.jobs[0]:insert(0, nil)
         
-        if df_ver >= 4200 then
-            gui.simulateInput(unitlistws, K'UNITJOB_VIEW_UNIT')
-        else
-            gui.simulateInput(unitlistws, K'UNITJOB_VIEW')
-        end
+        gui.simulateInput(unitlistws, K'UNITJOB_VIEW_UNIT')
 
         local ws = dfhack.gui.getCurViewscreen()
         if ws._type == df.viewscreen_unitst then
@@ -1306,7 +1297,7 @@ function unit_get_skills2(unitid)
     end
 
     local common_skills = {}
-    local performance_skills = mp.NIL
+    local performance_skills = {}
 
     local tmp = {}
     for i,v in ipairs(skill_class_names) do
@@ -1326,50 +1317,48 @@ function unit_get_skills2(unitid)
         end
     end
 
-    if df_ver >= 4200 then --dfver:4200-
-        local perf = C_unit_soul_performance_skills(unit.status.current_soul)
-        if perf then
-            performance_skills = {}
-            local tmp
+    local perf = C_unit_soul_performance_skills(unit.status.current_soul)
+    if perf then
+        performance_skills = {}
+        local tmp
 
-            -- instruments
-            tmp = {}
-            for i,v in ipairs(perf.musical_instruments) do
-                local inst = df.global.world.raws.itemdefs.instruments[v.id]
-                table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), v.rating })
-            end
-            table.insert(performance_skills, tmp)
-
-            -- poetic
-            tmp = {}
-            for i,v in ipairs(perf.poetic_forms) do
-                local form = df.poetic_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
-
-            -- musical
-            tmp = {}
-            for i,v in ipairs(perf.musical_forms) do
-                local form = df.musical_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
-
-            -- dance
-            tmp = {}
-            for i,v in ipairs(perf.dance_forms) do
-                local form = df.dance_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
+        -- instruments
+        tmp = {}
+        for i,v in ipairs(perf.musical_instruments) do
+            local inst = df.global.world.raws.itemdefs.instruments[v.id]
+            table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), v.rating })
         end
+        table.insert(performance_skills, tmp)
+
+        -- poetic
+        tmp = {}
+        for i,v in ipairs(perf.poetic_forms) do
+            local form = df.poetic_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
+
+        -- musical
+        tmp = {}
+        for i,v in ipairs(perf.musical_forms) do
+            local form = df.musical_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
+
+        -- dance
+        tmp = {}
+        for i,v in ipairs(perf.dance_forms) do
+            local form = df.dance_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
     end
 
     return { common_skills, performance_skills }
@@ -1383,7 +1372,7 @@ function unit_get_skills3(unitid)
     end
 
     local common_skills = {}
-    local performance_skills = mp.NIL
+    local performance_skills = {}
 
     local tmp = {}
     for i,v in ipairs(skill_class_names) do
@@ -1403,50 +1392,47 @@ function unit_get_skills3(unitid)
         end
     end
 
-    if df_ver >= 4200 then --dfver:4200-
-        local perf = C_unit_soul_performance_skills(unit.status.current_soul)
-        if perf then
-            performance_skills = {}
-            local tmp
+    local perf = C_unit_soul_performance_skills(unit.status.current_soul)
+    if perf then
+        local tmp
 
-            -- instruments
-            tmp = {}
-            for i,v in ipairs(perf.musical_instruments) do
-                local inst = df.global.world.raws.itemdefs.instruments[v.id]
-                table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), { 0, v.id }, v.rating })
-            end
-            table.insert(performance_skills, tmp)
-
-            -- poetic
-            tmp = {}
-            for i,v in ipairs(perf.poetic_forms) do
-                local form = df.poetic_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 1, v.id }, v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
-
-            -- musical
-            tmp = {}
-            for i,v in ipairs(perf.musical_forms) do
-                local form = df.musical_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 2, v.id }, v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
-
-            -- dance
-            tmp = {}
-            for i,v in ipairs(perf.dance_forms) do
-                local form = df.dance_form.find(v.id)
-                if form then
-                    table.insert(tmp, { dfhack.TranslateName(form.name, true), { 3, v.id }, v.rating })
-                end
-            end
-            table.insert(performance_skills, tmp)
+        -- instruments
+        tmp = {}
+        for i,v in ipairs(perf.musical_instruments) do
+            local inst = df.global.world.raws.itemdefs.instruments[v.id]
+            table.insert(tmp, { dfhack.df2utf(inst.name):utf8capitalize(), { 0, v.id }, v.rating })
         end
+        table.insert(performance_skills, tmp)
+
+        -- poetic
+        tmp = {}
+        for i,v in ipairs(perf.poetic_forms) do
+            local form = df.poetic_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), { 1, v.id }, v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
+
+        -- musical
+        tmp = {}
+        for i,v in ipairs(perf.musical_forms) do
+            local form = df.musical_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), { 2, v.id }, v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
+
+        -- dance
+        tmp = {}
+        for i,v in ipairs(perf.dance_forms) do
+            local form = df.dance_form.find(v.id)
+            if form then
+                table.insert(tmp, { dfhack.TranslateName(form.name, true), { 3, v.id }, v.rating })
+            end
+        end
+        table.insert(performance_skills, tmp)
     end
 
     return { common_skills, performance_skills }

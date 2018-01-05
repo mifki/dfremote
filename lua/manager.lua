@@ -25,13 +25,7 @@ function manager_get_orders()
 
 	for i,o in ipairs(df.global.world.manager_orders) do
 		local title = ordertitle(o)
-
-		local maxw = 0
-		if df_ver >= 4200 then --dfver:4200-
-			maxw = o.max_workshops
-		end
-
-		table.insert(orders, { title, o.amount_left, o.amount_total, o.status.whole, maxw, #o.item_conditions+#o.order_conditions })
+		table.insert(orders, { title, o.amount_left, o.amount_total, o.status.whole, o.max_workshops, #o.item_conditions+#o.order_conditions })
 	end
 
 	return { orders, have_manager }
@@ -108,11 +102,6 @@ function manager_new_order(idx, amount)
 	o.mat_index = ot.mat_index
 	o.item_category.whole = ot.item_category_whole
 	o.material_category.whole = ot.material_category_whole
-
-	if df_ver < 4200 then
-		amount = math.min(amount, 30)
-	end
-
 	o.amount_left = amount
 	o.amount_total = amount
 

@@ -46,12 +46,9 @@ require 'remote.civilizations'
 require 'remote.justice'
 require 'remote.raws'
 require 'remote.hauling'
-
-if df_ver >= 4200 then --dfver:4200-
-    require 'remote.locations'
-    require 'remote.petitions'
-    require 'remote.jobdetails'
-end
+require 'remote.locations'
+require 'remote.petitions'
+require 'remote.jobdetails'
 
 native = {}
 --dfhack.open_plugin(native, 'remote')
@@ -125,7 +122,7 @@ function reset_main()
         df.global.world.selected_building = nil
         df.global.ui_selected_unit = -1
         df.global.ui_workshop_in_add = false
-        C_lever_target_type_set(-1)
+        df.global.ui_lever_target_type = -1
         df.global.ui_sidebar_menus.zone.selected = nil
         df.global.ui.main.mode = df.ui_sidebar_mode.Default
         df.global.ui.waypoints.in_edit_waypts_mode = false
@@ -947,7 +944,7 @@ function get_status()
             local name = bldname(bld)
     
             if bld._type == df.building_trapst and df.global.ui_workshop_in_add then
-                local linkmode = C_lever_target_type_get()
+                local linkmode = df.global.ui_lever_target_type
                 if linkmode ~= -1 then
                     if linkmode == string.byte('t') or linkmode == string.byte('l') then
                         local enough = (linkmode == string.byte('t') and #df.global.ui_building_assign_items >= 2) or
@@ -1196,15 +1193,13 @@ function get_status()
     end
     
     local hasnewpetitions = false
-    if df_ver >= 4200 then --dfver:4200-
-        local petitions = #df.global.ui.petitions
-    
-        if petitions ~= last_petitions then
-            last_petitions = petitions
-            hasnewpetitions = true
-            ext = ext or {}
-            table.insert(ext, petitions)
-        end
+    local petitions = #df.global.ui.petitions
+
+    if petitions ~= last_petitions then
+        last_petitions = petitions
+        hasnewpetitions = true
+        ext = ext or {}
+        table.insert(ext, petitions)
     end
 
     return 0, packbits(df.global.pause_state, hasnewann, last_follow_unit, hasnewidlers, hasnewsiege, hasnewday, hasnewreportalert, hasnewpetitions), ext
@@ -1454,7 +1449,7 @@ function select_confirm()
     if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding then
 
         local bld = df.global.world.selected_building
-        if bld and C_lever_target_type_get() ~= -1 then
+        if bld and df.global.ui_lever_target_type ~= -1 then
             zoombacktobld = bld
         end
     end]]
