@@ -94,7 +94,7 @@ function build_confirm(fast)
     end
 
     local ret = build_req_get(true)
-    if not ret then
+    if not ret and df.global.ui_build_selector.building_type == -1 then
         if lastbldcmd ~= -1 then
             build(lastbldcmd)
         else
