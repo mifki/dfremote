@@ -1291,6 +1291,11 @@ stockpile_editing_settings = nil
 
 --luacheck: in=
 function building_stockpile_get_settings()
+    -- this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
+    if not stockpile_editing_settings then
+        building_stockpile_edit_settings()
+    end
+
     local ss = stockpile_editing_settings
 
     local ret = {}
