@@ -25,7 +25,7 @@ OUT = dist/$(DFHACKVER)/remote.plug.$(EXT)
 INC = -I"$(DH)/library/include" -I"$(DH)/library/proto" -I"$(DH)/depends/protobuf" -I"$(DH)/depends/lua/include" -I"$(DH)/depends/tthread" -Ienet/include
 LIB = -L"$(DH)/build/library" -ldfhack -ldfhack-version -L"$(DH)/build/depends/tthread" -ldfhack-tinythread ./enet/.libs/libenet.a
 
-CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -g -O3 -DUSE_FILE32API
+CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -g -O3 -DUSE_FILE32API -D_GLIBCXX_USE_CXX11_ABI=0
 LDFLAGS = $(LIB) -shared 
 
 ifeq ($(shell uname -s), Darwin)
