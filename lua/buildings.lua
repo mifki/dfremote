@@ -128,6 +128,9 @@ function building_query_selected(bldid)
         recenter_view(bld.centerx, bld.centery, bld.z)
     end
 
+    --todo: this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
+    stockpile_editing_settings = nil
+
     local btype = bld:getType()
     local bsub = bld:getSubtype()
     local bname = bldname(bld)
