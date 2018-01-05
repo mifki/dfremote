@@ -223,6 +223,7 @@ end
 function hauling_vehicle_get_choices(routeid)
 	return execute_with_hauling_menu(function(ws)
 		for i,v in ipairs(df.global.ui.hauling.view_routes) do
+			print(v.id)
 			if v.id == routeid then
 				df.global.ui.hauling.cursor_top = i
 				gui.simulateInput(ws, K'D_HAULING_VEHICLE')
@@ -246,9 +247,9 @@ function hauling_vehicle_get_choices(routeid)
 
 				return ret
 			end
-
-			error('no route with id '..tostring(routeid))
 		end
+		
+		error('no route with id '..tostring(routeid))
 	end)
 end
 
