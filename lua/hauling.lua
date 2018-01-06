@@ -140,7 +140,7 @@ function hauling_stop_link_set_mode(routeid, stopid, idx, mode)
 	if not route then
 		error('no route '..tostring(routeid))
 	end
-print(mode)
+
 	for i,stop in ipairs(route.stops) do
 		if stop.id == stopid then
 			stop.stockpiles[idx].mode.whole = mode
