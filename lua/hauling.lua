@@ -43,7 +43,7 @@ function hauling_route_info(id)
 			local vehicle = df.vehicle.find(route.vehicle_ids[0])
 			local vehicle_item = vehicle and df.item.find(vehicle.item_id)
 			if vehicle_item then
-				local vehicle_stop_id = route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]].id or -1
+				local vehicle_stop_id = #route.stops > 0 and route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]].id or -1
 
 				local on_stop = false
 
@@ -116,7 +116,7 @@ function hauling_stop_delete_condition(routeid, stopid, idx)
 end
 
 --luacheck: in=number,number,number
-function hauling_stop_delete_link(routeid, stopid, idx)
+function hauling_stop_link_delete(routeid, stopid, idx)
 	local route = df.hauling_route.find(routeid)
 
 	if not route then
@@ -126,14 +126,25 @@ function hauling_stop_delete_link(routeid, stopid, idx)
 	for i,stop in ipairs(route.stops) do
 		if stop.id == stopid then
 			stop.stockpiles:erase(idx)
-			--[[for j,link in ipairs(stop.stockpiles) do
-				if link.building_id == buildingid then
-					stop.stockpiles:erase(j)
-					return true
-				end
-			end]]
+			return true
+		end
+	end
 
-			error('no stockpile link '..tostring(buildingid))
+	error('no stop '..tostring(stopid))
+end
+
+--luacheck: in=number,number,number,number
+function hauling_stop_link_set_mode(routeid, stopid, idx, mode)
+	local route = df.hauling_route.find(routeid)
+
+	if not route then
+		error('no route '..tostring(routeid))
+	end
+print(mode)
+	for i,stop in ipairs(route.stops) do
+		if stop.id == stopid then
+			stop.stockpiles[idx].mode.whole = mode
+			return true
 		end
 	end
 
@@ -430,6 +441,7 @@ function hauling_stop_linking_ok()
     link.mode.take = true
 
     stop.stockpiles:insert('#', link)
+    bld.linked_stops:insert('#', stop)
 
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
 

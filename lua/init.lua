@@ -2058,12 +2058,13 @@ local handlers = {
         [11] = hauling_stop_delete_condition,
         [12] = hauling_vehicle_get_choices,
         [13] = hauling_vehicle_assign,
-        [14] = hauling_stop_delete_link,
+        [14] = hauling_stop_link_delete,
         [15] = hauling_stop_linking_begin,
         [16] = hauling_stop_linking_ok,
         [17] = hauling_stop_linking_cancel,
         [18] = hauling_stop_edit_item_settings,
         [19] = hauling_stop_save_condition,
+        [20] = hauling_stop_link_set_mode,
     },
 
     [148] = {
