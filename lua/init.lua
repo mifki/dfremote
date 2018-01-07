@@ -928,7 +928,7 @@ function get_status()
             goto continue_checks
         end
 
-        return 115, can_link and 1 or 0, { routename(route), stopname(stop), targetname }
+        return 115, can_link and 1 or 0, { haulingroutename(route), stopname(stop), targetname }
     end    
 
     ::continue_checks::
@@ -1077,7 +1077,7 @@ function get_status()
             local has_stops = sel_route and #sel_route.stops > 0
             local sel_stop = hauling.view_stops[hauling.cursor_top]
 
-            return 76, packbits(has_stops, sel_stop and 1 or 0), { routename(sel_route), sel_stop and stopname(sel_stop) or mp.NIL }
+            return 76, packbits(has_stops, sel_stop and 1 or 0), { haulingroutename(sel_route), sel_stop and stopname(sel_stop) or mp.NIL }
         
         else
             return 75, 0
@@ -2065,6 +2065,8 @@ local handlers = {
         [18] = hauling_stop_edit_item_settings,
         [19] = hauling_stop_save_condition,
         [20] = hauling_stop_link_set_mode,
+        [21] = hauling_route_set_name,
+        [22] = hauling_stop_set_name,
     },
 
     [148] = {

@@ -4,7 +4,7 @@ function hauling_get_routes()
 		local ret = {}
 
 		for i,route in ipairs(df.global.ui.hauling.routes) do
-			local name = routename(route)
+			local name = haulingroutename(route)
 
 			local bad = false
 			for j,w in ipairs(df.global.ui.hauling.view_bad) do
@@ -63,7 +63,7 @@ function hauling_route_info(id)
 			end
 		end
 
-		return { routename(route), route.id, stops, vehicle_info or mp.NIL }
+		return { haulingroutename(route), route.id, stops, vehicle_info or mp.NIL }
 	end)
 end
 
@@ -252,7 +252,7 @@ function hauling_vehicle_get_choices(routeid)
 						local itemname = item and itemname(item, 1, true)
 						local assigned_route = vehicle.route_id ~= -1 and df.hauling_route.find(vehicle.route_id)
 
-						table.insert(ret, { itemname, vehicle.id, item.id, assigned_route and routename(assigned_route) or mp.NIL })
+						table.insert(ret, { itemname, vehicle.id, item.id, assigned_route and haulingroutename(assigned_route) or mp.NIL })
 					end
 				end
 
@@ -300,7 +300,7 @@ function hauling_route_add()
 end
 
 --luacheck: in=number,string
-function hauling_route_set_name(id,name)
+function hauling_route_set_name(id, name)
 	local route = df.hauling_route.find(id)
 
 	if not route then
@@ -489,7 +489,6 @@ function hauling_stop_save_condition(routeid, stopid, idx, values)
 	end
 
 	local _,stop = utils.linear_index(route.stops, stopid, 'id')
-
 	if not stop then
 		error('no stop '..tostring(stopid))
 	end
@@ -511,6 +510,22 @@ function hauling_stop_save_condition(routeid, stopid, idx, values)
 
 	return true
 end
+
+--luacheck: in=number,number,string
+function hauling_stop_set_name(routeid, stopid, name)
+	local route = df.hauling_route.find(routeid)
+	if not route then
+		error('no hauling route '..tostring(routeid))
+	end
+
+	local _,stop = utils.linear_index(route.stops, stopid, 'id')
+	if not stop then
+		error('no stop '..tostring(stopid))
+	end
+
+	stop.name = name
+end
+
 
 --print(pcall(function()return json:encode(hauling_get_routes())end))
 --print(pcall(function()return json:encode(hauling_route_info(1))end))
