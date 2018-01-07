@@ -369,26 +369,29 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
             local participants = ev:getParticipantInfo()
 
             --todo: what is free_units and are all of free_units also in units? which one to use?
-            for j,v in ipairs(participants.free_units) do
-                -- game shows the topmost event if no match found for the unit
-                if v == unit.id or i == 0 then
-                    local jobtitle = actevname(ev, unit.id)
-                    local jobcolor = 10
-
-                    local need_types = needs_for_event_types[act.events[0]:getType()]
-                    local important = need_types and has_important_need(unit, need_types)
-                    
-                    if important then
-                        jobtitle = jobtitle .. '!'
-                        jobcolor = 13
+            if participants then
+                for j,v in ipairs(participants.free_units) do
+                    -- game shows the topmost event if no match found for the unit
+                    if v == unit.id or i == 0 then
+                        local jobtitle = actevname(ev, unit.id)
+                        local jobcolor = 10
+    
+                        local need_types = needs_for_event_types[act.events[0]:getType()]
+                        local important = need_types and has_important_need(unit, need_types)
+                        
+                        if important then
+                            jobtitle = jobtitle .. '!'
+                            jobcolor = 13
+                        end
+    
+                        return jobtitle, jobcolor, 2
                     end
-
-                    return jobtitle, jobcolor, 2
                 end
             end
         end    
+    end
 
-    elseif activityonly then
+    if activityonly then
         return nil
     end
 
