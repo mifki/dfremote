@@ -1,4 +1,16 @@
-function ordertitle(o)
+--todo: convert to use order id instead of idx
+
+function order_find_by_id(id)
+    for i,v in ipairs(df.global.world.manager_orders) do
+        if v.id == id then
+            return v, i
+        end
+    end
+
+    return nil
+end
+
+function ordertitle(o, with_amount)
 	local btn = df.interface_button_building_new_jobst:new()
 	
 	btn.reaction_name = o.reaction_name
@@ -11,10 +23,14 @@ function ordertitle(o)
 	btn.item_category.whole = o.item_category.whole
 	btn.material_category.whole = o.material_category.whole
 	
-	local title = utils.call_with_string(btn, 'getLabel')
+	local title = dfhack.df2utf(utils.call_with_string(btn, 'getLabel'))
 	df.delete(btn)
 
-	return dfhack.df2utf(title)
+	if with_amount then
+		title = title .. ' (' .. tostring(o.amount_total) .. ')'
+	end
+
+	return title
 end
 
 --luacheck: in=
@@ -128,3 +144,48 @@ function manager_order_set_max_workshops(idx, maxw)
     local o = df.global.world.manager_orders[idx]
     o.max_workshops = maxw
 end
+
+--luacheck: in=number
+function order_conditions_get(id)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+    local conditions = {}
+
+    for i,v in ipairs(order.item_conditions) do
+    	--local itemname = generic_item_name(v.item_type, v.item_subtype, -1, -1, -1, false)
+	    local q = df.reaction_product_itemst:new()
+
+	    q.item_type = v.item_type
+	    q.item_subtype = v.item_subtype
+	    	    
+	    local itemname = utils.call_with_string(q, 'getDescription')
+	    q:delete()
+
+	    itemname = itemname:sub(1, itemname:find(' %(')-1)
+    	itemname = itemname:lower()
+	    itemname = dfhack.df2utf(itemname)
+
+	    local matname = mp.NIL
+    	local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+        if mi then
+            local mat = mi.material
+            matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
+        end
+
+    	table.insert(conditions, { 0, false, itemname, matname, v.compare_type, v.compare_val })
+    end
+
+    for i,v in ipairs(order.order_conditions) do
+    	local target = order_find_by_id(v.order_id)
+    	local s = target and ordertitle(target, true) or '#invalid order#'
+    	table.insert(conditions, { 1, false, s, v.condition })
+    end
+
+    --todo: frequency, etc.
+    return { ordertitle(order), order.id, conditions }
+end
+
+print(pcall(function() return json:encode(order_conditions_get(14)) end))
