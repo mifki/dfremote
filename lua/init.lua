@@ -2042,6 +2042,16 @@ local handlers = {
         [4] = manager_delete_order,
         [5] = manager_reorder,
         [6] = manager_order_set_max_workshops,
+
+        [10] = manager_order_conditions_get,
+        [11] = manager_order_conditions_set_frequency,
+        [12] = manager_order_condition_get_item_choices,
+        [13] = manager_order_condition_get_material_choices,
+        [14] = manager_order_condition_get_trait_choices,
+        [15] = manager_order_condition_set_item,
+        [16] = manager_order_condition_set_material,
+        [17] = manager_order_condition_set_traits,
+        [18] = manager_order_condition_set_compare,
     },
 
     [146] = {

@@ -145,47 +145,265 @@ function manager_order_set_max_workshops(idx, maxw)
     o.max_workshops = maxw
 end
 
+
 --luacheck: in=number
-function order_conditions_get(id)
+function manager_order_conditions_get(id)
+    local order,idx = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	return execute_with_order_conditions(idx, function(ws)
+	    local conditions = {}
+
+	    for i,v in ipairs(order.item_conditions) do
+		    local q = df.reaction_product_itemst:new()
+
+		    q.item_type = v.item_type
+		    q.item_subtype = v.item_subtype
+		    	    
+		    local itemname = utils.call_with_string(q, 'getDescription')
+		    q:delete()
+
+		    itemname = itemname:sub(1, itemname:find(' %(')-1)
+	    	itemname = itemname:lower()
+		    itemname = dfhack.df2utf(itemname)
+
+		    local matname = mp.NIL
+	    	local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
+	        if mi then
+	            local mat = mi.material
+	            matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
+	        end
+
+	    	table.insert(conditions, { 0, ws.satisfied[i], itemname, matname, v.compare_type, v.compare_val })
+	    end
+
+	    for i,v in ipairs(order.order_conditions) do
+	    	local target = order_find_by_id(v.order_id)
+	    	local s = target and ordertitle(target, true) or '#invalid order#'
+	    	table.insert(conditions, { 1, ws.anon_1[i], s, v.condition })
+	    end
+
+	    return { ordertitle(order), order.id, conditions, order.frequency }
+	end)
+end
+
+--luacheck: in=
+function manager_order_condition_get_item_choices()
+	local q = df.viewscreen_workquota_conditionst:new()
+	local o = df.manager_order:new()
+
+	q.order = o
+
+	local ret = {}
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ADD_ITEM')
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TYPE')
+
+	for i,v in ipairs(q.list_entries) do
+		-- local item_type = C_viewscreen_workquota_conditionst_item_type(q,i)
+		-- local item_subtype = C_viewscreen_workquota_conditionst_item_subtype(q,i)
+
+		table.insert(ret, { dfhack.df2utf(v.value), i })
+	end
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+	o:delete()
+
+	return ret
+end
+
+--luacheck: in=
+function manager_order_condition_get_material_choices()
+	local q = df.viewscreen_workquota_conditionst:new()
+	local o = df.manager_order:new()
+
+	q.order = o
+
+	local ret = {}
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ADD_ITEM')
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_MATERIAL')
+
+	for i,v in ipairs(q.list_entries) do
+		-- local mat_type = q.list_unk1[i]
+		-- local mat_index = q.list_unk2[i]
+
+		table.insert(ret, { dfhack.df2utf(v.value), i })
+	end
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+	o:delete()
+
+	return ret
+end
+
+--luacheck: in=
+function manager_order_condition_get_trait_choices()
+	local q = df.viewscreen_workquota_conditionst:new()
+	local o = df.manager_order:new()
+
+	q.order = o
+
+	local ret = {}
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ADD_ITEM')
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TRAITS')
+
+	for i,v in ipairs(q.traits) do
+		table.insert(ret, { dfhack.df2utf(v.name), i })
+	end
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+	o:delete()
+
+	return ret
+end
+
+--luacheck: in=number,number,number
+function manager_order_condition_set_item(id, condidx, choiceidx)
     local order = order_find_by_id(id)
     if not order then
         error('no order '..tostring(id))
     end
 
-    local conditions = {}
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
 
-    for i,v in ipairs(order.item_conditions) do
-    	--local itemname = generic_item_name(v.item_type, v.item_subtype, -1, -1, -1, false)
-	    local q = df.reaction_product_itemst:new()
+	q.cond_idx = condidx
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TYPE')
+	
+	q.list_idx = choiceidx
+	gui.simulateInput(q, K'SELECT')
 
-	    q.item_type = v.item_type
-	    q.item_subtype = v.item_subtype
-	    	    
-	    local itemname = utils.call_with_string(q, 'getDescription')
-	    q:delete()
+	--todo: ideally catch errors and always delete
+	q:delete()
 
-	    itemname = itemname:sub(1, itemname:find(' %(')-1)
-    	itemname = itemname:lower()
-	    itemname = dfhack.df2utf(itemname)
-
-	    local matname = mp.NIL
-    	local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
-        if mi then
-            local mat = mi.material
-            matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
-        end
-
-    	table.insert(conditions, { 0, false, itemname, matname, v.compare_type, v.compare_val })
-    end
-
-    for i,v in ipairs(order.order_conditions) do
-    	local target = order_find_by_id(v.order_id)
-    	local s = target and ordertitle(target, true) or '#invalid order#'
-    	table.insert(conditions, { 1, false, s, v.condition })
-    end
-
-    --todo: frequency, etc.
-    return { ordertitle(order), order.id, conditions }
+	return true
 end
 
-print(pcall(function() return json:encode(order_conditions_get(14)) end))
+--luacheck: in=number,number,number
+function manager_order_condition_set_material(id, condidx, choiceidx)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+
+	q.cond_idx = condidx
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_MATERIAL')
+
+	q.list_idx = choiceidx
+	gui.simulateInput(q, K'SELECT')
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+	return true
+end
+
+--luacheck: in=number,number,number[]
+function manager_order_condition_set_traits(id, condidx, choiceidxs)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+
+	q.cond_idx = condidx
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TRAITS')
+
+	-- reset all traits first because we can only toggle
+	order.item_conditions[condidx].flags1.whole = 0
+	order.item_conditions[condidx].flags2.whole = 0
+	order.item_conditions[condidx].flags3.whole = 0
+	order.item_conditions[condidx].flags4 = 0
+	order.item_conditions[condidx].flags5 = 0
+	order.item_conditions[condidx].reaction_class = ''
+	order.item_conditions[condidx].has_material_reaction_product = ''
+	order.item_conditions[condidx].inorganic_bearing = -1
+	order.item_conditions[condidx].has_tool_use = df.tool_uses.NONE
+
+	--todo: .anon_1, .anon_2, .anon_3 ?
+
+	for i,v in ipairs(choiceidxs) do
+		q.list_idx = v
+		gui.simulateInput(q, K'SELECT')
+	end
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+	return true
+end
+
+--luacheck: in=number,number,number
+function manager_order_conditions_set_frequency(id, freq)
+    local order,idx = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	order.frequency = freq
+end
+
+--luacheck: in=number,number,number,number
+function manager_order_condition_set_compare(id, condidx, compare_type, compare_val)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+    local cond = order.item_conditions[condidx]
+    
+    cond.compare_type = compare_type
+    cond.compare_val = compare_val
+
+	return true
+end
+
+function manager_order_condition_get_order_choices(id)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local ret = {}
+
+	for i,o in ipairs(df.global.world.manager_orders) do
+		local found = false
+		for j,v in ipairs(order.order_conditions) do
+			if v.order_id == o.id then
+				found = true
+				break
+			end
+		end
+
+		if o ~= order and not found then
+			local title = ordertitle(o)
+			table.insert(ret, { title, o.id })
+		end
+	end
+
+	return ret
+
+end
+
+-- print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
+-- print(pcall(function() return json:encode(manager_order_condition_get_item_choices()) end))
+-- print(pcall(function() return json:encode(manager_order_condition_get_material_choices()) end))
+-- print(pcall(function() return json:encode(manager_order_condition_get_trait_choices()) end))
+-- print(pcall(function() return json:encode(manager_order_condition_set_item(0,1,10)) end))
+-- print(pcall(function() return json:encode(manager_order_condition_set_material(0,1,10)) end))
+-- print(pcall(function() return json:encode(manager_order_condition_set_traits(0,0,{2,4,6})) end))
+-- print(pcall(function() return json:encode(manager_order_conditions_set_frequency(0,2)) end))
+-- print(pcall(function() return json:encode(manager_order_condition_set_compare(0,1,1,13)) end))
+-- print(pcall(function() return json:encode(manager_order_condition_get_order_choices(0)) end))

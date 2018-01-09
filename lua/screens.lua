@@ -61,8 +61,11 @@ end
 function execute_with_nobles_screen(reset, fn)
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_NOBLES')
+		
 		local noblesws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_noblelistst
+		
 		--todo: check that we have switched to nobles screen
+		
 		--todo: why is this here? 
 		if reset then
 		    noblesws.mode = df.viewscreen_layer_noblelistst.T_mode.List
@@ -359,6 +362,29 @@ function execute_with_order_details(idx, fn)
 		local ok,ret = pcall(fn, detws) 
 		
 		detws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+		if not ok then
+			error (ret)
+		end
+		return ret
+	end)
+end
+
+function execute_with_order_conditions(idx, fn)
+	return execute_with_manager_screen(function(ws)
+		--todo: check idx range
+	    ws.sel_idx = idx
+
+	    gui.simulateInput(ws, K'MANAGER_CONDITIONS')
+	    
+	    local condws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_workquota_conditionst
+	    if condws._type ~= df.viewscreen_workquota_conditionst then
+	    	error('could not switch to order conditions screen '..tostring(condws._type))
+	    end
+		
+		local ok,ret = pcall(fn, condws) 		
+
+		condws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
 		if not ok then
 			error (ret)
