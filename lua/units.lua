@@ -956,7 +956,6 @@ function unit_get_thoughts(unitid, is_histfig)
     return { text }
 end
 
---todo: some are also flashing!
 local relations_unit = {
     { 'Pet', 10 },
     { 'Spouse', 12 },
@@ -1097,30 +1096,7 @@ function unit_get_relationships(unitid)
 
     local ret = {}
 
-    --[[for i,v in ipairs(relations_unit) do
-        ws.relation_unit_type[0] = i-1
-        ws.relation_histfig_type[0] = -1
-        ws:render()
-        local t = dfhack.screen.readTile(52, 3)
-        local fg = t.fg + (t.bold and 8 or 0)
-
-        local n = ''
-        for i=0,100 do
-            local t = dfhack.screen.readTile(52+i, 3)
-            if not t then break end
-            local c = string.char(t.ch)
-            if n:sub(#n,#n) == ' ' and c == ' ' then
-                break
-            end
-            n = n .. c
-        end
-        n = n:sub(0,#n-1)
-
-        print ('{ \''.. n .. '\', '.. fg.. ' },')
-    end]]
-
     for i,v in ipairs(ws.relation_unit) do
-
         local name, namecolor, id, can_view, can_zoom
         if v then
             name = unit_fulltitle(v)
@@ -1142,6 +1118,7 @@ function unit_get_relationships(unitid)
         local rel = ((rel_hf ~= -1) and relations_hf[rel_hf+1] or relations_unit[rel_u+1]) or { '#unknown relation#', 7 }
         local flags = (v and 1 or 0) + (can_zoom and 2 or 0) + (can_view and 4 or 0)
 
+        --todo: pass legendary skill status to flash the names
         table.insert(ret, { name, id, namecolor, rel[1], rel[2], flags, can_zoom and pos2table(v.pos) or mp.NIL })
     end
 

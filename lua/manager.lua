@@ -47,6 +47,20 @@ function manager_get_orders()
 	return { orders, have_manager }
 end
 
+--luacheck: in=
+function manager_get_orders2()
+    local have_manager = have_noble('MANAGER')
+
+	local orders = {}
+
+	for i,o in ipairs(df.global.world.manager_orders) do
+		local title = ordertitle(o)
+		table.insert(orders, { title, o.id, o.amount_left, o.amount_total, o.status.whole, o.max_workshops, #o.item_conditions+#o.order_conditions })
+	end
+
+	return { orders, have_manager }
+end
+
 local order_templates = nil
 local order_template_names = nil
 
@@ -185,7 +199,7 @@ function manager_order_conditions_get(id)
 	    	table.insert(conditions, { 1, ws.anon_1[i], s, v.condition })
 	    end
 
-	    return { ordertitle(order), order.id, conditions, order.frequency }
+	    return { ordertitle(order, true), order.id, conditions, order.frequency }
 	end)
 end
 
@@ -370,6 +384,7 @@ function manager_order_condition_set_compare(id, condidx, compare_type, compare_
 	return true
 end
 
+--luacheck: in=number
 function manager_order_condition_get_order_choices(id)
     local order = order_find_by_id(id)
     if not order then
@@ -388,13 +403,106 @@ function manager_order_condition_get_order_choices(id)
 		end
 
 		if o ~= order and not found then
-			local title = ordertitle(o)
+			local title = ordertitle(o, true)
 			table.insert(ret, { title, o.id })
 		end
 	end
 
 	return ret
+end
 
+--luacheck: in=number,number
+function manager_order_conditions_add_order(id, anotherid)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+    local cond = df.manager_order_condition_order:new()
+    cond.order_id = anotherid
+    cond.condition = df.manager_order_condition_order.T_condition.Completed
+
+    order.order_conditions:insert('#', cond)
+
+    return true
+end
+
+--luacheck: in=number,number
+function manager_order_conditions_add_item(id, itemidx)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ADD_ITEM')
+	q.cond_idx = #order.item_conditions - 1
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TYPE')
+	q.list_idx = itemidx
+	gui.simulateInput(q, K'SELECT')
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+    return true
+end
+
+--luacheck: in=number
+function manager_order_conditions_add_reagents(id)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_REAGENTS')
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+    return true
+end
+
+--luacheck: in=number
+function manager_order_conditions_add_products(id)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_PRODUCTS')
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+    return true
+end
+
+--luacheck: in=number,number
+function manager_order_conditions_delete(id, condidx)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+	local q = df.viewscreen_workquota_conditionst:new()
+	q.order = order
+	q.cond_idx = condidx
+
+	gui.simulateInput(q, K'WORK_ORDER_CONDITION_DELETE')
+
+	--todo: ideally catch errors and always delete
+	q:delete()
+
+	return true
 end
 
 -- print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
