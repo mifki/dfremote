@@ -199,7 +199,7 @@ function manager_order_conditions_get(id)
 	    	table.insert(conditions, { 1, ws.anon_1[i], s, v.condition })
 	    end
 
-	    return { ordertitle(order, true), order.id, conditions, order.frequency }
+	    return { ordertitle(order, true), order.id, conditions, order.frequency, order.status.whole }
 	end)
 end
 

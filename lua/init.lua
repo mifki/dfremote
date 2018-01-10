@@ -2053,11 +2053,12 @@ local handlers = {
         [16] = manager_order_condition_set_traits,
         [17] = manager_order_condition_set_compare,
         [18] = manager_order_conditions_set_frequency,
-        [19] = manager_order_conditions_add_order,
-        [20] = manager_order_conditions_add_item,
+        [19] = manager_order_conditions_add_item,
+        [20] = manager_order_conditions_add_order,
         [21] = manager_order_conditions_add_reagents,
         [22] = manager_order_conditions_add_products,
         [23] = manager_order_conditions_delete,
+        [24] = manager_order_condition_get_order_choices,
     },
 
     [146] = {
