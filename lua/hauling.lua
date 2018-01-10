@@ -43,9 +43,9 @@ function hauling_route_info(id)
 			local vehicle = df.vehicle.find(route.vehicle_ids[0])
 			local vehicle_item = vehicle and df.item.find(vehicle.item_id)
 			if vehicle_item then
-				local vehicle_stop_id = #route.stops > 0 and route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]].id or -1
+				local vehicle_stop = #route.stops > 0 and route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]] or nil
 
-				local on_stop = false
+				local on_stop = vehicle_stop and vehicle_stop.pos.x == vehicle_item.pos.x and vehicle_stop.pos.y == vehicle_item.pos.y and vehicle_stop.pos.z == vehicle_item.pos.z
 
 				local contained_volume = 0
 				for i,ref in ipairs(vehicle_item.general_refs) do
@@ -59,7 +59,7 @@ function hauling_route_info(id)
 
 				local fullness = math.ceil(contained_volume / 50000 * 100)
 
-				vehicle_info = { itemname(vehicle_item, 1, true), vehicle_item.id, vehicle_stop_id, on_stop, fullness }
+				vehicle_info = { itemname(vehicle_item, 1, true), vehicle_item.id, vehicle_stop.id, on_stop, fullness }
 			end
 		end
 
