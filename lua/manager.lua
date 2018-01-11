@@ -159,6 +159,164 @@ function manager_order_set_max_workshops(idx, maxw)
     o.max_workshops = maxw
 end
 
+local job_item_flag_titles1 = {
+	[df.job_item_flags1.improvable] = 'improvable',
+	[df.job_item_flags1.butcherable] = 'butcherable',
+	[df.job_item_flags1.millable] = 'millable',
+	[df.job_item_flags1.allow_buryable] = 'possible buriable',
+	[df.job_item_flags1.unrotten] = 'unrotten',
+	[df.job_item_flags1.undisturbed] = 'undisturbed',
+	[df.job_item_flags1.collected] = 'collected',
+	[df.job_item_flags1.sharpenable] = 'sharpenable',
+	[df.job_item_flags1.murdered] = 'murdered',
+	[df.job_item_flags1.distillable] = 'distillable',
+	[df.job_item_flags1.empty] = 'empty',
+	[df.job_item_flags1.processable] = 'processable',
+	[df.job_item_flags1.bag] = 'bag',
+	[df.job_item_flags1.cookable] = 'cookable',
+	[df.job_item_flags1.extract_bearing_plant] = 'extract-bearing plant',
+	[df.job_item_flags1.extract_bearing_fish] = 'extract-bearing fish',
+	[df.job_item_flags1.extract_bearing_vermin] = 'extract-bearing small creature',
+	[df.job_item_flags1.processable_to_vial] = 'processable (to vial)',
+	[df.job_item_flags1.processable_to_bag] = 'processable (to bag)',
+	[df.job_item_flags1.processable_to_barrel] = 'processable (to barrel)',
+	[df.job_item_flags1.solid] = 'solid',
+	[df.job_item_flags1.tameable_vermin] = 'tameable small creature',
+	[df.job_item_flags1.nearby] = 'nearby',
+	[df.job_item_flags1.sand_bearing] = 'sand-bearing',
+	[df.job_item_flags1.glass] = 'glass',
+	[df.job_item_flags1.milk] = 'milk',
+	[df.job_item_flags1.milkable] = 'milkable',
+	[df.job_item_flags1.finished_goods] = 'finished good',
+	[df.job_item_flags1.ammo] = 'ammo',
+	[df.job_item_flags1.furniture] = 'furniture',
+	--[df.job_item_flags1.not_bin] = ''
+	[df.job_item_flags1.lye_bearing] = 'lye-bearing',
+}
+
+local job_item_flag_titles2 = {
+	[df.job_item_flags2.dye] = 'dye',
+	[df.job_item_flags2.dyeable] = 'dyeable',
+	[df.job_item_flags2.dyed] = 'dyed',
+	[df.job_item_flags2.sewn_imageless] = 'sewn-imageless',
+	[df.job_item_flags2.glass_making] = 'glass-making',
+	[df.job_item_flags2.screw] = 'screw',
+	[df.job_item_flags2.building_material] = 'building material',
+	[df.job_item_flags2.fire_safe] = 'fire-safe',
+	[df.job_item_flags2.magma_safe] = 'magma_safe',
+	[df.job_item_flags2.deep_material] = 'deep material',
+	[df.job_item_flags2.melt_designated] = 'melt-designated',
+	[df.job_item_flags2.non_economic] = 'non-economic',
+	--[df.job_item_flags2.allow_melt_dump] = 
+	--[df.job_item_flags2.allow_artifact] = 
+	[df.job_item_flags2.plant] = 'plant',
+	[df.job_item_flags2.silk] = 'silk',
+	[df.job_item_flags2.leather] = 'leather',
+	[df.job_item_flags2.bone] = 'bone',
+	[df.job_item_flags2.shell] = 'shell',
+	[df.job_item_flags2.totemable] = 'totemable',
+	[df.job_item_flags2.horn] = 'horn',
+	[df.job_item_flags2.pearl] = 'pearl',
+	[df.job_item_flags2.plaster_containing] = 'plaster-containing',
+	--[df.job_item_flags2.anon_1] = 
+	[df.job_item_flags2.soap] = 'soap',
+	--[df.job_item_flags2.body_part] = 
+	[df.job_item_flags2.ivory_tooth] = 'ivory/tooth',
+	[df.job_item_flags2.lye_milk_free] = 'lye/milk-free',
+	[df.job_item_flags2.blunt] = 'blunt',
+	[df.job_item_flags2.unengraved] = 'unengraved',
+	[df.job_item_flags2.hair_wool] = 'hair/wool',
+	[df.job_item_flags2.yarn] = 'yarn',
+} 
+
+local job_item_flag_titles3 = {
+	[df.job_item_flags3.unimproved] = 'unimproved',
+	--[df.job_item_flags3.any_raw_material] = 
+	[df.job_item_flags3.non_absorbent] = 'non-absorbent',
+	[df.job_item_flags3.non_pressed] = 'non-pressed',
+	--[df.job_item_flags3.allow_liquid_powder] = 
+	--[df.job_item_flags3.any_craft] = 
+	[df.job_item_flags3.hard] = 'hard',
+	[df.job_item_flags3.food_storage] = 'food storage',
+	[df.job_item_flags3.metal] = 'metal',
+	[df.job_item_flags3.sand] = 'sand',
+	--[df.job_item_flags3.anon_1] = 
+	[df.job_item_flags3.written_on] = 'written-on',
+	[df.job_item_flags3.edged] = 'edged',
+}
+
+local tool_use_titles = {
+	[df.tool_uses.LIQUID_COOKING] = 'liquid cooking',
+	[df.tool_uses.LIQUID_SCOOP] = 'liquid scoop',
+	[df.tool_uses.GRIND_POWDER_RECEPTACLE] = 'poweder grinding receptacle',
+	[df.tool_uses.GRIND_POWDER_GRINDER] = 'powder grinding',
+	[df.tool_uses.MEAT_CARVING] = 'meat carving',
+	[df.tool_uses.MEAT_BONING] = 'meat boning',
+	[df.tool_uses.MEAT_SLICING] = 'meat slicing',
+	[df.tool_uses.MEAT_CLEAVING] = 'meat cleaving',
+	[df.tool_uses.HOLD_MEAT_FOR_CARVING] = 'meat-carving holder',
+	[df.tool_uses.MEAL_CONTAINER] = 'meal container',
+	[df.tool_uses.LIQUID_CONTAINER] = 'liquid container',
+	[df.tool_uses.FOOD_STORAGE] = 'food storage',
+	[df.tool_uses.HIVE] = 'hive',
+	[df.tool_uses.NEST_BOX] = 'nest box',
+	[df.tool_uses.SMALL_OBJECT_STORAGE] = 'small object container',
+	[df.tool_uses.TRACK_CART] = 'track cart',
+	[df.tool_uses.HEAVY_OBJECT_HAULING] = 'heavy object hauler',
+	[df.tool_uses.STAND_AND_WORK_ABOVE] = 'stand-and-work',
+	[df.tool_uses.ROLL_UP_SHEET] = 'sheet roller',
+	[df.tool_uses.PROTECT_FOLDED_SHEETS] = 'folded sheet protector',
+	[df.tool_uses.CONTAIN_WRITING] = 'writing container',
+	[df.tool_uses.BOOKCASE] = 'bookcase',
+}
+
+local function get_condition_traits(cond)
+	--todo: if a material is specified for the condition, conflicting traits will not be shown in game
+
+	local ret = {}
+
+	if cond.has_tool_use ~= df.tool_uses.NONE then
+		table.insert(ret, tool_use_titles[cond.has_tool_use])
+
+		-- if tool use is set, game shows only it and not other traits
+		return ret
+	end
+
+	for i,v in pairs(job_item_flag_titles1) do
+		if cond.flags1[i] then
+			table.insert(ret, v)
+		end
+	end
+
+	for i,v in pairs(job_item_flag_titles2) do
+		if cond.flags2[i] then
+			table.insert(ret, v)
+		end
+	end
+
+	for i,v in pairs(job_item_flag_titles3) do
+		if cond.flags3[i] then
+			table.insert(ret, v)
+		end
+	end
+
+	if cond.inorganic_bearing ~= -1 then
+		local mi = dfhack.matinfo.decode(0, cond.inorganic_bearing)
+		local t = (mi and mi.material.state_name.Solid or '#unknown mat#') .. '-bearing'
+
+		table.insert(ret, t)
+	end
+
+	if #cond.reaction_class > 0 then
+		table.insert(ret, cond.reaction_class)
+	end
+
+	if #cond.has_material_reaction_product > 0 then
+		table.insert(ret, cond.has_material_reaction_product .. '-producing')
+	end
+
+	return ret
+end
 
 --luacheck: in=number
 function manager_order_conditions_get(id)
@@ -190,7 +348,9 @@ function manager_order_conditions_get(id)
 	            matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
 	        end
 
-	    	table.insert(conditions, { 0, ws.satisfied[i], itemname, matname, v.compare_type, v.compare_val })
+	        local traits = get_condition_traits(v)
+
+	    	table.insert(conditions, { 0, ws.satisfied[i], itemname, matname, traits, v.compare_type, v.compare_val })
 	    end
 
 	    for i,v in ipairs(order.order_conditions) do
@@ -502,10 +662,14 @@ function manager_order_conditions_delete(id, condidx)
 	--todo: ideally catch errors and always delete
 	q:delete()
 
+	if #order.item_conditions + #order.order_conditions == 0 then
+		order.frequency = 0
+	end
+
 	return true
 end
 
--- print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
+print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
 -- print(pcall(function() return json:encode(manager_order_condition_get_item_choices()) end))
 -- print(pcall(function() return json:encode(manager_order_condition_get_material_choices()) end))
 -- print(pcall(function() return json:encode(manager_order_condition_get_trait_choices()) end))
