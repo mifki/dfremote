@@ -415,8 +415,31 @@ function manager_order_condition_get_material_choices()
 	return ret
 end
 
---luacheck: in=
-function manager_order_condition_get_trait_choices()
+local function is_trait_set(cond, trait)
+	if trait.mat_index ~= -1 and trait.mat_index == cond.inorganic_bearing then
+		return true
+	end
+	
+	if #trait.product_desc > 0 and trait.product_desc == cond.has_material_reaction_product then
+		return true
+	end
+	
+	if #trait.item_desc > 0 and trait.item_desc == cond.reaction_class then
+		return true
+	end
+	
+	if trait.type >= 1 and trait.type <= 3 then
+		return bit32.band(cond['flags'..trait.type], trait.flags.whole) ~= 0
+	end
+
+	return false
+end
+
+--luacheck: in=number
+function manager_order_condition_get_trait_choices(id, condidx)
+    local order = id ~= -1 and order_find_by_id(id)
+    local cond = order and condidx ~= -1 and order.item_conditions[condidx]
+
 	local q = df.viewscreen_workquota_conditionst:new()
 	local o = df.manager_order:new()
 
@@ -428,7 +451,8 @@ function manager_order_condition_get_trait_choices()
 	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TRAITS')
 
 	for i,v in ipairs(q.traits) do
-		table.insert(ret, { dfhack.df2utf(v.name), i })
+		local on = cond and is_trait_set(cond, v) or false
+		table.insert(ret, { dfhack.df2utf(v.name), i, on })
 	end
 
 	--todo: ideally catch errors and always delete
@@ -669,10 +693,10 @@ function manager_order_conditions_delete(id, condidx)
 	return true
 end
 
-print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
+-- print(pcall(function() return json:encode(manager_order_conditions_get(0)) end))
 -- print(pcall(function() return json:encode(manager_order_condition_get_item_choices()) end))
 -- print(pcall(function() return json:encode(manager_order_condition_get_material_choices()) end))
--- print(pcall(function() return json:encode(manager_order_condition_get_trait_choices()) end))
+-- print(pcall(function() return json:encode(manager_order_condition_get_trait_choices(0,0)) end))
 -- print(pcall(function() return json:encode(manager_order_condition_set_item(0,1,10)) end))
 -- print(pcall(function() return json:encode(manager_order_condition_set_material(0,1,10)) end))
 -- print(pcall(function() return json:encode(manager_order_condition_set_traits(0,0,{2,4,6})) end))
