@@ -270,6 +270,38 @@ local tool_use_titles = {
 	[df.tool_uses.BOOKCASE] = 'bookcase',
 }
 
+local function get_condition_itemtype(cond)
+    local q = df.reaction_product_itemst:new()
+
+    q.item_type = cond.item_type
+    q.item_subtype = cond.item_subtype
+    	    
+    local itemname = utils.call_with_string(q, 'getDescription')
+    q:delete()
+
+    itemname = itemname:sub(1, itemname:find(' %(')-1)
+	itemname = itemname:lower()
+    itemname = dfhack.df2utf(itemname)
+
+    return itemname
+end
+
+local function get_condition_material(cond)
+	local mi = dfhack.matinfo.decode(cond.mat_type, cond.mat_index)
+    if mi then
+        local mat = mi.material
+        
+        --todo: always Solid?
+        local matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name.Solid)
+        local matname_adj = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_adj.Solid)
+
+        return { matname, matname_adj }
+
+    else
+    	return mp.NIL
+    end
+end
+
 local function get_condition_traits(cond)
 	--todo: if a material is specified for the condition, conflicting traits will not be shown in game
 
@@ -329,34 +361,18 @@ function manager_order_conditions_get(id)
 	    local conditions = {}
 
 	    for i,v in ipairs(order.item_conditions) do
-		    local q = df.reaction_product_itemst:new()
-
-		    q.item_type = v.item_type
-		    q.item_subtype = v.item_subtype
-		    	    
-		    local itemname = utils.call_with_string(q, 'getDescription')
-		    q:delete()
-
-		    itemname = itemname:sub(1, itemname:find(' %(')-1)
-	    	itemname = itemname:lower()
-		    itemname = dfhack.df2utf(itemname)
-
-		    local matname = mp.NIL
-	    	local mi = dfhack.matinfo.decode(v.mat_type, v.mat_index)
-	        if mi then
-	            local mat = mi.material
-	            matname = dfhack.df2utf((#mat.prefix>0 and (mat.prefix .. ' ') or '') .. mat.state_name[0])
-	        end
-
+	        local itemtype = get_condition_itemtype(v)
+	        local matname = get_condition_material(v)
 	        local traits = get_condition_traits(v)
 
-	    	table.insert(conditions, { 0, ws.satisfied[i], itemname, matname, traits, v.compare_type, v.compare_val })
+	    	table.insert(conditions, { itemtype, i, 0, ws.satisfied[i], matname, traits, v.compare_type, v.compare_val })
 	    end
 
 	    for i,v in ipairs(order.order_conditions) do
 	    	local target = order_find_by_id(v.order_id)
 	    	local s = target and ordertitle(target, true) or '#invalid order#'
-	    	table.insert(conditions, { 1, ws.anon_1[i], s, v.condition })
+	    	
+	    	table.insert(conditions, { s, i, 1, mp.NIL--[[ ws.anon_1[i] ]], v.condition })
 	    end
 
 	    return { ordertitle(order, true), order.id, conditions, order.frequency, order.status.whole }
@@ -379,7 +395,7 @@ function manager_order_condition_get_item_choices()
 		-- local item_type = C_viewscreen_workquota_conditionst_item_type(q,i)
 		-- local item_subtype = C_viewscreen_workquota_conditionst_item_subtype(q,i)
 
-		table.insert(ret, { dfhack.df2utf(v.value), i })
+		table.insert(ret, { dfhack.df2utf(v.value):utf8capitalize(), i })
 	end
 
 	--todo: ideally catch errors and always delete
@@ -405,7 +421,7 @@ function manager_order_condition_get_material_choices()
 		-- local mat_type = q.list_unk1[i]
 		-- local mat_index = q.list_unk2[i]
 
-		table.insert(ret, { dfhack.df2utf(v.value), i })
+		table.insert(ret, { dfhack.df2utf(v.value):utf8capitalize(), i })
 	end
 
 	--todo: ideally catch errors and always delete
@@ -429,7 +445,7 @@ local function is_trait_set(cond, trait)
 	end
 	
 	if trait.type >= 1 and trait.type <= 3 then
-		return bit32.band(cond['flags'..trait.type], trait.flags.whole) ~= 0
+		return bit32.band(cond['flags'..trait.type].whole, trait.flags.whole) ~= 0
 	end
 
 	return false
@@ -452,7 +468,17 @@ function manager_order_condition_get_trait_choices(id, condidx)
 
 	for i,v in ipairs(q.traits) do
 		local on = cond and is_trait_set(cond, v) or false
-		table.insert(ret, { dfhack.df2utf(v.name), i, on })
+
+		local exclusive = 0
+		if v.mat_index ~= -1 then
+			exclusive = 1
+		elseif #v.product_desc > 0 then
+			exclusive = 2
+		elseif #v.item_desc > 0 then
+			exclusive = 3
+		end
+
+		table.insert(ret, { dfhack.df2utf(v.name), i, on, exclusive })
 	end
 
 	--todo: ideally catch errors and always delete
@@ -481,7 +507,7 @@ function manager_order_condition_set_item(id, condidx, choiceidx)
 	--todo: ideally catch errors and always delete
 	q:delete()
 
-	return true
+	return { mp.NIL, get_condition_itemtype(order.item_conditions[condidx]) }
 end
 
 --luacheck: in=number,number,number
@@ -503,7 +529,7 @@ function manager_order_condition_set_material(id, condidx, choiceidx)
 	--todo: ideally catch errors and always delete
 	q:delete()
 
-	return true
+	return { mp.NIL, get_condition_material(order.item_conditions[condidx]) }
 end
 
 --luacheck: in=number,number,number[]
@@ -540,7 +566,7 @@ function manager_order_condition_set_traits(id, condidx, choiceidxs)
 	--todo: ideally catch errors and always delete
 	q:delete()
 
-	return true
+	return { mp.NIL, get_condition_traits(order.item_conditions[condidx]) }
 end
 
 --luacheck: in=number,number,number
@@ -565,7 +591,21 @@ function manager_order_condition_set_compare(id, condidx, compare_type, compare_
     cond.compare_type = compare_type
     cond.compare_val = compare_val
 
-	return true
+	return { mp.NIL }
+end
+
+--luacheck: in=number,number,number
+function manager_order_condition_set_condition(id, condidx, condition)
+    local order = order_find_by_id(id)
+    if not order then
+        error('no order '..tostring(id))
+    end
+
+    local cond = order.order_conditions[condidx]
+    
+    cond.condition = condition
+
+	return { mp.NIL }
 end
 
 --luacheck: in=number

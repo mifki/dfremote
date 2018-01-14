@@ -2059,6 +2059,7 @@ local handlers = {
         [22] = manager_order_conditions_add_products,
         [23] = manager_order_conditions_delete,
         [24] = manager_order_condition_get_order_choices,
+        [25] = manager_order_condition_set_condition,
     },
 
     [146] = {
