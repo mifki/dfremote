@@ -269,8 +269,8 @@ function building_query_selected(bldid)
 
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
-        if owner and C_unit_spouse_id(owner) ~= -1 then
-            local owner2 = df.unit.find(C_unit_spouse_id(owner))
+        if owner and owner.relationship_ids[df.unit_relationship_type.Spouse] ~= -1 then
+            local owner2 = df.unit.find(owner.relationship_ids[df.unit_relationship_type.Spouse])
             if owner2 then
                 ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
             end

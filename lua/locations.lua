@@ -231,9 +231,7 @@ function location_occupation_get_candidates(locid, occid)
 			if loc and loc.id == locid then
 				for j,occ in ipairs(ws.occupations) do
 					if occ.id == occid then
-						--xxx: df.viewscreen_locationsst is incorrect in DFHack 0.43.03-r1 on Windows, so simulating input instead
-						--ws.menu = df.viewscreen_locationsst.T_menu.Occupations
-						gui.simulateInput(ws, K'STANDARDSCROLL_RIGHT')
+						ws.menu = df.viewscreen_locationsst.T_menu.Occupations
 						ws.occupation_idx = j
 						gui.simulateInput(ws, K'SELECT')
 

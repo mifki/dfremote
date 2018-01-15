@@ -63,7 +63,7 @@ function build_confirm(fast)
     if istrue(fast) then
         if df.global.ui.main.mode == df.ui_sidebar_mode.Build and df.global.ui_build_selector.building_type ~= -1 and df.global.ui_build_selector.stage == 2 then
             local req = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index]
-            local max = C_build_req_get_max(req)
+            local max = req.count_max
 
             -- disallow quick build for buildings where player can choose any number of items to use
             if max == 0 then
@@ -122,9 +122,9 @@ function build_req_get(grouped)
 
         local req = df.global.ui_build_selector.requirements[df.global.ui_build_selector.req_index]
 
-        local required = C_build_req_get_required(req)
-        local max      = C_build_req_get_max(req)
-        local provided = C_build_req_get_provided(req)
+        local required = req.count_required
+        local max      = req.count_max
+        local provided = req.count_provided
 
         return { choices, required, max, provided }
     end

@@ -24,6 +24,19 @@ local finder_params = {
     return false
 end]]
 
+function check_embark_warning_flags(ws)
+	return ws.in_embark_aquifer or ws.in_embark_salt or ws.in_embark_large or ws.in_embark_narrow or ws.in_embark_civ_dying or ws.in_embark_only_warning
+end
+
+function reset_embark_warning_flags(ws)
+	ws.in_embark_aquifer = false
+	ws.in_embark_salt = false
+	ws.in_embark_large = false
+	ws.in_embark_narrow = false
+	ws.in_embark_civ_dying = false
+	ws.in_embark_only_warning = false
+end
+
 --luacheck: in=string
 function embark_newgame(folder)
     local ws = dfhack.gui.getCurViewscreen()
@@ -91,7 +104,7 @@ function embark_get_overview()
 
 	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
 		-- just in case
-		C_reset_embark_warning_flags(ws)
+		reset_embark_warning_flags(ws)
 
 		local civs = {}
 		for i,civ in ipairs(ws.available_civs) do
@@ -297,7 +310,7 @@ function embark_finder_status()
 	end
 
 	-- just in case
-	C_reset_embark_warning_flags(ws)
+	reset_embark_warning_flags(ws)
 
 	--[[if ws.page ~= df.viewscreen_choose_start_sitest.T_page.Find then
 		return nil
@@ -441,7 +454,7 @@ function embark_embark()
 
 	-- We're still on the embark map screen, likely a message box is displayed
 	if ws._type == df.viewscreen_choose_start_sitest then --as:ws=df.viewscreen_choose_start_sitest
-		if C_check_embark_warning_flags(ws) then
+		if check_embark_warning_flags(ws) then
 			--todo: should return this message to the app instead of accepting silently
 			gui.simulateInput(ws, K'SELECT')
 			ws = dfhack.gui.getCurViewscreen()
@@ -551,7 +564,7 @@ function embark_back_to_map()
 	ws.parent.breakdown_level = df.interface_breakdown_types.NONE
 	ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
-	C_reset_embark_warning_flags(ws.parent)
+	reset_embark_warning_flags(ws.parent)
 	
 	--todo: app reloads data straight away, while the screen will change only the next tick
 end

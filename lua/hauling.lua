@@ -463,6 +463,7 @@ function hauling_stop_linking_cancel()
     return ret
 end
 
+--luacheck: in=number,number
 function hauling_stop_edit_item_settings(routeid, stopid)
 	stockpile_editing_settings = nil
 	
@@ -482,6 +483,7 @@ function hauling_stop_edit_item_settings(routeid, stopid)
 	return true
 end
 
+--luacheck: in=number,number,number,number[]
 function hauling_stop_save_condition(routeid, stopid, idx, values)
 	local route = df.hauling_route.find(routeid)
 	if not route then

@@ -1,9 +1,9 @@
-DFHACKVER ?= 0.43.05-r1
+DFHACKVER ?= 0.43.05-r3
 
 DFVERNUM = `echo $(DFHACKVER) | sed -e s/-.*// -e s/\\\\.//g`
 
-DF ?= /Users/vit/df/df_43_05_osx
-DH ?= /Users/vit/df/dfhack4305
+DF ?= /Users/vit/Downloads/df_43_05_osx
+DH ?= /Users/vit/Downloads/buildagent-2/workspace/root/dfhack/0.43.05-r3
 
 BITS ?= 64
 GCCVER ?= 4.8

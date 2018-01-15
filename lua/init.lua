@@ -64,6 +64,7 @@ local extdata = nil
 building_btns = {} --as:df.interface_button_construction_building_selectorst[]
 designate_cmds = {}
 
+--luacheck: in=
 function close_all()
     local ws = dfhack.gui.getCurViewscreen()
 
@@ -104,10 +105,12 @@ function close_all()
     end
 end
 
+--luacheck: in=
 function cancel_to_1st_corner()
     df.global.selection_rect.start_x = -30000
 end
 
+--luacheck: in=
 function reset_main()
     if dfhack.gui.getCurViewscreen()._type == df.viewscreen_dwarfmodest then
         -- if cancelling flow mode zone creation, need to remove the not-yet-created zone !

@@ -97,7 +97,7 @@ end
 
 --luacheck: in=bool
 function burrow_set_brush_mode(erase)
-	df.global.ui.burrows.brush_erasing = istrue(erase) and 1 or 0
+	df.global.ui.burrows.brush_erasing = istrue(erase)
 end
 
 --todo: convert to screen_ functions

@@ -311,7 +311,7 @@ function unit_fullprof(unit)
         prof = prof .. ' ' ..unit.curse.name
     end
 
-    local ownerid = C_unit_pet_owner_id(unit)
+    local ownerid = unit.relationship_ids[df.unit_relationship_type.Pet]
     local owner = (ownerid ~= -1) and df.unit.find(ownerid) or nil
 
     if not owner and unit.flags1.tame then
@@ -1297,7 +1297,7 @@ function unit_get_skills2(unitid)
         end
     end
 
-    local perf = C_unit_soul_performance_skills(unit.status.current_soul)
+    local perf = unit.status.current_soul.performance_skills
     if perf then
         performance_skills = {}
         local tmp
@@ -1372,7 +1372,7 @@ function unit_get_skills3(unitid)
         end
     end
 
-    local perf = C_unit_soul_performance_skills(unit.status.current_soul)
+    local perf = unit.status.current_soul.performance_skills
     if perf then
         local tmp
 
@@ -1527,7 +1527,7 @@ function unit_get_assigned_animals(unitid)
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
-            if work and C_unit_pet_owner_id(unit) == unitid then
+            if work and unit.relationship_ids[df.unit_relationship_type.Pet] == unitid then
                 local name = unit_fulltitle(unit)
 
                 table.insert(ret, { name, unit.id, unit.sex })
@@ -1546,7 +1546,7 @@ function unit_get_assign_animal_choices(unitid)
         if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
-            if work and C_unit_pet_owner_id(unit) == -1 then
+            if work and unit.relationship_ids[df.unit_relationship_type.Pet] == -1 then
                 local name = unit_fulltitle(unit)
 
                 table.insert(ret, { name, unit.id, unit.sex })
@@ -1568,7 +1568,7 @@ function unit_assign_animals(unitid, animalids)
         local animal = df.unit.find(v)
 
         if animal then
-            C_unit_set_pet_owner_id(animal, unit.id)
+            animal.relationship_ids[df.unit_relationship_type.Pet] = unit.id
         end
     end
 end

@@ -22,7 +22,7 @@ local function ensure_images_loaded(bldid, idx)
         local det = df.global.ui_sidebar_menus.job_details
 
         -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
+        if det.setting_detail_type == -1 then
             for i,v in ipairs(det.detail_type) do
                 if v == 1 then
                     det.detail_cursor = i
@@ -151,7 +151,7 @@ function job_details_get_choices(bldid, jobidx, detidx)
         end
 
         -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
+        if det.setting_detail_type == -1 then
             df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
             gui.simulateInput(ws, K'SELECT')
         end
@@ -210,7 +210,7 @@ function job_details_set(bldid, jobidx, detidx, choiceidx)
         --todo: modify job.hist_figure_id which holds the detail setting directly ?
 
         -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
+        if det.setting_detail_type == -1 then
             df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
             gui.simulateInput(ws, K'SELECT')
         end
@@ -291,7 +291,7 @@ function order_details_get_choices(idx, detidx)
         end
 
         -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
+        if det.setting_detail_type == -1 then
             df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
             gui.simulateInput(ws, K'SELECT')
         end
@@ -345,7 +345,7 @@ function order_details_set(idx, detidx, choiceidx)
         --todo: modify job.hist_figure_id which holds the detail setting directly ?
 
         -- select a detail type if it hasn't been selected as the only available
-        if C_job_details_setting_detail_type(det) == -1 then
+        if det.setting_detail_type == -1 then
             df.global.ui_sidebar_menus.job_details.detail_cursor = detidx
             gui.simulateInput(ws, K'SELECT')
         end

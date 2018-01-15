@@ -449,7 +449,7 @@ local sell_category_matchers = {
 
     --df.entity_sell_category.Parchment
     [df.entity_sell_category.Clay+1] = function(entity, idx, item_type, item_subtype, mat_type, mat_index)
-        return _match_mat_vec (C_entity_organic_resources_parchment(entity.resources.organic), idx, mat_type, mat_index)
+        return _match_mat_vec (entity.resources.organic.parchment, idx, mat_type, mat_index)
     end,
     
     --df.entity_sell_category.CupsMugsGoblets
