@@ -59,7 +59,7 @@ function hauling_route_info(id)
 
 				local fullness = math.ceil(contained_volume / 50000 * 100)
 
-				vehicle_info = { itemname(vehicle_item, 1, true), vehicle_item.id, vehicle_stop.id, on_stop, fullness }
+				vehicle_info = { itemname(vehicle_item, 1, true), vehicle_item.id, vehicle_stop and vehicle_stop.id or -1, on_stop, fullness }
 			end
 		end
 
