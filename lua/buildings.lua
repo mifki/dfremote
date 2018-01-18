@@ -626,7 +626,10 @@ function get_job_choices(ws, level)
 
         local descr = mp.NIL
         local subchoices = mp.NIL
-        if btn._type == df.interface_button_buildingst or btn._type == df.interface_button_building_material_selectorst or btn._type == df.interface_button_building_category_selectorst then
+        if btn._type == df.interface_button_buildingst or
+           btn._type == df.interface_button_building_material_selectorst or
+           btn._type == df.interface_button_building_category_selectorst or
+           btn._type == df.interface_button_building_custom_category_selectorst then
             if level == 0 then
                 df.global.ui_workshop_in_add = true
                 ws:logic() --to initialize / switch to add job menu
