@@ -98,11 +98,15 @@ function zone_information_get(bldid, mode)
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
                 local jumped = df.global.window_x ~= ox or df.global.window_y ~= oy
-                error('can not switch to zone info mode (sel ' .. tostring(df.global.ui_sidebar_menus.zone.selected.id) .. 
+                local zz = df.global.ui_sidebar_menus.zone.selected
+                error('can not switch to zone info mode (sel ' .. tostring(zz.id) .. 
                     ' req ' .. tostring(bldid) .. 
-                    ' flags ' .. tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole) ..
+                    ' flags ' .. tostring(zz.zone_flags.whole) ..
                     ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
                     ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) ..
+                    ' rect ' .. tostring(zz.x1) .. ' ' .. tostring(zz.y1) .. ' ' .. tostring(zz.x2) .. ' ' .. tostring(zz.y2) ..
+                    ' win ' .. tostring(ox) .. ' ' .. tostring(oy) .. ' ' .. tostring(df.global.window_z) ..
+                    ' cur ' .. tostring(df.global.cursor.x) .. ' ' .. tostring(df.global.cursor.y) .. ' ' .. tostring(df.global.cursor.z) ..
                     ' jumped ' .. tostring(jumped) .. ')')
             end
 
@@ -129,11 +133,15 @@ function zone_information_get(bldid, mode)
 
             if df.global.ui.main.mode == df.ui_sidebar_mode.Zones then
                 local jumped = df.global.window_x ~= ox or df.global.window_y ~= oy
-                error('can not switch to zone info mode (sel ' .. tostring(df.global.ui_sidebar_menus.zone.selected.id) .. 
+                local zz = df.global.ui_sidebar_menus.zone.selected
+                error('can not switch to zone info mode (sel ' .. tostring(zz.id) .. 
                     ' req ' .. tostring(bldid) .. 
-                    ' flags ' .. tostring(df.global.ui_sidebar_menus.zone.selected.zone_flags.whole) ..
+                    ' flags ' .. tostring(zz.zone_flags.whole) ..
                     ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
                     ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) ..
+                    ' rect ' .. tostring(zz.x1) .. ' ' .. tostring(zz.y1) .. ' ' .. tostring(zz.x2) .. ' ' .. tostring(zz.y2) ..
+                    ' win ' .. tostring(ox) .. ' ' .. tostring(oy) .. ' ' .. tostring(df.global.window_z) ..
+                    ' cur ' .. tostring(df.global.cursor.x) .. ' ' .. tostring(df.global.cursor.y) .. ' ' .. tostring(df.global.cursor.z) ..
                     ' jumped ' .. tostring(jumped) .. ')')
             end
 
