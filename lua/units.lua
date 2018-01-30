@@ -941,17 +941,16 @@ function unit_get_thoughts(unitid, is_histfig)
     if ws._type ~= df.viewscreen_textviewerst then
         error('can not switch to thoughts screen')
     end
-    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
-
-    local text = ''
     
+    local text = ''
     for i,v in ipairs(ws.src_text) do
         if #v.value > 0 then
             text = text .. dfhack.df2utf(v.value:gsub('%[P]', '[B]')) .. ' '
         end
     end
-
+    
     text = text:gsub('  ', ' ')
+    ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     return { text }
 end

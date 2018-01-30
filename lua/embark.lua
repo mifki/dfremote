@@ -492,14 +492,14 @@ function embark_reclaim(idx)
     	local ws2 = ws2 --as:df.viewscreen_textviewerst
     	local text = ''
     	for i,v in ipairs(ws2.formatted_text) do
-	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+	    	text = text .. charptr_to_string(v.text) .. ' '
 	    end
 	    text = text:gsub('%s+', ' ')
 
         local title = ws2.title
         title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
-	    return { title, text }
+	    return { dfhack.df2utf(title), dfhack.df2utf(text) }
 	end
 
 	return { '' }
