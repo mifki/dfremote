@@ -1770,7 +1770,10 @@ function engraving_get_description(id)
     end
 
     --todo: this.
-    error('not supported')
+    error('not supported ' .. tostring(df.global.ui.main.mode) ..
+          ' ' .. tostring(cur.x) .. '=' .. tostring(en.pos.x) ..
+          ' ' .. tostring(cur.y) .. '=' .. tostring(en.pos.y) ..
+          ' ' .. tostring(cur.z) .. '=' .. tostring(en.pos.z))
 end
 
 --luacheck: in=
