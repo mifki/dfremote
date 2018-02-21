@@ -754,14 +754,14 @@ function get_status()
         if ws.page_filename:find('data/announcement/') then
             local text = ''
             for i,v in ipairs(ws.formatted_text) do
-                text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+                text = text .. charptr_to_string(v.text) .. ' '
             end
             text = text:gsub('%s+', ' ')
     
             local title = ws.title
             title = title:gsub("^%s+", ""):gsub("%s+$", "")
     
-            return 98, 0, { title, text }
+            return 98, 0, { dfhack.df2utf(title), dfhack.df2utf(text) }
         end
     end
     

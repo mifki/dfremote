@@ -95,16 +95,16 @@ function job_get_description(unitid)
             if not v.text then
                 text = text .. '[P]'
             else
-                text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+                text = text .. charptr_to_string(v.text) .. ' '
             end
         end
 
         text = text:gsub('%s+', ' ')
 
-        local title = dfhack.df2utf(ws.title)
+        local title = ws.title
         title = title:gsub("^%s+", ""):gsub("%s+$", "")
 
-        return { title, text }
+        return { dfhack.df2utf(title), dfhack.df2utf(text) }
     end
 
 	return nil

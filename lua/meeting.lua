@@ -69,9 +69,9 @@ function read_meeting_screen(dfmarkup)
 				-- end
 
 				if dfmarkup then
-					text = text .. (#text > 0 and (nl and '[P]' or ' ') or '[P]') .. dfhack.df2utf(line)
+					text = text .. (#text > 0 and (nl and '[P]' or ' ') or '[P]') .. line
 				else
-					text = text .. (#text > 0 and (nl and '</p><p align=justify>' or ' ') or '<p align=justify>') .. dfhack.df2utf(line)
+					text = text .. (#text > 0 and (nl and '</p><p align=justify>' or ' ') or '<p align=justify>') .. line
 				end
 				nl = false
 			end
@@ -100,7 +100,7 @@ function meeting_get(dfmarkup)
     	local ws = ws --as:df.viewscreen_textviewerst
     	text = ''
     	for i,v in ipairs(ws.formatted_text) do
-	    	text = text .. dfhack.df2utf(charptr_to_string(v.text)) .. ' '
+	    	text = text .. charptr_to_string(v.text) .. ' '
 	    end
 
     	activity = ws.parent.dipscript_popup.activity --hint:df.viewscreen_meetingst
@@ -115,7 +115,7 @@ function meeting_get(dfmarkup)
     	if #ws.text > 0 then
     		text = dfmarkup and '[P]' or '<p align=justify>'
     		for i,v in ipairs(ws.text) do
-    			local line = dfhack.df2utf(v.value)
+    			local line = v.value
 				
 				if text:sub(#text,#text) == '.' and line:find('^[A-Z]') then
 					text = text .. (dfmarkup and '[P]' or '</p><p align=justify>')
@@ -138,12 +138,12 @@ function meeting_get(dfmarkup)
     	return { text or 'Could not read meeting screen.', actions or { 'Done' }, '', '', false }
     end
 
-    local actor_name  = unitname(activity.unit_actor)
+    local actor_name = unitname(activity.unit_actor)
 	local actor_fullname = actor_name .. ', ' .. unitprof(activity.unit_actor)
 	local noble_fullname = unitname(activity.unit_noble) .. ', ' .. unitprof(activity.unit_noble)
 
 	text = text:gsub('%s+', ' ')
-	text = text:gsub('^'..actor_name..': ', '')
+	text = text:gsub('^'..dfhack.utf2df(actor_name)..': ', '')
 	if not dfmarkup then
 		text = text:gsub('The latest news from (%w+)', 'The latest news from <b>%1</b>')
 		text = text:gsub('The %u%w+ %u%w+', '<i>%0</i>')
@@ -151,7 +151,7 @@ function meeting_get(dfmarkup)
 		--text = text:gsub('(%u.-) ', '<i>%1</i> ')
 	end
 
-	return { text, actions, actor_fullname, noble_fullname, reply }
+	return { dfhack.df2utf(text), actions, actor_fullname, noble_fullname, reply }
 end
 
 --luacheck: in=number
