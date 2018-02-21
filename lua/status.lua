@@ -145,6 +145,8 @@ function performance_skill_get_description(_id)
     if type == 0 then
         local inst = df.global.world.raws.itemdefs.instruments[id]
         local text = inst.description:gsub('  ', ' ')
+        
+        text = dfhack.df2utf(text)
 
         return { text }
     end
