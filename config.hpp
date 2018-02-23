@@ -57,6 +57,12 @@ static bool load_config()
     std::ifstream fseed("data/init/remote.txt");
     if(!fseed.is_open())
         return false;
+        
+    char *pwd = getenv("DFREMOTE_PWD");
+    if (pwd)
+        pwd_hash = hash_password(std::string(pwd));
+    else
+        pwd_hash = getenv("DFREMOTE_PWD_HASH") ?: "";
 
     string str;
     while(std::getline(fseed,str))

@@ -227,7 +227,7 @@ static void patch_rendering(bool enable_lower_levels)
     void check_open_firewall(color_ostream *out2, int port);
 #endif
 
-std::string hash_password(std::string &pwd)
+std::string hash_password(const std::string &pwd)
 {
     std::string q = pwd;
 
