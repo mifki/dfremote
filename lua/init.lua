@@ -1808,6 +1808,10 @@ local function perform_update(pwd)
     return native.start_update()
 end
 
+local function idle_time()
+    return os.time() - last_cmd_time
+end
+
 local handlers_foreign = {
     [238] = {
         [4] = setup_get_server_info,
@@ -1815,6 +1819,8 @@ local handlers_foreign = {
         
         [20] = dfaas_save_game,
         [21] = dfaas_save_done,
+        
+        [80] = idle_time,
     },
 }
 
@@ -2389,12 +2395,17 @@ local function _check_utf8(o, path)
     end
 end
 
+local last_cmd_time = os.time()
 function handle_command(cmd, subcmd, seq, data, foreign)
     --print(cmd,subcmd,seq)
 
     ensure_native()
 
     local hs = foreign and handlers_foreign or handlers
+    
+    if not foreign then
+        last_cmd_time = os.time()
+    end
 
     local grp = hs[cmd]
     local handler = (cmd < 128) and grp or (grp and grp[subcmd] or nil)
@@ -2453,6 +2464,10 @@ function matching_version(clientver, apply)
         --dfhack.run_command_silent('gui/load-screen disable') 
         
         first_time_setup_done = true
+    end
+    
+    if apply then
+        last_cmd_time = os.time()
     end
     
     --todo: print this in debug mode
