@@ -43,7 +43,7 @@ local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:
 function setup_get_designations()
     local choices = {}
 
-    designate_cmds = {}
+    STATE.designate_cmds = {}
 
     for i,v in ipairs(designations) do
         local sub = mp.NIL
@@ -52,15 +52,15 @@ function setup_get_designations()
             local subchoices = {}
 
             for j,w in ipairs(v[4]) do
-                table.insert(designate_cmds, { v[3], w[3] })
-                table.insert(subchoices, { w[1], w[2], #designate_cmds })
+                table.insert(STATE.designate_cmds, { v[3], w[3] })
+                table.insert(subchoices, { w[1], w[2], #STATE.designate_cmds })
             end
 
             table.insert(choices, { v[1], v[2], subchoices })
 
         else
-            table.insert(designate_cmds, { v[3] })
-            table.insert(choices, { v[1], v[2], #designate_cmds })
+            table.insert(STATE.designate_cmds, { v[3] })
+            table.insert(choices, { v[1], v[2], #STATE.designate_cmds })
         end
 
     end
@@ -110,8 +110,8 @@ local function get_choices_build()
             subchoices = get_choices_build()
         end
 
-        table.insert(building_btns, btnclone or 0)
-        table.insert(choices, { title, key, #building_btns, subchoices })
+        table.insert(STATE.building_btns, btnclone or 0)
+        table.insert(choices, { title, key, #STATE.building_btns, subchoices })
     end
 
     return choices            
@@ -121,7 +121,7 @@ end
 function setup_get_buildings()
     return execute_with_main_mode(0, function(ws)
         gui.simulateInput(ws, K'D_BUILDING')
-        building_btns = {}
+        STATE.building_btns = {}
         return get_choices_build()
     end)
 end

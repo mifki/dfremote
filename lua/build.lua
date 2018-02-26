@@ -16,7 +16,7 @@ local lastbldcmd = -1
 
 --luacheck: in=number
 function build(idx)
-    local btn = building_btns[idx]
+    local btn = STATE.building_btns[idx]
 
     lastbldcmd = idx
 

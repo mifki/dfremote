@@ -9,6 +9,13 @@ utils = require 'utils'
 
 df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4303, etc.
 
+STATE = _G.DFREMOTE_STATE or {
+    building_btns = {}, --as:df.interface_button_construction_building_selectorst[]
+    designate_cmds = {},
+    last_cmd_time = os.time(),
+}
+_G.DFREMOTE_STATE = STATE
+
 require 'remote.compat'
 
 require 'remote.utf8.utf8data'
@@ -60,9 +67,6 @@ lastann = 0
 lastannrep = 0
 local lastextdata = nil
 local extdata = nil
-
-building_btns = {} --as:df.interface_button_construction_building_selectorst[]
-designate_cmds = {}
 
 --luacheck: in=
 function close_all()
@@ -1668,7 +1672,7 @@ function designate(idx)
 
     gui.simulateInput(ws, K'D_DESIGNATE')
 
-    local cmd = designate_cmds[idx]
+    local cmd = STATE.designate_cmds[idx]
     for i,v in ipairs(cmd) do
         gui.simulateInput(ws, v)
     end
@@ -1809,7 +1813,7 @@ local function perform_update(pwd)
 end
 
 local function idle_time()
-    return os.time() - last_cmd_time
+    return os.time() - STATE.last_cmd_time
 end
 
 local handlers_foreign = {
@@ -2395,7 +2399,6 @@ local function _check_utf8(o, path)
     end
 end
 
-local last_cmd_time = os.time()
 function handle_command(cmd, subcmd, seq, data, foreign)
     --print(cmd,subcmd,seq)
 
@@ -2404,7 +2407,7 @@ function handle_command(cmd, subcmd, seq, data, foreign)
     local hs = foreign and handlers_foreign or handlers
     
     if not foreign then
-        last_cmd_time = os.time()
+        STATE.last_cmd_time = os.time()
     end
 
     local grp = hs[cmd]
@@ -2467,7 +2470,7 @@ function matching_version(clientver, apply)
     end
     
     if apply then
-        last_cmd_time = os.time()
+        STATE.last_cmd_time = os.time()
     end
     
     --todo: print this in debug mode
