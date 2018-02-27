@@ -58,11 +58,14 @@ static bool load_config()
     if(!fseed.is_open())
         return false;
         
-    char *pwd = getenv("DFREMOTE_PWD");
-    if (pwd)
-        pwd_hash = hash_password(std::string(pwd));
+    char *tmp = getenv("DFREMOTE_PWD");
+    if (tmp)
+        pwd_hash = hash_password(std::string(tmp));
     else
-        pwd_hash = getenv("DFREMOTE_PWD_HASH") ?: "";
+    {
+        tmp = getenv("DFREMOTE_PWD_HASH");
+        pwd_hash = tmp ? tmp : "";
+    }
 
     string str;
     while(std::getline(fseed,str))
