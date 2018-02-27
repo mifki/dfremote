@@ -36,7 +36,7 @@ ifeq ($(shell uname -s), Darwin)
 	LDFLAGS += -framework Security -undefined dynamic_lookup #-mmacosx-version-min=10.6 
 else
 	CXX = g++-$(GCCVER)
-	CFLAGS += -std=c++0x -fPIC
+	CFLAGS += -std=c++0x -fPIC -s
 endif
 
 
