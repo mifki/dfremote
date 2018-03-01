@@ -241,13 +241,6 @@ struct_identity group_info::_identity(sizeof(group_info), &df::allocator_fn<grou
 
 #define CUR_STRUCT type_category
 static const struct_field_info type_category_fields[] = {
-/*    { FLD(PRIMITIVE, code), identity_traits<std::string >::get() },
-    { FLD(PRIMITIVE, name), identity_traits<std::string >::get() },
-    { FLD(CONTAINER, flags), identity_traits<BitArray<df::reaction_flags> >::get(), 0, TID(reaction_flags) },
-    { FLD(STL_VECTOR_PTR, reagents), identity_traits<df::reaction_reagent >::get(), 0, NULL },
-    { FLD(STL_VECTOR_PTR, products), identity_traits<df::reaction_product >::get(), 0, NULL },
-    { FLD(PRIMITIVE, skill), TID(job_skill) },
-    { FLD(SUBSTRUCT, building), &reaction::T_building::_identity },*/
     { FLD(PRIMITIVE, count), TID(int32_t) },
     { FLD(PRIMITIVE, busy), TID(int32_t) },
     { FLD(STL_VECTOR_PTR, groups_index), df::identity_traits<group_info >::get(), 0, NULL },

@@ -133,15 +133,11 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
 DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 {
-    enet_deinitialize();
     remote_stop();
+    enet_deinitialize();
     free_buffers();
     free(rendered_tiles);
+    lua_close(L);
 
-    return CR_OK;//FAILURE;
-
-    /*if (enabled)
-        restore_renderer();
-
-    return CR_OK;*/
+    return CR_OK;
 }

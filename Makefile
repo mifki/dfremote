@@ -2,8 +2,8 @@ DFHACKVER ?= 0.43.05-r3
 
 DFVERNUM = `echo $(DFHACKVER) | sed -e s/-.*// -e s/\\\\.//g`
 
-DF ?= /Users/vit/Downloads/df_43_05_osx
-DH ?= /Users/vit/Downloads/buildagent-2/workspace/root/dfhack/0.43.05-r3
+DF ?= /home/vit/df/df4305
+DH ?= /home/vit/qbuild-server/workspace/root/dfhack/0.43.05-r3
 
 BITS ?= 64
 GCCVER ?= 4.8
@@ -25,8 +25,8 @@ OUT = dist/$(DFHACKVER)/remote.plug.$(EXT)
 INC = -I"$(DH)/library/include" -I"$(DH)/library/proto" -I"$(DH)/depends/protobuf" -I"$(DH)/depends/lua/include" -I"$(DH)/depends/tthread" -Ienet/include
 LIB = -L"$(DH)/build/library" -ldfhack -ldfhack-version -L"$(DH)/build/depends/tthread" -ldfhack-tinythread ./enet/.libs/libenet.a
 
-CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -g -O3 -DUSE_FILE32API -D_GLIBCXX_USE_CXX11_ABI=0
-LDFLAGS = $(LIB) -shared 
+CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -O3 -DUSE_FILE32API -D_GLIBCXX_USE_CXX11_ABI=0
+LDFLAGS = $(LIB) -shared
 
 ifeq ($(shell uname -s), Darwin)
 	export MACOSX_DEPLOYMENT_TARGET=10.6
@@ -37,6 +37,7 @@ ifeq ($(shell uname -s), Darwin)
 else
 	CXX = g++-$(GCCVER)
 	CFLAGS += -std=c++0x -fPIC
+	LDFLAGS += -fuse-ld=gold --no-gnu-unique
 endif
 
 

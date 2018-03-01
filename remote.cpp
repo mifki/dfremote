@@ -565,6 +565,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
     {
         // long t1 = enet_time_get2();
         FastCoreSuspender suspend;
+        if (!remote_on)
+            return false;
         // long t2 = enet_time_get2();
         // *out2 << (t2-t1) << std::endl;
 
@@ -800,6 +802,8 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         if (cmd == 15)
         {
             FastCoreSuspender suspend;
+            if (!remote_on)
+                return;
 
             newwidth = std::min((int)mdata[3], world->map.x_count);
             newheight = std::min((int)mdata[4], world->map.y_count);
@@ -833,6 +837,8 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     }
 
     FastCoreSuspender suspend;
+    if (!remote_on)
+        return;
 
     int top = lua_gettop(L);
     Lua::PushModulePublic(*out2, L, "remote", "handle_command");
@@ -1135,7 +1141,8 @@ void enthreadmain(ENetHost *server)
             if (!lua_isnil(L,-1))
             {
                 FastCoreSuspender suspend;                
-                Lua::SafeCall(*out2, L, 0, 0, true);    
+                if (remote_on)
+                    Lua::SafeCall(*out2, L, 0, 0, true);    
             }
         }        
 

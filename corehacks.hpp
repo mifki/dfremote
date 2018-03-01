@@ -30,10 +30,11 @@ void core_suspend_fast()
     SDL_SemPost(enabler->async_tobox.sem);
     SDL_SemPost(enabler->async_tobox.sem_fill);
 
-    // Wait for async_frames to change zero -> anything, either as the result of our call
-    // or after mainloop(), or by another request.
-    // Either case means we're not in the mainloop() anymore.
-    while(!*frames)
+    // Wait for async_frames to change zero -> anything, either as the result of our call above
+    // or after mainloop(), or by another request. Either case means we're not in the mainloop() anymore.
+    // remote_on check is needed to avoid race condition when stopping or unloading from console,
+    // and the loop is already suspended by DFHack core (and is waiting in SDL_NumJoysticks())
+    while(!*frames && remote_on)
     {
 #ifdef WIN32
         __nop();
