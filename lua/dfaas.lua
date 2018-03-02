@@ -1,5 +1,5 @@
 --luacheck: in=string,string
-local function dfaas_get_status(clientver, pwd)
+function dfaas_get_status(clientver, pwd)
     local idle_time = os.time() - STATE.last_cmd_time
     
     return { setup_get_server_info(clientver, pwd), idle_time }
