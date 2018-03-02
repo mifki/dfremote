@@ -56,6 +56,7 @@ require 'remote.hauling'
 require 'remote.locations'
 require 'remote.petitions'
 require 'remote.jobdetails'
+require 'remote.dfaas'
 
 native = {}
 --dfhack.open_plugin(native, 'remote')
@@ -1313,29 +1314,6 @@ function save_game()
     end
 end
 
---luacheck: in=string
-function dfaas_save_game(pwd)
-    if not native.verify_pwd(pwd or '') then
-        return false
-    end
-
-    --todo: need to return to main screen!
-
-    save_game()    
-    return true
-end
-
---luacheck: in=string
-function dfaas_save_done(pwd)
-    if not native.verify_pwd(pwd or '') then
-        return false
-    end
-
-    --todo: need to return to main screen!
-
-    return (df.global.ui.main.autosave_request ~= true)
-end
-
 --luacheck: in=
 function save_and_close()
     local ws = screen_main()
@@ -1806,14 +1784,10 @@ end
 
 local function perform_update(pwd)
     if not native.verify_pwd(pwd or '') then
-        return false
+        error('invalid password')
     end
 
     return native.start_update()
-end
-
-local function idle_time()
-    return os.time() - STATE.last_cmd_time
 end
 
 local handlers_foreign = {
@@ -1823,8 +1797,7 @@ local handlers_foreign = {
         
         [20] = dfaas_save_game,
         [21] = dfaas_save_done,
-        
-        [80] = idle_time,
+        [22] = dfaas_get_status,
     },
 }
 
