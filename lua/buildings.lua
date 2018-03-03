@@ -149,7 +149,7 @@ function building_query_selected(bldid)
     local genflags = packbits(removing, forbidden, actual, constructed, workshop_like)
 
     if not constructed then
-        local needsarchitect = (bld:needsDesign() and not bld.design.flags.designed) --hint:df.building_actual
+        local needsarchitect = (bld:needsDesign() and bld.design and not bld.design.flags.designed) --hint:df.building_actual
 
         --todo: how can there be no construction job (found in logs)?
         local cjob = #bld.jobs > 0 and bld.jobs[0]
