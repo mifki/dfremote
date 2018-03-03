@@ -97,6 +97,38 @@ local function get_choices_build()
             title = 'Constructions\nWall, Floor, Stairs, ...'
         end
 
+        if title:find('%(N%)') then
+            key = '╨'
+        elseif title:find('%(S%)') then
+            key = '╥'
+        elseif title:find('%(E%)') then
+            key = '╞'
+        elseif title:find('%(W%)') then
+            key = '╡'
+        elseif title:find('%(NS%)') then
+            key = '║'
+        elseif title:find('%(NE%)') then
+            key = '╚'
+        elseif title:find('%(NW%)') then
+            key = '╝'
+        elseif title:find('%(SE%)') then
+            key = '╔'
+        elseif title:find('%(SW%)') then
+            key = '╗'
+        elseif title:find('%(EW%)') then
+            key = '═'
+        elseif title:find('%(NSE%)') then
+            key = '╠'
+        elseif title:find('%(NSW%)') then
+            key = '╣'
+        elseif title:find('%(NEW%)') then
+            key = '╩'
+        elseif title:find('%(SEW%)') then
+            key = '╦'
+        elseif title:find('%(NSEW%)') then
+            key = '╬'
+        end    
+
         --todo: don't try to clone for category buttons
         local btnclone = clone_build_button(choice)
 

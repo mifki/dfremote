@@ -1290,6 +1290,29 @@ end
 stockpile_editing_settings = nil
 
 --luacheck: in=
+function building_stockpile_edit_settings()
+    stockpile_editing_settings = nil
+
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        error(errmsg_wrongscreen(ws))
+    end
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
+        error('no selected building')
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_stockpilest
+    if bld._type ~= df.building_stockpilest then
+        error('not a stockpile '..tostring(bld))
+    end
+
+    stockpile_editing_settings = bld.settings
+
+    return true
+end
+
+--luacheck: in=
 function building_stockpile_get_settings()
     --todo: this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
     if not stockpile_editing_settings then
@@ -1352,26 +1375,82 @@ function building_stockpile_get_settings()
 end
 
 --luacheck: in=
-function building_stockpile_edit_settings()
-    stockpile_editing_settings = nil
-
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
+function building_stockpile_get_settings_level1()
+    --todo: this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
+    if not stockpile_editing_settings then
+        building_stockpile_edit_settings()
     end
 
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
+    local ss = stockpile_editing_settings
+
+    local ret = {}
+    for i,toplevel in ipairs(stockpile_settings_schema()) do
+        local toplevel_name = toplevel[1]
+        local toplevel_field = toplevel[2]
+        local toplevel_enabled = ss.flags[toplevel_field]
+        
+        local groups = toplevel[3]
+        local flags = toplevel[4]
+        local has_groups_or_flags = #groups > 0 or #flags > 0
+
+        table.insert(ret, { toplevel_name, toplevel_enabled, has_groups_or_flags })
     end
 
-    local bld = df.global.world.selected_building --as:df.building_stockpilest
-    if bld._type ~= df.building_stockpilest then
-        error('not a stockpile '..tostring(bld))
+    local flags = {
+        { 'Allow Plant/Animal', ss.allow_organic },
+        { 'Allow Non-Plant/Animal', ss.allow_inorganic },
+    }
+    table.insert(ret, flags)
+
+    return ret
+end
+
+--luacheck: in=number
+function building_stockpile_get_settings_level2(l1)
+    local ss = stockpile_editing_settings
+
+    local toplevel = stockpile_settings_schema()[l1+1]
+
+    local toplevel_name = toplevel[1]
+    local toplevel_field = toplevel[2]
+    local toplevel_enabled = ss.flags[toplevel_field]
+    local groups = toplevel[3]
+    local flags = toplevel[4]
+
+    local grps = {}
+    local flgs = {}
+    if #groups > 0 or #flags > 0 then
+        local toplevel_obj = ss[toplevel_field] --as:bool[][]
+        for j,group in ipairs(groups) do
+            local list = toplevel_obj[group[2]]
+            local group_name = group[1]
+            local num_enabled, num_all
+
+            if type(group[4]) == 'function' then
+                local idx_fn = group[4]
+                local idxs = idx_fn()
+                num_enabled = toplevel_enabled and count_enabled(list, idxs) or 0
+                num_all = #idxs
+            else
+                num_enabled = toplevel_enabled and count_enabled(list) or 0
+                num_all = (type(group[3]) == 'table') and #group[3] or group[3]
+            end
+
+            local has_level3 = group[5] ~= nil
+
+            --todo: maybe not return empty categories? but then need to remove them form schema or adjust index in building_stockpile_setenabled() 
+            --if num_all > 0 then
+                table.insert(grps, { group_name, num_enabled, num_all, has_level3 })
+            --end
+        end
+
+        for j,flag in ipairs(flags) do
+            local flag_name = flag[1]
+            table.insert(flgs, { flag_name, toplevel_obj[flag[2]] })
+        end        
     end
 
-    stockpile_editing_settings = bld.settings
-
-    return true
+    return { toplevel_name, toplevel_enabled, grps, flgs }
 end
 
 --luacheck: in=number,number
@@ -1486,7 +1565,8 @@ function building_stockpile_set_flag(group, flag, enabled)
 
     local ss = stockpile_editing_settings
 
-    if group == 100 then
+    --todo: 100 is temporary for compatibility with older apps
+    if group == -1 or group == 100 then
         if flag == 0 then
             ss.allow_organic = enabled
         elseif flag == 1 then

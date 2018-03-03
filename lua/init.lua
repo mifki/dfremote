@@ -2004,6 +2004,8 @@ local handlers = {
         [10] = building_stockpile_set_linksonly,
         [11] = building_stockpile_delete_link,
         [12] = building_stockpile_edit_settings,
+        [13] = building_stockpile_get_settings_level1,
+        [14] = building_stockpile_get_settings_level2,
     },
 
     [141] = {
