@@ -1993,7 +1993,7 @@ function buildings_get_list2()
             local title, descr
 
             if bld._type == df.building_civzonest then --as:bld=df.building_civzonest
-                title = 'Activity Zone'
+                title = zonename(bld)
                 descr = zone_mode_string_for_flags(bld.zone_flags.whole)
 
                 if not bld.zone_flags.active then
