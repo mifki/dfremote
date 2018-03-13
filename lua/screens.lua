@@ -39,20 +39,12 @@ function execute_with_selected_zone(bldid, fn)
 
 	return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws)
 		local zone = df.building.find(bldid)
- 
-		-- we assume there will be a tile belonging to the zone on y1
-		local x = zone.x1
-		while x < zone.x2 do
-			if zone.room.extents[x-zone.x1] > 0 then
-				break
-			end
-			x = x + 1
-		end
 
-		df.global.cursor.x = x
-	    df.global.cursor.y = zone.y1
-	    df.global.cursor.z = zone.z-1
-	    gui.simulateInput(ws, K'CURSOR_UP_Z')
+		if not zone then
+			error('no zone with id '..tostring(bldid))
+		end
+ 
+        building_focus(zone, ws)
 
 	    return fn(ws, zone)
 	end)
@@ -247,7 +239,7 @@ end
 function execute_with_locations_for_building(bldid, fn)
     local bld = (bldid and bldid ~= -1) and df.building.find(bldid) or df.global.world.selected_building
     if not bld then
-        error('no building/zone '..tostring(bldid))
+        error('no building/zone with id '..tostring(bldid))
     end
 
     if bld._type ~= df.building_civzonest and bld._type ~= df.building_bedst and bld._type ~= df.building_tablest then

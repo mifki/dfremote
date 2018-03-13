@@ -116,16 +116,13 @@ function building_query_selected(bldid)
     end
 
     if not bld then
-        error('no building '..tostring(bldid))
+        error('no building with id '..tostring(bldid))
     end
 
     if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building ~= bld then
         df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
-        df.global.cursor.x = bld.x1
-        df.global.cursor.y = bld.y1
-        df.global.cursor.z = bld.z-1
-        gui.simulateInput(ws, K'CURSOR_UP_Z')
-        recenter_view(bld.centerx, bld.centery, bld.z)
+
+        building_focus(bld)
     end
 
     --todo: this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
@@ -2039,23 +2036,48 @@ function building_goto(bldid)
     local bld = df.building.find(bldid)
 
     if not bld then
-        return
+        error('no building with id '..tostring(bldid))
     end
 
     --todo: reset main
     df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
 
-    df.global.cursor.x = bld.centerx
-    df.global.cursor.y = bld.centery
-    df.global.cursor.z = bld.z-1
-
-    local ws = dfhack.gui.getCurViewscreen()
-    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, K'CURSOR_UP_Z')
-
-    recenter_view(bld.centerx, bld.centery, bld.z)
+    building_focus(bld)
 
     return true
+end
+
+function building_find_own_tile(bld)
+    local x = bld.x1
+    local y = bld.y1
+
+    if bld.room.extents then
+        while y <= bld.y2 do
+            while x <= bld.x2 do
+                if bld.room.extents[(bld.x2-bld.x1+1)*(y-bld.y1)+(x-bld.x1)] > 0 then
+                    return x, y
+                end
+                x = x + 1
+            end
+            x = bld.x1
+            y = y + 1
+        end
+    
+        return nil
+    end
+
+    return x, y
+end
+
+function building_focus(bld, ws)
+    local x,y = building_find_own_tile(bld)
+
+    df.global.cursor.x = x
+    df.global.cursor.y = y
+    df.global.cursor.z = bld.z - 1
+    gui.simulateInput(ws or dfhack.gui.getCurViewscreen(), K'CURSOR_UP_Z')
+    
+    recenter_view(x, y, bld.z)
 end
 
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))

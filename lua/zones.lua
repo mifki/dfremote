@@ -31,7 +31,7 @@ end
 function zone_settings_get(bldid)
     local zone = (bldid and bldid ~= -1) and df.building.find(bldid) or df.global.ui_sidebar_menus.zone.selected --as:df.building_civzonest
     if not zone then
-        error('no zone found for id '..tostring(bldid))
+        error('no zone with id '..tostring(bldid))
     end
 
     local loc = zone.zone_flags.meeting_area and zone.location_id ~= -1 and location_find_by_id(zone.location_id)
@@ -262,24 +262,16 @@ end
 
 --luacheck: in=number
 function zone_goto(bldid)
-    local bld = df.building.find(bldid)
+    local zone = df.building.find(bldid)
 
-    if not bld then
-        return
+    if not zone then
+        error('no zone with id '..tostring(bldid))
     end
 
     --todo: reset main
     df.global.ui.main.mode = df.ui_sidebar_mode.Zones
 
-    df.global.cursor.x = bld.centerx
-    df.global.cursor.y = bld.centery
-    df.global.cursor.z = bld.z-1
-
-    local ws = dfhack.gui.getCurViewscreen()
-    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, K'CURSOR_UP_Z')
-
-    recenter_view(bld.centerx, bld.centery, bld.z)
+    building_focus(zone)
 
     return true
 end
