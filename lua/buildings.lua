@@ -2051,7 +2051,7 @@ function building_find_own_tile(bld)
     local x = bld.x1
     local y = bld.y1
 
-    if bld.room.extents then
+    if bld._type == df.building_stockpilest or bld._type == df.building_civzonest then
         while y <= bld.y2 do
             while x <= bld.x2 do
                 if bld.room.extents[(bld.x2-bld.x1+1)*(y-bld.y1)+(x-bld.x1)] > 0 then
