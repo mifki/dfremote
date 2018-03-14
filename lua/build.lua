@@ -71,7 +71,7 @@ function build_confirm(fast)
                 repeat
                     continue = false
                     for i,choice in ipairs(df.global.ui_build_selector.choices) do
-                        if choice:getNumCandidates() > 0 then
+                        if choice:getNumCandidates() - choice:getUsedCount() > 0 then
                             df.global.ui_build_selector.sel_index = i
                             gui.simulateInput(ws, K'SELECT')
                             
@@ -86,6 +86,9 @@ function build_confirm(fast)
                             else
                                 continue = true
                             end
+
+                            --start over because we modified the collection and our iterator is broken
+                            break
                         end
                     end
                 until not continue
