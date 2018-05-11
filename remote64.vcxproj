@@ -69,10 +69,10 @@
     <Library Include="ws2_32.lib" />
     <Library Include="winmm.lib" />
     <Library Include="enet\enet64.lib" />
-    <Library Include="$(dfhack)\build\VC2015\library\Release\SDL.lib" />
-    <Library Include="$(dfhack)\build\VC2015\library\Release\dfhack-version.lib" />
-    <Library Include="$(dfhack)\build\VC2015\depends\lua\Release\lua.lib" />
-    <Library Include="$(dfhack)\build\VC2015\depends\tthread\Release\dfhack-tinythread.lib" />
+    <Library Include="$(dfhack)\build\win64\VC2015\library\Release\SDL.lib" />
+    <Library Include="$(dfhack)\build\win64\VC2015\library\Release\dfhack-version.lib" />
+    <Library Include="$(dfhack)\build\win64\VC2015\depends\lua\Release\lua.lib" />
+    <Library Include="$(dfhack)\build\win64\VC2015\depends\tthread\Release\dfhack-tinythread.lib" />
     <Library Include="$(dfhack)\depends\zlib\lib\win64\zlib.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
