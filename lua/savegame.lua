@@ -18,7 +18,7 @@ function get_load_game_screen()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         local parent = ws.parent
         parent.child = nil
-        ws:delete()
+        -- ws:delete() --todo: --fixme:
         ws = parent
     end
     ws.breakdown_level = df.interface_breakdown_types.NONE

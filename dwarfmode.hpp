@@ -23,7 +23,8 @@ int get_menu_width()
 void render_remote_map()
 {
     //*out2 << "render start"<<std::endl;
-    int menu_width = *df::global::ui_menu_width, area_map_width = *df::global::ui_area_map_width;
+    uint8_t menu_width, area_map_width;
+    Gui::getMenuWidth(menu_width, area_map_width);
 
     //*df::global::ui_menu_width = 3;
     //*df::global::ui_area_map_width = 3;

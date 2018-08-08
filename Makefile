@@ -1,12 +1,12 @@
-DFHACKVER ?= 0.43.05-r3
+DFHACKVER ?= 0.44.12-alpha1
 
 DFVERNUM = `echo $(DFHACKVER) | sed -e s/-.*// -e s/\\\\.//g`
 
-DF ?= /home/vit/df/df4305
-DH ?= /home/vit/qbuild-server/workspace/root/dfhack/0.43.05-r3
+DF ?= /Users/vit/Downloads/df_44_12_osx
+DH ?= /Users/vit/Downloads/buildagent/workspace/root/dfhack/0.44
 
 BITS ?= 64
-GCCVER ?= 4.8
+GCCVER ?= 7
 
 SRC = remote.cpp sha256.cpp QR_Encode.cpp
 DEP = dwarfmode.hpp commands.hpp plugin.hpp patches.hpp itemcache.hpp config.hpp corehacks.hpp sha256.h connect.hpp Makefile
@@ -25,7 +25,7 @@ OUT = dist/$(DFHACKVER)/remote.plug.$(EXT)
 INC = -I"$(DH)/library/include" -I"$(DH)/library/proto" -I"$(DH)/depends/protobuf" -I"$(DH)/depends/lua/include" -I"$(DH)/depends/tthread" -Ienet/include
 LIB = -L"$(DH)/build/library" -ldfhack -ldfhack-version -L"$(DH)/build/depends/tthread" -ldfhack-tinythread ./enet/.libs/libenet.a
 
-CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -O3 -DUSE_FILE32API -D_GLIBCXX_USE_CXX11_ABI=0
+CFLAGS = $(INC) -m$(BITS) -DLINUX_BUILD -O3 -DUSE_FILE32API -D_GLIBCXX_USE_CXX11_ABI=0 -g
 LDFLAGS = $(LIB) -shared
 
 ifeq ($(shell uname -s), Darwin)
