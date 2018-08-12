@@ -601,7 +601,7 @@ function get_look_list(detailed)
                     local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
                     title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
 
-                    local c = df.global.world.raws.language.colors[mi.material.state_color[v.spatter_mat_state]]
+                    local c = C_world_raws_colors()[mi.material.state_color[v.spatter_mat_state]]
                     color = c.color + c.bold*8
 
                 else

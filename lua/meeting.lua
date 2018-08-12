@@ -87,7 +87,7 @@ function read_meeting_screen(dfmarkup)
 	return text, reply, actions
 end
 
---luacheck: in=
+--luacheck: in=bool
 function meeting_get(dfmarkup)
 	dfmarkup = istrue(dfmarkup)
 	

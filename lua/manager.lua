@@ -365,14 +365,15 @@ function manager_order_conditions_get(id)
 	        local matname = get_condition_material(v)
 	        local traits = get_condition_traits(v)
 
-	    	table.insert(conditions, { itemtype, i, 0, ws.satisfied[i], matname, traits, v.compare_type, v.compare_val })
+	    	table.insert(conditions, { itemtype, i, 0, C_viewscreen_workquota_conditionst_satisfied_items(ws)[i], matname, traits, v.compare_type, v.compare_val })
 	    end
 
 	    for i,v in ipairs(order.order_conditions) do
 	    	local target = order_find_by_id(v.order_id)
 	    	local s = target and ordertitle(target, true) or '#invalid order#'
 	    	
-	    	table.insert(conditions, { s, i, 1, mp.NIL--[[ ws.anon_1[i] ]], v.condition })
+	    	--todo: why?
+	    	table.insert(conditions, { s, i, 1, mp.NIL--[[ C_viewscreen_workquota_conditionst_satisfied_orders(ws)[i] ]], v.condition })
 	    end
 
 	    return { ordertitle(order, true), order.id, conditions, order.frequency, order.status.whole }

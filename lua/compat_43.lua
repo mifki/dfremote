@@ -34,6 +34,14 @@ function C_viewscreen_workquota_conditionst_item_smth2(q, i)
 	return df.reinterpret_cast('int16_t', df.reinterpret_cast('intptr_t', addr).value + 2*i).value
 end
 
+function C_viewscreen_workquota_conditionst_satisfied_items(ws)
+	return ws.satisfied
+end
+
+function C_viewscreen_workquota_conditionst_satisfied_orders(ws)
+	return ws.anon_1
+end
+
 function C_unit_dead(unit)
 	return unit.flags1.dead
 end
@@ -56,4 +64,12 @@ end
 
 function C_world_site_inhabitants(site)
 	return site.inhabitants
+end
+
+function C_world_raws_colors()
+	return df.global.world.raws.language.colors
+end
+
+function C_unit_corpse_name(unit)
+	return unit.enemy.undead.anon_7
 end

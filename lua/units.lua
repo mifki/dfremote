@@ -300,10 +300,10 @@ function unit_fullprof(unit)
     local prof = unitprof(unit)
 
     if unit.enemy.undead then
-        if #unit.enemy.undead.anon_7 == 0 then
+        if #C_unit_corpse_name(unit) == 0 then
             prof = prof .. ' Corpse'
         else
-            prof = dfhack.df2utf(unit.enemy.undead.anon_7):utf8capitalize() -- a reanimated body part will use this string instead
+            prof = dfhack.df2utf(C_unit_corpse_name(unit)):utf8capitalize() -- reanimated body parts use this string instead
         end
     end
   

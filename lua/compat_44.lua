@@ -34,6 +34,14 @@ function C_viewscreen_workquota_conditionst_item_smth2(q, i)
 	return df.reinterpret_cast('int16_t', df.reinterpret_cast('intptr_t', addr).value + 2*i).value
 end
 
+function C_viewscreen_workquota_conditionst_satisfied_items(ws)
+	return ws.satisfied_items
+end
+
+function C_viewscreen_workquota_conditionst_satisfied_orders(ws)
+	return ws.satisfied_orders
+end
+
 function C_embark_get_profile_name(ws, idx)
 	if dfhack.VERSION == '0.43.05-r1' then
 		--xxx: ws.choices is holding a list of profiles, but the structure is unknown. the first field is string and is the name
@@ -80,4 +88,12 @@ end
 
 function C_world_site_inhabitants(site)
 	return site.unk_1.inhabitants
+end
+
+function C_world_raws_colors()
+	return df.global.world.raws.descriptors.colors
+end
+
+function C_unit_corpse_name(unit)
+	return unit.enemy.undead.unk_7
 end
