@@ -45,7 +45,7 @@ function hauling_route_info(id)
 			if vehicle_item then
 				local vehicle_stop = #route.stops > 0 and route.vehicle_stops[0] ~= -1 and route.stops[route.vehicle_stops[0]] or nil
 
-				local on_stop = vehicle_stop and vehicle_stop.pos.x == vehicle_item.pos.x and vehicle_stop.pos.y == vehicle_item.pos.y and vehicle_stop.pos.z == vehicle_item.pos.z
+				local on_stop = vehicle_stop and (vehicle_stop.pos.x == vehicle_item.pos.x and vehicle_stop.pos.y == vehicle_item.pos.y and vehicle_stop.pos.z == vehicle_item.pos.z) or false
 
 				local contained_volume = 0
 				for i,ref in ipairs(vehicle_item.general_refs) do
