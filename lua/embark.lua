@@ -73,10 +73,11 @@ function embark_newgame(folder)
 		return
 	end
 
+    titlews.menu_line_id:insert(0, 1)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
-    -- whether there's a 'continue playing' menu item
-    titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0)
+    titlews.sel_menu_line = 0
     gui.simulateInput(titlews, K'SELECT')
+    titlews.menu_line_id:erase(0)
     titlews:logic()
     titlews:render()
 

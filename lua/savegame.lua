@@ -1,11 +1,9 @@
 function get_load_game_screen()
-    local ws = dfhack.gui.getCurViewscreen()
-
-    if ws._type == df.viewscreen_loadgamest then
-        return ws
-    end
-
+    -- Always return to title and open load screen to force reload folders
+    
     -- Check that we're on title screen or its subscreens
+    --todo: use df.global.gview.view.child
+    local ws = dfhack.gui.getCurViewscreen()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         ws = ws.parent
     end
@@ -25,13 +23,11 @@ function get_load_game_screen()
     
     local titlews = ws --as:df.viewscreen_titlest
     
-    if #titlews.arena_savegames-#titlews.start_savegames == 1 then
-        return nil, true
-    end
-
+    titlews.menu_line_id:insert(0, 0)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     titlews.sel_menu_line = 0
     gui.simulateInput(titlews, K'SELECT')
+    titlews.menu_line_id:erase(0)
 
     -- This is to deal with the custom dfhack load screen
     ws = dfhack.gui.getCurViewscreen()
@@ -43,7 +39,7 @@ function get_load_game_screen()
 end
 
 --luacheck: in=
-function savegame_list()
+function savegames_list()
     local ws,nogames = get_load_game_screen() --as:df.viewscreen_loadgamest
     if not ws then
         if nogames then
@@ -94,6 +90,34 @@ end
 
 --luacheck: in=string
 function savegame_delete(folder)
+end
+
+--luacheck: in=
+function savegames_force_reload()
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_titlest or (ws.child and ws.child._type == df.viewscreen_new_regionst) then
+        return true
+    end
+
+    -- Return to title screen
+    ws = dfhack.gui.getCurViewscreen()
+    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
+        local parent = ws.parent
+        parent.child = nil
+        ws:delete()
+        ws = parent
+    end
+    
+    -- This code will cause title screen to be recreated
+    local worldgenws = df.viewscreen_new_regionst:new()
+    worldgenws.simple_mode = 1
+    
+    worldgenws.parent = ws
+    ws.child = worldgenws
+    ws.breakdown_level = 2
+    
+    gui.simulateInput(a, K'LEAVESCREEN')
+    return true
 end
 
 --luacheck: in=
@@ -157,10 +181,11 @@ function create_new_world(params)
     
     local titlews = ws --as:df.viewscreen_titlest
 
+    titlews.menu_line_id:insert(0, 2)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
-    -- whether there's a 'continue playing' and/or 'start playing' menu items
-    titlews.sel_menu_line = (#titlews.arena_savegames-#titlews.start_savegames > 1 and 1 or 0) + (#titlews.start_savegames > 0 and 1 or 0)
+    titlews.sel_menu_line = 0
     gui.simulateInput(titlews, K'SELECT')
+    titlews.menu_line_id:erase(0)
 
     worldgen_params = params
 
@@ -180,7 +205,7 @@ function progress_worldgen()
         return
     end    
 
-    -- If finished loading raws
+    -- If finished loading raws, start worldgen with the requested parameters
     if ws.unk_b4 == 0 then
         -- Close 'Welcome to ...' message
         if #ws.welcome_msg > 0 then

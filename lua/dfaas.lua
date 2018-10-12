@@ -27,3 +27,12 @@ function dfaas_save_done(pwd)
 
     return (df.global.ui.main.autosave_request ~= true)
 end
+
+--luacheck: in=string
+function dfaas_savegames_force_reload(pwd)
+    if not native.verify_pwd(pwd or '') then
+        error('invalid password')
+    end
+    
+    return savegames_force_reload()
+end

@@ -1798,6 +1798,7 @@ local handlers_foreign = {
         [20] = dfaas_save_game,
         [21] = dfaas_save_done,
         [22] = dfaas_get_status,
+        [23] = dfaas_savegames_force_reload,
     },
 }
 
@@ -2290,10 +2291,11 @@ local handlers = {
     },
 
     [237] = {
-        [1] = savegame_list,
+        [1] = savegames_list,
         [2] = savegame_load,
         [3] = savegame_checkloaded,
         [4] = worlds_get_empty,
+        [5] = savegames_force_reload,
 
         [10] = create_new_world,
         [11] = worldgen_status,
