@@ -836,7 +836,11 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         }
     }
 
-    FastCoreSuspender suspend;
+    //TODO: don't hardcode these
+    bool need_suspend = !((cmd == 238 && subcmd == 4) || (cmd == 237 && subcmd == 11));
+    if (need_suspend)
+        core_suspend_fast();
+
     if (!remote_on)
         return;
 
@@ -851,6 +855,9 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     bool handled = false;
     if (Lua::SafeCall(*out2, L, 5, 2, true))
         handled = lua_toboolean(L,-2);
+        
+    if (need_suspend)
+        core_resume_fast();
 
     if (handled)
     {

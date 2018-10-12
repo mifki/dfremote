@@ -169,47 +169,51 @@ function setup_get_server_info(clientver, pwd)
     end
 
     local ws = dfhack.gui.getCurViewscreen()
+    local wstype = ws._type
 
-    -- Get rid of help and options screens
+    -- Not doing this, as the core is not suspended for this command
+    -- Extra screens will be removed in game load / new world commands anyway
+    --[[-- Get rid of help and options screens
     if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then --hint:df.viewscreen_textviewerst
         local parent = ws.parent
         parent.child = nil
         ws:delete()
         ws = parent
-    end
+    end]]
 
     -- Busy loading game
-    if ws._type == df.viewscreen_loadgamest and istrue(ws.loading) then --hint:df.viewscreen_loadgamest
+    if wstype == df.viewscreen_loadgamest and istrue(ws.loading) then --hint:df.viewscreen_loadgamest
         return { ver, 'busy-loading-game' }
     end
 
     -- Busy updating world
-    if ws._type == df.viewscreen_update_regionst then
+    if wstype == df.viewscreen_update_regionst then
         return { ver, 'busy-updating' }
     end
 
     -- Busy saving game
-    if ws._type == df.viewscreen_savegamest or ws._type == df.viewscreen_export_regionst then
+    if wstype == df.viewscreen_savegamest or wstype == df.viewscreen_export_regionst then
         return { ver, 'busy-saving' }
     end
 
     -- Busy unloading world
-    if ws._type == df.viewscreen_game_cleanerst then
+    if wstype == df.viewscreen_game_cleanerst then
         return { ver, 'busy-unloading' }
     end
 
     -- Worldgen in progress (unlike other screens below, this screen is a child of the title screen)
-    if ws._type == df.viewscreen_new_regionst then
+    if wstype == df.viewscreen_new_regionst then
         if worldgen_params or (not istrue(ws.simple_mode) and not istrue(ws.in_worldgen)) then --hint:df.viewscreen_new_regionst
             return { ver, 'worldgen' }
         end
     end
 
     ws = df.global.gview.view.child
+    wstype = ws._type
 
     -- Dwarf mode
     --todo: handle 'abandoned' screen !!
-    if ws._type == df.viewscreen_dwarfmodest then
+    if wstype == df.viewscreen_dwarfmodest then
         local site = df.world_site.find(df.global.ui.site_id)
         local site_name = site and string.utf8capitalize(dfhack.df2utf(dfhack.TranslateName(site.name))) or '#unknown site#'
         local world_name = string.utf8capitalize(dfhack.df2utf(dfhack.TranslateName(df.global.world.world_data.name)))
@@ -218,27 +222,27 @@ function setup_get_server_info(clientver, pwd)
     end
 
     -- Adventure mode
-    if ws._type == df.viewscreen_dungeonmodest then
+    if wstype == df.viewscreen_dungeonmodest then
         return { ver, 'advmode' }
     end
 
     -- Embark preparations
     --todo: should return/show embark world/folder name
-    if ws._type == df.viewscreen_choose_start_sitest then
+    if wstype == df.viewscreen_choose_start_sitest then
         return { ver, 'embark' }
     end
 
     -- Legends mode
-    if ws._type == df.viewscreen_legendsst then
+    if wstype == df.viewscreen_legendsst then
         return { ver, 'legends' }
     end
 
     -- Title screen (or game list screen)
-    if ws._type == df.viewscreen_titlest then
+    if wstype == df.viewscreen_titlest then
         return { ver, 'nogame' }
     end
 
-    if ws._type == df.viewscreen_adopt_regionst then
+    if wstype == df.viewscreen_adopt_regionst then
         return { ver, 'busy-loading-world' }
     end
 
