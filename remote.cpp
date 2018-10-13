@@ -837,7 +837,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     }
 
     //TODO: don't hardcode these
-    bool need_suspend = !((cmd == 238 && subcmd == 4) || (cmd == 237 && subcmd == 11));
+    bool need_suspend = !((cmd == 238 && subcmd == 4) || (cmd == 238 && subcmd == 22) || (cmd == 237 && subcmd == 11));
     if (need_suspend)
         core_suspend_fast();
 
