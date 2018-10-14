@@ -34,6 +34,7 @@ void core_suspend_fast()
     // or after mainloop(), or by another request. Either case means we're not in the mainloop() anymore.
     // remote_on check is needed to avoid race condition when stopping or unloading from console,
     // and the loop is already suspended by DFHack core (and is waiting in SDL_NumJoysticks())
+    enabler->async_paused = true;
     while(!*frames && remote_on)
     {
 #ifdef WIN32

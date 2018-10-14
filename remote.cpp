@@ -842,7 +842,11 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         core_suspend_fast();
 
     if (!remote_on)
+    {
+        if (need_suspend)
+            core_resume_fast();
         return;
+    }
 
     int top = lua_gettop(L);
     Lua::PushModulePublic(*out2, L, "remote", "handle_command");
@@ -854,7 +858,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
     bool handled = false;
     if (Lua::SafeCall(*out2, L, 5, 2, true))
-        handled = lua_toboolean(L,-2);
+        handled = lua_toboolean(L, -2);
         
     if (need_suspend)
         core_resume_fast();
