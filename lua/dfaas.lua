@@ -29,10 +29,10 @@ function dfaas_save_done(pwd)
 end
 
 --luacheck: in=string
-function dfaas_savegames_force_reload(pwd)
+function dfaas_savegames_refresh(pwd)
     if not native.verify_pwd(pwd or '') then
         error('invalid password')
     end
     
-    return savegames_force_reload()
+    return savegames_refresh()
 end

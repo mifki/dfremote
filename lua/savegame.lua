@@ -93,7 +93,7 @@ function savegame_delete(folder)
 end
 
 --luacheck: in=
-function savegames_force_reload()
+function savegames_refresh()
     local ws = screen_main()
     if ws._type ~= df.viewscreen_titlest or (ws.child and ws.child._type == df.viewscreen_new_regionst) then
         return true
