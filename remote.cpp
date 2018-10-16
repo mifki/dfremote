@@ -97,6 +97,7 @@ static color_ostream *out2;
 
 static unsigned short advflags;
 #define ADVFLAG_NO_FASTRENDER (1 << 0)
+#define ADVFLAG_NO_LOCALMAP   (1 << 1)
 
 static int gwindow_x, gwindow_y, gwindow_z;
 
@@ -162,7 +163,6 @@ static int newwidth, newheight;
 static volatile bool waiting_render;
 static volatile bool map_render_enabled;
 static volatile bool render_initial;
-static bool force_render_ui;
 
 static unsigned int server_token;
 static unsigned int world_token;
@@ -1229,6 +1229,12 @@ void enthreadmain(ENetHost *server)
     enet_host_destroy(server);
 }
 
+void disable_local_map()
+{
+    MemoryPatcher p(Core::getInstance().p);
+    apply_patch(&p, p_dwarfmode_render);        
+}
+
 bool remote_start()
 {
     if (remote_on)
@@ -1263,6 +1269,9 @@ bool remote_start()
     wy = *df::global::window_y;
 
     enabler->gfps = 5;
+
+    if (advflags & ADVFLAG_NO_LOCALMAP)
+        disable_local_map();
 
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);

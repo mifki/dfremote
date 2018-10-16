@@ -89,14 +89,6 @@ command_result remote_cmd(color_ostream &out, std::vector <std::string> & args)
         {
             remote_print_version();
         }
-        else if (cmd == "hideui")
-        {
-            force_render_ui = false;
-        }
-        else if (cmd == "unhideui")
-        {
-            force_render_ui = true;
-        }
         else if (cmd == "advflags")
         {
             if (args.size() == 3)
