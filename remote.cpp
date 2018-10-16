@@ -220,6 +220,7 @@ static void patch_rendering(bool enable_lower_levels)
 }
 
 #include "dwarfmode.hpp"
+#include "embark.hpp"
 #include "itemcache.hpp"
 #include "corehacks.hpp"
 
@@ -1263,8 +1264,9 @@ bool remote_start()
 
     enabler->gfps = 5;
 
-    INTERPOSE_HOOK(dwarfmode_hook2, render).apply(true);
-    INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(true);
+    INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
+    INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
+    INTERPOSE_HOOK(embark_hook, render).apply(true);
 
     remote_on = true;
 
@@ -1285,8 +1287,9 @@ void remote_stop()
 
     *df::global::pause_state = true;
 
-    INTERPOSE_HOOK(dwarfmode_hook2, render).apply(false);
-    INTERPOSE_HOOK(dwarfmode_hook2, feed).apply(false);
+    INTERPOSE_HOOK(dwarfmode_hook, render).apply(false);
+    INTERPOSE_HOOK(dwarfmode_hook, feed).apply(false);
+    INTERPOSE_HOOK(embark_hook, render).apply(false);
 
     remote_on = false;
     timer_timeout = -1;

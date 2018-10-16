@@ -423,8 +423,6 @@ function embark_finder_stop()
 
 	local _finder = C_location_finder(ws.finder)	
 	_finder.search_x = -1
-
-	return embark_finder_status()
 end
 
 --luacheck: in=
