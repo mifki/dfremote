@@ -233,7 +233,7 @@ void render_remote_map()
 }
 
 
-struct dwarfmode_hook2 : public df::viewscreen_dwarfmodest
+struct dwarfmode_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
@@ -291,5 +291,5 @@ struct dwarfmode_hook2 : public df::viewscreen_dwarfmodest
     }
 };
 
-IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, render, -300);
-IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook2, feed, -300);
+IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook, render, -300);
+IMPLEMENT_VMETHOD_INTERPOSE_PRIO(dwarfmode_hook, feed, -300);
