@@ -1,28 +1,24 @@
-function get_load_game_screen()
+local function get_load_game_screen()
     -- Always return to title and open load screen to force reload folders
     
     -- Check that we're on title screen or its subscreens
-    --todo: use df.global.gview.view.child
-    local ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        ws = ws.parent
-    end
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_titlest then
         return nil
     end
 
     -- Return to title screen
-    ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        local parent = ws.parent
+    local ws2 = dfhack.gui.getCurViewscreen()
+    while ws2 and ws2.parent and ws2 ~= ws do
+        local parent = ws2.parent
         parent.child = nil
-        ws:delete()
-        ws = parent
+        ws2:delete()
+        ws2 = parent
     end
-    ws.breakdown_level = df.interface_breakdown_types.NONE
     
     local titlews = ws --as:df.viewscreen_titlest
-    
+    titlews.breakdown_level = df.interface_breakdown_types.NONE --todo: why was this needed?
+
     titlews.menu_line_id:insert(0, 0)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None
     titlews.sel_menu_line = 0
@@ -37,6 +33,35 @@ function get_load_game_screen()
 
     return ws
 end
+
+local function refresh_saves()
+    local ws = screen_main()
+    if ws._type ~= df.viewscreen_titlest then
+        return
+    end
+
+    -- Return to title screen
+    local ws2 = dfhack.gui.getCurViewscreen()
+    while ws2 and ws2.parent and ws2 ~= ws do
+        local parent = ws2.parent
+        parent.child = nil
+        ws2:delete()
+        ws2 = parent
+    end
+    
+    -- This code will cause title screen to be recreated
+    local worldgenws = df.viewscreen_new_regionst:new()
+    worldgenws.simple_mode = 1
+    
+    worldgenws.parent = ws
+    ws.child = worldgenws
+    ws.breakdown_level = 2
+    
+    gui.simulateInput(worldgenws, K'LEAVESCREEN')
+
+    return true
+end
+
 
 --luacheck: in=
 function savegames_list()
@@ -93,55 +118,17 @@ function savegame_delete(folder)
 end
 
 --luacheck: in=
-function savegames_refresh()
-    local ws = screen_main()
-    if ws._type ~= df.viewscreen_titlest or (ws.child and ws.child._type == df.viewscreen_new_regionst) then
-        return true
-    end
-
-    -- Return to title screen
-    ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        local parent = ws.parent
-        parent.child = nil
-        ws:delete()
-        ws = parent
-    end
-    
-    -- This code will cause title screen to be recreated
-    local worldgenws = df.viewscreen_new_regionst:new()
-    worldgenws.simple_mode = 1
-    
-    worldgenws.parent = ws
-    ws.child = worldgenws
-    ws.breakdown_level = 2
-    
-    gui.simulateInput(a, K'LEAVESCREEN')
-    return true
-end
-
---luacheck: in=
 function worlds_get_empty()
-    local ws = dfhack.gui.getCurViewscreen()
-
-    -- Check that we're on title screen or its subscreens
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        ws = ws.parent
-    end
+    --todo: should not do this all the time?
+    refresh_saves()
+    
+    local ws = screen_main() --as:df.viewscreen_titlest
     if ws._type ~= df.viewscreen_titlest then
         return nil
     end
 
-    -- Get the title screen
-    ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        ws = ws.parent
-    end
-
-    local titlews = ws --as:df.viewscreen_titlest
     local ret = {}
-
-    for i,v in ipairs(titlews.start_savegames) do
+    for i,v in ipairs(ws.start_savegames) do
         local folder = v.save_dir
         local name = dfhack.df2utf(v.world_name_str)
 
@@ -159,27 +146,23 @@ function create_new_world(params)
         return
     end
 
-    local ws = dfhack.gui.getCurViewscreen()
-
     -- Check that we're on title screen or its subscreens
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        ws = ws.parent
-    end
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_titlest then
-        return
+        return nil
     end
 
     -- Return to title screen
-    ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        local parent = ws.parent
+    local ws2 = dfhack.gui.getCurViewscreen()
+    while ws2 and ws2.parent and ws2 ~= ws do
+        local parent = ws2.parent
         parent.child = nil
-        ws:delete()
-        ws = parent
+        ws2:delete()
+        ws2 = parent
     end
-    ws.breakdown_level = df.interface_breakdown_types.NONE
     
     local titlews = ws --as:df.viewscreen_titlest
+    titlews.breakdown_level = df.interface_breakdown_types.NONE --todo: why was this needed?
 
     titlews.menu_line_id:insert(0, 2)
     titlews.sel_subpage = df.viewscreen_titlest.T_sel_subpage.None

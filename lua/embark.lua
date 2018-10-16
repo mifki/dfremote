@@ -39,27 +39,23 @@ end
 
 --luacheck: in=string
 function embark_newgame(folder)
-    local ws = dfhack.gui.getCurViewscreen()
-
     -- Check that we're on title screen or its subscreens
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        ws = ws.parent
-    end
+    local ws = screen_main()
     if ws._type ~= df.viewscreen_titlest then
-        return
+        return nil
     end
 
     -- Return to title screen
-    ws = dfhack.gui.getCurViewscreen()
-    while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
-        local parent = ws.parent
+    local ws2 = dfhack.gui.getCurViewscreen()
+    while ws2 and ws2.parent and ws2 ~= ws do
+        local parent = ws2.parent
         parent.child = nil
-        ws:delete()
-        ws = parent
+        ws2:delete()
+        ws2 = parent
     end
-    ws.breakdown_level = df.interface_breakdown_types.NONE
     
     local titlews = ws --as:df.viewscreen_titlest
+    titlews.breakdown_level = df.interface_breakdown_types.NONE --todo: why was this needed?
     
     local idx = -1
     for i,v in ipairs(titlews.start_savegames) do
