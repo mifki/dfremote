@@ -6,6 +6,9 @@ struct embark_hook : public df::viewscreen_choose_start_sitest
 
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
+        // Stopping location finder sometimes crashes the game,
+        // I guess because the screen is rendering at that time. 
+        // So let's not render the finder page.
         if (this->page == df::viewscreen_choose_start_sitest::T_page::Find)
             return;
         
