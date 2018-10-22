@@ -34,9 +34,13 @@ void core_suspend_fast()
     // or after mainloop(), or by another request. Either case means we're not in the mainloop() anymore.
     // remote_on check is needed to avoid race condition when stopping or unloading from console,
     // and the loop is already suspended by DFHack core (and is waiting in SDL_NumJoysticks())
-    enabler->async_paused = true;
     while(!*frames && remote_on)
     {
+#if !defined(__APPLE__) && !defined(WIN32)
+        // Looks like in some cases (e.g. ending the game), this is getting reset to false, which
+        // for some reason is causing this loop to never complete on single-core computers
+        enabler->async_paused = true;
+#endif
 #ifdef WIN32
         __nop();
 #else
