@@ -3,11 +3,12 @@ static uint32_t saved_frames;
 void core_suspend_fast()
 {
     volatile unsigned int *frames = &enabler->async_frames;
+    volatile bool *paused = &enabler->async_paused;
 
     // Claim channel lock early to make sure no commands posted
     SDL_SemWait(enabler->async_tobox.sem);
 
-    enabler->async_paused = true;
+    *paused = true;
 
     // If async_frames is zero, mainloop() has already finished or wasn't requested.
     // And since we've already set async_paused=true, mainloop() won't be called even if requested.
@@ -15,12 +16,26 @@ void core_suspend_fast()
     if (!*frames)
     {
         saved_frames = 0;
-        enabler->async_paused = true;
+        *paused = true;
         return;
     }
 
+    df::enabler::T_async_tobox::T_queue command;
+    command.cmd = df::enabler::T_async_tobox::T_queue::pause;
+    enabler->async_tobox.queue.push_back(command);
+    SDL_SemPost(enabler->async_tobox.sem);
+    SDL_SemPost(enabler->async_tobox.sem_fill);
+
+    do {
+        SDL_SemWait(enabler->async_frombox.sem_fill);
+        SDL_SemWait(enabler->async_frombox.sem);
+        if (!enabler->async_frombox.queue.empty())
+            enabler->async_frombox.queue.pop_front();
+        SDL_SemPost(enabler->async_frombox.sem);    
+    } while (!*paused);
+
     saved_frames = *frames;
-    *frames = 0;
+    /* *frames = 0;
 
     // Trigger async_frames change
     df::enabler::T_async_tobox::T_queue command;
@@ -46,7 +61,7 @@ void core_suspend_fast()
 #else
         asm volatile ("nop");
 #endif        
-    }
+    }*/
 
     // At this point we can be sure mainloop() has finished and won't be called again
     
@@ -96,6 +111,7 @@ void core_force_render()
     //TODO: should wait specifically for 'complete' msg
     SDL_SemWait(enabler->async_frombox.sem_fill);
     SDL_SemWait(enabler->async_frombox.sem);
-    enabler->async_frombox.queue.pop_front();
+    if (!enabler->async_frombox.queue.empty())
+        enabler->async_frombox.queue.pop_front();
     SDL_SemPost(enabler->async_frombox.sem);
 }
