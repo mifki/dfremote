@@ -3,26 +3,24 @@ function p {
 
 	cp manifests/$1/manifest.json out/tileset-$1/
 
-	if [ -d out-4024/tileset-$1 ] ; then
-		mkdir -p out/tileset-$1/4024
+	if [ -d out-4305/tileset-$1 ] ; then
+		mkdir -p out/tileset-$1/4305
 	
-		cp out-4024/tileset-$1/raw.json out/tileset-$1/4024/
-		cp out-4024/tileset-$1/tileset.png out/tileset-$1/4024/
-		cp -r out-4024/tileset-$1/graphics out/tileset-$1/4024/
+		cp out-4305/tileset-$1/raw.json out/tileset-$1/4305/
+		cp out-4305/tileset-$1/tileset.png out/tileset-$1/4305/
+		cp -r out-4305/tileset-$1/graphics out/tileset-$1/4305/
 		
-		cp out-4024/tileset-$1/colors.txt out/tileset-$1/
-
+		cp out-4305/tileset-$1/colors.txt out/tileset-$1/
 	fi
 
-	if [ -d out-4303/tileset-$1 ] ; then
-		mkdir -p out/tileset-$1/4303
+	if [ -d out-4412/tileset-$1 ] ; then
+		mkdir -p out/tileset-$1/4412
 	
-		cp out-4303/tileset-$1/raw.json out/tileset-$1/4303/
-		cp out-4303/tileset-$1/tileset.png out/tileset-$1/4303/
-		cp -r out-4303/tileset-$1/graphics out/tileset-$1/4303/
+		cp out-4412/tileset-$1/raw.json out/tileset-$1/4412/
+		cp out-4412/tileset-$1/tileset.png out/tileset-$1/4412/
+		cp -r out-4412/tileset-$1/graphics out/tileset-$1/4412/
 		
-		cp out-4303/tileset-$1/colors.txt out/tileset-$1/
-
+		cp out-4412/tileset-$1/colors.txt out/tileset-$1/
 	fi
 
 	cd out
@@ -38,6 +36,8 @@ p Afro
 p ASCII-Default
 p ASCII-Square
 p CLA
+p CursesOfBalin
+p CursesOfBalin-Blue
 p Duerer
 p GemSet
 p Grim-Fortress
@@ -51,7 +51,10 @@ p Shizzle
 p SimpleMood
 p Spacefox
 p Taffer
+p Taffer-Heretical
+p Taffer-Orthodox
 p Tergel
+p Vacuum-NoCells-CoQ
 p Wanderlust
 
 rm -rf out
