@@ -2,6 +2,7 @@ function p {
 	mkdir -p out/tileset-$1
 
 	cp manifests/$1/manifest.json out/tileset-$1/
+	cp colors/$1/* out/tileset-$1/
 
 	if [ -d out-4305/tileset-$1 ] ; then
 		mkdir -p out/tileset-$1/4305
@@ -54,7 +55,7 @@ p Taffer
 p Taffer-Heretical
 p Taffer-Orthodox
 p Tergel
-p Vacuum-NoCells-CoQ
+p Vacuum-NoCells
 p Wanderlust
 
 rm -rf out

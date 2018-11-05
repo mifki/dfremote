@@ -12,6 +12,7 @@ function p {
 	cp -r DFgraphics-$V/$1/raw/graphics out-$V/tileset-$1/
 	node diff.js raw DFgraphics-$V/$1/data/init > out-$V/tileset-$1/raw.json
 	cp DFgraphics-$V/$1/data/init/colors.txt out-$V/tileset-$1/
+	cp DFgraphics-$V/$1/data/init/colors-*.txt out-$V/tileset-$1/
 	cp "DFgraphics-$V/$1/data/art/$2" out-$V/tileset-$1/tileset.png
 	cp DFgraphics-$V/$1/manifest.json out-$V/tileset-$1/
 	cp manifests/$1/manifest.json out-$V/tileset-$1/
@@ -41,7 +42,7 @@ p Taffer taffer_20x20_serif_hollow_straight_walls.png
 p Taffer-Heretical taffer.png
 p Taffer-Orthodox taffer.png
 p Tergel 16x16_Tergel.png
-p Vacuum-NoCells-CoQ VFDTilesNoCells.png
+p Vacuum-NoCells VFDTilesNoCells.png
 p Wanderlust wanderlust.png
 
 rm -rf raw
