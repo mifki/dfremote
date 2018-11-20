@@ -22,14 +22,18 @@ void core_suspend_fast()
     enabler->async_tobox.queue.push_back(command);
     SDL_SemPost(enabler->async_tobox.sem);
     SDL_SemPost(enabler->async_tobox.sem_fill);
+    
+    *paused = true;
 
-    do {
+    // do {
         SDL_SemWait(enabler->async_frombox.sem_fill);
         SDL_SemWait(enabler->async_frombox.sem);
         if (!enabler->async_frombox.queue.empty())
             enabler->async_frombox.queue.pop_front();
         SDL_SemPost(enabler->async_frombox.sem);    
-    } while (!*paused);
+        if (!*paused)
+        *out2 << "W" << std::endl;
+    // } while (!*paused);
 
     saved_frames = *frames;
 
@@ -43,20 +47,21 @@ void core_suspend_fast()
 
 void core_resume_fast()
 {
-    //SDL_SemWait(enabler->async_tobox.sem);
-    {
-        df::enabler::T_async_tobox::T_queue command;
-        command.cmd = df::enabler::T_async_tobox::T_queue::start;
-        enabler->async_tobox.queue.push_back(command);
-    }
+    enabler->async_paused = false;
+    // SDL_SemWait(enabler->async_tobox.sem);
+    // {
+    //     df::enabler::T_async_tobox::T_queue command;
+    //     command.cmd = df::enabler::T_async_tobox::T_queue::start;
+    //     enabler->async_tobox.queue.push_back(command);
+    // }
     {
         df::enabler::T_async_tobox::T_queue command;
         command.cmd = df::enabler::T_async_tobox::T_queue::inc;
-        command.val = saved_frames;
+        command.val = 0;//saved_frames;
         enabler->async_tobox.queue.push_back(command);
     }
     SDL_SemPost(enabler->async_tobox.sem);
-    SDL_SemPost(enabler->async_tobox.sem_fill);
+    // SDL_SemPost(enabler->async_tobox.sem_fill);
     SDL_SemPost(enabler->async_tobox.sem_fill);
 }
 
