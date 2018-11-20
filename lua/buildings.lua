@@ -316,7 +316,7 @@ function building_query_selected(bldid)
         
         elseif btype == df.building_type.Coffin then
             local bld = bld --as:df.building_coffinst
-            local buried = owner and owner.flags1.dead or false
+            local buried = owner and C_unit_dead(owner) or false
             local mode = bld.burial_mode
             local flags = packbits(mode.allow_burial, not mode.no_citizens, not mode.no_pets, buried)
             table.insert(ret, flags)
@@ -1123,7 +1123,7 @@ function building_room_owner_get_candidates(bldid)
         else
             local cname = unitname(unit)
             local cprof = unitprof(unit)
-            table.insert(ret, { cname, cprof, unit.flags1.dead })        
+            table.insert(ret, { cname, cprof, C_unit_dead(unit) })        
         end
     end
 
@@ -1176,7 +1176,7 @@ function building_room_owner_get_candidates2(bldid)
         else
             local cname = unit_fulltitle(unit)
             local cprofcolor = dfhack.units.getProfessionColor(unit)
-            table.insert(ret, { cname, unit.id, cprofcolor, unit.flags1.dead })        
+            table.insert(ret, { cname, unit.id, cprofcolor, C_unit_dead(unit) })        
         end
     end
 
@@ -1883,7 +1883,7 @@ function building_well_is_active()
     end
 
     local x = df.global.gps.dimx - 2 - 30 + 1
-    if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+    if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
         x = x - (23 + 1)
     end
 
@@ -1906,7 +1906,7 @@ function building_hive_has_access()
     end
 
     local x = df.global.gps.dimx - 2 - 30 + 1
-    if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+    if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
         x = x - (23 + 1)
     end
 

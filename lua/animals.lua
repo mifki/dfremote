@@ -15,7 +15,7 @@ function animals_get()
 	local ret = {}
 
 	for i,unit in ipairs(df.global.world.units.active) do
-		if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.dead and not unit.flags1.forest then
+		if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not C_unit_dead(unit) and not unit.flags1.forest then
 
 			local prof = dfhack.units.getProfessionName(unit) --xxx: no nobles, so always capitalized, no need to use unitprof()
 			local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)

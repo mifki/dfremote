@@ -73,7 +73,7 @@ function justice_get_data()
 				end
 			end
 
-			table.insert(convicts, { fullname, v.id, punishment, v.flags1.dead })
+			table.insert(convicts, { fullname, v.id, punishment, C_unit_dead(v) })
 		end
 
 		return { true, recent_cases, cold_cases, convicts, ws.jails_needed, ws.jails_present }
@@ -111,7 +111,7 @@ function justice_get_crime_details(crimeid)
 
 	return { crime_type_names[v.mode+1], v.id, v.mode,
 			 victim_name, v.victim,
-			 convict_name, v.convicted, convict and convict.flags1.dead or false,
+			 convict_name, v.convicted, convict and C_unit_dead(convict) or false,
 			 witnesses, v.flags.needs_trial }
 end
 
@@ -147,7 +147,7 @@ function justice_get_convict_info(unitid)
 		end
 	end
 
-	return { unit_fulltitle(unit), unit.id, unit.flags1.dead, punishment, crimes, officer_name, officer and officer.id or -1 }
+	return { unit_fulltitle(unit), unit.id, C_unit_dead(unit), punishment, crimes, officer_name, officer and officer.id or -1 }
 end
 
 local function focus_crime(ws, crimeid)
@@ -199,7 +199,7 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 
 		local ret = {}
 		for i,unit in ipairs(ws.convict_choices) do
-			if show_dead or not unit.flags1.dead then
+			if show_dead or not C_unit_dead(unit) then
 				local name = unit_fulltitle(unit)
 
 				local wcnt = 0
@@ -210,7 +210,7 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 				end
 
 				if show_innocent or wcnt > 0 then
-					table.insert(ret, { name, unit.id, unit.flags1.dead, wcnt })
+					table.insert(ret, { name, unit.id, C_unit_dead(unit), wcnt })
 				end
 			end
 		end

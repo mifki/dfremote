@@ -179,7 +179,7 @@ local function simulate_orders_globals()
         ws:render()
 
         local x = df.global.gps.dimx - 2 - 30 + 1
-        if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
             x = x - (23 + 1)
         end
         x = x + 1
@@ -258,7 +258,7 @@ function orders_set(section, idx, val)
 
 	return execute_with_main_mode(mode, function(ws)
         local x = df.global.gps.dimx - 2 - 30 + 1
-        if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
             x = x - (23 + 1)
         end
         x = x + 1

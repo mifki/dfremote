@@ -104,8 +104,9 @@ function close_all()
 
     while ws._type ~= df.viewscreen_dwarfmodest do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
 end
@@ -601,7 +602,7 @@ function get_look_list(detailed)
                     local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
                     title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
 
-                    local c = df.global.world.raws.language.colors[mi.material.state_color[v.spatter_mat_state]]
+                    local c = C_world_raws_colors()[mi.material.state_color[v.spatter_mat_state]]
                     color = c.color + c.bold*8
 
                 else
@@ -658,7 +659,7 @@ function count_idlers()
     local cnt = 0
 
     for i,unit in ipairs(df.global.world.units.active) do
-        if not unit.flags1.dead and not unit.job.current_job then
+        if not C_unit_dead(unit) and not unit.job.current_job then
             local prf = unit.profession
             if dfhack.units.isCitizen(unit) then
                 --todo: need to check activity_entry.events for individual drills ?
@@ -714,8 +715,9 @@ function get_status()
         local focus = dfhack.gui.getCurFocus()
         if focus == 'dfhack/lua/warn-starving' or focus == 'dfhack/lua/status_overlay' then
             local parent = ws.parent
-            parent.child = nil
-            ws:delete()
+            -- parent.child = nil
+            -- ws:delete()
+            ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
             ws = parent
         end
     end
@@ -970,7 +972,8 @@ function get_status()
 
             if not constructed then        
                 name = name .. ' (not built)'
-            elseif bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.dead then
+            elseif bld._type == df.building_coffinst and bld.owner and C_unit_dead(bld.owner) then
+                --todo: is the check right in 44.xx where dead->inactive ?
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
             elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
                 name = name .. ' (locked)' --todo: this modifier shouldn't be on server side
@@ -1044,7 +1047,7 @@ function get_status()
     --[D]epot access
     if mainmode == df.ui_sidebar_mode.DepotAccess then
         local x = df.global.gps.dimx - 2 - 30 + 1
-        if df.global.ui_menu_width == 1 or df.global.ui_area_map_width == 2 then
+        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
             x = x - (23 + 1)
         end
 
@@ -1120,7 +1123,7 @@ function get_status()
             break
         end
 
-        local flags = df.global.announcements.flags[ann.type]
+        local flags = C_announcements().flags[ann.type]
         if flags.D_DISPLAY then
             hasnewann = true
         end
@@ -1767,8 +1770,9 @@ function close_legends()
     local ws = dfhack.gui.getCurViewscreen()
     while ws and ws.parent and ws._type ~= df.viewscreen_legendsst do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
 

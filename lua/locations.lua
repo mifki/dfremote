@@ -409,7 +409,7 @@ function locations_add_get_deity_choices(bldid)
     			local worshippers = 0
     			for j,unit in ipairs(df.global.world.units.active) do
     				--todo: I'm not completely sure these conditions are correct
-    				if not unit.flags1.dead and not unit.flags3[31] and dfhack.units.isOwnCiv(unit) then
+    				if not C_unit_dead(unit) and not unit.flags3[31] and dfhack.units.isOwnCiv(unit) then
     					local uhf = df.historical_figure.find(unit.hist_figure_id)
     					if uhf then
     						for k,l in ipairs(uhf.histfig_links) do

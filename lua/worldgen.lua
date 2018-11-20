@@ -194,7 +194,7 @@ function worldgen_get_world_info()
 
             local owner_civ = find_parent_civ(owner) --df.historical_entity.find(site.civ_id)
             --[[if not owner_civ or owner_civ.id ~= site.civ_id then
-                if site_type_name(site) == 'fortress' and #site.inhabitants == 0 then
+                if site_type_name(site) == 'fortress' and #C_world_site_inhabitants(site) == 0 then
                     table.insert(reclaimable, site)
                 end
             end]]
@@ -216,20 +216,22 @@ function worldgen_get_world_info()
             end
 
         --[[else
-            if site_type_name(site) == 'fortress' and #site.inhabitants == 0 then
+            if site_type_name(site) == 'fortress' and #C_world_site_inhabitants(site) == 0 then
                 table.insert(reclaimable, site)
             end]]
         end
 
         -- Calculate civ population
-        for j,v in ipairs(site.inhabitants) do
+        local inhabitants = C_world_site_inhabitants(site)
+        for j,v in ipairs(inhabitants) do
             local t = pops[v.race]
             if t then
                 t.pop = t.pop + v.count
             end
         end
 
-        for j,v in ipairs(site.nemesis) do
+        local nemesis = C_world_site_nemesis(site)
+        for j,v in ipairs(nemesis) do
             local n = df.nemesis_record.find(v)
             if n then
                 local fig = n.figure
