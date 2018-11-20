@@ -149,8 +149,9 @@ function create_new_world(params)
     ws = dfhack.gui.getCurViewscreen()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
     ws.breakdown_level = df.interface_breakdown_types.NONE

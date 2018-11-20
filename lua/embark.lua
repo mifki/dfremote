@@ -53,8 +53,9 @@ function embark_newgame(folder)
     ws = dfhack.gui.getCurViewscreen()
     while ws and ws.parent and ws._type ~= df.viewscreen_titlest do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
     ws.breakdown_level = df.interface_breakdown_types.NONE
@@ -483,8 +484,9 @@ function embark_reclaim(idx)
 
 	if ws2._type == df.viewscreen_setupdwarfgamest and ws2.breakdown_level == df.interface_breakdown_types.STOPSCREEN then
         local parent = ws2.parent
-        parent.child = nil
-        ws2:delete()
+        -- parent.child = nil
+        -- ws2:delete()
+        ws2.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws2 = parent
 	end
 

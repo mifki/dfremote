@@ -104,8 +104,9 @@ function close_all()
 
     while ws._type ~= df.viewscreen_dwarfmodest do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
 end
@@ -714,8 +715,9 @@ function get_status()
         local focus = dfhack.gui.getCurFocus()
         if focus == 'dfhack/lua/warn-starving' or focus == 'dfhack/lua/status_overlay' then
             local parent = ws.parent
-            parent.child = nil
-            ws:delete()
+            -- parent.child = nil
+            -- ws:delete()
+            ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
             ws = parent
         end
     end
@@ -1768,8 +1770,9 @@ function close_legends()
     local ws = dfhack.gui.getCurViewscreen()
     while ws and ws.parent and ws._type ~= df.viewscreen_legendsst do
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
 

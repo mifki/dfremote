@@ -173,8 +173,9 @@ function setup_get_server_info(clientver, pwd)
     -- Get rid of help and options screens
     if (ws._type == df.viewscreen_textviewerst and ws.page_filename:find('data/help/')) or ws._type == df.viewscreen_optionst then --hint:df.viewscreen_textviewerst
         local parent = ws.parent
-        parent.child = nil
-        ws:delete()
+        -- parent.child = nil
+        -- ws:delete()
+        ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         ws = parent
     end
 
