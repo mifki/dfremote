@@ -361,7 +361,7 @@ end
 
 function unit_jobtitle(unit, norepeatsuffix, activityonly)
     --todo: if there's an activity and a job, the game will show the job
-    if #unit.social_activities > 0 then
+    if #unit.social_activities > 0 and not unit.job.current_job then
         local actid = unit.social_activities[0]
 
         local act = df.activity_entry.find(actid)

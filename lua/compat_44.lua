@@ -11,7 +11,7 @@ function C_unit_set_geld(unit, val)
 end
 
 function C_squad_position_activities_events(sqpos)
-	return { sqpos.activities[1], sqpos.activities[2], sqpos.events[0] }, { sqpos.events[1], sqpos.events[2], sqpos.unk_118 }
+	return { sqpos.activities[0], sqpos.activities[1], sqpos.activities[2] }, { sqpos.events[0], sqpos.events[1], sqpos.events[2] }
 end
 
 function C_viewscreen_workquota_conditionst_item_type(q, i)

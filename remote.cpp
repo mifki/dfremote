@@ -391,7 +391,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
         if (df::viewscreen_dwarfmodest::_identity.is_direct_instance(ws))
         {
             {
-                CoreSuspender suspend;
+                FastCoreSuspender suspend;
                 newwidth = map_w;
                 newheight = map_h;
                 waiting_render = true;
