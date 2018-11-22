@@ -360,7 +360,14 @@ local function has_important_need(unit, need_types)
 end
 
 function unit_jobtitle(unit, norepeatsuffix, activityonly)
-    --todo: if there's an activity and a job, the game will show the job
+    local meeting = unit.meeting
+    if meeting.target_entity ~= -1 and meeting.target_role ~= -1 and not unit.job.current_job then
+        if meeting.state == df.unit.T_meeting.T_state.FollowNoble or meeting.state == df.unit.T_meeting.T_state.DoMeeting then
+            --todo: meeting.target_role is also checked but I don't know how to do it properly without hardcoding
+            return 'Attend Meeting', 11, 0
+        end
+    end
+
     if #unit.social_activities > 0 and not unit.job.current_job then
         local actid = unit.social_activities[0]
 
