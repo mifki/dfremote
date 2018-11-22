@@ -108,7 +108,7 @@ function squads_get_info()
     
         local squads = {}
     
-        for i,squad in ipairs(df.global.ui.squads.list) do
+        for i,squad in ipairs(C_squads_list()) do
         	local name = squadname(squad)
         	local ordertitle = squad_order_title(squad)
     

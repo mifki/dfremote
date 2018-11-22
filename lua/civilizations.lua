@@ -24,11 +24,17 @@ function civilization_get_info(civid)
     end
 
     local civsws = df.viewscreen_civlistst:new()
+    if df_ver >= 4412 then --dfver:4412-
+        civsws.page = 0
+    end
     civsws.entities:insert(0, civ)
     gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)
 
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_entityst
+    if ws._type ~= df.viewscreen_entityst then
+        error('failed to switch to civ info screen')
+    end
     ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     local leaders = {}
@@ -107,6 +113,9 @@ function civilization_get_agreement(civid, idx)
     end
 
     local civsws = df.viewscreen_civlistst:new()
+    if df_ver >= 4412 then --dfver:4412-
+        civsws.page = 0
+    end
     civsws.entities:insert(0, civ)
     gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)

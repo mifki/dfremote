@@ -97,3 +97,12 @@ end
 function C_unit_corpse_name(unit)
 	return unit.enemy.undead.unk_7
 end
+
+function C_squads_list()
+	if dfhack.VERSION == '0.44.12-r1' then
+		-- squad list is in a wrong location and has a wrong type
+		return df.reinterpret_cast(df.global.ui.squads.list, df.global.ui.squads.unk_44_12i)
+	end
+
+	return df.global.ui.squads.list
+end

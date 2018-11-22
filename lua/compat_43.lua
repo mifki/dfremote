@@ -73,3 +73,7 @@ end
 function C_unit_corpse_name(unit)
 	return unit.enemy.undead.anon_7
 end
+
+function C_squads_list()
+	return df.global.ui.squads.list
+end

@@ -239,3 +239,7 @@ end
 function errmsg_wrongmode()
     return 'wrong mode ' .. tostring(df.global.ui.main.mode) .. ' ' .. dfhack.gui.getCurFocus()
 end
+
+function whole(v)
+    return type(v) == 'number' and v or v.whole
+end

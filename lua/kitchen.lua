@@ -36,7 +36,7 @@ function kitchen_get_data()
                 local title = string.utf8capitalize(dfhack.df2utf(v.value))
                 local id = { ws.item_type[i-1][j], ws.item_subtype[i-1][j], ws.mat_type[i-1][j], ws.mat_index[i-1][j] }
                 
-                table.insert(ret[i][2], { title, ws.count[i-1][j], ws.forbidden[i-1][j], ws.possible[i-1][j], id })
+                table.insert(ret[i][2], { title, ws.count[i-1][j], whole(ws.forbidden[i-1][j]), whole(ws.possible[i-1][j]), id })
             end
         end
 
