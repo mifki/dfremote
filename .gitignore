@@ -7,3 +7,8 @@ enet/config.log
 enet/config.status
 enet/libtool
 enet/Makefile
+x64
+Release
+remote64.vcxproj.user
+.vs
+dist/0.*
