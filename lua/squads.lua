@@ -68,7 +68,7 @@ end
 function squads_get_list()
     local squads = {}
     local leaders = {}
-
+print(dfhack.gui.getCurViewscreen())
     execute_with_military_screen(function(ws)
         for i,squad in ipairs(ws.squads.list) do
             if squad then
@@ -574,6 +574,7 @@ local function confirm_uniform(ws, uniformid)
 
     ws.layer_objects[57].cursor = uniidx --hint:df.layer_object_listst
     gui.simulateInput(ws, K'SELECT')
+
     return true    
 end
 
@@ -581,30 +582,36 @@ end
 function squad_create_with_leader(assid, uniformid)
     return execute_with_military_screen(function(ws)
         if assid == -1 then
-            if #ws.squads.list == 0 or (#ws.squads.list == 1 and not ws.squads.list[0]) then
-                gui.simulateInput(ws, K'D_MILITARY_CREATE_SQUAD')
-                return confirm_uniform(ws, uniformid)                
+            if #ws.squads.list == 0 or ws.num_squads < #ws.squads.list then
+                for i,v in ipairs(ws.squads.list) do
+                    if not v then
+                        gui.simulateInput(ws, K'D_MILITARY_CREATE_SQUAD')
+                        return confirm_uniform(ws, uniformid)                
+                    end
+
+                    gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
+                end
+
+                -- this should not be reached, but if that happened, scrolling down will reset back to the first item
+                gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
             end
 
             for i,v in ipairs(ws.squads.can_appoint) do
                 if istrue(v) then
                     gui.simulateInput(ws, K'D_MILITARY_CREATE_SUB_SQUAD')
                     return confirm_uniform(ws, uniformid)
-                else
-                    gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
                 end
+
+                gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
             end
         else
             for i,ass in ipairs(ws.squads.leader_assignments) do
-                if ass.id == assid and not ws.squads.list[i] then
-                    if i > 0 then
-                        ws.layer_objects[0].cursor = i-1 --hint:df.layer_object_listst
-                        gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
-                    end
-
+                if ass.id == assid then
                     gui.simulateInput(ws, K'D_MILITARY_CREATE_SQUAD')
                     return confirm_uniform(ws, uniformid)
                 end
+
+                gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')            
             end
         end
     end)

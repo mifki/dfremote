@@ -83,6 +83,20 @@ function execute_with_nobles_screen(reset, fn)
 end
 
 function execute_with_military_screen(fn)
+	-- military screen commits changes (squad creation) upon destruction, so that if the app creates a squad,
+	-- and requests a list straight away, the screen will not have been destroyed yet, and a new screen won't
+	-- show changes. so if the old screen is still there, reuse it
+	local milws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_militaryst
+	if milws._type == df.viewscreen_layer_militaryst and milws.breakdown_level == df.interface_breakdown_types.STOPSCREEN then
+		local ok,ret = pcall(fn, milws)
+
+		if not ok then
+			error (ret)
+		end
+
+		return ret
+	end
+
 	return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
 		gui.simulateInput(ws, K'D_MILITARY')
 		local milws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_militaryst
