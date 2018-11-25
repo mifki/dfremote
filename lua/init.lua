@@ -474,7 +474,26 @@ function get_look_list(detailed)
                 local layer = geobiome.layers[geolayer_idx]
                 local matinfo = dfhack.matinfo.decode(0, layer.mat_index)
 
-                --print(biome_idx, geolayer_idx, rbio.geo_index, mat)
+                if ttmat == df.tiletype_material.SOIL and not matinfo.inorganic.flags.SOIL_ANY then
+                    -- find the default (first) soil layer
+                    for i,v in ipairs(geobiome.layers) do
+                        local mi = dfhack.matinfo.decode(0, v.mat_index)
+                        if mi.inorganic.flags.SOIL_ANY then
+                            matinfo = mi
+                            break
+                        end
+                    end
+                elseif ttmat == df.tiletype_material.STONE and matinfo.inorganic.flags.SOIL_ANY then
+                    -- find the default (first) stone layer
+                    for i,v in ipairs(geobiome.layers) do
+                        local mi = dfhack.matinfo.decode(0, v.mat_index)
+                        if not mi.inorganic.flags.SOIL_ANY then
+                            matinfo = mi
+                            break
+                        end
+                    end
+                end
+
                 if df.tiletype.attrs[tt].special == df.tiletype_special.FURROWED then
                     title = 'furrowed ' .. matinfo.material.state_name[0]
                 else
