@@ -563,6 +563,8 @@ function embark_back_to_map()
 
 	reset_embark_warning_flags(ws.parent)
 	
+	--todo: remove everything from df.global.world.units.all - unsure how important it is
+	
 	--todo: app reloads data straight away, while the screen will change only the next tick
 end
 
