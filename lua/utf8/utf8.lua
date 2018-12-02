@@ -281,15 +281,16 @@ local function utf8replace1st(s, mapping)
 	while pos <= bytes do
 		charbytes = utf8charbytes(s, pos)
 		local c = strsub(s, pos, pos + charbytes - 1)
-		if c == ' ' or c == '-' then
+
+		if c == ' ' or c == '-' or c == '*' then
 			first = true
 			newstr = newstr .. c
 		else
 			newstr = newstr .. (first and mapping[c] or c)
+			first = false
 		end
 
 		pos = pos + charbytes
-		first = false
 	end
 
 	return newstr
@@ -312,9 +313,9 @@ if not string.utf8upper and utf8_lc_uc then
 end
 
 -- install in the string library
-if not string.utf8capitalize and utf8_lc_uc then
+-- if not string.utf8capitalize and utf8_lc_uc then
 	string.utf8capitalize = utf8capitalize
-end
+-- end
 
 -- identical to string.lower except it knows about unicode simple case conversions
 local function utf8lower(s)
