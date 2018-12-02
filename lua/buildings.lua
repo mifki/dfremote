@@ -106,7 +106,7 @@ end
 
 --luacheck: in=number
 function building_query_selected(bldid)
-    local ws = dfhack.gui.getCurViewscreen()
+    local ws = dfhack.gui.getCurViewscreen(true)
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
     end
