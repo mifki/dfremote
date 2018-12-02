@@ -1,3 +1,8 @@
+-- Most of the functions below operate on the currently selected building only,
+-- even if they accept a [unused] building id argument.
+-- Building interactions usually start with building_query_selected, which
+-- will try to transition to [q]uery mode and select the passed building.
+
 function get_squads_use(bld)
     local squads = {}
     local eid = df.global.ui.main.fortress_entity.id
@@ -99,8 +104,6 @@ local function bait_idx(t)
     return 0
 end
 
---xxx: most of the functions below can operate on the currently selected building only
---xxx: this function will try to transition to [q]uery mode and select the passed building
 --luacheck: in=number
 function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen()
@@ -262,7 +265,7 @@ function building_query_selected(bldid)
         or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
         or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack or btype == df.building_type.ArcheryTarget
         or btype == df.building_type.Coffin or btype == df.building_type.Slab or btype == df.building_type.Cage
-        or btype == df.building_type.Chain or btype == df.building_type.Well then
+        or btype == df.building_type.Chain or btype == df.building_type.Well or btype == df.building_type.DisplayFurniture then
 
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
@@ -384,6 +387,29 @@ function building_query_selected(bldid)
 
             local flags = packbits(is_active, is_full)
             table.insert(ret, flags)
+
+        elseif btype == df.building_type.DisplayFurniture then
+            table.insert(ret, {})            
+
+            local lname = mp.NIL
+            if bld.is_room and bld.location_id ~= -1 then
+                local loc = location_find_by_id(bld.location_id)
+                if loc then
+                    lname = locname(loc)
+                end
+            end
+            table.insert(ret, lname)
+
+        elseif btype == df.building_type.Statue then
+            local lname = mp.NIL
+            if bld.is_room and bld.location_id ~= -1 then
+                local loc = location_find_by_id(bld.location_id)
+                if loc then
+                    lname = locname(loc)
+                end
+            end
+            table.insert(ret, lname)
+
         end
 
     elseif btype == df.building_type.FarmPlot then
@@ -477,7 +503,7 @@ function building_workshop_set_repeat(bldid, idx, value)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -495,7 +521,7 @@ function building_workshop_set_suspend(bldid, idx, value)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -516,7 +542,7 @@ function building_workshop_set_do_now(bldid, idx, value)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -537,7 +563,7 @@ function building_workshop_cancel(bldid, idx)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -556,7 +582,7 @@ function building_workshop_reorder(bldid, fromidx, toidx)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -684,7 +710,7 @@ function building_workshop_get_jobchoices(bldid)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -804,7 +830,7 @@ function building_workshop_addjob(bldid, idx, rep)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -924,7 +950,7 @@ function building_workshop_profile_get(bldid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -970,7 +996,7 @@ function building_workshop_profile_set_minmax(bldid, min, max)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1006,7 +1032,7 @@ function building_workshop_profile_set_unit(bldid, unitid, on)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1048,7 +1074,7 @@ function building_room_free(bldid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         print('b')
         return
     end
@@ -1072,6 +1098,7 @@ function building_room_free(bldid)
         [df.building_type.Cage] = K'BUILDJOB_CAGE_FREE',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_FREE',
         [df.building_type.Well] = K'BUILDJOB_WELL_FREE',
+        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_FREE',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1086,7 +1113,7 @@ function building_room_owner_get_candidates(bldid)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1106,6 +1133,7 @@ function building_room_owner_get_candidates(bldid)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1139,7 +1167,7 @@ function building_room_owner_get_candidates2(bldid)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1159,6 +1187,7 @@ function building_room_owner_get_candidates2(bldid)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1192,7 +1221,7 @@ function building_room_owner_set(bldid, idx)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1212,6 +1241,7 @@ function building_room_owner_set(bldid, idx)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1236,7 +1266,7 @@ function building_room_owner_set2(bldid, id)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1256,6 +1286,7 @@ function building_room_owner_set2(bldid, id)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
+        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
@@ -1285,7 +1316,7 @@ function building_set_flag(bldid, flag, value)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1421,7 +1452,7 @@ function building_room_set_squaduse(bldid, squadid, mode)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1510,7 +1541,7 @@ function building_remove(bldid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1527,7 +1558,7 @@ function building_stopremoval(bldid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1542,7 +1573,7 @@ function building_suspend(bldid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1557,7 +1588,7 @@ function building_farm_set_crop(bldid, season, plantid)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1765,7 +1796,7 @@ function building_assign_get_candidates(bldid)
         error(errmsg_wrongscreen(ws))
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         error('no selected building')
     end
 
@@ -1830,7 +1861,7 @@ function building_assign(bldid, objid, objtype, on)
         return
     end
 
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
         return
     end
 
@@ -1925,7 +1956,7 @@ function building_quick_action(idx)
     
     local bld = df.global.world.selected_building
 
-    if df.global.ui.main.mode ~= 17 or bld == nil then
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or bld == nil then
         return
     end
 
@@ -2080,7 +2111,157 @@ function building_focus(bld, ws)
     recenter_view(x, y, bld.z)
 end
 
+local display_items_cache = nil
+local display_items
+
+function init_display_items_cache(bldid)
+    execute_with_display_items_for_building(bldid, function(ws, bld)
+        local ret = {}
+
+        for i,v in ipairs(ws.item_type) do
+            if v == -1 then
+                local items = {}
+                for j,w in ipairs(ws.artifacts) do
+                    table.insert(items, { itemname(w, 1), w.id })
+                end
+
+                table.insert(ret, { 'artifacts', i, items })
+            else
+                local items = {}
+                for j,w in ipairs(ws.items[v]) do
+                    table.insert(items, { itemname(w, 3), w.id })
+                end
+
+                table.insert(ret, { item_type_plural_names[v], i, items })
+            end
+
+            gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
+        end
+
+        display_items_cache = ret
+    end)
+end
+
+function building_displayed_items_get_categories(bldid)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or bld == nil then
+        return
+    end
+
+    if bld._type ~= df.building_display_furniturest then
+        error('wrong building type '..tostring(bld._type))
+    end
+
+    -- if not display_items_cache then
+        init_display_items_cache()
+    -- end
+
+    local ret = {}
+
+    for i,v in ipairs(display_items_cache) do
+        table.insert(ret, { v[1], v[2], #v[3] })
+    end
+
+    return ret
+end
+
+function building_displayed_items_get_choices(bldid, catidx)
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or bld == nil then
+        return
+    end
+
+    if bld._type ~= df.building_display_furniturest then
+        error('wrong building type '..tostring(bld._type))
+    end
+
+    -- if not display_items_cache then
+        init_display_items_cache()
+    -- end
+
+    local ret = {}
+
+    for i,v in ipairs(display_items_cache[catidx+1][3]) do
+        table.insert(ret, v)
+    end
+
+    return ret
+end
+
+function building_displayed_items_assign(bldid, itemids)
+    execute_with_display_items_for_building(bldid, function(ws, bld)
+        for i,v in ipairs(itemids) do
+            --todo: don't need to sort in this case I guess
+            utils.insert_sorted(ws.selected_item_ids, v)
+        end
+
+        gui.simulateInput(ws, K'LEAVESCREEN')        
+    end)    
+end
+
+function building_displayed_items_remove(bldid, itemid)
+    local ws = dfhack.gui.getCurViewscreen(true)
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    local bld = df.global.world.selected_building --as:df.building_display_furniturest
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or bld == nil then
+        return
+    end
+
+    if bld._type ~= df.building_display_furniturest then
+        error('wrong building type '..tostring(bld._type))
+    end
+
+    for i,v in ipairs(bld.displayed_items) do
+        if v == itemid then
+            df.global.ui_sidebar_menus.job_details.displayed_items_cursor = i
+            gui.simulateInput(ws, K'BUILDJOB_DISPLAY_FURNITURE_CANCEL')
+            return true
+        end
+    end
+end
+
+function building_displayed_items_cancel()
+    display_items_cache = nil
+end
+
+function building_set_name(bldid, name)
+    local bld
+    if bldid and bldid ~= -1 then
+        bld = df.building.find(bldid)
+    else
+        bld = df.global.world.selected_building
+    end
+
+    if not bld then
+        error('no building with id '..tostring(bldid))
+    end
+
+    bld.name = name
+
+    return bldname(bld)
+end
+
 --print(pcall(function() return json:encode(building_assign_get_candidates()) end))
 --print(pcall(function() return json:encode(building_workshop_profile_get(4899)) end))
 --print(pcall(function() return json:encode(building_workshop_get_jobchoices(0)) end))
 --print(pcall(function() return json:encode(buildings_get_list()) end))
+-- print(pcall(function() return json:encode(building_displayed_items_get_categories()) end))
+--print(pcall(function() return json:encode(building_displayed_items_get_choices(-1, 2)) end))
+--print(pcall(function() return json:encode(building_displayed_items_remove(-1, 3232)) end))
+--print(pcall(function() return json:encode(building_displayed_items_assign(-1, {3232})) end))
