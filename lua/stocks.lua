@@ -201,7 +201,7 @@ function stocks_get_categories()
 
     for i,v in ipairs(stocks_category_types) do
         local name = item_type_plural_names[v]
-        local cat = data.cats[type]
+        local cat = data.cats[v]
         table.insert(list, { name, v, cat.count, cat.busy })
     end
 
