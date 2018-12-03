@@ -2200,6 +2200,10 @@ function building_displayed_items_get_choices(bldid, catidx)
     return ret
 end
 
+function building_displayed_items_search(bldid, q)
+    return {}
+end
+
 function building_displayed_items_assign(bldid, itemids)
     execute_with_display_items_for_building(bldid, function(ws, bld)
         for i,v in ipairs(itemids) do

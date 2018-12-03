@@ -2194,6 +2194,7 @@ local handlers = {
         [6] = building_start_resize,
         [7] = building_suspend,
         [8] = building_quick_action,
+        [9] = building_set_name,
 
         [10] = building_workshop_get_jobchoices,
         [11] = building_workshop_set_repeat,
@@ -2219,6 +2220,13 @@ local handlers = {
         
         [50] = buildings_get_list2,
         [51] = building_goto,
+
+        [60] = building_displayed_items_get_categories,
+        [61] = building_displayed_items_get_choices,
+        [62] = building_displayed_items_assign,
+        [63] = building_displayed_items_remove,
+        [64] = building_displayed_items_cancel,
+        [65] = building_displayed_items_search,
     },
 
     [176] = {
