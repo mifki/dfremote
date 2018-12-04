@@ -89,6 +89,7 @@ item_type_plural_names = {
     [87]    =   'egg',
     [88]    =   'codices',
     [89]    =   'sheet',
+    [90]    =   'branches',
 }
 
 local stocks_category_types = {
