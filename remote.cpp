@@ -207,7 +207,7 @@ static void patch_rendering(bool enable_lower_levels)
 
     if (!ready)
     {
-        (new MemoryPatcher(Core::getInstance().p))->makeWritable((void*)addr, sizeof(p_render_lower_levels.len));
+        (new MemoryPatcher(Core::getInstance().p.get()))->makeWritable((void*)addr, sizeof(p_render_lower_levels.len));
         memcpy(orig, (void*)addr, p_render_lower_levels.len);
         ready = true;
     }
@@ -1231,7 +1231,7 @@ void enthreadmain(ENetHost *server)
 
 void disable_local_map()
 {
-    MemoryPatcher p(Core::getInstance().p);
+    MemoryPatcher p(Core::getInstance().p.get());
     apply_patch(&p, p_dwarfmode_render);        
 }
 
