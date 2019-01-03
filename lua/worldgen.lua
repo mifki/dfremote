@@ -10,7 +10,7 @@ function worldgen_status()
         error(errmsg_wrongscreen(ws))
     end
 
-    if ws.unk_b4 ~= 0 then
+    if istrue(ws.load_world_params) then
         return { 'loading' }
     end
 
