@@ -2201,7 +2201,37 @@ function building_displayed_items_get_choices(bldid, catidx)
 end
 
 function building_displayed_items_search(bldid, q)
-    return {}
+    local ws = dfhack.gui.getCurViewscreen()
+    if ws._type ~= df.viewscreen_dwarfmodest then
+        return
+    end
+
+    local bld = df.global.world.selected_building
+
+    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or bld == nil then
+        return
+    end
+
+    if bld._type ~= df.building_display_furniturest then
+        error('wrong building type '..tostring(bld._type))
+    end
+
+    -- if not display_items_cache then
+        init_display_items_cache()
+    -- end
+
+    local ret = {}
+    q = q:lower()
+
+    for i,v in ipairs(display_items_cache) do
+        for j,w in ipairs(v[3]) do
+            if w[1]:find(q) then
+                table.insert(ret, w)
+            end
+        end
+    end
+
+    return ret
 end
 
 function building_displayed_items_assign(bldid, itemids)
