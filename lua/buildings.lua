@@ -400,6 +400,15 @@ function building_query_selected(bldid)
             end
             table.insert(ret, lname)
 
+            local dispitems = {}
+            for i,v in ipairs(bld.displayed_items) do --hint:df.building_display_furniturest
+                local item = df.item.find(v)
+                local iname = item and itemname(item, 0, false) or '#unknown item#'
+
+                table.insert(dispitems, { iname, v })
+            end
+            table.insert(ret, dispitems)
+
         elseif btype == df.building_type.Statue then
             local lname = mp.NIL
             if bld.is_room and bld.location_id ~= -1 then
@@ -2121,18 +2130,25 @@ function init_display_items_cache(bldid)
         for i,v in ipairs(ws.item_type) do
             if v == -1 then
                 local items = {}
+                local items2 = {}
                 for j,w in ipairs(ws.artifacts) do
-                    table.insert(items, { itemname(w, 1), w.id })
+                    local iname = itemname(w, 3)
+                    table.insert(items, { iname, w.id })
+                    table.insert(items2, iname:utf8lower())
                 end
 
-                table.insert(ret, { 'artifacts', i, items })
+                table.insert(ret, { 'artifacts', i, items, items2 })
             else
                 local items = {}
+                local items2 = {}
+
                 for j,w in ipairs(ws.items[v]) do
-                    table.insert(items, { itemname(w, 3), w.id })
+                    local iname = itemname(w, 3)
+                    table.insert(items, { iname, w.id })
+                    table.insert(items2, iname:utf8lower())
                 end
 
-                table.insert(ret, { item_type_plural_names[v], i, items })
+                table.insert(ret, { item_type_plural_names[v], i, items, items2 })
             end
 
             gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
@@ -2224,9 +2240,10 @@ function building_displayed_items_search(bldid, q)
     q = q:lower()
 
     for i,v in ipairs(display_items_cache) do
-        for j,w in ipairs(v[3]) do
-            if w[1]:find(q) then
-                table.insert(ret, w)
+        local items = v[3]
+        for j,w in ipairs(v[4]) do
+            if w:find(q) then
+                table.insert(ret, items[j])
             end
         end
     end
