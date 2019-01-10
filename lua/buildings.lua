@@ -300,7 +300,7 @@ function building_query_selected(bldid)
         
         elseif btype == df.building_type.Coffin then
             local bld = bld --as:df.building_coffinst
-            local buried = owner and C_unit_dead(owner) or false
+            local buried = owner and C_unit_dead(owner) or false --todo: is this the right way?
             local mode = bld.burial_mode
             local flags = packbits(mode.allow_burial, not mode.no_citizens, not mode.no_pets, buried)
             table.insert(ret, flags)
@@ -505,10 +505,27 @@ local function get_squads_use(bld)
     return squads
 end
 
+local function building_is_machine(btype)
+    return btype == df.building_type.Windmill or btype == df.building_type.WaterWheel or btype == df.building_type.AxleVertical
+        or btype == df.building_type.AxleHorizontal or btype == df.building_type.GearAssembly or btype == df.building_type.Rollers
+        or btype == df.building_type.ScrewPump
+end
+
+local function building_can_be_room(btype)
+    return btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
+        or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
+        or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack or btype == df.building_type.ArcheryTarget
+        or btype == df.building_type.Coffin or btype == df.building_type.Slab or btype == df.building_type.Cage
+        or btype == df.building_type.Chain or btype == df.building_type.Well or btype == df.building_type.DisplayFurniture
+end
+
+local function building_is_workshop(btype, bsub)
+    return (btype == df.building_type.Workshop or btype == df.building_type.Furnace
+        or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
+end
+
 function query__specific_info(bld)
     local btype = bld:getType()
-    local workshop_like = (btype == df.building_type.Workshop or btype == df.building_type.Furnace
-        or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
 
     if btype == df.building_type.TradeDepot then
         local bld = bld --as:df.building_tradedepotst
@@ -530,10 +547,7 @@ function query__specific_info(bld)
     end
 
     -- machine
-    if btype == df.building_type.Windmill or btype == df.building_type.WaterWheel or btype == df.building_type.AxleVertical
-        or btype == df.building_type.AxleHorizontal or btype == df.building_type.GearAssembly or btype == df.building_type.Rollers
-        or btype == df.building_type.ScrewPump then
-
+    if building_is_machine(btype) then
         local machine = bld.machine
         local ttype = dfhack.maps.getTileType(bld.centerx, bld.centery, bld.z)
         local stable_foundation = (ttype ~= df.tiletype.OpenSpace)
@@ -557,7 +571,7 @@ function query__specific_info(bld)
     end
 
     -- workshops, furnaces, and also levers and pressure plates
-   if workshop_like then
+   if building_is_workshop(btype, bld:getSubtype()) then
         local jobs = {}
         for i,job in ipairs(bld.jobs) do
             local title = jobname(job)
@@ -619,7 +633,7 @@ function query__specific_info(bld)
     if btype == df.building_type.ArcheryTarget then
         local bld = bld --as:df.building_archerytargetst
         
-        reutrn { bld.archery_direction, get_squads_use(bld) }
+        return { bld.archery_direction, get_squads_use(bld) }
     end
 
     if btype == df.building_type.Box or btype == df.building_type.Cabinet
@@ -629,6 +643,7 @@ function query__specific_info(bld)
     
     if btype == df.building_type.Coffin then
         local bld = bld --as:df.building_coffinst
+        local owner = bld.owner
         local buried = owner and C_unit_dead(owner) or false
         local mode = bld.burial_mode
         local flags = packbits(mode.allow_burial, not mode.no_citizens, not mode.no_pets, buried)
@@ -717,9 +732,6 @@ function query__specific_info(bld)
         end
 
         return { dispitems }
-    end    
-
-    if btype == df.building_type.Statue then
     end    
 
     if btype == df.building_type.FarmPlot then
@@ -815,40 +827,71 @@ end
 function query__room_info(bld)
     local btype = bld:getType()
 
-    if btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
-        or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
-        or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack or btype == df.building_type.ArcheryTarget
-        or btype == df.building_type.Coffin or btype == df.building_type.Slab or btype == df.building_type.Cage
-        or btype == df.building_type.Chain or btype == df.building_type.Well or btype == df.building_type.DisplayFurniture then
-
+    if bld.is_room then
         local owner = bld.owner
         local ownername = owner and unit_fulltitle(owner) or ''
-        if owner and owner.relationship_ids[df.unit_relationship_type.Spouse] ~= -1 then
+        
+        if btype ~= df.building_type.Coffin and owner and owner.relationship_ids[df.unit_relationship_type.Spouse] ~= -1 then
             local owner2 = df.unit.find(owner.relationship_ids[df.unit_relationship_type.Spouse])
             if owner2 then
                 ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
             end
         end
-        local ownerprof = mp.NIL --xxx: unused because fulltitle already includes profession (and becase of spouses)
+
+        -- normally rooms can be assigned and the owner is displayed
+        local can_assign = true
+        local show_owner = true
+        local show_squads = false
+
+        if btype == df.building_type.Bed then
+            -- owner is shown when it's not barracks or dormitory
+            show_owner = not bld.bed_flags.barracks and not bld.bed_flags.dormitory
+            show_squads = bld.bed_flags.barracks
         
-        return { bld.is_room, ownername, ownerprof }
+            -- can assign if not in a tavern
+            local loc = bld.location_id ~= -1 and location_find_by_id(bld.location_id)
+            can_assign = not loc or loc._type ~= df.abstract_building_inn_tavernst
+                
+        elseif btype == df.building_type.ArcheryTarget then
+            -- archery targets have no owners
+            can_assign = false
+            show_owner = false
+            show_squads = true
+        
+        elseif btype == df.building_type.Box or btype == df.building_type.Cabinet or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack then
+            -- owner is shown when it's set, otherwise squads are shown
+            show_owner = #ownername > 0
+            show_squads = not show_owner
+                
+        elseif btype == df.building_type.Cage then
+            -- owner is shown when it's set
+            show_owner = #ownername > 0
+        
+        elseif btype == df.building_type.Chain then
+            -- chain can have owner when it's not used by justice
+            show_owner = not bld.flags.justice and #ownername > 0
+            can_assign = not bld.flags.justice
+        
+        elseif btype == df.building_type.Well then
+            -- wells have no owners
+            can_assign = false
+            show_owner = false        
+        end
+
+        local flags = packbits(can_assign, show_owner, show_squads)
+
+        local loc = bld.location_id ~= -1 and location_find_by_id(bld.location_id)
+        local lname = loc and (locname(loc) or '#unknown location#') or mp.NIL
+        
+        --todo: pass owners as an array and include unit ids
+        return {
+            flags, ownername,
+            show_squads and get_squads_use(bld) or mp.NIL,
+            lname, bld.location_id,
+        }
     end
 
     return nil    
-end
-
-function query__location_info(bld)
-    if bld.is_room and bld.location_id ~= -1 then
-        local loc = location_find_by_id(bld.location_id)
-        if loc then
-            local lname = locname(loc)
-            local is_tavern = loc._type == df.abstract_building_inn_tavernst
-
-            return { lname, bld.location_id, is_tavern } --todo: pass location type
-        end
-    end
-
-    return nil
 end
 
 --luacheck: in=number
@@ -889,10 +932,12 @@ function building_query_selected2(bldid)
     local curstage = bld:getBuildStage()
     local maxstage = bld:getMaxBuildStage()
     local constructed = (curstage == maxstage)
-    local workshop_like = (btype == df.building_type.Workshop or btype == df.building_type.Furnace
-        or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
+    
+    local workshop_like = building_is_workshop(btype, bsub)
+    local can_be_room = building_can_be_room(btype)
+    local is_machine = building_is_machine(btype)
 
-    local genflags = packbits(removing, forbidden, actual, constructed, workshop_like)
+    local genflags = packbits(removing, forbidden, actual, constructed, workshop_like, can_be_room, is_machine)
 
     if not constructed then
         local needsarchitect = (bld:needsDesign() and bld.design and not bld.design.flags.designed) --hint:df.building_actual
@@ -925,7 +970,6 @@ function building_query_selected2(bldid)
     return {
         bldname(bld), bld.id, btype, genflags, bldname(bld, true),
         query__room_info(bld) or mp.NIL,
-        query__location_info(bld) or mp.NIL,
         query__specific_info(bld) or mp.NIL,
     }
 end
