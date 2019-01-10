@@ -86,8 +86,15 @@ function unitprof(unit)
     return string.utf8capitalize(prof)
 end
 
-function bldname(bld)
+function bldname(bld, no_custom)
+    local custom_name = bld.name
+    if no_custom then
+        bld.name = ''
+    end
+
     local name = dfhack.df2utf(utils.call_with_string(bld, 'getName'))
+    bld.name = custom_name
+
     name = name:gsub('\\f', SYMBOL_FEMALE_UTF):gsub('\\m', SYMBOL_MALE_UTF)
     return string.utf8capitalize(name)
 end

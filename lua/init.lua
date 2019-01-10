@@ -2190,6 +2190,7 @@ local handlers = {
         [2] = building_stopremoval,
         [3] = building_get_contained_items,
         [4] = building_query_selected,
+        [104] = building_query_selected2,
         [5] = building_set_flag,
         [6] = building_start_resize,
         [7] = building_suspend,
