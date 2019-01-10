@@ -68,7 +68,7 @@ end
 function squads_get_list()
     local squads = {}
     local leaders = {}
-print(dfhack.gui.getCurViewscreen())
+
     execute_with_military_screen(function(ws)
         for i,squad in ipairs(ws.squads.list) do
             if squad then
@@ -133,142 +133,7 @@ function squads_get_info()
     end)
 end
 
--- DEPRECATED BELOW
-
---luacheck: in=number
-function squads_cancel_order(idx)
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-
-        df.global.ui.squads.sel_squads[idx] = true
-    
-        gui.simulateInput(ws, K'D_SQUADS_CANCEL_ORDER')
-
-        return true
-    end)
-end
-
---luacheck: in=number
-function squads_order_move(idx)
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-
-        df.global.ui.squads.sel_squads[idx] = true
-
-        gui.simulateInput(ws, K'D_SQUADS_MOVE')
-    
-        return true
-    end, true)
-end
-
---luacheck: in=number
-function squads_order_attack_list(idx)
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-
-        df.global.ui.squads.sel_squads[idx] = true
-    
-        gui.simulateInput(ws, K'D_SQUADS_KILL')
-        ws:logic()
-        gui.simulateInput(ws, K'D_SQUADS_KILL_LIST')
-    
-        return true
-    end, true)
-end
-
---luacheck: in=number
-function squads_order_attack_rect(idx)
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-    
-        df.global.ui.squads.sel_squads[idx] = true
-    
-        gui.simulateInput(ws, K'D_SQUADS_KILL')
-        ws:logic()
-        gui.simulateInput(ws, K'D_SQUADS_KILL_RECT')
-
-        return true
-    end, true)
-end
-
---luacheck: in=number
-function squads_order_attack_map(idx)
-    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
-        squads_reset()
-        gui.simulateInput(ws, K'D_SQUADS')
-
-        df.global.ui.squads.sel_squads[idx] = true
-
-        gui.simulateInput(ws, K'D_SQUADS_KILL')
-
-        return true
-    end, true)
-end
-
---luacheck: in=number
-function squads_attack_list_get(idx)
-    local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error(errmsg_wrongmode())
-    end
-
-    local squadsui = df.global.ui.squads
-
-    if not squadsui.in_kill_list then
-    	error('wrong state')
-    end
-
-    local ret = {}
-
-    for i,t in ipairs(squadsui.kill_targets) do
-    	local name = unit_creature_name(t)
-    	table.insert(ret, { name, squadsui.sel_kill_targets[i] })
-    end
-
-    return ret
-end
-
---luacheck: in=number[]
-function squads_attack_list_confirm(idxs)
-    local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.Squads then
-        error(errmsg_wrongmode())
-    end
-
-    local squadsui = df.global.ui.squads
-
-    if not squadsui.in_kill_list then
-    	error('wrong state')
-    end
-
-    for i=0,#df.global.ui.squads.sel_kill_targets-1 do
-    	df.global.ui.squads.sel_kill_targets[i] = false
-    end
-
-    for i,idx in pairs(idxs) do
-	    df.global.ui.squads.sel_kill_targets[idx] = true
-	end
-
-	gui.simulateInput(ws, K'SELECT')
-
-    return true
-end
-
--- NEW BELOW
-
-function squads_cancel_order2(id)
+function squads_cancel_order(id)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
         error('no squad '..tostring(id))
@@ -287,7 +152,7 @@ function squads_cancel_order2(id)
 end
 
 --luacheck: in=number
-function squads_order_move2(id)
+function squads_order_move(id)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
         error('no squad '..tostring(id))
@@ -306,7 +171,7 @@ function squads_order_move2(id)
 end
 
 --luacheck: in=number
-function squads_attack_list_get2(id)
+function squads_attack_list_get(id)
     local function _process()
         local ret = {}
     
@@ -343,7 +208,7 @@ function squads_attack_list_get2(id)
 end
 
 --luacheck: in=number,number[]
-function squads_attack_list_confirm2(id, targetids)
+function squads_attack_list_confirm(id, targetids)
     local function _process(ws)
         local targets = {}
         for i,v in ipairs(targetids) do
@@ -352,7 +217,6 @@ function squads_attack_list_confirm2(id, targetids)
     
         for i,unit in ipairs(df.global.ui.squads.kill_targets) do
             df.global.ui.squads.sel_kill_targets[i] = targets[unit.id] and true or false
-            print('# '..tostring(targets[unit.id] and true or false))
         end
 
     	gui.simulateInput(ws, K'SELECT')
@@ -387,7 +251,7 @@ function squads_attack_list_confirm2(id, targetids)
 end
 
 --luacheck: in=number
-function squads_order_attack_rect2(id)
+function squads_order_attack_rect(id)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
         error('no squad '..tostring(id))
@@ -408,7 +272,7 @@ function squads_order_attack_rect2(id)
 end
 
 --luacheck: in=number
-function squads_order_attack_map2(id)
+function squads_order_attack_map(id)
     local sqidx = squad_id2idx(id)
     if sqidx == -1 then
         error('no squad '..tostring(id))

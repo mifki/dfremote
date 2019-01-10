@@ -16,7 +16,7 @@ local mood_items = { --as:string[][]
 
     ['bone'] = { 'bones', 'skeletons', 'bones... yes' },
     ['shell'] = { 'shells', 'shells', 'a shell...' },
-    ['skull'] = { 'body parts', 'death', 'a corpse', '__things' },
+    ['skull'] = { 'body parts', 'death', 'a corpse', 'things... certain things' },
 }
 
 function building_workshop_get_mood(bld)
@@ -85,407 +85,6 @@ local function bait_idx(t)
     return 0
 end
 
---luacheck: in=number
-function building_query_selected(bldid)
-    local ws = dfhack.gui.getCurViewscreen(true)
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    local bld
-    if bldid and bldid ~= -1 then
-        bld = df.building.find(bldid)
-    else
-        bld = df.global.world.selected_building
-    end
-
-    if not bld then
-        error('no building with id '..tostring(bldid))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building ~= bld then
-        df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
-
-        building_focus(bld)
-    end
-
-    --todo: this is temporary for backward compatibility with old apps that don't call building_stockpile_edit_settings
-    stockpile_editing_settings = nil
-
-    local btype = bld:getType()
-    local bsub = bld:getSubtype()
-    local bname = bldname(bld)
-    local ret = nil
-
-    local removing = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.DestroyBuilding)
-    local actual = df.building_actual:is_instance(bld)
-    local forbidden = actual and #bld.contained_items > 0 and bld.contained_items[0].item.flags.forbid --hint:df.building_actual
-
-    local curstage = bld:getBuildStage()
-    local maxstage = bld:getMaxBuildStage()
-    local constructed = (curstage == maxstage)
-    local workshop_like = (btype == df.building_type.Workshop or btype == df.building_type.Furnace
-        or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
-
-    local genflags = packbits(removing, forbidden, actual, constructed, workshop_like)
-
-    if not constructed then
-        local needsarchitect = (bld:needsDesign() and bld.design and not bld.design.flags.designed) --hint:df.building_actual
-
-        --todo: how can there be no construction job (found in logs)?
-        local cjob = #bld.jobs > 0 and bld.jobs[0]
-        local active = cjob and (cjob.flags.fetching or cjob.flags.bringing or cjob.flags.working)
-        local suspended = cjob and cjob.flags.suspend
-
-        --todo: 'Construction initiated.' - when?
-        local stagename
-        if needsarchitect then
-            stagename = 'Waiting for architect...'
-        elseif curstage == 0 then
-            stagename = 'Waiting for construction...'
-        elseif curstage == 1 then
-            stagename = 'Partially constructed.'
-        elseif curstage == 2 then
-            stagename = 'Construction nearly done.'
-        else
-            stagename = 'Constructing...' --xxx: just not to leave it empty in case there are other values
-        end
-
-        ret = { btype, genflags, bname, stagename, active, suspended }
-
-    elseif btype == df.building_type.TradeDepot then
-        local bld = bld --as:df.building_tradedepotst
-        --todo: return broker name, current job, accessibility
-
-        local caravan_state = #df.global.ui.caravans > 0 and df.global.ui.caravans[0].trade_state or 0
-
-        local can_trade = depot_can_trade(bld)
-        local can_movegoods = depot_can_movegoods(bld)
-
-        local avail_flags = packbits(can_movegoods, can_trade)
-
-        ret = { btype, genflags, bname, bld.trade_flags.whole, avail_flags }
-
-    elseif btype == df.building_type.Door or btype == df.building_type.Hatch then
-        local bld = bld --as:df.building_doorst
-        ret = { btype, genflags, bname, bld.door_flags.whole }
-
-    elseif btype == df.building_type.Windmill or btype == df.building_type.WaterWheel or btype == df.building_type.AxleVertical
-        or btype == df.building_type.AxleHorizontal or btype == df.building_type.GearAssembly or btype == df.building_type.Rollers
-        or btype == df.building_type.ScrewPump then
-
-        local machine = df.machine.find(bld.machine.machine_id)
-        local ttype = dfhack.maps.getTileType(bld.centerx, bld.centery, bld.z)
-        local stable_foundation = (ttype ~= df.tiletype.OpenSpace)
-
-        ret = {
-            btype, genflags, bname,
-            machine and machine.cur_power or -1, machine and machine.min_power or -1, machine and machine.flags.whole or 0,
-            stable_foundation
-        }
-
-        if btype == df.building_type.Rollers or btype == df.building_type.ScrewPump then
-            local bld = bld --as:df.building_rollersst
-            table.insert(ret, bld.direction)
-        end
-
-        if btype == df.building_type.ScrewPump then
-            local bld = bld --as:df.building_screw_pumpst
-            table.insert(ret, bld.pump_manually)
-        end
-    
-    elseif workshop_like then
-        local jobs = {}
-        for i,job in ipairs(bld.jobs) do
-            local title = jobname(job)
-
-            --todo: first check that job type supports setting details
-            local can_set_details = (#job.items == 0)
-
-            --todo: game actually shows 'A' not based on flags but rather on presence of general_ref_unit_workerst ref
-
-            local moreflags = packbits(can_set_details)
-
-            table.insert(jobs, { title, job.flags.whole, moreflags })
-        end
-
-        local moodinfo = building_workshop_get_mood(bld)
-        local workshop_type = -1
-        --todo: --fixme: should pass type for furnaces as well, but app currently doesn't check building type
-        --               when comparing subtype, thus treating magma smelters and jeweler's workshops
-        if btype == df.building_type.Trap then --as:bld=df.building_trapst
-            workshop_type = bld.trap_type
-        elseif btype == df.building_type.Workshop then --as:bld=df.building_workshopst
-            workshop_type = bld.type
-        end
-
-        local profile_info = mp.NIL
-        if have_noble('MANAGER') then
-            local min = bld.profile.min_level
-            local max = bld.profile.max_level
-
-            if min == 3000 then
-                min = 15
-            end
-            if max == 3000 then
-                max = 15
-            end
-
-            profile_info = { #bld.profile.permitted_workers, min, max }
-        end
-
-        local clt = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and bld:getClutterLevel() or 0
-        local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0 --hint:df.building_actual
-
-        --TODO: how to determine this properly?
-        local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bldid) == 0 or false
-
-        ret = { btype, genflags, bname, workshop_type, jobs, moodinfo or mp.NIL, profile_info, clt, num_items, millstone_needs_power }
-
-    elseif btype == df.building_type.Chair or btype == df.building_type.Table or btype == df.building_type.Statue
-        or btype == df.building_type.Bed or btype == df.building_type.Box or btype == df.building_type.Cabinet
-        or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack or btype == df.building_type.ArcheryTarget
-        or btype == df.building_type.Coffin or btype == df.building_type.Slab or btype == df.building_type.Cage
-        or btype == df.building_type.Chain or btype == df.building_type.Well or btype == df.building_type.DisplayFurniture then
-
-        local owner = bld.owner
-        local ownername = owner and unit_fulltitle(owner) or ''
-        if owner and owner.relationship_ids[df.unit_relationship_type.Spouse] ~= -1 then
-            local owner2 = df.unit.find(owner.relationship_ids[df.unit_relationship_type.Spouse])
-            if owner2 then
-                ownername = ownername .. ' & ' .. unit_fulltitle(owner2)
-            end
-        end
-        local ownerprof = mp.NIL --xxx: unused because fulltitle already includes profession (and becase of spouses)
-        ret = { btype, genflags, bname, bld.is_room, ownername, ownerprof }
-
-        if btype == df.building_type.Table then
-            local bld = bld --as:df.building_tablest
-            table.insert(ret, bld.table_flags.meeting_hall)
-            
-            local lname = mp.NIL
-            if bld.is_room and bld.location_id ~= -1 then
-                local loc = location_find_by_id(bld.location_id)
-                if loc then
-                    lname = locname(loc)
-                end
-            end
-            table.insert(ret, lname)
-
-        elseif btype == df.building_type.Bed then
-            local bld = bld --as:df.building_bedst
-            table.insert(ret, bld.bed_flags.whole)
-            table.insert(ret, get_squads_use(bld))
-
-            -- some operations on bedrooms are unavailable if the bed is in a tavern
-            local lname, is_tavern = mp.NIL, false
-            if bld.is_room and bld.location_id ~= -1 then
-                local loc = location_find_by_id(bld.location_id)
-                if loc then
-                    lname = locname(loc) 
-                    is_tavern = loc._type == df.abstract_building_inn_tavernst
-                end
-            end
-            table.insert(ret, lname)
-            table.insert(ret, is_tavern)
-
-        elseif btype == df.building_type.ArcheryTarget then
-            local bld = bld --as:df.building_archerytargetst
-            table.insert(ret, bld.archery_direction)
-            table.insert(ret, get_squads_use(bld))
-
-        elseif btype == df.building_type.Box or btype == df.building_type.Cabinet
-            or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack then
-            table.insert(ret, get_squads_use(bld))
-        
-        elseif btype == df.building_type.Coffin then
-            local bld = bld --as:df.building_coffinst
-            local buried = owner and C_unit_dead(owner) or false --todo: is this the right way?
-            local mode = bld.burial_mode
-            local flags = packbits(mode.allow_burial, not mode.no_citizens, not mode.no_pets, buried)
-            table.insert(ret, flags)
-
-        elseif btype == df.building_type.Slab then
-            local bld = bld --as:df.building_slabst
-            local slabitem = bld.contained_items[0].item --as:df.item_slabst
-            local inmemory = slabitem.engraving_type == df.slab_engraving_type.Memorial and slabitem.topic and hfname(df.historical_figure.find(slabitem.topic)) or mp.NIL
-            --todo: show full description and not just the name
-            table.insert(ret, inmemory)
-
-        elseif btype == df.building_type.Cage then
-            local bld = bld --as:df.building_cagest
-            local occupants = {}
-
-            for i,v in ipairs(bld.contained_items[0].item.general_refs) do
-                if v._type == df.general_ref_contains_unitst then
-                    local unit = df.unit.find(v.unit_id) --hint:df.general_ref_contains_unitst
-                    if unit then
-                        local title = unit_fulltitle(unit)
-                        table.insert(occupants, { title, unit.id, 0 })
-                    end
-                elseif v._type == df.general_ref_contains_itemst then
-                    local item = df.item.find(v.item_id) --hint:df.general_ref_contains_itemst
-                    if item then
-                        local title = itemname(item, 0, true)
-                        table.insert(occupants, { title, item.id, 1 })
-                    end
-                end
-            end
-
-            table.insert(ret, occupants)
-
-        elseif btype == df.building_type.Chain then
-            local bld = bld --as:df.building_chainst
-            local assigned = bld.assigned and unit_fulltitle(bld.assigned) or mp.NIL
-            local chained = bld.chained and unit_fulltitle(bld.chained) or mp.NIL
-            table.insert(ret, bld.flags.justice)
-            table.insert(ret, assigned)
-            table.insert(ret, bld.assigned and bld.assigned.id or -1)
-            table.insert(ret, chained)
-            table.insert(ret, bld.chained and bld.chained.id or -1)
-
-        elseif btype == df.building_type.Well then
-            local bld = bld --as:df.building_wellst
-            local is_active = building_well_is_active()
-
-            -- find bucket and check if liquid amount is 10
-            local liquid = 0
-            for j,w in ipairs(bld.contained_items) do
-                if w.item._type == df.item_bucketst then
-                    for i,v in ipairs(w.item.general_refs) do
-                        if v._type == df.general_ref_contains_itemst then
-                            local item = df.item.find(v.item_id) --hint:df.general_ref_item
-                            if item and item._type == df.item_liquid_miscst then
-                                liquid = liquid + item.stack_size --hint:df.item_liquid_miscst
-                            end
-                        end
-                    end
-
-                    break
-                end
-            end
-            local is_full = liquid == 10
-
-            local flags = packbits(is_active, is_full)
-            table.insert(ret, flags)
-
-        elseif btype == df.building_type.DisplayFurniture then
-            table.insert(ret, {})            
-
-            local lname = mp.NIL
-            if bld.is_room and bld.location_id ~= -1 then
-                local loc = location_find_by_id(bld.location_id)
-                if loc then
-                    lname = locname(loc)
-                end
-            end
-            table.insert(ret, lname)
-
-            local dispitems = {}
-            for i,v in ipairs(bld.displayed_items) do --hint:df.building_display_furniturest
-                local item = df.item.find(v)
-                local iname = item and itemname(item, 0, false) or '#unknown item#'
-
-                table.insert(dispitems, { iname, v })
-            end
-            table.insert(ret, dispitems)
-
-        elseif btype == df.building_type.Statue then
-            local lname = mp.NIL
-            if bld.is_room and bld.location_id ~= -1 then
-                local loc = location_find_by_id(bld.location_id)
-                if loc then
-                    lname = locname(loc)
-                end
-            end
-            table.insert(ret, lname)
-
-        end
-
-    elseif btype == df.building_type.FarmPlot then
-        local bld = bld --as:df.building_farmplotst
-        local keys = { K'BUILDJOB_FARM_SPRING', K'BUILDJOB_FARM_SUMMER', K'BUILDJOB_FARM_AUTUMN', K'BUILDJOB_FARM_WINTER' }
-
-        local crops = {}
-        for i,sk in ipairs(keys) do
-            gui.simulateInput(ws, sk)
-
-            local seascrops = { { 'Fallow', 9999, true } }
-            for i,plantid in ipairs(df.global.ui.selected_farm_crops) do
-                local name = df.global.world.raws.plants.all[plantid].name_plural:gsub("^%l", string.upper)
-                local has_seeds = df.global.ui.available_seeds[i]
-                table.insert(seascrops, { name, plantid, has_seeds })
-            end
-            table.insert(crops, seascrops)
-        end
-
-        local seasons = {}
-        for i,plantid in ipairs(bld.plant_id) do
-            local name = (plantid ~= -1) and df.global.world.raws.plants.all[plantid].name_plural:gsub("^%l", string.upper) or 'Fallow'
-            table.insert(seasons, name)
-        end
-
-        local fert = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.FertilizeField)
-        local fertinfo = { fert, bld.current_fertilization, bld.max_fertilization, bld.material_amount }
-
-        ret = { btype, genflags, bname, seasons, crops, fertinfo, bld.seasonal_fertilize }
-
-    elseif btype == df.building_type.Stockpile then
-        local bld = bld --as:df.building_stockpilest
-        local area = (bld.x2-bld.x1+1)*(bld.y2-bld.y1+1)
-
-        local give = {}
-        local take = {}
-        local links = { give, take }
-
-        for i,v in ipairs(bld.links.give_to_pile) do
-            table.insert(give, { bldname(v), v.id })
-        end
-        for i,v in ipairs(bld.links.take_from_pile) do
-            table.insert(take, { bldname(v), v.id })
-        end
-        for i,v in ipairs(bld.links.give_to_workshop) do
-            table.insert(give, { bldname(v), v.id })
-        end
-        for i,v in ipairs(bld.links.take_from_workshop) do
-            table.insert(take, { bldname(v), v.id })
-        end
-
-        ret = { btype, genflags, bname, area, bld.max_barrels, bld.max_bins, bld.max_wheelbarrows, links, bld.use_links_only }
-
-    elseif btype == df.building_type.SiegeEngine then
-        local bld = bld --as:df.building_siegeenginest
-        ret = { btype, genflags, bname, bld.type, bld.action, bld.facing }
-
-    elseif btype == df.building_type.NestBox then
-        local bld = bld --as:df.building_nest_boxst
-        local unit = bld.claimed_by ~= -1 and df.unit.find(bld.claimed_by)
-        local unitname = unit and unit_fulltitle(unit) or mp.NIL
-        ret = { btype, genflags, bname, unitname }
-
-    elseif btype == df.building_type.Hive then
-        local bld = bld --as:df.building_hivest
-        local hiveflags = bld.hive_flags.whole
-
-        local has_access = building_hive_has_access()
-
-        ret = { btype, genflags, bname, hiveflags, has_access }
-
-    elseif btype == df.building_type.AnimalTrap then
-        local bld = bld --as:df.building_animaltrapst
-        local baitidx = bait_idx(bld.bait_type)
-        local bait = #bld.contained_items > 1 and bld.contained_items[1].item --todo: is this correct?
-        local itemname = bait and itemname(bait, 0, true) or mp.NIL
-        local caught = bait and bait._type == df.item_verminst
-        ret = { btype, genflags, bname, baitidx, itemname, caught }
-
-    else
-        ret = { btype, genflags, bname }
-    end
-
-    return ret
-end
-
 local function get_squads_use(bld)
     local squads = {}
     local eid = df.global.ui.main.fortress_entity.id
@@ -519,9 +118,19 @@ local function building_can_be_room(btype)
         or btype == df.building_type.Chain or btype == df.building_type.Well or btype == df.building_type.DisplayFurniture
 end
 
+local function building_can_assign_location(btype)
+    return btype == df.building_type.Table or btype == df.building_type.Bed or btype == df.building_type.DisplayFurniture
+        or (df_ver >= 4312 and btype == df.building_type.Statue)
+end
+
 local function building_is_workshop(btype, bsub)
     return (btype == df.building_type.Workshop or btype == df.building_type.Furnace
         or (btype == df.building_type.Trap and (bsub == df.trap_type.Lever or bsub == df.trap_type.PressurePlate)))
+end
+
+local function bed_is_in_tavern(bld)
+    local loc = bld.location_id ~= -1 and location_find_by_id(bld.location_id)
+    return loc and loc._type == df.abstract_building_inn_tavernst
 end
 
 function query__specific_info(bld)
@@ -627,18 +236,13 @@ function query__specific_info(bld)
 
     if btype == df.building_type.Bed then
         local bld = bld --as:df.building_bedst
-        return { bld.bed_flags.whole, get_squads_use(bld) }
+        return { bld.bed_flags.whole, bed_is_in_tavern(bld) }
     end
 
     if btype == df.building_type.ArcheryTarget then
         local bld = bld --as:df.building_archerytargetst
         
-        return { bld.archery_direction, get_squads_use(bld) }
-    end
-
-    if btype == df.building_type.Box or btype == df.building_type.Cabinet
-        or btype == df.building_type.Armorstand or btype == df.building_type.Weaponrack then
-        return { get_squads_use(bld) }
+        return { bld.archery_direction }
     end
     
     if btype == df.building_type.Coffin then
@@ -849,8 +453,7 @@ function query__room_info(bld)
             show_squads = bld.bed_flags.barracks
         
             -- can assign if not in a tavern
-            local loc = bld.location_id ~= -1 and location_find_by_id(bld.location_id)
-            can_assign = not loc or loc._type ~= df.abstract_building_inn_tavernst
+            can_assign = not bed_is_in_tavern(bld)
                 
         elseif btype == df.building_type.ArcheryTarget then
             -- archery targets have no owners
@@ -878,7 +481,7 @@ function query__room_info(bld)
             show_owner = false        
         end
 
-        local flags = packbits(can_assign, show_owner, show_squads)
+        local flags = packbits(can_assign, show_owner, show_squads, building_can_assign_location(btype))
 
         local loc = bld.location_id ~= -1 and location_find_by_id(bld.location_id)
         local lname = loc and (locname(loc) or '#unknown location#') or mp.NIL
@@ -895,7 +498,7 @@ function query__room_info(bld)
 end
 
 --luacheck: in=number
-function building_query_selected2(bldid)
+function building_query_selected(bldid)
     local ws = dfhack.gui.getCurViewscreen(true)
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -969,8 +572,7 @@ function building_query_selected2(bldid)
 
     return {
         bldname(bld), bld.id, btype, genflags, bldname(bld, true),
-        query__room_info(bld) or mp.NIL,
-        query__specific_info(bld) or mp.NIL,
+        query__room_info(bld) or mp.NIL, query__specific_info(bld) or mp.NIL,
     }
 end
 
@@ -1625,60 +1227,6 @@ function building_room_owner_get_candidates(bldid)
 
     for i,unit in ipairs(df.global.ui_building_assign_units) do
         if not unit then
-            table.insert(ret, { 'Nobody', '', false })
-        else
-            local cname = unitname(unit)
-            local cprof = unitprof(unit)
-            table.insert(ret, { cname, cprof, C_unit_dead(unit) })        
-        end
-    end
-
-    df.global.ui_building_in_assign = false
-
-    return ret
-end
-
---luacheck: in=number
-function building_room_owner_get_candidates2(bldid)
-    local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    if not df.global.world.selected_building.is_room then
-        error('not a room')
-    end
-
-    local keys = {
-        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
-        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
-        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
-        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
-        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
-        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
-        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
-        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
-    }
-
-    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
-    --todo: don't know which of the following is required
-    ws:logic()
-    ws:render()
-
-    --todo: check that we have switched to the assignment mode
-
-    local ret = {}
-
-    for i,unit in ipairs(df.global.ui_building_assign_units) do
-        if not unit then
             table.insert(ret, { 'Nobody', -1, 15, false })
         else
             local cname = unit_fulltitle(unit)
@@ -1693,52 +1241,7 @@ function building_room_owner_get_candidates2(bldid)
 end
 
 --luacheck: in=number,number
-function building_room_owner_set(bldid, idx)
-    local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= df.ui_sidebar_mode.QueryBuilding or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    if not df.global.world.selected_building.is_room then
-        error('not a room')
-    end
-
-    local keys = {
-        [df.building_type.Chair] = K'BUILDJOB_CHAIR_ASSIGN',
-        [df.building_type.Table] = K'BUILDJOB_TABLE_ASSIGN',
-        [df.building_type.Bed] = K'BUILDJOB_BED_ASSIGN',
-        [df.building_type.Box] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Cabinet] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Armorstand] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Weaponrack] = K'BUILDJOB_RACKSTAND_ASSIGN',
-        [df.building_type.Coffin] = K'BUILDJOB_COFFIN_ASSIGN',
-        [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
-        [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
-        [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
-        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
-    }
-
-    gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
-    --todo: don't know which of the following is required
-    ws:logic()
-    ws:render()
-
-    --todo: check that we have switched to the assignment mode    
-
-    df.global.ui_building_item_cursor = idx    
-    gui.simulateInput(ws, 'SELECT')
-
-    df.global.ui_building_in_assign = false    
-
-    return true
-end
-
---luacheck: in=number,number
-function building_room_owner_set2(bldid, id)
+function building_room_owner_set(bldid, id)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         error(errmsg_wrongscreen(ws))
@@ -2457,45 +1960,6 @@ end
 
 --luacheck: in=
 function buildings_get_list()
-    local ret = {}
-    
-    for i,bld in ipairs(df.global.world.buildings.other.IN_PLAY) do
-        local title, descr
-        
-        if bld.is_room then
-            local info = room_type_table[bld._type]
-            if info then
-                local quality = bld:getRoomValue(unit)
-            
-                for i,v in ripairs(room_quality_table) do
-                    if quality >= v[1] then
-                        title = bldname(bld) .. ', ' .. v[info.qidx]
-                        break
-                    end
-                end
-            else
-                title = bldname(bld)
-            end
-
-        else
-            title = bldname(bld)
-        end
-        
-        local owner = bld.owner
-        local flags = packbits(bld.is_room)
-        
-        table.insert(ret, { title, bld.id, bld:getType(), bld:getSubtype(), descr or mp.NIL, owner and unit_fulltitle(owner) or mp.NIL, owner and owner.id or -1, flags })
-    end
-    
-    table.sort(ret, function(a,b)
-        return a[3] == b[3] and a[4] < b[4] or a[3] < b[3]
-    end)
-    
-    return ret
-end
-
---luacheck: in=
-function buildings_get_list2()
     return execute_with_rooms_screen(function(ws)
         local ret = {}
         for i,bld in ipairs(ws.buildings) do
@@ -2627,6 +2091,7 @@ function init_display_items_cache(bldid)
     end)
 end
 
+--luacheck: in=number
 function building_displayed_items_get_categories(bldid)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -2643,9 +2108,9 @@ function building_displayed_items_get_categories(bldid)
         error('wrong building type '..tostring(bld._type))
     end
 
-    -- if not display_items_cache then
+    if not display_items_cache then
         init_display_items_cache()
-    -- end
+    end
 
     local ret = {}
 
@@ -2656,6 +2121,7 @@ function building_displayed_items_get_categories(bldid)
     return ret
 end
 
+--luacheck: in=number,number
 function building_displayed_items_get_choices(bldid, catidx)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -2672,9 +2138,9 @@ function building_displayed_items_get_choices(bldid, catidx)
         error('wrong building type '..tostring(bld._type))
     end
 
-    -- if not display_items_cache then
+    if not display_items_cache then
         init_display_items_cache()
-    -- end
+    end
 
     local ret = {}
 
@@ -2685,6 +2151,7 @@ function building_displayed_items_get_choices(bldid, catidx)
     return ret
 end
 
+--luacheck: in=number,string
 function building_displayed_items_search(bldid, q)
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -2701,9 +2168,9 @@ function building_displayed_items_search(bldid, q)
         error('wrong building type '..tostring(bld._type))
     end
 
-    -- if not display_items_cache then
+    if not display_items_cache then
         init_display_items_cache()
-    -- end
+    end
 
     local ret = {}
     q = q:lower()
@@ -2720,6 +2187,7 @@ function building_displayed_items_search(bldid, q)
     return ret
 end
 
+--luacheck: in=number,number[]
 function building_displayed_items_assign(bldid, itemids)
     execute_with_display_items_for_building(bldid, function(ws, bld)
         for i,v in ipairs(itemids) do
@@ -2727,10 +2195,13 @@ function building_displayed_items_assign(bldid, itemids)
             utils.insert_sorted(ws.selected_item_ids, v)
         end
 
-        gui.simulateInput(ws, K'LEAVESCREEN')        
+        gui.simulateInput(ws, K'LEAVESCREEN')  
+
+        display_items_cache = nil
     end)    
 end
 
+--luacheck: in=number,number
 function building_displayed_items_remove(bldid, itemid)
     local ws = dfhack.gui.getCurViewscreen(true)
     if ws._type ~= df.viewscreen_dwarfmodest then
@@ -2747,6 +2218,8 @@ function building_displayed_items_remove(bldid, itemid)
         error('wrong building type '..tostring(bld._type))
     end
 
+    display_items_cache = nil
+
     for i,v in ipairs(bld.displayed_items) do
         if v == itemid then
             df.global.ui_sidebar_menus.job_details.displayed_items_cursor = i
@@ -2756,10 +2229,12 @@ function building_displayed_items_remove(bldid, itemid)
     end
 end
 
+--luacheck: in=
 function building_displayed_items_cancel()
     display_items_cache = nil
 end
 
+--luacheck: in=number,string
 function building_set_name(bldid, name)
     local bld
     if bldid and bldid ~= -1 then

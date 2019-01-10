@@ -20,55 +20,6 @@ function schedule_get_overview()
 							last = otype
 						end
 
-						table.insert(months, { same and last or -2, sched.sleep_mode, sched.uniform_mode })
-
-					else
-						local sched_order = sched.orders[0]
-						local order = sched_order.order
-						local otype = order:getType()
-
-						table.insert(months, { otype, sched.sleep_mode, sched.uniform_mode })
-					end
-
-				else
-					table.insert(months, { -1, sched.sleep_mode, sched.uniform_mode })
-				end
-			end
-			table.insert(alerts, months)
-		end
-		table.insert(squads, { squadname(squad), squad.id, alerts })
-	end
-
-	local alerts = {}
-    for i,alert in ipairs(df.global.ui.alerts.list) do
-    	table.insert(alerts, { alertname(alert), alert.id })
-	end	
-
-	return { squads, alerts }
-end
-
---luacheck: in=
-function schedule_get_overview2()
-	local squads = {}
-	for i,squad in ipairs(find_fortress_squads()) do
-		local alerts = {}
-		for j,a in ipairs(squad.schedule) do
-			local months = {}
-			for m,sched in ipairs(a) do
-				if #sched.orders > 0 then
-					if #sched.orders > 1 then
-						local last = nil
-						local same = true
-						for i,sched_order in ipairs(sched.orders) do
-							local order = sched_order.order
-							local otype = order:getType()
-							
-							if last and otype ~= last then
-								same = false
-							end
-							last = otype
-						end
-
 						table.insert(months, same and last or -2)
 
 					else

@@ -59,41 +59,6 @@ function depot_movegoods_get()
     
     for i,info in ipairs(movegoodsws.info) do
         local title = itemname(info.item, 0, true)
-        table.insert(ret, { title, info.distance, info.status })
-    end
-
-    return ret
-end
-
---luacheck: in=
-function depot_movegoods_get2()
-    local ws = dfhack.gui.getCurViewscreen()
-    if ws._type ~= df.viewscreen_dwarfmodest then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    if df.global.ui.main.mode ~= 17 or df.global.world.selected_building == nil then
-        error('no selected building')
-    end
-
-    local bld = df.global.world.selected_building
-    if bld:getType() ~= df.building_type.TradeDepot then
-        error('not a depot')
-    end
-
-    gui.simulateInput(ws, K'BUILDJOB_DEPOT_BRING')
-
-    local movegoodsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_assigntradest
-    if movegoodsws._type ~= df.viewscreen_layer_assigntradest then
-        error('can not switch to move goods screen')
-    end
-
-    gui.simulateInput(movegoodsws, K'ASSIGNTRADE_SORT')
-
-    local ret = {}
-    
-    for i,info in ipairs(movegoodsws.info) do
-        local title = itemname(info.item, 0, true)
         table.insert(ret, { title, info.item.id, info.distance, info.status })
     end
 
@@ -781,38 +746,6 @@ end
 
 --luacheck: in=bool
 function depot_trade_get_items(their)
-    local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
-    if ws._type ~= df.viewscreen_tradegoodsst then
-        error(errmsg_wrongscreen(ws))
-    end
-
-    their = istrue(their)
-
-    local items = their and ws.trader_items or ws.broker_items --as:df.item_actual[]
-    local sel = their and ws.trader_selected or ws.broker_selected
-    local counts = their and ws.trader_count or ws.broker_count
-    local creature = df.global.world.raws.creatures.all[ws.entity.race]
-
-    local ret = {}
-
-    for i,item in ipairs(items) do
-        local title = itemname(item, 0, true)
-        local value = item_or_container_price_for_caravan(item, ws.caravan, ws.entity, creature, nil, ws.caravan.buy_prices, ws.caravan.sell_prices)
-
-        local inner = is_contained(item)
-        local entity_stolen = dfhack.items.getGeneralRef(item, df.general_ref_type.ENTITY_STOLEN) --as:df.general_ref_entity_stolenst
-        local stolen = entity_stolen and (df.historical_entity.find(entity_stolen.entity_id) ~= nil)
-        local flags = packbits(inner, stolen, item.flags.foreign)
-
-        --todo: use getStackSize() ?
-        table.insert(ret, { title, value, item.weight, sel[i], flags, item.stack_size, counts[i] })
-    end
-
-    return ret
-end
-
---luacheck: in=bool
-function depot_trade_get_items2(their)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_tradegoodsst
     if ws._type ~= df.viewscreen_tradegoodsst then
         error(errmsg_wrongscreen(ws))

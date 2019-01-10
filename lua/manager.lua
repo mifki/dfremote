@@ -41,20 +41,6 @@ function manager_get_orders()
 
 	for i,o in ipairs(df.global.world.manager_orders) do
 		local title = ordertitle(o)
-		table.insert(orders, { title, o.amount_left, o.amount_total, o.status.whole, o.max_workshops, #o.item_conditions+#o.order_conditions })
-	end
-
-	return { orders, have_manager }
-end
-
---luacheck: in=
-function manager_get_orders2()
-    local have_manager = have_noble('MANAGER')
-
-	local orders = {}
-
-	for i,o in ipairs(df.global.world.manager_orders) do
-		local title = ordertitle(o)
 		table.insert(orders, { title, o.id, o.amount_left, o.amount_total, o.status.whole, o.max_workshops, #o.item_conditions+#o.order_conditions })
 	end
 

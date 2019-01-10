@@ -1845,7 +1845,6 @@ local handlers = {
 
     [130] = {
         [1] = animals_get,
-        [2] = animals_get2,
         
         [11] = animals_set_slaughter,
         [12] = animals_set_available,
@@ -1948,7 +1947,7 @@ local handlers = {
     },
 
     [135] = {
-        [1] = schedule_get_overview2,
+        [1] = schedule_get_overview,
         [2] = schedule_get_months,
         [3] = schedule_get_orders,
         [4] = schedule_month_duplicate_to_all,
@@ -1994,9 +1993,6 @@ local handlers = {
         [3] = justice_get_crime_details,
         [4] = justice_get_convict_choices,
         [5] = justice_convict,
-
-        --xxx: temporary due to a typo in the app
-        [10] = setup_get_settings,
     },
 
     [139] = {
@@ -2057,7 +2053,6 @@ local handlers = {
         [4] = manager_delete_order,
         [5] = manager_reorder,
         [6] = manager_order_set_max_workshops,
-        [7] = manager_get_orders2,
 
         [10] = manager_order_conditions_get,
         [11] = manager_order_condition_get_item_choices,
@@ -2135,24 +2130,14 @@ local handlers = {
         [1] = squads_get_info,
         [2] = squads_reset,
 
-        -- deprecated, accept indices
         [11] = squads_cancel_order,
         [12] = squads_order_move,
-        [13] = squads_order_attack_list,
         [14] = squads_attack_list_get,
         [15] = squads_attack_list_confirm,
         [16] = squads_order_attack_map,
         [17] = squads_order_attack_rect,
         
-        [18] = squad_set_alert,
-        
-        -- new, accept ids
-        [21] = squads_cancel_order2,
-        [22] = squads_order_move2,
-        [24] = squads_attack_list_get2,
-        [25] = squads_attack_list_confirm2,
-        [26] = squads_order_attack_map2,
-        [27] = squads_order_attack_rect2,
+        [18] = squad_set_alert,        
     },
 
     [162] = {
@@ -2176,11 +2161,9 @@ local handlers = {
         [4] = depot_trade_dotrade,
         [5] = depot_trade_seize,
         [6] = depot_trade_offer,
-        [7] = depot_trade_get_items2,
 
         [20] = depot_movegoods_get,
         [21] = depot_movegoods_set,
-        [22] = depot_movegoods_get2,
 
         [30] = depot_access,
     },
@@ -2190,7 +2173,6 @@ local handlers = {
         [2] = building_stopremoval,
         [3] = building_get_contained_items,
         [4] = building_query_selected,
-        [104] = building_query_selected2,
         [5] = building_set_flag,
         [6] = building_start_resize,
         [7] = building_suspend,
@@ -2212,14 +2194,12 @@ local handlers = {
         [31] = building_room_owner_get_candidates,
         [32] = building_room_owner_set,
         [33] = building_room_set_squaduse,
-        [34] = building_room_owner_get_candidates2,
-        [35] = building_room_owner_set2,
 
         [40] = building_farm_set_crop,
         [41] = building_assign_get_candidates,
         [42] = building_assign,
         
-        [50] = buildings_get_list2,
+        [50] = buildings_get_list,
         [51] = building_goto,
 
         [60] = building_displayed_items_get_categories,
@@ -2276,9 +2256,7 @@ local handlers = {
         [34] = unit_get_health,
         [35] = unit_customize,
         [36] = unit_get_inventory_and_spatters,
-        [37] = unit_get_skills2,
-        [38] = unit_get_skills3,
-        [39] = unit_get_kills,
+        [37] = unit_get_kills,
 
         [40] = unit_get_assigned_animals,
         [41] = unit_get_assign_animal_choices,
