@@ -129,7 +129,7 @@ function alert_set_name(id, name)
         error('no alert '..tostring(id))
     end
 
-    alert.name = name
+    alert.name = dfhack.utf2df(name)
 
     return true
 end

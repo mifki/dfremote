@@ -113,7 +113,7 @@ function uniform_set_name(id, name)
 		error('no uniform '..tostring(id))
 	end
 
-	uniform.name = name
+	uniform.name = dfhack.utf2df(name)
 
 	return true
 end

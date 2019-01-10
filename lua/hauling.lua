@@ -307,7 +307,7 @@ function hauling_route_set_name(id, name)
 		error('no route '..tostring(id))
 	end
 
-	route.name = name
+	route.name = dfhack.utf2df(name)
 end
 
 --luacheck: in=number,bool
@@ -525,7 +525,7 @@ function hauling_stop_set_name(routeid, stopid, name)
 		error('no stop '..tostring(stopid))
 	end
 
-	stop.name = name
+	stop.name = dfhack.utf2df(name)
 end
 
 

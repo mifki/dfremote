@@ -80,8 +80,8 @@ function waypoints_add_point(x, y, z, name, comment)
 	local pt = df.ui.T_waypoints.T_points:new()
 
 	pt.id = df.global.ui.waypoints.next_point_id
-	pt.name = name
-	pt.comment = comment or ''
+	pt.name = dfhack.utf2df(name)
+	pt.comment = comment and dfhack.utf2df(comment) or ''
 	
 	pt.pos.x = x
 	pt.pos.y = y
@@ -115,8 +115,8 @@ function waypoints_place_point(name, comment)
     end
 
     local pt = df.global.ui.waypoints.points[df.global.ui.waypoints.cur_point_index]
-	pt.name = name
-	pt.comment = comment or ''
+	pt.name = dfhack.utf2df(name)
+	pt.comment = comment and dfhack.utf2df(comment) or ''
 
 	pt.tile = 33
 	pt.fg_color = 11
@@ -164,8 +164,8 @@ function waypoints_set_name_comment(id, name, comment)
 		return
 	end
 
-	pt.name = name or ''
-	pt.comment = comment or ''
+	pt.name = dfhack.utf2df(name) or ''
+	pt.comment = comment and dfhack.utf2df(comment) or ''
 end
 
 --luacheck: in=bool
@@ -236,7 +236,7 @@ function route_set_name(id, name)
 		return
 	end
 
-	route.name = name or ''
+	route.name = name and dfhack.utf2df(name) or ''
 end
 
 --luacheck: in=number

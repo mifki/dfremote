@@ -2303,7 +2303,7 @@ function building_set_name(bldid, name)
         error('no building with id '..tostring(bldid))
     end
 
-    bld.name = name
+    bld.name = dfhack.utf2df(name)
 
     return bldname(bld)
 end

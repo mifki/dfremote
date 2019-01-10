@@ -153,7 +153,7 @@ function burrow_set_name(id, name)
 		error('no burrow '..tostring(id))
 	end
 
-	burrow.name = name
+	burrow.name = dfhack.utf2df(name)
 
 	return true
 end
