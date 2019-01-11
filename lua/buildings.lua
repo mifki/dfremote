@@ -342,6 +342,8 @@ function query__specific_info(bld)
         local bld = bld --as:df.building_farmplotst
         local keys = { K'BUILDJOB_FARM_SPRING', K'BUILDJOB_FARM_SUMMER', K'BUILDJOB_FARM_AUTUMN', K'BUILDJOB_FARM_WINTER' }
 
+        local ws = dfhack.gui.getCurViewscreen(true)
+
         local crops = {}
         for i,sk in ipairs(keys) do
             gui.simulateInput(ws, sk)
