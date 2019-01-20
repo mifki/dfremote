@@ -940,7 +940,7 @@ function building_workshop_addjob(bldid, idx, rep)
             end
         end
 
-    else
+    elseif bld._type == df.building_workshopst then
         local bld = bld --as:df.building_workshopst
         local wtype = bld.type
 
@@ -1004,9 +1004,14 @@ function building_workshop_addjob(bldid, idx, rep)
         else    
             local btn = jobchoices[idx] --as:df.interface_button_building_new_jobst
             btn.building = bld
-    
+
             btn:click()
         end
+    else
+        local btn = jobchoices[idx] --as:df.interface_button_building_new_jobst
+        btn.building = bld
+
+        btn:click()
     end
 
     --todo: check here again for traps and other unsopported job types
