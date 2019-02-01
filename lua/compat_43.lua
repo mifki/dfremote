@@ -77,3 +77,7 @@ end
 function C_squads_list()
 	return df.global.ui.squads.list
 end
+
+function C_plant_tree_tile_any_branches(t)
+	return t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4
+end

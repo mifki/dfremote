@@ -224,7 +224,7 @@ function query__specific_info(bld)
         local num_items = (btype == df.building_type.Workshop or btype == df.building_type.Furnace) and #bld.contained_items or 0 --hint:df.building_actual
 
         --TODO: how to determine this properly?
-        local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bldid) == 0 or false
+        local millstone_needs_power = (workshop_type == df.workshop_type.Millstone) and #building_workshop_get_jobchoices(bld.id) == 0 or false
 
         return { workshop_type, jobs, moodinfo or mp.NIL, profile_info or mp.NIL, clt, num_items, millstone_needs_power }
     end
@@ -450,6 +450,7 @@ function query__room_info(bld)
         local show_squads = false
 
         if btype == df.building_type.Bed then
+            local bld = bld --as:df.building_bedst
             -- owner is shown when it's not barracks or dormitory
             show_owner = not bld.bed_flags.barracks and not bld.bed_flags.dormitory
             show_squads = bld.bed_flags.barracks
@@ -786,6 +787,8 @@ end
 --todo: don't hardcode this; should find all glasses in df.global.world.raws.mat_table.builtin
 local glasses = { 'green glass', 'clear glass', 'crystal glass' }
 
+--todo: bldid is not used at the moment
+--luacheck: in=number
 function building_workshop_get_jobchoices(bldid)
     local ws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_dwarfmodest
     if ws._type ~= df.viewscreen_dwarfmodest then

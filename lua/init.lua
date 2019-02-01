@@ -211,7 +211,7 @@ local function coordInTree(tree, x, y, z)
         local ok,ret = pcall(function()
             if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
                 local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
-                return (t.trunk or t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 or t.twigs) and t or nil
+                return (t.trunk or C_plant_tree_tile_any_branches(t) or t.twigs) and t or nil
             end
             
             if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
@@ -407,7 +407,7 @@ function get_look_list(detailed)
                                 title = title .. ' roots'
                             elseif t.trunk then
                                 title = title .. ' trunk'
-                            elseif t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4 then
+                            elseif C_plant_tree_tile_any_branches(t) then
                                 title = title .. ' branches'
                             elseif t.twigs then
                                 title = title .. ' twigs'                                    
@@ -1821,7 +1821,6 @@ local handlers_foreign = {
         [20] = dfaas_save_game,
         [21] = dfaas_save_done,
         [22] = dfaas_get_status,
-        [23] = dfaas_savegames_refresh,
     },
 }
 
@@ -2305,7 +2304,6 @@ local handlers = {
         [2] = savegame_load,
         [3] = savegame_checkloaded,
         [4] = worlds_get_empty,
-        [5] = savegames_refresh,
 
         [10] = create_new_world,
         [11] = worldgen_status,
