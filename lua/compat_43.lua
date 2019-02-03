@@ -81,3 +81,15 @@ end
 function C_plant_tree_tile_any_branches(t)
 	return t.branches or t.thick_branches_1 or t.thick_branches_2 or t.thick_branches_3 or t.thick_branches_4
 end
+
+function C_viewscreen_image_creatorst_modes(imgws)
+	return imgws.anon_1
+end
+
+function C_viewscreen_image_creatorst_set_mode_cursor(imgws, idx)
+	imgws.category_idx = idx
+end
+
+function C_viewscreen_new_regionst_loading_raws(ws)
+	return istrue(ws.unk_b4)
+end

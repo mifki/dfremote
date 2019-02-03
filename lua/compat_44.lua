@@ -81,3 +81,15 @@ end
 function C_plant_tree_tile_any_branches(t)
 	return t.branches or t.connection_east or t.connection_south or t.connection_west or t.connection_north
 end
+
+function C_viewscreen_image_creatorst_modes(imgws)
+	return imgws.modes
+end
+
+function C_viewscreen_image_creatorst_set_mode_cursor(imgws, idx)
+	imgws.mode_cursor = idx
+end
+
+function C_viewscreen_new_regionst_loading_raws(ws)
+	return ws.load_world_params
+end

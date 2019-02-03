@@ -157,7 +157,7 @@ function query__specific_info(bld)
 
     -- machine
     if building_is_machine(btype) then
-        local machine = bld.machine
+        local machine = df.machine.find(bld.machine.machine_id)
         local ttype = dfhack.maps.getTileType(bld.centerx, bld.centery, bld.z)
         local stable_foundation = (ttype ~= df.tiletype.OpenSpace)
 
@@ -325,7 +325,7 @@ function query__specific_info(bld)
         return { flags }
     end    
 
-    if btype == df.building_type.DisplayFurniture then
+    if btype == df.building_type.DisplayFurniture then --dfver:4412-
         local dispitems = {}
         
         for i,v in ipairs(bld.displayed_items) do --hint:df.building_display_furniturest
@@ -2102,7 +2102,7 @@ function init_display_items_cache(bldid)
 end
 
 --luacheck: in=number
-function building_displayed_items_get_categories(bldid)
+function building_displayed_items_get_categories(bldid) --dfver:4412-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
@@ -2132,7 +2132,7 @@ function building_displayed_items_get_categories(bldid)
 end
 
 --luacheck: in=number,number
-function building_displayed_items_get_choices(bldid, catidx)
+function building_displayed_items_get_choices(bldid, catidx) --dfver:4412-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
@@ -2162,7 +2162,7 @@ function building_displayed_items_get_choices(bldid, catidx)
 end
 
 --luacheck: in=number,string
-function building_displayed_items_search(bldid, q)
+function building_displayed_items_search(bldid, q) --dfver:4412-
     local ws = dfhack.gui.getCurViewscreen()
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
@@ -2198,7 +2198,7 @@ function building_displayed_items_search(bldid, q)
 end
 
 --luacheck: in=number,number[]
-function building_displayed_items_assign(bldid, itemids)
+function building_displayed_items_assign(bldid, itemids) --dfver:4412-
     execute_with_display_items_for_building(bldid, function(ws, bld)
         for i,v in ipairs(itemids) do
             --todo: don't need to sort in this case I guess
@@ -2212,7 +2212,7 @@ function building_displayed_items_assign(bldid, itemids)
 end
 
 --luacheck: in=number,number
-function building_displayed_items_remove(bldid, itemid)
+function building_displayed_items_remove(bldid, itemid) --dfver:4412-
     local ws = dfhack.gui.getCurViewscreen(true)
     if ws._type ~= df.viewscreen_dwarfmodest then
         return
@@ -2240,7 +2240,7 @@ function building_displayed_items_remove(bldid, itemid)
 end
 
 --luacheck: in=
-function building_displayed_items_cancel()
+function building_displayed_items_cancel() --dfver:4412-
     display_items_cache = nil
 end
 

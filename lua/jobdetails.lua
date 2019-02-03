@@ -1,18 +1,6 @@
 local detail_type_names = { 'Material', 'Image', 'Size', 'Decoration Type' }
 local decoration_type_titles = { 'Image', 'Covered', 'Hanging rings', 'Bands', 'Spikes' }
 
-local function select_artist_to_choose_image(imgws)
-    for j,w in ipairs(imgws.anon_1) do
-        if w == 5 then
-            imgws.category_idx = j
-            gui.simulateInput(imgws, K'SELECT')
-            break
-        end
-    end
-
-    imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
-end
-
 local function ensure_images_loaded(bldid, idx)
     if #df.global.world.art_image_chunks > 0 then
         return
@@ -34,7 +22,15 @@ local function ensure_images_loaded(bldid, idx)
 
         local imgws = dfhack.gui.getCurViewscreen()
         if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-            select_artist_to_choose_image(imgws)
+            for j,w in ipairs(C_viewscreen_image_creatorst_modes(imgws)) do
+                if w == 5 then
+                    C_viewscreen_image_creatorst_set_mode_cursor(imgws, j)
+                    gui.simulateInput(imgws, K'SELECT')
+                    break
+                end
+            end
+
+            imgws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
         end
     end
 
@@ -224,11 +220,6 @@ function job_details_set(bldid, jobidx, detidx, choiceidx)
         end
         gui.simulateInput(ws, K'SELECT')
         
-        -- local imgws = dfhack.gui.getCurViewscreen()
-        -- if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-        --     select_artist_to_choose_image(imgws)
-        -- end
-
         return true
     end)
 end
@@ -358,12 +349,7 @@ function order_details_set(idx, detidx, choiceidx)
             det.decoration_cursor = choiceidx
         end
         gui.simulateInput(ws, K'SELECT')
-        
-        -- local imgws = dfhack.gui.getCurViewscreen()
-        -- if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-        --     select_artist_to_choose_image(imgws)
-        -- end
-        
+                
         return true
     end)
 end

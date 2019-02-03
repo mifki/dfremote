@@ -131,7 +131,7 @@ function reset_main()
         df.global.world.selected_building = nil
         df.global.ui_selected_unit = -1
         df.global.ui_workshop_in_add = false
-        df.global.ui_lever_target_type = -1
+        df.global.ui_lever_target_type = df.lever_target_type[df.lever_target_type[-1]]
         df.global.ui_sidebar_menus.zone.selected = nil
         df.global.ui.main.mode = df.ui_sidebar_mode.Default
         df.global.ui.waypoints.in_edit_waypts_mode = false

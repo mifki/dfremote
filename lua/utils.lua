@@ -247,6 +247,7 @@ function errmsg_wrongmode()
     return 'wrong mode ' .. tostring(df.global.ui.main.mode) .. ' ' .. dfhack.gui.getCurFocus()
 end
 
+-- to handle some values that became bitfields in newer dfhack versions
 function whole(v)
     return type(v) == 'number' and v or v.whole
 end

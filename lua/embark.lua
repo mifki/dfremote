@@ -550,7 +550,8 @@ function embark_back_to_map()
 	ws.parent.breakdown_level = df.interface_breakdown_types.NONE
 	ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
-	reset_embark_warning_flags(ws.parent)
+	local embws = ws.parent --as:df.viewscreen_choose_start_sitest
+	reset_embark_warning_flags(embws)
 	
 	--todo: remove everything from df.global.world.units.all - unsure how important it is
 	

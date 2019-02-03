@@ -10,7 +10,7 @@ function worldgen_status()
         error(errmsg_wrongscreen(ws))
     end
 
-    if istrue(ws.load_world_params) then
+    if C_viewscreen_new_regionst_loading_raws(ws) then
         return { 'loading' }
     end
 
@@ -85,7 +85,7 @@ function worldgen_cancel()
     end
 
     -- Loading raws, can't cancel
-    if ws.unk_b4 ~= 0 then
+    if C_viewscreen_new_regionst_loading_raws(ws) then
         return
     end
 

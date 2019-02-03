@@ -55,7 +55,7 @@ local orders = {
 
 	{
 		'', {
-			{ 'standing_orders_farmer_harvest', 'Only farmers harvest', K'ORDERS_ALL_HARVEST' },
+			{ 'standing_orders_farmer_harvest', 'Everybody (not only farmers) harvest', K'ORDERS_ALL_HARVEST' },
 			{ 'standing_orders_mix_food', 'Mix food', K'ORDERS_MIXFOODS' },
 		}, df.ui_sidebar_mode.Orders
 	},
@@ -97,133 +97,9 @@ local orders = {
 	}
 }
 
---todo: order globals are now available on all platforms, use them
-
-local function parse_orders_main(t, ret)
-    ret['standing_orders_job_cancel_announce'] = t(0, 12, 's') and 1 or t(0, 12, 'm') and 2 or t(0, 12, 'a') and 3 or 0
-
-	ret['standing_orders_gather_animals'] = t(1, 11, 'G')
-	ret['standing_orders_gather_food'] = t(2, 11, 'G')
-	ret['standing_orders_gather_furniture'] = t(3, 11, 'G')
-	ret['standing_orders_gather_bodies'] = t(4, 11, 'G')
-	
-	ret['standing_orders_gather_minerals'] = t(6, 11, 'G')
-	ret['standing_orders_gather_wood'] = t(7, 11, 'G')
-	ret['standing_orders_farmer_harvest'] = t(8, 3, 'O')
-    ret['standing_orders_mix_food'] = t(9, 3, 'M')
-end
-
-local function parse_orders_forbid(t, ret)
-    ret['standing_orders_forbid_used_ammo'] = t(0, 3, 'F')
-	ret['standing_orders_forbid_own_dead'] = t(1, 3, 'F')
-	ret['standing_orders_forbid_own_dead_items'] = t(2, 3, 'F')
-	ret['standing_orders_forbid_other_nohunt'] = t(3, 3, 'F')
-	ret['standing_orders_forbid_other_dead_items'] = t(4, 3, 'F')
-end
-
-local function parse_orders_refuse(t, ret, ws)
-	local s1 = false
-	local s2 = false
-
-	ret['standing_orders_gather_refuse'] = t(0, 11, 'G')
-	if ws and not ret['standing_orders_gather_refuse'] then --as:ws=df.viewscreen
-		gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
-		ws:render()
-		s1 = true
-	end
-
-	ret['standing_orders_gather_refuse_outside'] = t(1, 11, 'G')
-	if ws and not ret['standing_orders_gather_refuse_outside'] then --as:ws=df.viewscreen
-		gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
-		ws:render()
-		s2 = true
-	end
-
-	local dy = 1 --ret['standing_orders_gather_refuse_outside'] and 1 or 0
-
-	ret['standing_orders_gather_vermin_remains'] = t(3, 5, 'G')
-	ret['standing_orders_dump_corpses'] = t(3+dy, 11, 'D')
-	ret['standing_orders_dump_skulls'] = t(4+dy, 11, 'D')
-	ret['standing_orders_dump_bones'] = t(5+dy, 11, 'D')
-	ret['standing_orders_dump_shells'] = t(6+dy, 11, 'D')
-	ret['standing_orders_dump_skins'] = t(7+dy, 11, 'D')
-	ret['standing_orders_dump_hair'] = t(8+dy, 11, 'D')
-	ret['standing_orders_dump_other'] = t(9+dy, 11, 'D')
-
-	if s2 then
-		gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
-	end
-	if s1 then
-		gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
-	end
-end
-
-local function parse_orders_workshop(t, ret)
-	ret['standing_orders_auto_loom'] = t(0, 13, 'A') and 2 or (t(0, 13, 'D') and 1 or 0)
-	ret['standing_orders_use_dyed_cloth'] = t(1, 7, 'D')
-	ret['standing_orders_auto_collect_webs'] = t(2, 3, 'A')
-	ret['standing_orders_auto_slaughter'] = t(3, 3, 'A')
-	ret['standing_orders_auto_butcher'] = t(4, 3, 'A')
-	ret['standing_orders_auto_fishery'] = t(5, 3, 'A')
-	ret['standing_orders_auto_kitchen'] = t(6, 3, 'A')
-	ret['standing_orders_auto_tan'] = t(7, 3, 'A')	
-end
-
-local function parse_orders_zone(t, ret)
-	ret['standing_orders_zoneonly_drink'] = t(0, 3, 'Z')
-	ret['standing_orders_zoneonly_fish'] = t(1, 3, 'Z')
-end
-
-local function simulate_orders_globals()
-	return execute_with_main_mode(df.ui_sidebar_mode.Orders, function(ws)
-        ws:render()
-
-        local x = df.global.gps.dimx - 2 - 30 + 1
-        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
-            x = x - (23 + 1)
-        end
-        x = x + 1
-
-        local y = 5
-        local x2 = x + 3
-
-        local function t(row, dx, ch)
-        	local offset = ((x+dx)*df.global.gps.dimy+(y+row))*4
-        	if offset < 0 then
-        		error('screen offset < 0 ('..
-                    ' dims ' .. tostring(df.global.gps.dimx) .. ' ' .. tostring(df.global.gps.dimy) ..
-                    ' dims ' .. tostring(df.global.init.display.grid_x) .. ' ' .. tostring(df.global.init.display.grid_y) .. ')')
-    		end
-        	return string.char(df.global.gps.screen[offset]) == ch
-        end
-
-        local ret = {}
-        parse_orders_main(t, ret)
-
-        df.global.ui.main.mode = df.ui_sidebar_mode.OrdersForbid
-        ws:render()
-        parse_orders_forbid(t, ret)
-
-        df.global.ui.main.mode = df.ui_sidebar_mode.OrdersRefuse
-        ws:render()
-        parse_orders_refuse(t, ret, ws)
-
-		df.global.ui.main.mode = df.ui_sidebar_mode.OrdersWorkshop
-		ws:render()
-		parse_orders_workshop(t, ret)
-
-		df.global.ui.main.mode = df.ui_sidebar_mode.OrdersZone
-		ws:render()
-		parse_orders_zone(t, ret)
-
-        return ret
-	end)	
-end
-
 --luacheck: in=
 function orders_get()
-	--local check = df.global.standing_orders_gather_animals
-	local globals = simulate_orders_globals()
+	local globals = df.global
 
 	local ret = {}
 
@@ -243,6 +119,7 @@ function orders_get()
 	return ret
 end
 
+--todo: can we just set global values without ui?
 --luacheck: in=number,number,bool
 function orders_set(section, idx, val)
 	section = section + 1
@@ -251,71 +128,48 @@ function orders_set(section, idx, val)
 	local order = orders[section][2][idx]
 	local gname = order[1]
 	local mode = orders[section][3]
+	local key = order[3]
 
-	if type (order[2]) == 'string' then
-		val = istrue(val)
-	end
+	-- if type (order[2]) == 'string' then
+	-- 	val = istrue(val)
+	-- end
 
 	return execute_with_main_mode(mode, function(ws)
-        local x = df.global.gps.dimx - 2 - 30 + 1
-        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
-            x = x - (23 + 1)
-        end
-        x = x + 1
-
-        local y = 5
-        local x2 = x + 3
-
-        local function t(row, dx, ch)
-        	return string.char(df.global.gps.screen[((x+dx)*df.global.gps.dimy+(y+row))*4]) == ch
-        end
-
+		local globals = df.global
 		local s1 = false
 		local s2 = false
+    
+    	--xxx: the app allows to set refuse flags even if the main "gather refuse" is unset
+    	--xxx: in that case, temporarily enable/show refuse options
         if mode == df.ui_sidebar_mode.OrdersRefuse then
-        	ws:render()
-	        local globals = {}        	
-    		parse_orders_refuse(t, globals, ws)
-			if idx ~= 1 and not globals['standing_orders_gather_refuse'] then
-				gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
+			if idx ~= 1 and not istrue(globals[orders[section][2][1][1]]) then
+				gui.simulateInput(ws, orders[section][2][1][3])
 				s1 = true
 			end
 
-			if idx ~= 2 and not globals['standing_orders_gather_refuse_outside'] then
-				gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
+			if idx ~= 2 and not istrue(globals[orders[section][2][2][1]]) then
+				gui.simulateInput(ws, orders[section][2][2][3])
 				s2 = true
 			end    		
     	end
 
         local prev = nil
         while true do
-	        ws:render()
-	        local globals = {}
-	        if mode == df.ui_sidebar_mode.Orders then
-	        	parse_orders_main(t, globals)
-	    	elseif mode == df.ui_sidebar_mode.OrdersRefuse then
-	    		parse_orders_refuse(t, globals)
-	    	elseif mode == df.ui_sidebar_mode.OrdersForbid then
-	    		parse_orders_forbid(t, globals)
-	    	elseif mode == df.ui_sidebar_mode.OrdersWorkshop then
-	    		parse_orders_workshop(t, globals)
-	    	elseif mode == df.ui_sidebar_mode.OrdersZone then
-	    		parse_orders_zone(t, globals)
-	    	end
-
         	if globals[gname] == val or prev == globals[gname] then
         		break
         	end
 	    	
 	    	prev = globals[gname]
-	    	gui.simulateInput(ws, order[3])
+	    	gui.simulateInput(ws, key)
+	    	print (val,globals[gname])
 	    end
 
+	    --xxx: now disable/hide the refuse options temporarily shown above
 		if s2 then
-			gui.simulateInput(ws, K'ORDERS_REFUSE_OUTSIDE')
+			gui.simulateInput(ws, orders[section][2][2][3])
 		end
 		if s1 then
-			gui.simulateInput(ws, K'ORDERS_REFUSE_GATHER')
+			gui.simulateInput(ws, orders[section][2][1][3])
 		end
 
 	    return true
