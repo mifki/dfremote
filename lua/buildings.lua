@@ -1187,9 +1187,12 @@ function building_room_free(bldid)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_FREE',
         [df.building_type.Cage] = K'BUILDJOB_CAGE_FREE',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_FREE',
-        [df.building_type.Well] = K'BUILDJOB_WELL_FREE',
-        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_FREE',
+        [df.building_type.Well] = K'BUILDJOB_WELL_FREE'
     }
+
+    if df_ver >= 4412 and df_ver <= 4499 then --dfver:4412-4499
+        keys[df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_FREE'
+    end    
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
 
@@ -1223,8 +1226,11 @@ function building_room_owner_get_candidates(bldid)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
-        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
+
+    if df_ver >= 4412 and df_ver <= 4499 then --dfver:4412-4499
+        keys[df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN'
+    end
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
     --todo: don't know which of the following is required
@@ -1277,8 +1283,11 @@ function building_room_owner_set(bldid, id)
         [df.building_type.Slab] = K'BUILDJOB_STATUE_ASSIGN',  
         [df.building_type.Cage] = K'BUILDJOB_CAGE_ASSIGN',
         [df.building_type.Chain] = K'BUILDJOB_CHAIN_ASSIGN',
-        [df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN',
     }
+
+    if df_ver >= 4412 and df_ver <= 4499 then --dfver:4412-4499
+        keys[df.building_type.DisplayFurniture] = K'BUILDJOB_STATUE_ASSIGN'
+    end
 
     gui.simulateInput(ws, keys[df.global.world.selected_building:getType()])
     --todo: don't know which of the following is required
