@@ -22,6 +22,8 @@ int get_menu_width()
 
 void render_remote_map()
 {
+    FastCoreSuspender suspend(3);
+    
     //*out2 << "render start"<<std::endl;
     uint8_t menu_width, area_map_width;
     Gui::getMenuWidth(menu_width, area_map_width);

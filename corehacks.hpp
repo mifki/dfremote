@@ -1,75 +1,119 @@
+#include <mutex>
+
+#include "df/viewscreen_barterst.h"
+
 static uint32_t saved_frames;
 
-void core_suspend_fast()
+std::recursive_mutex mutex;
+
+typedef char (*MAINLOOP)();
+static MAINLOOP _mainloop;
+
+static uint32_t mainloop_addr_orig;
+
+void core_unhack();
+
+static uint8_t save[13];
+static uint64_t fnptr;
+
+static void protected_mainloop()
 {
-    volatile unsigned int *frames = &enabler->async_frames;
-    volatile bool *paused = &enabler->async_paused;
+    mutex.lock();
 
-    // Claim channel lock early to make sure no commands posted
-    SDL_SemWait(enabler->async_tobox.sem);
-
-    // If async_frames is zero, mainloop() has already finished or wasn't requested.
-    // So we're safe to proceed in either case.
-    if (!*frames)
+    if (_mainloop())
     {
-        *paused = true;
-        saved_frames = 0;
+#if defined(DF_04305)
+        MemoryPatcher p(Core::getInstance().p);
+#else
+        MemoryPatcher p(Core::getInstance().p.get());
+#endif
+    
+#ifdef WIN32
+        uint64_t addr = A_MAINLOOP_CALL + Core::getInstance().vinfo->getRebaseDelta();
+#else
+        uint64_t addr = A_MAINLOOP_CALL;
+#endif
+
+        uint8_t opcode[] = { 0xe9 };
+        uint64_t jneaddr = *(uint32_t*)(save + 13 - 4) + addr + 13;
+        uint64_t retptr = addr + 2+8+2;
+        int32_t data = jneaddr - retptr - 5;
+
+        p.write((void*)(retptr), &opcode, 1);
+        p.write((void*)(retptr+1), &data, 4);
         return;
     }
-
-    df::enabler::T_async_tobox::T_queue command;
-    command.cmd = df::enabler::T_async_tobox::T_queue::pause;
-    enabler->async_tobox.queue.push_back(command);
-    SDL_SemPost(enabler->async_tobox.sem);
-    SDL_SemPost(enabler->async_tobox.sem_fill);
     
-    *paused = true;
-
-    // do {
-        SDL_SemWait(enabler->async_frombox.sem_fill);
-        SDL_SemWait(enabler->async_frombox.sem);
-        if (!enabler->async_frombox.queue.empty())
-            enabler->async_frombox.queue.pop_front();
-        SDL_SemPost(enabler->async_frombox.sem);    
-        if (!*paused)
-        *out2 << "W" << std::endl;
-    // } while (!*paused);
-
-    saved_frames = *frames;
-
-    // At this point we can be sure mainloop() has finished and won't be called again
-    
-    //XXX: This is to prevent render command from being sent. It crashes the game at least while moving
-    //XXX: region location on embark screen.
-    //TODO: Still the situation when rendering has already been started is not covered.
-    SDL_SemWait(enabler->async_tobox.sem);
+    mutex.unlock();
 }
 
-void core_resume_fast()
+void core_hack()
 {
-    enabler->async_paused = false;
-    // SDL_SemWait(enabler->async_tobox.sem);
-    // {
-    //     df::enabler::T_async_tobox::T_queue command;
-    //     command.cmd = df::enabler::T_async_tobox::T_queue::start;
-    //     enabler->async_tobox.queue.push_back(command);
-    // }
-    {
-        df::enabler::T_async_tobox::T_queue command;
-        command.cmd = df::enabler::T_async_tobox::T_queue::inc;
-        command.val = 0;//saved_frames;
-        enabler->async_tobox.queue.push_back(command);
-    }
-    SDL_SemPost(enabler->async_tobox.sem);
-    // SDL_SemPost(enabler->async_tobox.sem_fill);
-    SDL_SemPost(enabler->async_tobox.sem_fill);
+#if defined(DF_04305)
+    MemoryPatcher p(Core::getInstance().p);
+#else
+    MemoryPatcher p(Core::getInstance().p.get());
+#endif
+
+#ifdef WIN32
+    uint64_t addr = A_MAINLOOP_CALL + Core::getInstance().vinfo->getRebaseDelta();
+#else
+    uint64_t addr = A_MAINLOOP_CALL;
+#endif
+
+#if defined(WIN32) || defined(__APPLE__)
+    _mainloop = (MAINLOOP) (*(int32_t*)(addr+1) + addr + 5);
+#else
+    uint8_t *_mainloop_jmp = (uint8_t*) (*(int32_t*)(addr+1) + addr + 5);
+    void *_mainloop_ptr_addr = (*(int32_t*)(_mainloop_jmp+2) + _mainloop_jmp + 6);
+    _mainloop = *(MAINLOOP*) _mainloop_ptr_addr;
+#endif
+    
+    memcpy(save, (void*)addr, 13);
+
+    uint8_t opcode1[] = { 0x48, 0xbf };
+    fnptr = (uint64_t)&protected_mainloop;
+    uint64_t data = (uint64_t)&fnptr;
+    uint8_t opcode2[] = { 0xff,0x17, 0x90 };
+
+    p.write((void*)(addr), &opcode1, 2);
+    p.write((void*)(addr+2), &data, 8);
+    p.write((void*)(addr+2+8), &opcode2, 3);
+}
+
+void core_unhack()
+{
+ #if defined(DF_04305)
+    MemoryPatcher p(Core::getInstance().p);
+#else
+    MemoryPatcher p(Core::getInstance().p.get());
+#endif
+
+#ifdef WIN32
+    uint64_t addr = A_MAINLOOP_CALL + Core::getInstance().vinfo->getRebaseDelta();
+#else
+    uint64_t addr = A_MAINLOOP_CALL;
+#endif
+
+    p.write((void*)addr, save, 13);
+}
+
+void core_suspend_fast(int a)
+{
+    mutex.lock();
+}
+
+void core_resume_fast(int a)
+{
+    mutex.unlock();
 }
 
 // Suspender that does not wait till the next graphics frame
 class FastCoreSuspender {
+    int a;
 public:
-    FastCoreSuspender() { core_suspend_fast(); }
-    ~FastCoreSuspender() { core_resume_fast(); }
+    FastCoreSuspender(int a=0) :a(a) { core_suspend_fast(a); }
+    ~FastCoreSuspender() { core_resume_fast(a); }
 };
 
 

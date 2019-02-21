@@ -29,6 +29,7 @@
 #elif defined(__APPLE__)
 
 #else
+    #include <dlfcn.h>
 #endif
 
 #include "Core.h"
@@ -223,10 +224,10 @@ static void patch_rendering(bool enable_lower_levels)
 #endif
 }
 
+#include "corehacks.hpp"
 #include "dwarfmode.hpp"
 #include "embark.hpp"
 #include "itemcache.hpp"
-#include "corehacks.hpp"
 
 #if defined(WIN32)
     void check_open_firewall(color_ostream *out2, int port);
@@ -844,12 +845,12 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     //TODO: don't hardcode these
     bool need_suspend = !((cmd == 238 && subcmd == 4) || (cmd == 238 && subcmd == 22) || (cmd == 237 && subcmd == 11));
     if (need_suspend)
-        core_suspend_fast();
+        core_suspend_fast(1);
 
     if (!remote_on)
     {
         if (need_suspend)
-            core_resume_fast();
+            core_resume_fast(1);
         return;
     }
 
@@ -866,7 +867,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         handled = lua_toboolean(L, -2);
         
     if (need_suspend)
-        core_resume_fast();
+        core_resume_fast(1);
 
     if (handled)
     {
@@ -1111,10 +1112,11 @@ void enthreadmain(ENetHost *server)
                         {
                             force_send_map = true;
                             // *out2 << "forcing render" << std::endl;
-                            core_force_render();
+                            // core_force_render();
+                            render_remote_map();
                             // *out2 << "forced render done" << std::endl;
                             //df::global::gview->view.child->render();
-                            enet_host_flush(server);
+                            // enet_host_flush(server);
                         }
                     }
 
@@ -1174,7 +1176,7 @@ void enthreadmain(ENetHost *server)
                 }
             }
 
-            else if (enabler->gframe_last != t2/*(enabler->gframe_last != t2 && force_send_map) || server->serviceTime-t >= 250*/)
+            else if ((enabler->gframe_last != t2||force_send_map)/* || server->serviceTime-t >= 250*/)
             {
                 //TODO: and only if on the game screen
                 if (map_render_enabled)
@@ -1285,6 +1287,8 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
 
+    core_hack();
+
     remote_on = true;
 
     enthread = new tthread::thread((void (*)(void *))enthreadmain, server);
@@ -1318,6 +1322,10 @@ void remote_stop()
     enabler->gfps = 50;
     
     remote_unload_lua();
+    core_unhack();
+    
+    *out2 << COLOR_YELLOW << "Dwarf Fortress Remote server stopped" << std::endl;
+    *out2 << COLOR_RESET;
 }
 
 void remote_publish(string &name)

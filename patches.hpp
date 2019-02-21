@@ -44,6 +44,9 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x140b7f500, 9, true, { 0x48, 0x8B, 0x44, 0x24, 0x28,  0xC6, 0x00, 0x00,  0xC3 }
         };
+        
+        #define A_MAINLOOP        0x140630640
+        #define A_MAINLOOP_CALL   0x14035c0c1
 
     #elif defined(__APPLE__)
         #define A_LOAD_MULTI_PDIM 0x10106a9b0
@@ -62,10 +65,13 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x100d075c0, 5, true, { 0x41, 0xc6, 0x00, 0x00, 0xC3 }
         };
+        
+        #define A_MAINLOOP        0x1006daea0
+        #define A_MAINLOOP_CALL   0x100fff563
 
     #else
-        #define A_RENDER_MAP 0x00d537c0
-        #define A_RENDER_UPDOWN 0x00b345f0
+        #define A_RENDER_MAP      0x00d537c0
+        #define A_RENDER_UPDOWN   0x00b345f0
 
         #define NO_DISPLAY_PATCH
 
@@ -78,13 +84,16 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x00fc8fa0, 5, true, { 0x41, 0xc6, 0x00, 0x00, 0xC3 }
         };
+        
+        #define A_MAINLOOP        dlsym(RTLD_DEFAULT, "_Z8mainloopv")
+        #define A_MAINLOOP_CALL   ((int64_t)dlsym(RTLD_DEFAULT, "_ZN9enablerst10async_loopEv") + 0xb0)
     #endif        
 
 #elif defined(DF_04412)
     #ifdef WIN32
-        #define A_LOAD_MULTI_PDIM  0x140aeb200
-        #define A_RENDER_MAP       0x1408b9f20
-        #define A_RENDER_UPDOWN    0x140600c10
+        #define A_LOAD_MULTI_PDIM 0x140aeb200
+        #define A_RENDER_MAP      0x1408b9f20
+        #define A_RENDER_UPDOWN   0x140600c10
 
         static patchdef p_display = { 0x1403a134b, 5 };
 
@@ -97,10 +106,14 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x140c37e60, 9, true, { 0x48, 0x8b, 0x44, 0x24, 0x28, 0xc6, 0x00, 0x00, 0xc3 }
         };
+        
+        #define A_MAINLOOP        0x1406bf1f0
+        #define A_MAINLOOP_CALL   0x1403a0f41
+        
     #elif defined(__APPLE__)
-        #define A_LOAD_MULTI_PDIM  0x1011aa460
-        #define A_RENDER_MAP       0x100b30bc0
-        #define A_RENDER_UPDOWN    0x10089e2e0
+        #define A_LOAD_MULTI_PDIM 0x1011aa460
+        #define A_RENDER_MAP      0x100b30bc0
+        #define A_RENDER_UPDOWN   0x10089e2e0
 
         static patchdef p_display = { 0x10113de0b, 5 };
 
@@ -113,9 +126,13 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x100dd1a20, 5, true, { 0x41, 0xc6, 0x00, 0x00, 0xc3 }
         };
+        
+        #define A_MAINLOOP        0x1007429f0
+        #define A_MAINLOOP_CALL   0x10113cfa3
+        
     #else
-        #define A_RENDER_MAP       0xe1f9f0
-        #define A_RENDER_UPDOWN    0xbea660
+        #define A_RENDER_MAP      0xe1f9f0
+        #define A_RENDER_UPDOWN   0xbea660
         #define NO_DISPLAY_PATCH
 
         static patchdef p_dwarfmode_render = { 0x720395, 5 };
@@ -127,7 +144,10 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x10a2f30, 5, true, { 0x41, 0xc6, 0x00, 0x00, 0xc3 }
         };
-        #endif      
+        
+        #define A_MAINLOOP        dlsym(RTLD_DEFAULT, "_Z8mainloopv")
+        #define A_MAINLOOP_CALL   ((int64_t)dlsym(RTLD_DEFAULT, "_ZN9enablerst10async_loopEv") + 0xb0)
+    #endif
 
 #else
     #error Unsupported DF version
