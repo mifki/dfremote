@@ -146,35 +146,35 @@ function itemname(item, type, decorate)
 end
 
 function burrowname(burrow)
-    return (#burrow.name > 0) and burrow.name or ('Burrow ' .. tostring(burrow.id+1))
+    return (#burrow.name > 0) and dfhack.df2utf(burrow.name) or ('Burrow ' .. tostring(burrow.id+1))
 end
 
 function pointname(point)
-    return (#point.name > 0) and point.name or ('Point ' .. tostring(point.id+1))
+    return (#point.name > 0) and dfhack.df2utf(point.name) or ('Point ' .. tostring(point.id+1))
 end
 
 function routename(route)
-    return (#route.name > 0) and route.name or ('Route ' .. tostring(route.id+1))
+    return (#route.name > 0) and dfhack.df2utf(route.name) or ('Route ' .. tostring(route.id+1))
 end
 
 function haulingroutename(route)
-    return (#route.name > 0) and route.name or ('Route ' .. tostring(route.id+1))
+    return (#route.name > 0) and dfhack.df2utf(route.name) or ('Route ' .. tostring(route.id+1))
 end
 
 function stopname(stop)
-    return (#stop.name > 0) and stop.name or ('Stop ' .. tostring(stop.id))
+    return (#stop.name > 0) and dfhack.df2utf(stop.name) or ('Stop ' .. tostring(stop.id))
 end
 
 function alertname(alert)
-    return (#alert.name > 0) and alert.name or ('Alert State ' .. tostring(alert.id))
+    return (#alert.name > 0) and dfhack.df2utf(alert.name) or ('Alert State ' .. tostring(alert.id))
 end
 
 function squadname(squad)
-    return (#squad.alias > 0) and squad.alias or dfhack.df2utf(dfhack.TranslateName(squad.name, true))    
+    return (#squad.alias > 0) and dfhack.df2utf(squad.alias) or dfhack.df2utf(dfhack.TranslateName(squad.name, true))    
 end
 
 function uniformname(uniform)
-    return (#uniform.name > 0) and uniform.name or ('Uniform ' .. tostring(uniform.id+1))
+    return (#uniform.name > 0) and dfhack.df2utf(uniform.name) or ('Uniform ' .. tostring(uniform.id+1))
 end
 
 function zonename(zone)
