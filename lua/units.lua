@@ -1480,9 +1480,12 @@ local unit = df.unit.find(unitid)
     if not unit then
         error('no unit '..tostring(unitid))
     end
+    
+    --todo: use histfig.info.kills instead ?
 
     local unitws = df.viewscreen_unitst:new()
     unitws.unit = unit
+    unitws.anon_1 = 1
     gui.simulateInput(unitws, K'UNITVIEW_KILLS')
     df.delete(unitws)
 
