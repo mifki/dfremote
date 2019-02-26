@@ -23,7 +23,5 @@ function dfaas_save_done(pwd)
         error('invalid password')
     end
 
-    --todo: need to return to main screen!
-
     return (df.global.ui.main.autosave_request ~= true)
 end
