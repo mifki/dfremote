@@ -1112,8 +1112,8 @@ void enthreadmain(ENetHost *server)
                         {
                             force_send_map = true;
                             // *out2 << "forcing render" << std::endl;
-                            // core_force_render();
-                            render_remote_map();
+                            core_force_render();
+                            // render_remote_map();
                             // *out2 << "forced render done" << std::endl;
                             //df::global::gview->view.child->render();
                             // enet_host_flush(server);

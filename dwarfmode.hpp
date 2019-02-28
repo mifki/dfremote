@@ -22,9 +22,6 @@ int get_menu_width()
 
 void render_remote_map()
 {
-    FastCoreSuspender suspend(3);
-    
-    //*out2 << "render start"<<std::endl;
     uint8_t menu_width, area_map_width;
     Gui::getMenuWidth(menu_width, area_map_width);
 
@@ -228,11 +225,11 @@ void render_remote_map()
     gps->screen = enabler->renderer->screen = sctop;
     gps->screen_limit = gps->screen + gps->dimx * gps->dimy * 4;
 //    gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
-        gps->screentexpos           = screentexpostop;
-        gps->screentexpos_addcolor  = screentexpos_addcolortop;
-        gps->screentexpos_grayscale = screentexpos_grayscaletop;
-        gps->screentexpos_cf        = screentexpos_cftop;
-        gps->screentexpos_cbr       = screentexpos_cbrtop;
+    gps->screentexpos           = screentexpostop;
+    gps->screentexpos_addcolor  = screentexpos_addcolortop;
+    gps->screentexpos_grayscale = screentexpos_grayscaletop;
+    gps->screentexpos_cf        = screentexpos_cftop;
+    gps->screentexpos_cbr       = screentexpos_cbrtop;
 }
 
 

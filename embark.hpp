@@ -6,6 +6,7 @@ struct embark_hook : public df::viewscreen_choose_start_sitest
 
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
+        // The game crashes when moving selected embark location without this
         FastCoreSuspender suspend(2);
         INTERPOSE_NEXT(render)();
     }
