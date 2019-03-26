@@ -263,7 +263,7 @@ function labors_get_counts()
     end
     
     for i,unit in ipairs(df.global.world.units.active) do
-        if dfhack.units.isCitizen(unit) then
+        if unit_iscitizen(unit) then
         	local ulabors = unit.status.labors
             for i=0,df.unit_labor._last_item do
                 if ulabors[i] then
@@ -300,7 +300,7 @@ function labors_get_dwarves_with_labor(laboridx)
     local disabled = {}
 
 	for i,unit in ipairs(df.global.world.units.active) do
-		if unit.profession ~= df.profession.CHILD and unit.profession ~= df.profession.BABY and dfhack.units.isCitizen(unit) then
+		if unit.profession ~= df.profession.CHILD and unit.profession ~= df.profession.BABY and unit_iscitizen(unit) then
 			--if unit.status.labors[laboridx] then
 				local uname = unitname(unit)
 			    local prof = unitprof(unit)
@@ -342,7 +342,7 @@ function labors_get_all_dwarves()
     local disallowed = {}
 
 	for i,unit in ipairs(df.global.world.units.active) do
-		if dfhack.units.isCitizen(unit) then
+		if unit_iscitizen(unit) then
 			local uname = unitname(unit)
 		    local prof = unitprof(unit)
 			if unit.profession ~= df.profession.CHILD and unit.profession ~= df.profession.BABY then

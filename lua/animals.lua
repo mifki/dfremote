@@ -187,7 +187,7 @@ function animals_trainer_get_choices()
 	local ret = {}
 
 	for i,unit in ipairs(df.global.world.units.active) do
-		if dfhack.units.isCitizen(unit) then
+		if unit_iscitizen(unit) then
 			local uname = unitname(unit)
 		    local prof = unitprof(unit)
 		    local fullname = uname .. ', ' .. prof

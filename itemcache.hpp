@@ -111,6 +111,7 @@ void itemcache_init()
 
         df::item *container = Items::getContainer(item);
         df::unit *holder = item->flags.bits.in_inventory ? Items::getHolderUnit(item) : NULL;
+        //TODO: ideally should use modfified unit_iscitizen() 
         if (item_is_busy(item) || (container && item_is_busy(container)) || (holder && !Units::isCitizen(holder)))
             cat.busy += stack;
         else

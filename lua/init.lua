@@ -680,7 +680,7 @@ function count_idlers()
     for i,unit in ipairs(df.global.world.units.active) do
         if not C_unit_dead(unit) and not unit.job.current_job then
             local prf = unit.profession
-            if dfhack.units.isCitizen(unit) then
+            if unit_iscitizen(unit) then
                 --todo: need to check activity_entry.events for individual drills ?
                 if prf ~= df.profession.BABY and prf ~= df.profession.CHILD and prf ~= df.profession.DRUNK and
                    not df.profession.attrs[prf].military and #unit.military.individual_drills == 0 then

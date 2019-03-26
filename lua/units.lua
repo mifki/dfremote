@@ -11,6 +11,32 @@ function unit_creature_name(unit)
     end
 end
 
+--xxx: DFHack's Units::isCitizen() skips melancholy and raving units while they are actually citizens
+function unit_iscitizen(unit)
+    if unit.mood == df.mood_type.Berserk or
+       unit_testflagcurse(unit, 'CRAZED') or unit_testflagcurse(unit, 'OPPOSED_TO_LIFE') or
+       unit.enemy.undead or
+       unit.flags3.ghostly or
+       unit.flags1.marauder or unit.flags1.active_invader or unit.flags1.invader_origin or
+       unit.flags1.forest or
+       unit.flags1.merchant or unit.flags1.diplomat then
+        return false
+    end
+           
+    if unit.flags1.tame then
+        return true
+    end
+            
+    if unit.flags2.underworld or unit.flags2.resident or
+       unit.flags2.visitor_uninvited or unit.flags2.visitor or
+       unit.civ_id == -1 or
+       unit.civ_id ~= df.global.ui.civ_id then
+        return false
+    end
+    
+    return true
+end
+
 function unit_get_effects(unit)
     local ret = {}
 
@@ -120,7 +146,7 @@ function unit_query_selected(unitid)
 
     local jobtitle, jobcolor = unit_jobtitle(unit, false)
 
-    local is_citizen = dfhack.units.isCitizen(unit) 
+    local is_citizen = unit_iscitizen(unit) 
     local can_edit_labors = is_citizen and unit.profession ~= df.profession.CHILD and unit.profession ~= df.profession.BABY
 
     local histfig = df.historical_figure.find(unit.hist_figure_id)
@@ -881,7 +907,7 @@ function unit_get_thoughts(unitid, is_histfig)
 
         local dummyunit
         for i,v in ipairs(df.global.world.units.active) do
-            if dfhack.units.isCitizen(v) then
+            if unit_iscitizen(v) then
                 dummyunit = v
                 break
             end
@@ -909,7 +935,7 @@ function unit_get_thoughts(unitid, is_histfig)
             error('no unit '..tostring(unitid))
         end
 
-        --xxx: this method creates an extra screen but doesn't require to check isCitizen and other flags we're unaware of
+        --xxx: this method creates an extra screen but doesn't require to check unit_iscitizen() and other flags we're unaware of
         local unitlistws = df.viewscreen_unitlistst:new()
         unitlistws.page = df.viewscreen_unitlist_page.Citizens
         unitlistws.cursor_pos[0] = 0
@@ -926,7 +952,7 @@ function unit_get_thoughts(unitid, is_histfig)
 
         df.delete(unitlistws)
 
-        --[[if not C_unit_dead(unit) and dfhack.units.isCitizen(unit) then
+        --[[if not C_unit_dead(unit) and unit_iscitizen(unit) then
             local unitws = df.viewscreen_unitst:new()
             unitws.unit = unit
             gui.simulateInput(unitws, K'SELECT')
