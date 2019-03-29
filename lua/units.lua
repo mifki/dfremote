@@ -13,28 +13,25 @@ end
 
 --xxx: DFHack's Units::isCitizen() skips melancholy and raving units while they are actually citizens
 function unit_iscitizen(unit)
-    if unit.mood == df.mood_type.Berserk or
-       unit_testflagcurse(unit, 'CRAZED') or unit_testflagcurse(unit, 'OPPOSED_TO_LIFE') or
-       unit.enemy.undead or
-       unit.flags3.ghostly or
-       unit.flags1.marauder or unit.flags1.active_invader or unit.flags1.invader_origin or
-       unit.flags1.forest or
-       unit.flags1.merchant or unit.flags1.diplomat then
-        return false
-    end
-           
-    if unit.flags1.tame then
-        return true
-    end
-            
-    if unit.flags2.underworld or unit.flags2.resident or
-       unit.flags2.visitor_uninvited or unit.flags2.visitor or
-       unit.civ_id == -1 or
-       unit.civ_id ~= df.global.ui.civ_id then
+    if unit.flags1.marauder or unit.flags1.invader_origin or unit.flags1.active_invader or unit.flags1.forest or
+       unit.flags1.merchant or unit.flags1.diplomat or unit.flags2.underworld or unit.flags2.resident or
+       unit.flags2.visitor_uninvited or unit.flags2.visitor then
         return false
     end
     
-    return true
+    if dfhack.units.isDead(unit) or dfhack.units.isOpposedToLife(unit) or unit.enemy.undead then
+        return false
+    end
+    
+    if unit.enemy.normal_race == unit.enemy.were_race and dfhack.units.isCrazed(unit) then
+        return false
+    end
+    
+    if unit.mood == df.mood_type.Berserk then
+        return false
+    end
+
+    return dfhack.units.isOwnGroup(unit)
 end
 
 function unit_get_effects(unit)

@@ -36,7 +36,7 @@ function item_is_fort_owned(item)
 
     if item.flags.in_inventory then
         local holder = dfhack.items.getHolderUnit(item)
-        if holder and not dfhack.units.isCitizen(holder) then
+        if holder and not unit_iscitizen(holder) then
             return false
         end
     end
