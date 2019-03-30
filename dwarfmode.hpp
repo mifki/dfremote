@@ -54,8 +54,8 @@ void render_remote_map()
 
     init->display.grid_x = newwidth + gmenu_w + 2;
     init->display.grid_y = newheight + 2;
-    gps->dimx = newwidth;
-    gps->dimy = newheight;
+    gps->dimx = curwidth = newwidth;
+    gps->dimy = curheight = newheight;
     gps->clipx[1] = newwidth;
     gps->clipy[1] = newheight;
 

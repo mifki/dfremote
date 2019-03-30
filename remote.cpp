@@ -160,7 +160,7 @@ static lua_State *L;
 
 static int wx, wy;
 static bool rendering;
-static int newwidth, newheight;
+static int newwidth, newheight, curwidth, curheight;
 static volatile bool waiting_render;
 static volatile bool map_render_enabled;
 static volatile bool render_initial;
@@ -647,17 +647,18 @@ bool send_map_updates(send_func sendfunc, void *conn)
     {
         b++;
         //int tile = 0;
-        int maxx = std::min(newwidth, world->map.x_count - gwindow_x);
-        int maxy = std::min(newheight, world->map.y_count - gwindow_y);
+        int maxx = std::min(curwidth, world->map.x_count - gwindow_x);
+        int maxy = std::min(curheight, world->map.y_count - gwindow_y);
         int cnt = 0;
         int lastdz = 0;
         int lastinfobyte = 0;
+
         unsigned char *lastinfobyteptr = NULL;
         for (int y = 0; y < maxy; y++)
         {
             for (int x = 0; x < maxx; x++)
             {
-                const int tile = x * newheight + y;
+                const int tile = x * curheight + y;
                 unsigned char *s = gscreen + tile*4;
 
                 int xx = x + gwindow_x;
