@@ -651,15 +651,34 @@ bool send_map_updates(send_func sendfunc, void *conn)
         int maxy = std::min(curheight, world->map.y_count - gwindow_y);
         int cnt = 0;
         int lastdz = 0;
-        int lastinfobyte = 0;
+        // int lastinfobyte = 0;
 
-        unsigned char *lastinfobyteptr = NULL;
-        for (int y = 0; y < maxy; y++)
+        // unsigned char *lastinfobyteptr = NULL;
+        int x0 = 0, y0 = 0, dz0 = 0;
+        bool deeper = false;
+        bool senddz = false;
+godeeper:;
+        for (int y = y0; y < maxy; y++)
         {
-            for (int x = 0; x < maxx; x++)
+            for (int x = x0; x < maxx; x++)
             {
                 const int tile = x * curheight + y;
                 unsigned char *s = gscreen + tile*4;
+
+                int dz = (s[3] & 0xfe) >> 1;
+                if (dz < dz0)
+                    continue;
+                if (dz > dz0)
+                {
+                    if (!deeper)
+                    {
+                        x0 = x;
+                        y0 = y;
+                        deeper = true;
+                    }
+
+                    continue;
+                }
 
                 int xx = x + gwindow_x;
                 int yy = y + gwindow_y;
@@ -670,28 +689,28 @@ bool send_map_updates(send_func sendfunc, void *conn)
                 unsigned int is;
                 unsigned char bg, fg;
                 unsigned short texpos = 0;
-                if (graphics && (texpos=*(gscreentexpos+tile)))
-                {
-                    if (gscreentexpos_grayscale[tile])
-                    {
-                        fg = gscreentexpos_cf[tile];
-                        bg = gscreentexpos_cbr[tile];
-                    }
-                    else if (gscreentexpos_addcolor[tile])
-                    {
-                        bg   = s[2] & 7;
-                        unsigned char bold = (s[3] & 1) * 8;
-                        fg   = (s[1] + bold) % 16;
-                    }
-                    else
-                    {
-                        fg = 15;
-                        bg = 0;
-                    }                    
+                // if (graphics && (texpos=*(gscreentexpos+tile)))
+                // {
+                //     if (gscreentexpos_grayscale[tile])
+                //     {
+                //         fg = gscreentexpos_cf[tile];
+                //         bg = gscreentexpos_cbr[tile];
+                //     }
+                //     else if (gscreentexpos_addcolor[tile])
+                //     {
+                //         bg   = s[2] & 7;
+                //         unsigned char bold = (s[3] & 1) * 8;
+                //         fg   = (s[1] + bold) % 16;
+                //     }
+                //     else
+                //     {
+                //         fg = 15;
+                //         bg = 0;
+                //     }                    
 
-                    is = texpos | (fg << 4) | bg;
-                }
-                else
+                //     is = texpos | (fg << 4) | bg;
+                // }
+                // else
                 {
                     is = *((unsigned int*)gscreen + tile);
                     is &= 0x01ffffff; // Ignore depth information
@@ -699,23 +718,23 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
-                    if (graphics && !(lastinfobyte--))
-                    {
-                        lastinfobyteptr = b;
-                        *(b++) = 0;
-                        lastinfobyte = 7;
-                    }
+                    // if (graphics && !(lastinfobyte--))
+                    // {
+                    //     lastinfobyteptr = b;
+                    //     *(b++) = 0;
+                    //     lastinfobyte = 7;
+                    // }
 
                     *(b++) = x + gwindow_x;
                     *(b++) = y + gwindow_y;
 
-                    if (texpos)
-                    {
-                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
-                        *(unsigned short*)b = texpos;
-                        b += 2;
-                    }
-                    else
+                    // if (texpos)
+                    // {
+                    //     *lastinfobyteptr |= 1 << (7-lastinfobyte);
+                    //     *(unsigned short*)b = texpos;
+                    //     b += 2;
+                    // }
+                    // else
                     {
                         *(b++) = s[0]; //ch
 
@@ -726,12 +745,19 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
                     *(b++) = fg | (bg << 4);
 
-                    int dz = (s[3] & 0xfe) >> 1;
-                    if (lastdz != dz) {
+                    if (senddz)
+                    {
+                        senddz = false;
                         *(b-1) |= 128;
-                        *(b++) = dz - lastdz;
-                        lastdz = dz;
+                        *(b++) = dz0;                        
                     }
+
+                    // int dz = (s[3] & 0xfe) >> 1;
+                    // if (lastdz != dz) {
+                    //     *(b-1) |= 128;
+                    //     *(b++) = dz - lastdz;
+                    //     lastdz = dz;
+                    // }
 
                     rblk->data[xx%16 + (yy%16) * 16] = is;
                     
@@ -746,6 +772,17 @@ bool send_map_updates(send_func sendfunc, void *conn)
                         goto enough;
                 }
             }
+
+            x0 = 0;
+        }
+
+        if (deeper) {
+            dz0++;
+            deeper = false;
+            senddz = true;
+
+*out2 << "deeper "<<dz0 <<std::endl;
+            goto godeeper;
         }
 
         enough:;
@@ -753,7 +790,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
     if (b != emptyb+1 || send_z)
     {
-        *firstb |= ((graphics ? 2 : 1) << 3);
+        *firstb |= (1 << 3);
         *emptyb = zlevel;//send_z ? zlevel : 0xff;
         send_z = false;
     }
@@ -762,6 +799,7 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
     if (*firstb)
     {
+        *out2 << "upd " << (int)(b-buf) << std::endl;
         sendfunc(buf, (int)(b-buf), conn);
         return true;
     }
