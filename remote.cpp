@@ -227,6 +227,7 @@ static void patch_rendering(bool enable_lower_levels)
 #include "corehacks.hpp"
 #include "dwarfmode.hpp"
 #include "embark.hpp"
+#include "units.hpp"
 #include "itemcache.hpp"
 
 #if defined(WIN32)
@@ -1325,6 +1326,7 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
+    enable_unit_hooks();
 
     core_hack();
 
