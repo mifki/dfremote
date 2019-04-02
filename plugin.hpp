@@ -36,6 +36,9 @@ void allocate_buffers(int tiles)
     REALLOC(mscreentexpos_cf_origin,        uint8_t, tiles+extra_tiles);
     REALLOC(mscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
 
+    REALLOC(gscreen_under,                  uint8_t, tiles * 4);
+    // REALLOC(mscreen_under,                  uint8_t, tiles * 4);
+
     gscreen                 = gscreen_origin                 + extra_tiles * 4;
     gscreentexpos           = gscreentexpos_origin           + extra_tiles;
     gscreentexpos_addcolor  = gscreentexpos_addcolor_origin  + extra_tiles;
@@ -58,6 +61,7 @@ void allocate_buffers(int tiles)
     memset(gscreentexpos_grayscale, 0, tiles);
     memset(gscreentexpos_cf,        0, tiles);
     memset(gscreentexpos_cbr,       0, tiles);
+    memset(mscreentexpos,           0, tiles * sizeof(long));
 }
 
 void free_buffers()

@@ -22,6 +22,8 @@ int get_menu_width()
 
 void render_remote_map()
 {
+    rendering_remote_map = true;
+
     uint8_t menu_width, area_map_width;
     Gui::getMenuWidth(menu_width, area_map_width);
 
@@ -64,6 +66,10 @@ void render_remote_map()
     gwindow_x = *df::global::window_x = wx;
     gwindow_y = *df::global::window_y = wy;
     gwindow_z = *df::global::window_z = std::max(0, std::min(*df::global::window_z, world->map.z_count-1));
+
+    memset(gscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
+    screen_under_ptr = gscreen_under;
+    screen_ptr = gscreen;        
 
     if (maxlevels)
         patch_rendering(false);
@@ -230,6 +236,8 @@ void render_remote_map()
     gps->screentexpos_grayscale = screentexpos_grayscaletop;
     gps->screentexpos_cf        = screentexpos_cftop;
     gps->screentexpos_cbr       = screentexpos_cbrtop;
+
+    rendering_remote_map = false;
 }
 
 

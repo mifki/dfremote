@@ -114,7 +114,6 @@ static int8_t *gscreentexpos_addcolor_origin;
 static uint8_t *gscreentexpos_grayscale, *gscreentexpos_cf, *gscreentexpos_cbr;
 static uint8_t *gscreentexpos_grayscale_origin, *gscreentexpos_cf_origin, *gscreentexpos_cbr_origin;
 
-
 // Buffers for rendering lower levels before merging    
 static uint8_t *mscreen;
 static uint8_t *mscreen_origin;
@@ -124,6 +123,9 @@ static int8_t *mscreentexpos_addcolor;
 static int8_t *mscreentexpos_addcolor_origin;
 static uint8_t *mscreentexpos_grayscale, *mscreentexpos_cf, *mscreentexpos_cbr;
 static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscreentexpos_cbr_origin;
+
+static uint8_t *gscreen_under, *mscreen_under;
+static uint8_t *screen_under_ptr, *screen_ptr;
 
 #include "patches.hpp"
 
@@ -164,6 +166,7 @@ static int newwidth, newheight, curwidth, curheight;
 static volatile bool waiting_render;
 static volatile bool map_render_enabled;
 static volatile bool render_initial;
+static bool rendering_remote_map;
 
 static unsigned int server_token;
 static unsigned int world_token;
@@ -715,6 +718,13 @@ godeeper:;
                 {
                     is = *((unsigned int*)gscreen + tile);
                     is &= 0x01ffffff; // Ignore depth information
+
+                    if (*(gscreen_under+tile*4))
+                    {
+                        is = *((unsigned int*)gscreen_under + tile);
+                        is &= 0x01ffffff; // Ignore depth information
+                        s = gscreen_under + tile*4;
+                    }
                 }
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
@@ -782,7 +792,7 @@ godeeper:;
             deeper = false;
             senddz = true;
 
-*out2 << "deeper "<<dz0 <<std::endl;
+// *out2 << "deeper "<<dz0 <<std::endl;
             goto godeeper;
         }
 
