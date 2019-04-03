@@ -561,6 +561,8 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
         map_render_enabled = true;
 }
 
+static unsigned char mapbuf[10000], mapbuf2[10000];
+
 bool send_map_updates(send_func sendfunc, void *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
@@ -646,10 +648,11 @@ bool send_map_updates(send_func sendfunc, void *conn)
         zlevel = gwindow_z;
     }
 
+    unsigned char *mapptr = mapbuf, *mapptr2 = mapbuf2;
     //TODO: shouldn't just skip if waiting_render is true, or at least don't update t2 if didn't send map here
     if (!waiting_render)
     {
-        b++;
+        // b++;
         //int tile = 0;
         int maxx = std::min(curwidth, world->map.x_count - gwindow_x);
         int maxy = std::min(curheight, world->map.y_count - gwindow_y);
@@ -693,36 +696,36 @@ godeeper:;
                 unsigned int is;
                 unsigned char bg, fg;
                 unsigned short texpos = 0;
-                // if (graphics && (texpos=*(gscreentexpos+tile)))
-                // {
-                //     if (gscreentexpos_grayscale[tile])
-                //     {
-                //         fg = gscreentexpos_cf[tile];
-                //         bg = gscreentexpos_cbr[tile];
-                //     }
-                //     else if (gscreentexpos_addcolor[tile])
-                //     {
-                //         bg   = s[2] & 7;
-                //         unsigned char bold = (s[3] & 1) * 8;
-                //         fg   = (s[1] + bold) % 16;
-                //     }
-                //     else
-                //     {
-                //         fg = 15;
-                //         bg = 0;
-                //     }                    
+                if (graphics && (texpos=*(gscreentexpos+tile)))
+                {
+                    if (gscreentexpos_grayscale[tile])
+                    {
+                        fg = gscreentexpos_cf[tile];
+                        bg = gscreentexpos_cbr[tile];
+                    }
+                    else if (gscreentexpos_addcolor[tile])
+                    {
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                    }
+                    else
+                    {
+                        fg = 15;
+                        bg = 0;
+                    }                    
 
-                //     is = texpos | (fg << 4) | bg;
-                // }
-                // else
+                    is = texpos | (fg << 4) | bg;
+                }
+                else
                 {
                     is = *((unsigned int*)gscreen + tile);
                     is &= 0x01ffffff; // Ignore depth information
 
                     if (*(gscreen_under+tile*4))
                     {
-                        is = *((unsigned int*)gscreen_under + tile);
-                        is &= 0x01ffffff; // Ignore depth information
+                        // is = *((unsigned int*)gscreen_under + tile);
+                        // is &= 0x01ffffff; // Ignore depth information
                         s = gscreen_under + tile*4;
                     }
                 }
@@ -736,8 +739,52 @@ godeeper:;
                     //     lastinfobyte = 7;
                     // }
 
-                    *(b++) = x + gwindow_x;
-                    *(b++) = y + gwindow_y;
+                    *(mapptr++) = x + gwindow_x;
+                    *(mapptr++) = y + gwindow_y;
+
+                    if (*(gscreen_under+tile*4))
+                    {
+                        {
+                            unsigned char *s_under = gscreen_under + tile*4;
+
+                            *(mapptr++) = s_under[0]; //ch
+
+                            bg   = s_under[2] & 7;
+                            unsigned char bold = (s_under[3] & 1) * 8;
+                            fg   = (s_under[1] + bold) % 16;
+                            *(mapptr++) = fg | (bg << 4);
+                        }
+
+                        *(mapptr2++) = x + gwindow_x;
+                        *(mapptr2++) = y + gwindow_y;
+
+                        if (texpos)
+                        {
+                            *(unsigned short*)mapptr2 = texpos;
+                            mapptr2 += 2;
+                        }
+                        else
+                        {
+                            *(unsigned short*)mapptr2 = s[0];
+                            mapptr2 += 2;
+                        }
+
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                        *(mapptr2++) = fg | (bg << 4);
+                    }
+                    else
+                    {
+                        *(mapptr++) = s[0]; //ch
+
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                        *(mapptr++) = fg | (bg << 4);
+
+                    }
+
 
                     // if (texpos)
                     // {
@@ -746,22 +793,22 @@ godeeper:;
                     //     b += 2;
                     // }
                     // else
-                    {
-                        *(b++) = s[0]; //ch
+                    // {
+                    //     *(mapptr++) = s[0]; //ch
 
-                        bg   = s[2] & 7;
-                        unsigned char bold = (s[3] & 1) * 8;
-                        fg   = (s[1] + bold) % 16;
-                    }
+                    //     bg   = s[2] & 7;
+                    //     unsigned char bold = (s[3] & 1) * 8;
+                    //     fg   = (s[1] + bold) % 16;
+                    // }
 
-                    *(b++) = fg | (bg << 4);
+                    // *(mapptr++) = fg | (bg << 4);
 
-                    if (senddz)
-                    {
-                        senddz = false;
-                        *(b-1) |= 128;
-                        *(b++) = dz0;                        
-                    }
+                    // if (senddz)
+                    // {
+                    //     senddz = false;
+                    //     *(mapptr-1) |= 128;
+                    //     *(mapptr++) = dz0;                        
+                    // }
 
                     // int dz = (s[3] & 0xfe) >> 1;
                     // if (lastdz != dz) {
@@ -787,7 +834,7 @@ godeeper:;
             x0 = 0;
         }
 
-        if (deeper) {
+        if (0&&deeper) {
             dz0++;
             deeper = false;
             senddz = true;
@@ -799,14 +846,34 @@ godeeper:;
         enough:;
     }
 
-    if (b != emptyb+1 || send_z)
+    if (mapptr != mapbuf || mapptr2 != mapbuf2 || send_z)
     {
-        *firstb |= (1 << 3);
-        *emptyb = zlevel;//send_z ? zlevel : 0xff;
+        *(b++) = zlevel;
+
+        if (mapptr != mapbuf)
+        {
+            *firstb |= (1 << 3);
+            int len = mapptr-mapbuf;
+            *(short*)b = len;
+            b += 2;
+            memcpy(b, mapbuf, len);
+            b += len;
+        }
+
+        if (mapptr2 != mapbuf2)
+        {
+            *firstb |= (1 << 4);
+            int len = mapptr2-mapbuf2;
+            *(short*)b = len;
+            b += 2;
+            memcpy(b, mapbuf2, len);
+            b += len;
+        }
+
         send_z = false;
     }
-    else
-        b--;
+    // else
+    //     b--;
 
     if (*firstb)
     {
