@@ -231,6 +231,7 @@ static void patch_rendering(bool enable_lower_levels)
 #include "dwarfmode.hpp"
 #include "embark.hpp"
 #include "units.hpp"
+#include "items.hpp"
 #include "itemcache.hpp"
 
 #if defined(WIN32)
@@ -762,16 +763,34 @@ godeeper:;
                         {
                             *(unsigned short*)mapptr2 = texpos;
                             mapptr2 += 2;
+
+                            if (gscreentexpos_grayscale[tile])
+                            {
+                                fg = gscreentexpos_cf[tile];
+                                bg = gscreentexpos_cbr[tile];
+                            }
+                            else if (gscreentexpos_addcolor[tile])
+                            {
+                                bg   = s[2] & 7;
+                                unsigned char bold = (s[3] & 1) * 8;
+                                fg   = (s[1] + bold) % 16;
+                            }
+                            else
+                            {
+                                fg = 15;
+                                bg = 0;
+                            }                                                
                         }
                         else
                         {
                             *(unsigned short*)mapptr2 = s[0];
                             mapptr2 += 2;
+
+                            bg   = s[2] & 7;
+                            unsigned char bold = (s[3] & 1) * 8;
+                            fg   = (s[1] + bold) % 16;
                         }
 
-                        bg   = s[2] & 7;
-                        unsigned char bold = (s[3] & 1) * 8;
-                        fg   = (s[1] + bold) % 16;
                         *(mapptr2++) = fg | (bg << 4);
                     }
                     else
@@ -1403,7 +1422,8 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
-    enable_unit_hooks();
+    // enable_unit_hooks();
+    enable_item_hooks();
 
     core_hack();
 
