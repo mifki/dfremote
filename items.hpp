@@ -106,7 +106,7 @@ struct cls##_hook : public df::cls \
         { \
             df::coord _pos = Items::getPosition(this); \
             if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight) \
-                if (1||!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y]) \
+                if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y]) \
                     ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y]; \
             } \
 \

@@ -232,6 +232,7 @@ static void patch_rendering(bool enable_lower_levels)
 #include "embark.hpp"
 #include "units.hpp"
 #include "items.hpp"
+#include "buildings.hpp"
 #include "itemcache.hpp"
 
 #if defined(WIN32)
@@ -291,6 +292,7 @@ void send_enet(const unsigned char *buf, int sz, ENetPeer *peer)
 
     if (sz >= 500)
     {
+*out2 << "compressing " << sz << std::endl;
         strm.zalloc = Z_NULL;
         strm.zfree = Z_NULL;
         strm.opaque = Z_NULL;
@@ -727,7 +729,7 @@ godeeper:;
                     {
                         // is = *((unsigned int*)gscreen_under + tile);
                         // is &= 0x01ffffff; // Ignore depth information
-                        s = gscreen_under + tile*4;
+                        // s = gscreen_under + tile*4;
                     }
                 }
 
@@ -845,7 +847,7 @@ godeeper:;
                     }
 
                     //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
-                    if (++cnt >= 5000)
+                    if (++cnt >= 1000)
                         goto enough;
                 }
             }
@@ -1422,8 +1424,10 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
-    // enable_unit_hooks();
+    
+    enable_building_hooks();
     enable_item_hooks();
+    enable_unit_hooks();
 
     core_hack();
 

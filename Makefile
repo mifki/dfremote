@@ -9,7 +9,7 @@ BITS ?= 64
 GCCVER ?= 4.8
 
 SRC = remote.cpp sha256.cpp QR_Encode.cpp
-DEP = dwarfmode.hpp embark.hpp commands.hpp plugin.hpp patches.hpp itemcache.hpp config.hpp corehacks.hpp sha256.h connect.hpp units.hpp items.hpp Makefile
+DEP = dwarfmode.hpp embark.hpp commands.hpp plugin.hpp patches.hpp itemcache.hpp config.hpp corehacks.hpp sha256.h connect.hpp units.hpp items.hpp buildings.hpp Makefile
 
 ifeq ($(shell uname -s), Darwin)
 	ifneq (,$(findstring 0.34,$(DFHACKVER)))
