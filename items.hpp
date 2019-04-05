@@ -108,7 +108,7 @@ struct cls##_hook : public df::cls \
             if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight) \
                 if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y]) \
                     ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y]; \
-            } \
+        } \
 \
         return INTERPOSE_NEXT(drawSelf)(); \
 \
