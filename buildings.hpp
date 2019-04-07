@@ -155,22 +155,27 @@ struct building_workshopst_hook : public df::building_workshopst
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                /*if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 108;//98;
+                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
                     dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                }
+                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
+                {
+                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
+                    // dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                 }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
                     // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
 
-                    screen_under_ptr[(x*curheight + y)*4+0] = 97;
+                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
-                }*/
+                }
 
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                /*if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
                     dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                     if (x == xmax && y == dbuf->y1-gwindow_y)
@@ -202,7 +207,7 @@ struct building_workshopst_hook : public df::building_workshopst
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
-                }
+                }*/
             }
         }
     }

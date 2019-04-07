@@ -10,7 +10,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                // if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*r->gdimy + _pos.y-gwindow_y])
+                if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
                     ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
         }
 
@@ -23,7 +23,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                // if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*r->gdimy + _pos.y-gwindow_y])
+                if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
                     ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
         }
 
@@ -36,7 +36,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                // if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*r->gdimy + _pos.y-gwindow_y])
+                if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
                     ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
         }
         
