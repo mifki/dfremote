@@ -172,7 +172,7 @@ struct building_workshopst_hook : public df::building_workshopst
                     screen_under_ptr[(x*curheight + y)*4+0] = 99;
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
-                    screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
+                    // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
                 }
 
                 /*if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
