@@ -72,8 +72,9 @@ struct cls##_hook : public df::cls \
 \
         for (int x = dbuf->x1-gwindow_x; x <= xmax; x++) \
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++) \
-                if (x >= 0 && y >= 0 && x < curwidth && y < curheight) \
-                    ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y]; \
+                if (df::global::cursor->x != x+gwindow_x || df::global::cursor->y != y+gwindow_y || df::global::cursor->z != this->z) \
+                    if (x >= 0 && y >= 0 && x < curwidth && y < curheight) \
+                        ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y]; \
     } \
 }; \
 IMPLEMENT_VMETHOD_INTERPOSE(cls##_hook, drawBuilding);
@@ -110,7 +111,7 @@ OVER1(building_statuest);
 OVER1(building_supportst);
 OVER1(building_tablest);
 OVER1(building_traction_benchst);
-OVER1(building_tradedepotst);
+// OVER1(building_tradedepotst);
 OVER1(building_trapst);
 OVER1(building_weaponrackst);
 OVER1(building_weaponst);
@@ -155,6 +156,9 @@ struct building_workshopst_hook : public df::building_workshopst
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
+                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                    continue;
+
                 if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
                     dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
@@ -174,30 +178,38 @@ struct building_workshopst_hook : public df::building_workshopst
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
                 }
+            }
+        }
+    }
+}; 
+IMPLEMENT_VMETHOD_INTERPOSE(building_workshopst_hook, drawBuilding);
 
-                /*if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+
+struct building_tradedepotst_hook : public df::building_tradedepotst
+{
+   typedef df::building_tradedepotst interpose_base;
+
+    DEFINE_VMETHOD_INTERPOSE(void, drawBuilding, (df::building_drawbuffer* dbuf, int16_t smth))
+    {
+        INTERPOSE_NEXT(drawBuilding)(dbuf, smth);
+
+        if (!rendering_remote_map)
+            return;
+
+        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
+
+        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        {
+            for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
+            {
+                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                    continue;
+
+                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
+                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
                     dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
-                    if (x == xmax && y == dbuf->y1-gwindow_y)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 100;
-                    else if (x == dbuf->x1-gwindow_x && y == ymax)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 101;
-                    else if (x == xmax && y == ymax)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 102;
-                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 103;
-
-                    else if (y == dbuf->y1-gwindow_y)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 104;
-                    else if (x == dbuf->x1-gwindow_x)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 105;
-                    else if (x == xmax)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 106;
-                    else if (y == ymax)
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 107;
-                    
-                    else
-                        dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 109;
                 }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
@@ -206,13 +218,13 @@ struct building_workshopst_hook : public df::building_workshopst
                     screen_under_ptr[(x*curheight + y)*4+0] = 99;
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
-                    screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
-                }*/
+                    // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
+                }
             }
         }
     }
 }; 
-IMPLEMENT_VMETHOD_INTERPOSE(building_workshopst_hook, drawBuilding);
+IMPLEMENT_VMETHOD_INTERPOSE(building_tradedepotst_hook, drawBuilding);
 
 
 void enable_building_hooks()
@@ -246,7 +258,7 @@ void enable_building_hooks()
     OVER1_ENABLE(building_supportst);
     OVER1_ENABLE(building_tablest);
     OVER1_ENABLE(building_traction_benchst);
-    //OVER1_ENABLE(building_tradedepotst);
+    OVER1_ENABLE(building_tradedepotst);
     OVER1_ENABLE(building_trapst);
     OVER1_ENABLE(building_weaponrackst);
     OVER1_ENABLE(building_weaponst);
