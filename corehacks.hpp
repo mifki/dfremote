@@ -1,7 +1,3 @@
-#include <mutex>
-
-#include "df/viewscreen_barterst.h"
-
 static uint32_t saved_frames;
 
 std::recursive_mutex mutex;

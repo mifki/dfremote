@@ -14,6 +14,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <mutex>
 #include <zlib.h>
 
 #if defined(WIN32)
@@ -99,6 +100,7 @@ static color_ostream *out2;
 static unsigned short advflags;
 #define ADVFLAG_NO_FASTRENDER (1 << 0)
 #define ADVFLAG_NO_LOCALMAP   (1 << 1)
+#define ADVFLAG_FASTRENDER    (1 << 2)
 
 static int gwindow_x, gwindow_y, gwindow_z;
 
@@ -197,6 +199,8 @@ static int timer_timeout = -1;
 static string timer_fn;
 
 static int maxlevels = 3;
+
+std::recursive_mutex render_mutex;
 
 static void patch_rendering(bool enable_lower_levels)
 {
@@ -653,8 +657,9 @@ bool send_map_updates(send_func sendfunc, void *conn)
 
     unsigned char *mapptr = mapbuf, *mapptr2 = mapbuf2;
     //TODO: shouldn't just skip if waiting_render is true, or at least don't update t2 if didn't send map here
-    if (!waiting_render)
+    // if (!waiting_render)
     {
+        render_mutex.lock();
         // b++;
         //int tile = 0;
         int maxx = std::min(curwidth, world->map.x_count - gwindow_x);
@@ -666,7 +671,8 @@ bool send_map_updates(send_func sendfunc, void *conn)
         // unsigned char *lastinfobyteptr = NULL;
         int x0 = 0, y0 = 0, dz0 = 0;
         bool deeper = false;
-        bool senddz = false;
+        bool senddz = false, senddz2 = false;
+        df::unit *u = df::unit::find(10281);
 godeeper:;
         for (int y = y0; y < maxy; y++)
         {
@@ -824,12 +830,18 @@ godeeper:;
 
                     // *(mapptr++) = fg | (bg << 4);
 
-                    // if (senddz)
-                    // {
-                    //     senddz = false;
-                    //     *(mapptr-1) |= 128;
-                    //     *(mapptr++) = dz0;                        
-                    // }
+                    if (senddz)
+                    {
+                        senddz = false;
+                        *(mapptr-1) |= 128;
+                        *(mapptr++) = dz0;                        
+                    }
+                    if (senddz2)
+                    {
+                        senddz2 = false;
+                        *(mapptr2-1) |= 128;
+                        *(mapptr2++) = dz0;                        
+                    }
 
                     // int dz = (s[3] & 0xfe) >> 1;
                     // if (lastdz != dz) {
@@ -855,16 +867,19 @@ godeeper:;
             x0 = 0;
         }
 
-        if (0&&deeper) {
+        if (deeper) {
             dz0++;
             deeper = false;
             senddz = true;
+            senddz2 = true;
 
 // *out2 << "deeper "<<dz0 <<std::endl;
             goto godeeper;
         }
 
         enough:;
+
+        render_mutex.unlock();
     }
 
     if (mapptr != mapbuf || mapptr2 != mapbuf2 || send_z)
@@ -1107,7 +1122,6 @@ void enthreadmain(ENetHost *server)
     ENetEvent event;
     unsigned int t = 0;
     unsigned int t2 = 0;
-    bool force_send_map = false;
 
     while (remote_on)
     {
@@ -1245,16 +1259,10 @@ void enthreadmain(ENetHost *server)
                         process_client_cmd(mdata, msz, (send_func)send_enet, event.peer);
                         
                         //TODO: only if moved, zlevel changed, cursor moved, etc.
-                        if (!(advflags & ADVFLAG_NO_FASTRENDER) && map_render_enabled &&
+                        if ((advflags & ADVFLAG_FASTRENDER) && map_render_enabled &&
                             !df::global::ui->main.autosave_request && !df::global::gview->view.child->child)
                         {
-                            force_send_map = true;
-                            // *out2 << "forcing render" << std::endl;
                             core_force_render();
-                            // render_remote_map();
-                            // *out2 << "forced render done" << std::endl;
-                            //df::global::gview->view.child->render();
-                            // enet_host_flush(server);
                         }
                     }
 
@@ -1314,25 +1322,14 @@ void enthreadmain(ENetHost *server)
                 }
             }
 
-            else if ((enabler->gframe_last != t2||force_send_map)/* || server->serviceTime-t >= 250*/)
+            else if (enabler->gframe_last != t2 && map_render_enabled)
             {
-                //TODO: and only if on the game screen
-                if (map_render_enabled)
-                {
-                    /*{
-                        CoreSuspender suspend;
-                        render_remote_map();
-                    }*/
+                //TODO: and only if on the game screen ?
+                t = server->serviceTime;
+                t2 = enabler->gframe_last;
 
-                    //*out2 << "sending map" << std::endl;
-                    //*out2 << server->serviceTime << " " << (server->serviceTime-t) << std::endl;
-                    t = server->serviceTime;
-                    t2 = enabler->gframe_last;
-                    force_send_map = false;
-
-                    if (send_map_updates((send_func)send_enet, client_peer))
-                        enet_host_flush(server);
-                }
+                if (send_map_updates((send_func)send_enet, client_peer))
+                    enet_host_flush(server);
             }
         }
 
@@ -1416,7 +1413,8 @@ bool remote_start()
     wx = *df::global::window_x;
     wy = *df::global::window_y;
 
-    enabler->gfps = 5;
+    enabler->gfps = 10;
+    df::global::d_init->flags1.clear(df::d_init_flags1::VARIED_GROUND_TILES);
 
     if (advflags & ADVFLAG_NO_LOCALMAP)
         disable_local_map();

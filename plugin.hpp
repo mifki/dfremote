@@ -37,7 +37,7 @@ void allocate_buffers(int tiles)
     REALLOC(mscreentexpos_cbr_origin,       uint8_t, tiles+extra_tiles);
 
     REALLOC(gscreen_under,                  uint8_t, tiles * 4);
-    // REALLOC(mscreen_under,                  uint8_t, tiles * 4);
+    REALLOC(mscreen_under,                  uint8_t, tiles * 4);
 
     gscreen                 = gscreen_origin                 + extra_tiles * 4;
     gscreentexpos           = gscreentexpos_origin           + extra_tiles;

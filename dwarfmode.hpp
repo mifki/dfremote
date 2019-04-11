@@ -22,6 +22,7 @@ int get_menu_width()
 
 void render_remote_map()
 {
+    render_mutex.lock();
     rendering_remote_map = true;
 
     uint8_t menu_width, area_map_width;
@@ -85,6 +86,10 @@ void render_remote_map()
         gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
         gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
         gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
+
+        memset(mscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
+        screen_under_ptr = mscreen_under;
+        screen_ptr = mscreen;
 
         bool empty_tiles_left, rendered1st = false;
         int p = 1;
@@ -194,14 +199,15 @@ void render_remote_map()
                     }
 
                     *((int*)gscreen + tile) = *((int*)mscreen + tile2);
-                        if (*(mscreentexpos+tile2))
-                        {
-                            *(gscreentexpos + tile) = *(mscreentexpos + tile2);
-                            *(gscreentexpos_addcolor + tile) = *(mscreentexpos_addcolor + tile2);
-                            *(gscreentexpos_grayscale + tile) = *(mscreentexpos_grayscale + tile2);
-                            *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
-                            *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
-                        }
+                    *((uint32_t*)gscreen_under + tile) = *((uint32_t*)mscreen_under + tile2);
+                    if (*(mscreentexpos+tile2))
+                    {
+                        *(gscreentexpos + tile) = *(mscreentexpos + tile2);
+                        *(gscreentexpos_addcolor + tile) = *(mscreentexpos_addcolor + tile2);
+                        *(gscreentexpos_grayscale + tile) = *(mscreentexpos_grayscale + tile2);
+                        *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
+                        *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
+                    }
                     gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
                 }
 
@@ -238,6 +244,7 @@ void render_remote_map()
     gps->screentexpos_cbr       = screentexpos_cbrtop;
 
     rendering_remote_map = false;
+    render_mutex.unlock();
 }
 
 
