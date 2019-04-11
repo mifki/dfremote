@@ -97,7 +97,7 @@ OVER1(building_chainst);
 OVER1(building_chairst);
 OVER1(building_coffinst);
 OVER1(building_doorst);
-OVER1(building_furnacest);
+// OVER1(building_furnacest);
 OVER1(building_gear_assemblyst);
 OVER1(building_hatchst);
 OVER1(building_hivest);
@@ -125,14 +125,7 @@ struct stockpile_hook : public df::building_stockpilest
 
     DEFINE_VMETHOD_INTERPOSE(void, drawBuilding, (df::building_drawbuffer* dbuf, int16_t smth))
     {
-        if (df::global::ui->main.mode == df::ui_sidebar_mode::QueryBuilding ||
-            df::global::ui->main.mode == df::ui_sidebar_mode::LookAround ||
-            df::global::ui->main.mode == df::ui_sidebar_mode::Stockpiles)
-            INTERPOSE_NEXT(drawBuilding)(dbuf, smth);
-        else
-        {
-            memset(dbuf->tile, 32, 31*31);
-        }
+        memset(dbuf->tile, 61, 31*31);
     }
 }; 
 IMPLEMENT_VMETHOD_INTERPOSE(stockpile_hook, drawBuilding);
@@ -183,6 +176,53 @@ struct building_workshopst_hook : public df::building_workshopst
     }
 }; 
 IMPLEMENT_VMETHOD_INTERPOSE(building_workshopst_hook, drawBuilding);
+
+
+struct building_furnacest_hook : public df::building_furnacest
+{
+   typedef df::building_furnacest interpose_base;
+
+    DEFINE_VMETHOD_INTERPOSE(void, drawBuilding, (df::building_drawbuffer* dbuf, int16_t smth))
+    {
+        INTERPOSE_NEXT(drawBuilding)(dbuf, smth);
+
+        if (!rendering_remote_map)
+            return;
+
+        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
+
+        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        {
+            for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
+            {
+                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                    continue;
+
+                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                {
+                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                    dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                }
+                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
+                {
+                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
+                    // dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                }
+                if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
+                {
+                    // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
+
+                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    screen_under_ptr[(x*curheight + y)*4+1] = 15;
+                    screen_under_ptr[(x*curheight + y)*4+2] = 0;
+                    // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
+                }
+            }
+        }
+    }
+}; 
+IMPLEMENT_VMETHOD_INTERPOSE(building_furnacest_hook, drawBuilding);
 
 
 struct building_tradedepotst_hook : public df::building_tradedepotst
@@ -264,7 +304,7 @@ void enable_building_hooks()
     OVER1_ENABLE(building_weaponst);
     OVER1_ENABLE(building_wellst);
 
-    INTERPOSE_HOOK(building_furnacest_hook, drawBuilding).apply(false);
+    INTERPOSE_HOOK(building_furnacest_hook, drawBuilding).apply(true);
     INTERPOSE_HOOK(building_workshopst_hook, drawBuilding).apply(true);
 
     INTERPOSE_HOOK(stockpile_hook, drawBuilding).apply(false);
