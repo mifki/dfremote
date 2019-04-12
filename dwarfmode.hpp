@@ -28,8 +28,6 @@ void render_remote_map()
     uint8_t menu_width, area_map_width;
     Gui::getMenuWidth(menu_width, area_map_width);
 
-    //*df::global::ui_menu_width = 3;
-    //*df::global::ui_area_map_width = 3;
     gmenu_w = get_menu_width();
 
     int tdimx = gps->dimx;
@@ -48,7 +46,6 @@ void render_remote_map()
     // So we adjust all this so that it renders to our gdimx x gdimy buffer starting at (0,0).
     gps->screen       = gscreen - 4*newheight - 4;
     gps->screen_limit = gscreen + newwidth * newheight * 4;
-    // gps->screentexpos = gscreendummy - newheight - 1;
     gps->screentexpos           = gscreentexpos           - newheight - 1;
     gps->screentexpos_addcolor  = gscreentexpos_addcolor  - newheight - 1;
     gps->screentexpos_grayscale = gscreentexpos_grayscale - newheight - 1;
@@ -72,15 +69,15 @@ void render_remote_map()
     screen_under_ptr = gscreen_under;
     screen_ptr = gscreen;        
 
-    if (maxlevels)
+    if (*df::global::window_z > 0)
         patch_rendering(false);
 
     render_map();
 
-    if (maxlevels && *df::global::window_z > 0)
+    if (maxlevels > 1 && *df::global::window_z > 0)
     {
-        gps->screen                 = mscreen - 4*newheight - 4;
-        gps->screen_limit           = mscreen + newwidth * newheight * 4;
+        gps->screen                 = mscreen                 - 4*newheight - 4;
+        gps->screen_limit           = mscreen                 + newwidth * newheight * 4;
         gps->screentexpos           = mscreentexpos           - newheight - 1;
         gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
         gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
@@ -91,41 +88,28 @@ void render_remote_map()
         screen_under_ptr = mscreen_under;
         screen_ptr = mscreen;
 
-        bool empty_tiles_left, rendered1st = false;
+        bool lower_level_rendered = false;
         int p = 1;
         int x0 = 0;
-        int zz0 = *df::global::window_z; 
+        int zz0 = *df::global::window_z; // Current "top" zlevel
         int maxp = std::min(maxlevels-1, zz0);   
 
         do
         {
             (*df::global::window_z)--;
 
-            if (p > 1)
-            {
-                (*df::global::window_x) += x0;
-                init->display.grid_x -= x0;
-
-                render_map();
-
-                (*df::global::window_x) -= x0;
-                init->display.grid_x += x0;
-            }
-
-            empty_tiles_left = false;
+            lower_level_rendered = false;
             int x00 = x0;
-            int zz = zz0 - p + 1;
+            int zz = zz0 - p + 1; // Last rendered zlevel in gscreen, the tiles of which we're checking below
 
-            int x1 = std::min(newwidth, world->map.x_count-*df::global::window_x);
-            int y1 = std::min(newheight, world->map.y_count-*df::global::window_y);
+            int x1 = std::min(curwidth, world->map.x_count-*df::global::window_x);
+            int y1 = std::min(curheight, world->map.y_count-*df::global::window_y);
+
             for (int x = x0; x < x1; x++)
             {
                 for (int y = 0; y < y1; y++)
                 {
                     const int tile = x * newheight + y, stile = tile * 4;
-
-                    //if ((gscreen[stile+3]&0xf0))
-                    //    continue;
 
                     unsigned char ch = gscreen[stile+0];
                     if (ch != 0 && ch != 31)
@@ -136,6 +120,7 @@ void render_remote_map()
                     if (xx < 0 || yy < 0)
                         continue;
 
+                    //TODO: bring this back
                     // bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
                     // if (!must_render_tile)
                     //     continue;
@@ -143,19 +128,24 @@ void render_remote_map()
                     int xxquot = xx >> 4, xxrem = xx & 15;
                     int yyquot = yy >> 4, yyrem = yy & 15;                    
 
+                    // If the tile looks like a ramp, check that it's really a ramp
+                    // Also, no need to go deeper if the ramp is covered with water
                     if (ch == 31)
                     {
-                        //TODO: zz0 or zz ??
-                        df::map_block *block0 = world->map.block_index[xxquot][yyquot][zz0];
+                        df::map_block *block0 = world->map.block_index[xxquot][yyquot][zz];
                         if (block0->tiletype[xxrem][yyrem] != df::tiletype::RampTop || block0->designation[xxrem][yyrem].bits.flow_size)
                             continue;
                     }
 
-                    if (p == 1 && !rendered1st)
+                    // If the tile is empty, render the next zlevel (if not rendered already)
+                    if (!lower_level_rendered)
                     {
+                        // All tiles to the left were not empty, so skip them
+                        x0 = x;
+
                         (*df::global::window_x) += x0;
                         init->display.grid_x -= x0;
-
+*out2 << "R " << p << " " << maxp << " " << maxlevels << std::endl;
                         render_map();
 
                         (*df::global::window_x) -= x0;
@@ -163,40 +153,10 @@ void render_remote_map()
 
                         x00 = x0;
 
-                        rendered1st = true;                        
-                    }                    
+                        lower_level_rendered = true;
+                    }
 
                     const int tile2 = (x-(x00)) * newheight + y, stile2 = tile2 * 4;                    
-
-                    int d = p;
-                    ch = mscreen[stile2+0];
-
-                    if (ch == 0)
-                    {
-                        bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
-                        if (must_render_tile)
-                        {
-                            empty_tiles_left = true;
-                            continue;
-                        }
-                    }
-                    else if (ch == 31)
-                    {
-                        mscreen[stile2+0] = 30;
-
-                        df::map_block *block1 = world->map.block_index[xxquot][yyquot][zz-1];
-                        df::tiletype t1 = block1->tiletype[xxrem][yyrem];
-                        if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
-                        {
-                            bool must_render_tile = (p < maxp || !rendered_tiles[zz*256*256 + xx+yy*256]);
-                            if (must_render_tile)
-                            {
-                                empty_tiles_left = true;
-                                continue;
-                            }
-                        }
-                        d++;
-                    }
 
                     *((int*)gscreen + tile) = *((int*)mscreen + tile2);
                     *((uint32_t*)gscreen_under + tile) = *((uint32_t*)mscreen_under + tile2);
@@ -208,16 +168,13 @@ void render_remote_map()
                         *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
                         *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
                     }
-                    gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
+                    gscreen[stile+3] = (p << 1) | (gscreen[stile+3]&1);
                 }
-
-                if (!empty_tiles_left)
-                    x0 = x + 1;
             }
 
-            if (p++ >= MAX_LEVELS_RENDER_EVER)
+            if (p++ >= maxp)
                 break;
-        } while(empty_tiles_left);
+        } while(lower_level_rendered);
 
         (*df::global::window_z) = zz0;
 
@@ -226,9 +183,6 @@ void render_remote_map()
 
     waiting_render = false;
 
-    //*df::global::ui_menu_width = menu_width;
-    //*df::global::ui_area_map_width = area_map_width;        
-
     init->display.grid_x = gps->dimx = tdimx;
     init->display.grid_y = gps->dimy = tdimy;
     gps->clipx[1] = gps->dimx - 1;
@@ -236,7 +190,6 @@ void render_remote_map()
 
     gps->screen = enabler->renderer->screen = sctop;
     gps->screen_limit = gps->screen + gps->dimx * gps->dimy * 4;
-//    gps->screentexpos = enabler->renderer->screentexpos = screentexpostop;
     gps->screentexpos           = screentexpostop;
     gps->screentexpos_addcolor  = screentexpos_addcolortop;
     gps->screentexpos_grayscale = screentexpos_grayscaletop;
