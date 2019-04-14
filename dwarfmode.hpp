@@ -145,7 +145,7 @@ void render_remote_map()
 
                         (*df::global::window_x) += x0;
                         init->display.grid_x -= x0;
-*out2 << "R " << p << " " << maxp << " " << maxlevels << std::endl;
+
                         render_map();
 
                         (*df::global::window_x) -= x0;
