@@ -1414,7 +1414,7 @@ bool remote_start()
     wy = *df::global::window_y;
 
     enabler->gfps = 10;
-    df::global::d_init->flags1.clear(df::d_init_flags1::VARIED_GROUND_TILES);
+    df::global::d_init->flags1.set(df::d_init_flags1::VARIED_GROUND_TILES);
 
     if (advflags & ADVFLAG_NO_LOCALMAP)
         disable_local_map();
