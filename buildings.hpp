@@ -105,7 +105,7 @@ OVER1(building_instrumentst);
 OVER1(building_nest_boxst);
 OVER1(building_rollersst);
 OVER1(building_screw_pumpst);
-OVER1(building_siegeenginest);
+// OVER1(building_siegeenginest);
 OVER1(building_slabst);
 OVER1(building_statuest);
 OVER1(building_supportst);
@@ -265,6 +265,48 @@ struct building_tradedepotst_hook : public df::building_tradedepotst
     }
 }; 
 IMPLEMENT_VMETHOD_INTERPOSE(building_tradedepotst_hook, drawBuilding);
+
+
+struct building_siegeenginest_hook : public df::building_siegeenginest
+{
+   typedef df::building_siegeenginest interpose_base;
+
+    DEFINE_VMETHOD_INTERPOSE(void, drawBuilding, (df::building_drawbuffer* dbuf, int16_t smth))
+    {
+        INTERPOSE_NEXT(drawBuilding)(dbuf, smth);
+
+        if (!rendering_remote_map)
+            return;
+
+        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
+
+        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        {
+            for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
+            {
+                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                    continue;
+
+                // if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                // {
+                //     dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                //     dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                // }
+                if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
+                {
+                    // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
+
+                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    screen_under_ptr[(x*curheight + y)*4+1] = 15;
+                    screen_under_ptr[(x*curheight + y)*4+2] = 0;
+                    // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
+                }
+            }
+        }
+    }
+}; 
+IMPLEMENT_VMETHOD_INTERPOSE(building_siegeenginest_hook, drawBuilding);
 
 
 void enable_building_hooks()
