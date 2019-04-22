@@ -748,6 +748,9 @@ godeeper:;
                     //     lastinfobyte = 7;
                     // }
 
+                    if (mapptr - mapbuf >= sizeof(mapbuf))
+                        goto enough;
+
                     *(mapptr++) = x + gwindow_x;
                     *(mapptr++) = y + gwindow_y;
 
@@ -800,6 +803,13 @@ godeeper:;
                         }
 
                         *(mapptr2++) = fg | (bg << 4);
+
+                        if (senddz2)
+                        {
+                            senddz2 = false;
+                            *(mapptr2-1) |= 128;
+                            *(mapptr2++) = dz0;                        
+                        }
                     }
                     else
                     {
@@ -810,6 +820,12 @@ godeeper:;
                         fg   = (s[1] + bold) % 16;
                         *(mapptr++) = fg | (bg << 4);
 
+                        if (senddz)
+                        {
+                            senddz = false;
+                            *(mapptr-1) |= 128;
+                            *(mapptr++) = dz0;                        
+                        }
                     }
 
 
@@ -830,18 +846,6 @@ godeeper:;
 
                     // *(mapptr++) = fg | (bg << 4);
 
-                    if (senddz)
-                    {
-                        senddz = false;
-                        *(mapptr-1) |= 128;
-                        *(mapptr++) = dz0;                        
-                    }
-                    if (senddz2)
-                    {
-                        senddz2 = false;
-                        *(mapptr2-1) |= 128;
-                        *(mapptr2++) = dz0;                        
-                    }
 
                     // int dz = (s[3] & 0xfe) >> 1;
                     // if (lastdz != dz) {
@@ -859,8 +863,8 @@ godeeper:;
                     }
 
                     //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
-                    if (++cnt >= 1000)
-                        goto enough;
+                    // if (++cnt >= 1000)
+                    //     goto enough;
                 }
             }
 
@@ -913,7 +917,7 @@ godeeper:;
 
     if (*firstb)
     {
-        *out2 << "upd " << (int)(b-buf) << std::endl;
+        *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
         sendfunc(buf, (int)(b-buf), conn);
         return true;
     }

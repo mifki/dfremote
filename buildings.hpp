@@ -166,7 +166,27 @@ struct building_workshopst_hook : public df::building_workshopst
                 {
                     // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
 
-                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    if (x == xmax && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 106;
+                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 103;
+                    else if (x == xmax && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 107;
+                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 105;
+
+                    else if (y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 101;
+                    else if (x == dbuf->x1-gwindow_x)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 100;
+                    else if (x == xmax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 102;
+                    else if (y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 104;
+                    
+                    else
+                        screen_under_ptr[(x*curheight + y)*4+0] = 99;
+
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
@@ -211,9 +231,27 @@ struct building_furnacest_hook : public df::building_furnacest
                 }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
-                    // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
+                    if (x == xmax && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 106;
+                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 103;
+                    else if (x == xmax && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 107;
+                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
-                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    else if (y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 101;
+                    else if (x == dbuf->x1-gwindow_x)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 100;
+                    else if (x == xmax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 102;
+                    else if (y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 104;
+                    
+                    else
+                        screen_under_ptr[(x*curheight + y)*4+0] = 99;
+
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
@@ -253,9 +291,27 @@ struct building_tradedepotst_hook : public df::building_tradedepotst
                 }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
-                    // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
+                    if (x == xmax && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 106;
+                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 103;
+                    else if (x == xmax && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 107;
+                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
-                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    else if (y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 101;
+                    else if (x == dbuf->x1-gwindow_x)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 100;
+                    else if (x == xmax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 102;
+                    else if (y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 104;
+                    
+                    else
+                        screen_under_ptr[(x*curheight + y)*4+0] = 99;
+
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!
@@ -295,9 +351,27 @@ struct building_siegeenginest_hook : public df::building_siegeenginest
                 // }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
-                    // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
+                    if (x == xmax && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 106;
+                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 103;
+                    else if (x == xmax && y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 107;
+                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
-                    screen_under_ptr[(x*curheight + y)*4+0] = 99;
+                    else if (y == dbuf->y1-gwindow_y)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 101;
+                    else if (x == dbuf->x1-gwindow_x)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 100;
+                    else if (x == xmax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 102;
+                    else if (y == ymax)
+                        screen_under_ptr[(x*curheight + y)*4+0] = 104;
+                    
+                    else
+                        screen_under_ptr[(x*curheight + y)*4+0] = 99;
+
                     screen_under_ptr[(x*curheight + y)*4+1] = 15;
                     screen_under_ptr[(x*curheight + y)*4+2] = 0;
                     // screen_under_ptr[(x*curheight + y)*4+3] = 0; //TODO: dz !!!

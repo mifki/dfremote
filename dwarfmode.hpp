@@ -104,7 +104,7 @@ void render_remote_map()
 
             int x1 = std::min(curwidth, world->map.x_count-*df::global::window_x);
             int y1 = std::min(curheight, world->map.y_count-*df::global::window_y);
-
+            bool empty_tiles_left = false;
             for (int x = x0; x < x1; x++)
             {
                 for (int y = 0; y < y1; y++)
@@ -156,7 +156,37 @@ void render_remote_map()
                         lower_level_rendered = true;
                     }
 
-                    const int tile2 = (x-(x00)) * newheight + y, stile2 = tile2 * 4;                    
+                    const int tile2 = (x-(x00)) * newheight + y, stile2 = tile2 * 4;
+
+                    int d = p;
+                    ch = mscreen[stile2+0];
+
+                    // Special checks to ensure there are no certain tiles left on the last level
+                    if (p == maxp && p < MAX_LEVELS_RENDER_EVER)
+                    {
+                        // If there's still no tile and it has never been rendered, go deeper
+                        if (ch == 0)
+                        {
+                            if (!rendered_tiles[zz*256*256 + xx+yy*256])
+                            {
+                                maxp = p + 1;
+                                x0 = x;
+                            }
+                        }
+
+                        // If it's a ramp top, just change it to a ramp on the lower level
+                        // We don't care about missing a unit or an item on slope that deep
+                        else if (ch == 31)
+                        {
+                            df::map_block *block1 = world->map.block_index[xxquot][yyquot][zz-1];
+                            df::tiletype t1 = block1->tiletype[xxrem][yyrem];
+                            if (t1 == df::tiletype::RampTop && !block1->designation[xxrem][yyrem].bits.flow_size)
+                            {
+                                mscreen[stile2+0] = 30;
+                                d++;
+                            }
+                        }
+                    }
 
                     *((int*)gscreen + tile) = *((int*)mscreen + tile2);
                     *((uint32_t*)gscreen_under + tile) = *((uint32_t*)mscreen_under + tile2);
@@ -168,12 +198,13 @@ void render_remote_map()
                         *(gscreentexpos_cf + tile) = *(mscreentexpos_cf + tile2);
                         *(gscreentexpos_cbr + tile) = *(mscreentexpos_cbr + tile2);
                     }
-                    gscreen[stile+3] = (p << 1) | (gscreen[stile+3]&1);
+                    gscreen[stile+3] = (d << 1) | (gscreen[stile+3]&1);
                 }
             }
 
-            if (p++ >= maxp)
+            if (p == maxp)
                 break;
+            p++;
         } while(lower_level_rendered);
 
         (*df::global::window_z) = zz0;
