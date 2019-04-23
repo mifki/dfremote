@@ -199,6 +199,8 @@ static int timer_timeout = -1;
 static string timer_fn;
 
 static int maxlevels = 3;
+    unsigned int t2 = 0;
+
 
 std::recursive_mutex render_mutex;
 
@@ -468,8 +470,8 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                 continue;
 
             // Skip unmined or non-existent blocks
-            if (block_is_unmined(bx, by, zlevel))
-                continue;
+            // if (block_is_unmined(bx, by, zlevel))
+            //     continue;
 
             // Limit to number of blocks per msg
             if (++cnt >= 10)
@@ -504,14 +506,15 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
                     const int tile = x * map_h + y;
                     unsigned char *s = gscreen + tile*4;
-                    unsigned int *is = (unsigned int*)gscreen + tile;
+                    unsigned int is;// = (unsigned int*)gscreen + tile;
 
                     unsigned char bg, fg;
 
-                    if (graphics && *(gscreentexpos+tile))
+                    unsigned short texpos = 0;
+                    if (graphics && (texpos=*(gscreentexpos+tile)))
                     {
                         *lastinfobyteptr |= 1 << (7-lastinfobyte);
-                        *(unsigned short*)b = *(gscreentexpos+tile);
+                        *(unsigned short*)b = texpos;
                         b += 2;
 
                         if (gscreentexpos_grayscale[tile])
@@ -530,9 +533,14 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                             fg = 15;
                             bg = 0;
                         }
+
+                        is = texpos | (fg << 4) | bg;                        
                     }
                     else
                     {
+                        is = *((unsigned int*)gscreen + tile);
+                        is &= 0x01ffffff; // Ignore depth information
+
                         *(b++) = s[0]; //ch
 
                         bg   = s[2] & 7;
@@ -549,7 +557,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
                         lastdz = dz;
                     }                    
 
-                    rblk->data[i + j * 16] = *is;
+                    rblk->data[i + j * 16] = is;
 
                     if (dz)
                     {
@@ -564,8 +572,11 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     enough:;
     sendfunc(buf, (int)(b-buf), conn);
 
-    if (!*nextblk)
+    if (!*nextblk) {
         map_render_enabled = true;
+        t2 = enabler->gframe_last;
+        *out2 << "initial map sent" << std::endl;
+    }
 }
 
 static unsigned char mapbuf[10000], mapbuf2[10000];
@@ -748,7 +759,7 @@ godeeper:;
                     //     lastinfobyte = 7;
                     // }
 
-                    if (mapptr - mapbuf >= sizeof(mapbuf))
+                    if (mapptr - mapbuf >= sizeof(mapbuf)-10)
                         goto enough;
 
                     *(mapptr++) = x + gwindow_x;
@@ -756,6 +767,9 @@ godeeper:;
 
                     if (*(gscreen_under+tile*4))
                     {
+                        if (mapptr2 - mapbuf2 >= sizeof(mapbuf2)-10)
+                            goto enough;
+
                         {
                             unsigned char *s_under = gscreen_under + tile*4;
 
@@ -765,6 +779,13 @@ godeeper:;
                             unsigned char bold = (s_under[3] & 1) * 8;
                             fg   = (s_under[1] + bold) % 16;
                             *(mapptr++) = fg | (bg << 4);
+
+                            if (senddz)
+                            {
+                                senddz = false;
+                                *(mapptr-1) |= 128;
+                                *(mapptr++) = dz0;                        
+                            }                            
                         }
 
                         *(mapptr2++) = x + gwindow_x;
@@ -917,7 +938,7 @@ godeeper:;
 
     if (*firstb)
     {
-        *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
+        *out2 << "upd " << gwindow_x << " " << gwindow_y << " " << curwidth << " " << curheight << " " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
         sendfunc(buf, (int)(b-buf), conn);
         return true;
     }
@@ -1125,7 +1146,6 @@ void enthreadmain(ENetHost *server)
 {
     ENetEvent event;
     unsigned int t = 0;
-    unsigned int t2 = 0;
 
     while (remote_on)
     {
@@ -1326,7 +1346,7 @@ void enthreadmain(ENetHost *server)
                 }
             }
 
-            else if (enabler->gframe_last != t2 && map_render_enabled)
+            else if (enabler->gframe_last > t2 && map_render_enabled)
             {
                 //TODO: and only if on the game screen ?
                 t = server->serviceTime;
