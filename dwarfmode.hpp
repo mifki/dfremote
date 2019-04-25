@@ -56,8 +56,8 @@ void render_remote_map()
     init->display.grid_y = newheight + 2;
     gps->dimx = curwidth = newwidth;
     gps->dimy = curheight = newheight;
-    gps->clipx[1] = newwidth;
-    gps->clipy[1] = newheight;
+    gps->clipx[1] = curwidth;
+    gps->clipy[1] = curheight;
 
     waiting_render = true;
 
@@ -76,13 +76,13 @@ void render_remote_map()
 
     if (maxlevels > 1 && *df::global::window_z > 0)
     {
-        gps->screen                 = mscreen                 - 4*newheight - 4;
-        gps->screen_limit           = mscreen                 + newwidth * newheight * 4;
-        gps->screentexpos           = mscreentexpos           - newheight - 1;
-        gps->screentexpos_addcolor  = mscreentexpos_addcolor  - newheight - 1;
-        gps->screentexpos_grayscale = mscreentexpos_grayscale - newheight - 1;
-        gps->screentexpos_cf        = mscreentexpos_cf        - newheight - 1;
-        gps->screentexpos_cbr       = mscreentexpos_cbr       - newheight - 1;
+        gps->screen                 = mscreen                 - 4*curheight - 4;
+        gps->screen_limit           = mscreen                 + curwidth * curheight * 4;
+        gps->screentexpos           = mscreentexpos           - curheight - 1;
+        gps->screentexpos_addcolor  = mscreentexpos_addcolor  - curheight - 1;
+        gps->screentexpos_grayscale = mscreentexpos_grayscale - curheight - 1;
+        gps->screentexpos_cf        = mscreentexpos_cf        - curheight - 1;
+        gps->screentexpos_cbr       = mscreentexpos_cbr       - curheight - 1;
 
         memset(mscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
         screen_under_ptr = mscreen_under;
@@ -109,7 +109,7 @@ void render_remote_map()
             {
                 for (int y = 0; y < y1; y++)
                 {
-                    const int tile = x * newheight + y, stile = tile * 4;
+                    const int tile = x * curheight + y, stile = tile * 4;
 
                     unsigned char ch = gscreen[stile+0];
                     if (ch != 0 && ch != 31)
@@ -156,7 +156,7 @@ void render_remote_map()
                         lower_level_rendered = true;
                     }
 
-                    const int tile2 = (x-(x00)) * newheight + y, stile2 = tile2 * 4;
+                    const int tile2 = (x-(x00)) * curheight + y, stile2 = tile2 * 4;
 
                     int d = p;
                     ch = mscreen[stile2+0];
