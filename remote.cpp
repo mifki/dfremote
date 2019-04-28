@@ -103,6 +103,7 @@ static unsigned short advflags;
 #define ADVFLAG_FASTRENDER    (1 << 2)
 
 static int gwindow_x, gwindow_y, gwindow_z;
+static int mwindow_x;
 
 static int gmenu_w;
 
@@ -656,8 +657,6 @@ bool send_map_updates(send_func sendfunc, void *conn)
         lua_settop(L, top);
     }
 
-    unsigned char *emptyb = b;
-
     static bool send_z = false;
     static int zlevel = 0;
     if (zlevel != gwindow_z)
@@ -667,23 +666,19 @@ bool send_map_updates(send_func sendfunc, void *conn)
     }
 
     unsigned char *mapptr = mapbuf, *mapptr2 = mapbuf2;
-    //TODO: shouldn't just skip if waiting_render is true, or at least don't update t2 if didn't send map here
-    // if (!waiting_render)
     {
         render_mutex.lock();
-        // b++;
-        //int tile = 0;
+
         int maxx = std::min(curwidth, world->map.x_count - gwindow_x);
         int maxy = std::min(curheight, world->map.y_count - gwindow_y);
         int cnt = 0;
         int lastdz = 0;
-        // int lastinfobyte = 0;
 
-        // unsigned char *lastinfobyteptr = NULL;
         int x0 = 0, y0 = 0, dz0 = 0;
         bool deeper = false;
         bool senddz = false, senddz2 = false;
         df::unit *u = df::unit::find(10281);
+
 godeeper:;
         for (int y = y0; y < maxy; y++)
         {
@@ -741,24 +736,10 @@ godeeper:;
                 {
                     is = *((unsigned int*)gscreen + tile);
                     is &= 0x01ffffff; // Ignore depth information
-
-                    if (*(gscreen_under+tile*4))
-                    {
-                        // is = *((unsigned int*)gscreen_under + tile);
-                        // is &= 0x01ffffff; // Ignore depth information
-                        // s = gscreen_under + tile*4;
-                    }
                 }
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
-                    // if (graphics && !(lastinfobyte--))
-                    // {
-                    //     lastinfobyteptr = b;
-                    //     *(b++) = 0;
-                    //     lastinfobyte = 7;
-                    // }
-
                     if (mapptr - mapbuf >= sizeof(mapbuf)-10)
                         goto enough;
 
@@ -849,32 +830,6 @@ godeeper:;
                         }
                     }
 
-
-                    // if (texpos)
-                    // {
-                    //     *lastinfobyteptr |= 1 << (7-lastinfobyte);
-                    //     *(unsigned short*)b = texpos;
-                    //     b += 2;
-                    // }
-                    // else
-                    // {
-                    //     *(mapptr++) = s[0]; //ch
-
-                    //     bg   = s[2] & 7;
-                    //     unsigned char bold = (s[3] & 1) * 8;
-                    //     fg   = (s[1] + bold) % 16;
-                    // }
-
-                    // *(mapptr++) = fg | (bg << 4);
-
-
-                    // int dz = (s[3] & 0xfe) >> 1;
-                    // if (lastdz != dz) {
-                    //     *(b-1) |= 128;
-                    //     *(b++) = dz - lastdz;
-                    //     lastdz = dz;
-                    // }
-
                     rblk->data[xx%16 + (yy%16) * 16] = is;
                     
                     if (dz)
@@ -882,10 +837,6 @@ godeeper:;
                         for (int z = zlevel-dz+1;z<=zlevel;z++)
                             rendered_tiles[z*256*256 + xx+yy*256] = true;
                     }
-
-                    //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
-                    // if (++cnt >= 1000)
-                    //     goto enough;
                 }
             }
 
@@ -898,10 +849,11 @@ godeeper:;
             senddz = true;
             senddz2 = true;
 
-// *out2 << "deeper "<<dz0 <<std::endl;
+            // *out2 << "deeper "<<dz0 <<std::endl;
             goto godeeper;
         }
 
+        //TODO: if we've reached limit, should send the rest the next tick and not the next frame !
         enough:;
 
         render_mutex.unlock();
@@ -933,12 +885,10 @@ godeeper:;
 
         send_z = false;
     }
-    // else
-    //     b--;
 
     if (*firstb)
     {
-        *out2 << "upd " << gwindow_x << " " << gwindow_y << " " << curwidth << " " << curheight << " " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
+        *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
         sendfunc(buf, (int)(b-buf), conn);
         return true;
     }

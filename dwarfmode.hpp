@@ -68,8 +68,9 @@ void render_remote_map()
     memset(gscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
     screen_under_ptr = gscreen_under;
     screen_ptr = gscreen;        
+    mwindow_x = gwindow_x;
 
-    if (*df::global::window_z > 0)
+    if (maxlevels > 1 && *df::global::window_z > 0)
         patch_rendering(false);
 
     render_map();
@@ -84,7 +85,7 @@ void render_remote_map()
         gps->screentexpos_cf        = mscreentexpos_cf        - curheight - 1;
         gps->screentexpos_cbr       = mscreentexpos_cbr       - curheight - 1;
 
-        memset(mscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
+        // memset(mscreen_under, 0, curwidth*curheight*sizeof(uint32_t));
         screen_under_ptr = mscreen_under;
         screen_ptr = mscreen;
 
@@ -145,7 +146,9 @@ void render_remote_map()
 
                         (*df::global::window_x) += x0;
                         init->display.grid_x -= x0;
+                        mwindow_x = gwindow_x + x0;
 
+                        memset(mscreen_under, 0, (curwidth-x0)*curheight*sizeof(uint32_t));
                         render_map();
 
                         (*df::global::window_x) -= x0;
@@ -167,6 +170,7 @@ void render_remote_map()
                         // If there's still no tile and it has never been rendered, go deeper
                         if (ch == 0)
                         {
+                            // mscreen[stile2+0] = 1;
                             if (!rendered_tiles[zz*256*256 + xx+yy*256])
                             {
                                 maxp = p + 1;

@@ -67,12 +67,12 @@ struct cls##_hook : public df::cls \
         if (!rendering_remote_map) \
             return; \
 \
-        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1); \
+        int xmax = std::min(dbuf->x2-mwindow_x, curwidth-1); \
         int ymax = std::min(dbuf->y2-gwindow_y, curheight-1); \
 \
-        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++) \
+        for (int x = dbuf->x1-mwindow_x; x <= xmax; x++) \
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++) \
-                if (df::global::cursor->x != x+gwindow_x || df::global::cursor->y != y+gwindow_y || df::global::cursor->z != this->z) \
+                if (df::global::cursor->x != x+mwindow_x || df::global::cursor->y != y+gwindow_y || df::global::cursor->z != this->z) \
                     if (x >= 0 && y >= 0 && x < curwidth && y < curheight) \
                         ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y]; \
     } \
@@ -142,42 +142,42 @@ struct building_workshopst_hook : public df::building_workshopst
         if (!rendering_remote_map)
             return;
 
-        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int xmax = std::min(dbuf->x2-mwindow_x, curwidth-1);
         int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
 
-        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        for (int x = dbuf->x1-mwindow_x; x <= xmax; x++)
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
                     continue;
 
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
-                    dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                    dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                    dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                 }
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
-                {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
-                    // dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
-                }
+                // if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
+                // {
+                //     dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
+                //     // dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                // }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
                     // ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y];
 
                     if (x == xmax && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 106;
-                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                    else if (x == dbuf->x1-mwindow_x && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 103;
                     else if (x == xmax && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 107;
-                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                    else if (x == dbuf->x1-mwindow_x && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
                     else if (y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 101;
-                    else if (x == dbuf->x1-gwindow_x)
+                    else if (x == dbuf->x1-mwindow_x)
                         screen_under_ptr[(x*curheight + y)*4+0] = 100;
                     else if (x == xmax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 102;
@@ -209,40 +209,40 @@ struct building_furnacest_hook : public df::building_furnacest
         if (!rendering_remote_map)
             return;
 
-        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int xmax = std::min(dbuf->x2-mwindow_x, curwidth-1);
         int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
 
-        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        for (int x = dbuf->x1-mwindow_x; x <= xmax; x++)
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
                     continue;
 
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
-                    dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                    dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                    dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                 }
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
-                {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
-                    // dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
-                }
+                // if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 176 || dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 177)
+                // {
+                //     dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 254;//
+                //     // dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                // }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
                     if (x == xmax && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 106;
-                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                    else if (x == dbuf->x1-mwindow_x && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 103;
                     else if (x == xmax && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 107;
-                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                    else if (x == dbuf->x1-mwindow_x && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
                     else if (y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 101;
-                    else if (x == dbuf->x1-gwindow_x)
+                    else if (x == dbuf->x1-mwindow_x)
                         screen_under_ptr[(x*curheight + y)*4+0] = 100;
                     else if (x == xmax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 102;
@@ -274,35 +274,35 @@ struct building_tradedepotst_hook : public df::building_tradedepotst
         if (!rendering_remote_map)
             return;
 
-        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int xmax = std::min(dbuf->x2-mwindow_x, curwidth-1);
         int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
 
-        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        for (int x = dbuf->x1-mwindow_x; x <= xmax; x++)
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
                     continue;
 
-                if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 {
-                    dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
-                    dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                    dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                    dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                 }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
                     if (x == xmax && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 106;
-                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                    else if (x == dbuf->x1-mwindow_x && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 103;
                     else if (x == xmax && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 107;
-                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                    else if (x == dbuf->x1-mwindow_x && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
                     else if (y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 101;
-                    else if (x == dbuf->x1-gwindow_x)
+                    else if (x == dbuf->x1-mwindow_x)
                         screen_under_ptr[(x*curheight + y)*4+0] = 100;
                     else if (x == xmax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 102;
@@ -334,35 +334,35 @@ struct building_siegeenginest_hook : public df::building_siegeenginest
         if (!rendering_remote_map)
             return;
 
-        int xmax = std::min(dbuf->x2-gwindow_x, curwidth-1);
+        int xmax = std::min(dbuf->x2-mwindow_x, curwidth-1);
         int ymax = std::min(dbuf->y2-gwindow_y, curheight-1);
 
-        for (int x = dbuf->x1-gwindow_x; x <= xmax; x++)
+        for (int x = dbuf->x1-mwindow_x; x <= xmax; x++)
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+gwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
                     continue;
 
-                // if (dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
+                // if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
                 // {
-                //     dbuf->tile[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
-                //     dbuf->fore[x-(dbuf->x1-gwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
+                //     dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 97;//108;//98;
+                //     dbuf->fore[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] = 15;
                 // }
                 if (x >= 0 && y >= 0 && x < curwidth && y < curheight)
                 {
                     if (x == xmax && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 106;
-                    else if (x == dbuf->x1-gwindow_x && y == ymax)
+                    else if (x == dbuf->x1-mwindow_x && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 103;
                     else if (x == xmax && y == ymax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 107;
-                    else if (x == dbuf->x1-gwindow_x && y == dbuf->y1-gwindow_y)
+                    else if (x == dbuf->x1-mwindow_x && y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 105;
 
                     else if (y == dbuf->y1-gwindow_y)
                         screen_under_ptr[(x*curheight + y)*4+0] = 101;
-                    else if (x == dbuf->x1-gwindow_x)
+                    else if (x == dbuf->x1-mwindow_x)
                         screen_under_ptr[(x*curheight + y)*4+0] = 100;
                     else if (x == xmax)
                         screen_under_ptr[(x*curheight + y)*4+0] = 102;

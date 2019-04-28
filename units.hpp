@@ -10,9 +10,9 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
-                if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
-                        ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
+                if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
+                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
+                        ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];
         }
 
         return INTERPOSE_NEXT(getCreatureTile)();
@@ -24,9 +24,9 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
-                if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
-                        ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
+                if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
+                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
+                        ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];
         }
 
         return INTERPOSE_NEXT(getCorpseTile)();
@@ -38,9 +38,9 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
-                if (pos.x-gwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-gwindow_x < curwidth && pos.y-gwindow_y < curheight)
-                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y])
-                        ((uint32_t*)screen_under_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-gwindow_x)*curheight + _pos.y-gwindow_y];
+                if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
+                    if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
+                        ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];
         }
         
         return INTERPOSE_NEXT(getGlowTile)();
