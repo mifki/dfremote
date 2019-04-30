@@ -6,7 +6,7 @@ DF ?= /Users/vit/Downloads/df_44_12_osx
 DH ?= /Users/vit/Downloads/buildagent/workspace/root/dfhack/0.44
 
 BITS ?= 64
-GCCVER ?= 4.8
+GCCVER ?= 7
 
 SRC = remote.cpp sha256.cpp QR_Encode.cpp
 DEP = dwarfmode.hpp embark.hpp commands.hpp plugin.hpp patches.hpp itemcache.hpp config.hpp corehacks.hpp sha256.h connect.hpp units.hpp items.hpp buildings.hpp Makefile

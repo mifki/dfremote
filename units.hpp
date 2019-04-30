@@ -6,9 +6,10 @@ struct unit_hook : public df::unit
 
     DEFINE_VMETHOD_INTERPOSE(uint8_t, getCreatureTile, ())
     {
-        if (rendering_remote_map)
+        if (rendering_remote_map && !this->flags1.bits.inactive)
         {
             df::coord _pos = Units::getPosition(this);
+
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
@@ -18,11 +19,13 @@ struct unit_hook : public df::unit
         return INTERPOSE_NEXT(getCreatureTile)();
     }
 
-    DEFINE_VMETHOD_INTERPOSE(uint8_t, getCorpseTile, ())
+    // Corpses are rendered as items so this is not needed
+    /*DEFINE_VMETHOD_INTERPOSE(uint8_t, getCorpseTile, ())
     {
         if (rendering_remote_map)
         {
             df::coord _pos = Units::getPosition(this);
+            *out2 << "C " << _pos.x << " " << _pos.y<<" "<<_pos.z<<std::endl;
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
@@ -30,11 +33,11 @@ struct unit_hook : public df::unit
         }
 
         return INTERPOSE_NEXT(getCorpseTile)();
-    }
+    }*/
 
     DEFINE_VMETHOD_INTERPOSE(uint8_t, getGlowTile, ())
     {
-        if (rendering_remote_map)
+        if (rendering_remote_map && !this->flags1.bits.inactive)
         {
             df::coord _pos = Units::getPosition(this);
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
@@ -48,12 +51,12 @@ struct unit_hook : public df::unit
 };
 
 IMPLEMENT_VMETHOD_INTERPOSE(unit_hook, getCreatureTile);
-IMPLEMENT_VMETHOD_INTERPOSE(unit_hook, getCorpseTile);
+// IMPLEMENT_VMETHOD_INTERPOSE(unit_hook, getCorpseTile);
 IMPLEMENT_VMETHOD_INTERPOSE(unit_hook, getGlowTile);
 
 void enable_unit_hooks()
 {
     INTERPOSE_HOOK(unit_hook, getCreatureTile).apply(true);
-    INTERPOSE_HOOK(unit_hook, getCorpseTile).apply(true);
+    // INTERPOSE_HOOK(unit_hook, getCorpseTile).apply(true);
     INTERPOSE_HOOK(unit_hook, getGlowTile).apply(true);
 }
