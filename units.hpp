@@ -25,7 +25,7 @@ struct unit_hook : public df::unit
         if (rendering_remote_map)
         {
             df::coord _pos = Units::getPosition(this);
-            *out2 << "C " << _pos.x << " " << _pos.y<<" "<<_pos.z<<std::endl;
+
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
@@ -40,6 +40,7 @@ struct unit_hook : public df::unit
         if (rendering_remote_map && !this->flags1.bits.inactive)
         {
             df::coord _pos = Units::getPosition(this);
+
             if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
