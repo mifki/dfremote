@@ -57,6 +57,7 @@ require 'remote.locations'
 require 'remote.petitions'
 require 'remote.jobdetails'
 require 'remote.dfaas'
+require 'remote.worldmap'
 
 native = {}
 --dfhack.open_plugin(native, 'remote')
@@ -1984,6 +1985,8 @@ local handlers = {
         [1] = civilizations_get_list,
         [2] = civilization_get_info,
         [3] = civilization_get_agreement,
+
+        [10] = worldmap_enter,
     },
 
     [138] = {

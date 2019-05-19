@@ -57,10 +57,12 @@
 #include "df/renderer.h"
 #include "df/interfacest.h"
 #include "df/world.h"
+#include "df/world_data.h"
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/viewscreen_topicmeeting_takerequestsst.h"
 #include "df/viewscreen_topicmeetingst.h"
 #include "df/viewscreen_meetingst.h"
+#include "df/viewscreen_civlistst.h"
 
 #include "tinythread.h"
 
@@ -130,6 +132,8 @@ static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscre
 static uint8_t *gscreen_under, *mscreen_under;
 static uint8_t *screen_under_ptr, *screen_ptr;
 
+static uint8_t world_map[100*100*4];
+
 #include "patches.hpp"
 
 #if defined(WIN32) && !defined(_WIN64)
@@ -139,7 +143,10 @@ static uint8_t *screen_under_ptr, *screen_ptr;
     typedef void (*RENDER_MAP)(void*, int);
 #endif
 
+typedef void (*RENDER_WORLD_MAP)(df::world_data *, int, int, int, int, int, int, int, int, int, int, int, int);
+
 RENDER_MAP _render_map;
+RENDER_WORLD_MAP render_world_map;
 
 #if defined(WIN32) && !defined(_WIN64)
     #define render_map() _render_map(0)
@@ -237,6 +244,7 @@ static void patch_rendering(bool enable_lower_levels)
 #include "corehacks.hpp"
 #include "dwarfmode.hpp"
 #include "embark.hpp"
+#include "civlist.hpp"
 #include "units.hpp"
 #include "items.hpp"
 #include "buildings.hpp"
@@ -963,6 +971,27 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
             return;
         }
 
+        if (cmd == 20)
+        {
+            unsigned char *b = buf;
+            *(b++) = 128;
+
+            *(unsigned short*)b = seq + 1;
+            b += 2;
+
+            int w = world->world_data->world_width, h = world->world_data->world_height;
+
+            //TODO: world size > 256?
+            *(b++) = w;
+            *(b++) = h;
+
+            memcpy(b, world_map, w*h*4);
+            b += w*h*4;
+
+            sendfunc(buf, (int)(b-buf), conn);
+            return;
+        }
+
         if (cmd == 90)
         {
             map_render_enabled = false;
@@ -1396,6 +1425,7 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
+    INTERPOSE_HOOK(civlist_hook, render).apply(true);
     
     enable_building_hooks();
     enable_item_hooks();

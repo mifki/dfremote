@@ -114,6 +114,7 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         #define A_LOAD_MULTI_PDIM 0x1011aa460
         #define A_RENDER_MAP      0x100b30bc0
         #define A_RENDER_UPDOWN   0x10089e2e0
+        #define A_RENDER_WORLD_MAP 0x100ba0fa0
 
         static patchdef p_display = { 0x10113de0b, 5 };
 

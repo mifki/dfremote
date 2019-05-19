@@ -97,6 +97,8 @@ DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCom
         _render_map = (RENDER_MAP) A_RENDER_MAP;
     #endif
 
+    render_world_map = (RENDER_WORLD_MAP) A_RENDER_WORLD_MAP;
+
     L = Lua::Open(*out2, NULL);
     if (!remote_print_version())
         return CR_OK;
