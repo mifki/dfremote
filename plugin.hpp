@@ -132,6 +132,8 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
         wx = *df::global::window_x;
         wy = *df::global::window_y;
+
+        world_map = REALLOC(world_map, uint8_t, df::global::world->world_data->world_width*df::global::world->world_data->world_height*4);
     }
 
     return CR_OK;
@@ -142,6 +144,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     remote_stop();
     enet_deinitialize();
     free_buffers();
+    free(world_map);
     free(rendered_tiles);
     lua_close(L);
 

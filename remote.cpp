@@ -132,7 +132,7 @@ static uint8_t *mscreentexpos_grayscale_origin, *mscreentexpos_cf_origin, *mscre
 static uint8_t *gscreen_under, *mscreen_under;
 static uint8_t *screen_under_ptr, *screen_ptr;
 
-static uint8_t world_map[100*100*4];
+static uint8_t *world_map;
 
 #include "patches.hpp"
 
