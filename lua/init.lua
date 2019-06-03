@@ -1303,6 +1303,11 @@ function generrseqstr(seq)
     return string.char(130, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
 end
 
+function genpartseqstr(seq)
+    local rseq = seq + 1
+    return string.char(131, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
+end
+
 --luacheck: in=number,number,number,number
 function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_high = high
@@ -2387,10 +2392,29 @@ local function _check_utf8(o, path)
     end
 end
 
-function handle_command(cmd, subcmd, seq, data, foreign)
+local _cmd
+local _seq
+local _send_partial
+function send_partial(ret)
+    local msg
+
+    local a,b = pcall(function() _check_utf8(ret, '') end)
+    if a then
+        msg = genpartseqstr(_seq) .. (_cmd < 128 and (ret or '') or mp.pack(ret))
+    else
+        msg = generrseqstr(seq) .. b .. ' ' .. cmd .. ',' .. subcmd
+    end
+
+    _send_partial(msg)
+end
+
+function handle_command(cmd, subcmd, seq, data, foreign, send_partial)
     --print(cmd,subcmd,seq)
 
     ensure_native()
+    _send_partial = send_partial
+    _cmd = cmd
+    _seq = seq
 
     local hs = foreign and handlers_foreign or handlers
     
@@ -2404,6 +2428,7 @@ function handle_command(cmd, subcmd, seq, data, foreign)
     if handler then
         local params = cmd < 128 and {data} or ((#data > 0) and mp.unpack(data) or {})
         local ret
+
         local ok,err = pcall(function() ret = handler(table.unpack(params)) end)
         if not ok then
             print (err)

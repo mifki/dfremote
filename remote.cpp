@@ -353,6 +353,16 @@ void send_enet(const unsigned char *buf, int sz, ENetPeer *peer)
     enet_peer_send(peer, 0, packet);
 }
 
+int send_partial(lua_State *L)
+{
+    size_t len;
+    const char *s = lua_tolstring(L, 1, &len);
+    if (s)
+        send_enet((const unsigned char*)s, len, client_peer);
+
+    return 0;
+}
+
 std::string address2ip(ENetAddress *addr)
 {
     char name[32];
@@ -1018,9 +1028,10 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     lua_pushinteger(L, seq);
     lua_pushlstring(L, (const char*)mdata+3, msz-3);
     lua_pushboolean(L, foreign);
+    lua_pushcfunction(L, send_partial);
 
     bool handled = false;
-    if (Lua::SafeCall(*out2, L, 5, 2, true))
+    if (Lua::SafeCall(*out2, L, 6, 2, true))
         handled = lua_toboolean(L, -2);
         
     if (need_suspend)
@@ -1033,6 +1044,8 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         if (s && seq)
             sendfunc((const unsigned char*)s, len, conn);
     }
+
+    // If the command was not handled, send an empty response anyway so that the callback is removed
     else if (seq)
     {
         unsigned char *b = buf;

@@ -102,6 +102,9 @@ DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCom
     L = Lua::Open(*out2, NULL);
     if (!remote_print_version())
         return CR_OK;
+
+    // lua_pushcfunction(L, send_partial);
+    // lua_setglobal(L, "send_partial");    
        
     commands.push_back(PluginCommand(
         "remote", "Dwarf Fortress Remote Server (mifki.com/df)",

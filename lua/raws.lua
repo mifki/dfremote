@@ -359,7 +359,7 @@ function raws_apply_creature_gfx(zmsgpackdata)
     end
 
     if max > 0 then
-        native.custom_command("gfx,"..tostring(max))
+        native.custom_command('gfx,'..tostring(max))
         df.global.init.display.flag.USE_GRAPHICS = true
     end
 

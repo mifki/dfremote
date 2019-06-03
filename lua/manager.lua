@@ -90,10 +90,15 @@ function manager_get_ordertemplates(fromidx)
 	end
 
 	local ret = {}
-	for i=fromidx+1,fromidx+300 do
-		table.insert(ret, order_template_names[i])
+	for i,v in ipairs(order_template_names) do
+		table.insert(ret, v)
+		if #ret >= 300 then
+			send_partial(ret)
+			ret = {}
+		end
 	end
-	return { ret, fromidx+300 < #order_template_names }
+
+	return true
 end
 
 --luacheck: in=number,number
