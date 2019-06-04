@@ -2392,7 +2392,7 @@ local function _check_utf8(o, path)
     end
 end
 
-local _cmd
+--[[local _cmd
 local _seq
 local _send_partial
 function send_partial(ret)
@@ -2406,15 +2406,29 @@ function send_partial(ret)
     end
 
     _send_partial(msg)
+end]]
+
+local _send_response
+function send_ok(data)
+    _send_response(128, data)
 end
 
-function handle_command(cmd, subcmd, seq, data, foreign, send_partial)
+function send_err(data)
+    _send_response(130, data)
+end
+
+function send_partial(data)
+    _send_response(131, data)
+end
+
+function handle_command(cmd, subcmd, data, foreign, send_response)
     --print(cmd,subcmd,seq)
 
     ensure_native()
-    _send_partial = send_partial
-    _cmd = cmd
-    _seq = seq
+    _send_response = send_response
+    -- _send_partial = send_partial
+    -- _cmd = cmd
+    -- _seq = seq
 
     local hs = foreign and handlers_foreign or handlers
     
@@ -2437,18 +2451,22 @@ function handle_command(cmd, subcmd, seq, data, foreign, send_partial)
         if ok then
             local a,b = pcall(function() _check_utf8(ret, '') end)
             if not a then
-                return true, generrseqstr(seq) .. b .. ' ' .. cmd .. ',' .. subcmd
+                -- return true, generrseqstr(seq) .. b .. ' ' .. cmd .. ',' .. subcmd
+                send_err(b .. ' ' .. cmd .. ',' .. subcmd)
             end
             
-            return true, genrespseqstr(seq) .. (cmd < 128 and (ret or '') or mp.pack(ret))    
+            -- return true, genrespseqstr(seq) .. (cmd < 128 and (ret or '') or mp.pack(ret))    
+            send_ok(cmd < 128 and (ret or '') or mp.pack(ret))
         else
-            return true, generrseqstr(seq) .. err
+            send_err(err)
+            -- return true, generrseqstr(seq) .. err
         end
     end
 
     local err = 'no cmd ' .. tostring(cmd) .. ' ' .. tostring(subcmd)
     print(err)
-    return true, generrseqstr(seq) .. err
+    send_err(err)
+    -- return true, generrseqstr(seq) .. err
 end
 
 local first_time_setup_done = false

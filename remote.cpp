@@ -353,12 +353,28 @@ void send_enet(const unsigned char *buf, int sz, ENetPeer *peer)
     enet_peer_send(peer, 0, packet);
 }
 
-int send_partial(lua_State *L)
+int send_response(lua_State *L)
 {
+    int seq = lua_tointeger(L, lua_upvalueindex(1));
+    int type = lua_tointeger(L, 1);
+
     size_t len;
-    const char *s = lua_tolstring(L, 1, &len);
+    const char *s = lua_tolstring(L, 2, &len);
     if (s)
-        send_enet((const unsigned char*)s, len, client_peer);
+    {
+        *out2 << "RESP " << len << std::endl;
+        unsigned char *b = buf;
+        *(b++) = type;
+
+        *(unsigned short*)b = seq + 1;
+        b += 2;
+
+        memcpy(b, s, len);
+        b += len;
+
+        send_enet(buf, b-buf, client_peer);
+        // send_enet((const unsigned char*)s, len, client_peer);
+    }
 
     return 0;
 }
@@ -1025,13 +1041,15 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     Lua::PushModulePublic(*out2, L, "remote", "handle_command");
     lua_pushinteger(L, cmd);
     lua_pushinteger(L, subcmd);
-    lua_pushinteger(L, seq);
+    // lua_pushinteger(L, seq);
     lua_pushlstring(L, (const char*)mdata+3, msz-3);
     lua_pushboolean(L, foreign);
-    lua_pushcfunction(L, send_partial);
+
+    lua_pushinteger(L, seq);
+    lua_pushcclosure(L, send_response, 1);
 
     bool handled = false;
-    if (Lua::SafeCall(*out2, L, 6, 2, true))
+    if (Lua::SafeCall(*out2, L, 5, 2, true))
         handled = lua_toboolean(L, -2);
         
     if (need_suspend)
@@ -1039,22 +1057,22 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
 
     if (handled)
     {
-        size_t len;
-        const char *s = lua_tolstring(L, -1, &len);
-        if (s && seq)
-            sendfunc((const unsigned char*)s, len, conn);
+        // size_t len;
+        // const char *s = lua_tolstring(L, -1, &len);
+        // if (s && seq)
+        //     sendfunc((const unsigned char*)s, len, conn);
     }
 
     // If the command was not handled, send an empty response anyway so that the callback is removed
     else if (seq)
     {
-        unsigned char *b = buf;
-        *(b++) = 128;
+        // unsigned char *b = buf;
+        // *(b++) = 128;
 
-        *(unsigned short*)b = seq + 1;
-        b += 2;
+        // *(unsigned short*)b = seq + 1;
+        // b += 2;
 
-        sendfunc(buf, b-buf, conn);
+        // sendfunc(buf, b-buf, conn);
     }
     
     lua_settop(L, top);
