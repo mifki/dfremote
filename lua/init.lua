@@ -2461,11 +2461,12 @@ function handle_command(cmd, subcmd, data, foreign, send_response)
             send_err(err)
             -- return true, generrseqstr(seq) .. err
         end
-    end
 
-    local err = 'no cmd ' .. tostring(cmd) .. ' ' .. tostring(subcmd)
-    print(err)
-    send_err(err)
+    else
+        local err = 'no cmd ' .. tostring(cmd) .. ' ' .. tostring(subcmd)
+        print(err)
+        send_err(err)
+    end
     -- return true, generrseqstr(seq) .. err
 end
 

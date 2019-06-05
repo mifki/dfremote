@@ -372,7 +372,8 @@ int send_response(lua_State *L)
         memcpy(b, s, len);
         b += len;
 
-        send_enet(buf, b-buf, client_peer);
+        if (client_peer)
+            send_enet(buf, b-buf, client_peer);
         // send_enet((const unsigned char*)s, len, client_peer);
     }
 
@@ -1437,7 +1438,7 @@ bool remote_start()
 
     if (!server)
     {
-        *out2 << "Error starting DF Remote Server" << std::endl;
+        *out2 << "Error starting DF Remote Server (" << errno << ")" << std::endl;
         return false;
     }
 
