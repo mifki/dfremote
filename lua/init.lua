@@ -1293,21 +1293,6 @@ function get_status_ext(needs_sync)
     return s1, s2, extdata, centerdata
 end
 
-function genrespseqstr(seq)
-    local rseq = seq + 1
-    return string.char(128, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
-end
-
-function generrseqstr(seq)
-    local rseq = seq + 1
-    return string.char(130, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
-end
-
-function genpartseqstr(seq)
-    local rseq = seq + 1
-    return string.char(131, bit32.band(rseq, 0xff), bit32.rshift(rseq, 8))
-end
-
 --luacheck: in=number,number,number,number
 function set_traffic_costs(high, normal, low, restricted)
     df.global.ui.main.traffic_cost_high = high
@@ -2055,7 +2040,7 @@ local handlers = {
 
     [145] = {
         [1] = manager_get_orders,
-        [2] = manager_get_ordertemplates,
+        [2] = manager_get_order_templates,
         [3] = manager_new_order,
         [4] = manager_delete_order,
         [5] = manager_reorder,
@@ -2392,22 +2377,6 @@ local function _check_utf8(o, path)
     end
 end
 
---[[local _cmd
-local _seq
-local _send_partial
-function send_partial(ret)
-    local msg
-
-    local a,b = pcall(function() _check_utf8(ret, '') end)
-    if a then
-        msg = genpartseqstr(_seq) .. (_cmd < 128 and (ret or '') or mp.pack(ret))
-    else
-        msg = generrseqstr(seq) .. b .. ' ' .. cmd .. ',' .. subcmd
-    end
-
-    _send_partial(msg)
-end]]
-
 local _send_response
 function send_ok(data)
     _send_response(128, data)
@@ -2422,13 +2391,10 @@ function send_partial(data)
 end
 
 function handle_command(cmd, subcmd, data, foreign, send_response)
-    --print(cmd,subcmd,seq)
+    --print(cmd,subcmd,foreign)
 
     ensure_native()
     _send_response = send_response
-    -- _send_partial = send_partial
-    -- _cmd = cmd
-    -- _seq = seq
 
     local hs = foreign and handlers_foreign or handlers
     
@@ -2444,22 +2410,18 @@ function handle_command(cmd, subcmd, data, foreign, send_response)
         local ret
 
         local ok,err = pcall(function() ret = handler(table.unpack(params)) end)
-        if not ok then
-            print (err)
-        end
         
         if ok then
             local a,b = pcall(function() _check_utf8(ret, '') end)
-            if not a then
-                -- return true, generrseqstr(seq) .. b .. ' ' .. cmd .. ',' .. subcmd
+            if a then
+                send_ok(cmd < 128 and (ret or '') or mp.pack(ret))
+            else
                 send_err(b .. ' ' .. cmd .. ',' .. subcmd)
             end
-            
-            -- return true, genrespseqstr(seq) .. (cmd < 128 and (ret or '') or mp.pack(ret))    
-            send_ok(cmd < 128 and (ret or '') or mp.pack(ret))
+
         else
+            print (err)
             send_err(err)
-            -- return true, generrseqstr(seq) .. err
         end
 
     else
@@ -2467,7 +2429,6 @@ function handle_command(cmd, subcmd, data, foreign, send_response)
         print(err)
         send_err(err)
     end
-    -- return true, generrseqstr(seq) .. err
 end
 
 local first_time_setup_done = false

@@ -67,6 +67,7 @@ local function populate_order_templates()
 			btn.item_category.whole = o.item_category.whole
 			btn.material_category.whole = o.material_category.whole
 			table.insert(order_template_names, dfhack.df2utf(utils.call_with_string(btn, 'getLabel')))
+			btn:delete()
 
 			local ot = {} --as:{reaction_name:string,hist_figure_id:number,job_type:'df.job_type',item_type:'df.item_type',item_subtype:number,mat_type:number,mat_index:number,item_category_whole:number,material_category_whole:number}
 			ot.reaction_name = o.reaction_name
@@ -83,21 +84,21 @@ local function populate_order_templates()
 	end)
 end
 
---luacheck: in=number
-function manager_get_ordertemplates(fromidx) 
-	if not order_templates or #order_templates == nil or fromidx == 0 then
-		populate_order_templates()
-	end
+--luacheck: in=
+function manager_get_order_templates() 
+	populate_order_templates()
 
 	local ret = {}
 	for i,v in ipairs(order_template_names) do
 		table.insert(ret, v)
 		if #ret >= 300 then
+			print('sending #'..tostring(#ret))
 			send_partial(ret)
 			ret = {}
 		end
 	end
 
+	send_partial(ret)
 	return true
 end
 

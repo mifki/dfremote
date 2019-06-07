@@ -356,13 +356,14 @@ void send_enet(const unsigned char *buf, int sz, ENetPeer *peer)
 int send_response(lua_State *L)
 {
     int seq = lua_tointeger(L, lua_upvalueindex(1));
+    ENetPeer *peer = (ENetPeer*) lua_touserdata(L, lua_upvalueindex(2));
+    
     int type = lua_tointeger(L, 1);
 
     size_t len;
     const char *s = lua_tolstring(L, 2, &len);
     if (s)
     {
-        *out2 << "RESP " << len << std::endl;
         unsigned char *b = buf;
         *(b++) = type;
 
@@ -372,9 +373,7 @@ int send_response(lua_State *L)
         memcpy(b, s, len);
         b += len;
 
-        if (client_peer)
-            send_enet(buf, b-buf, client_peer);
-        // send_enet((const unsigned char*)s, len, client_peer);
+        send_enet(buf, b-buf, peer);
     }
 
     return 0;
@@ -387,9 +386,6 @@ std::string address2ip(ENetAddress *addr)
 
     return name;    
 }
-
-typedef void(*send_func)(const unsigned char *buf, int sz, void *conn);
-
 
 static int old_status1 = 0, old_status2 = 0;
 static bool force_send_status;
@@ -421,7 +417,7 @@ bool block_is_unmined(int bx, int by, int zlevel)
     return true;
 }
 
-void send_initial_map(unsigned short seq, unsigned char startblk, send_func sendfunc, void *conn)
+void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
 
@@ -606,7 +602,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
     }
 
     enough:;
-    sendfunc(buf, (int)(b-buf), conn);
+    send_enet(buf, (int)(b-buf), conn);
 
     if (!*nextblk) {
         map_render_enabled = true;
@@ -617,7 +613,7 @@ void send_initial_map(unsigned short seq, unsigned char startblk, send_func send
 
 static unsigned char mapbuf[10000], mapbuf2[10000];
 
-bool send_map_updates(send_func sendfunc, void *conn)
+bool send_map_updates(ENetPeer *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
     bool needs_sync = force_send_status;
@@ -924,14 +920,14 @@ godeeper:;
     if (*firstb)
     {
         *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
-        sendfunc(buf, (int)(b-buf), conn);
+        send_enet(buf, (int)(b-buf), conn);
         return true;
     }
 
     return false;
 }
 
-void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc, void *conn)
+void process_client_cmd(const unsigned char *mdata, int msz, ENetPeer *conn)
 {
     if (msz < 3)
         return;
@@ -983,7 +979,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
         
         if (cmd == 17)
         {
-            send_initial_map(seq, mdata[3], sendfunc, conn);
+            send_initial_map(seq, mdata[3], conn);
             return;
         }
 
@@ -1015,7 +1011,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
             memcpy(b, world_map, w*h*4);
             b += w*h*4;
 
-            sendfunc(buf, (int)(b-buf), conn);
+            send_enet(buf, (int)(b-buf), conn);
             return;
         }
 
@@ -1042,39 +1038,19 @@ void process_client_cmd(const unsigned char *mdata, int msz, send_func sendfunc,
     Lua::PushModulePublic(*out2, L, "remote", "handle_command");
     lua_pushinteger(L, cmd);
     lua_pushinteger(L, subcmd);
-    // lua_pushinteger(L, seq);
     lua_pushlstring(L, (const char*)mdata+3, msz-3);
     lua_pushboolean(L, foreign);
 
     lua_pushinteger(L, seq);
-    lua_pushcclosure(L, send_response, 1);
+    lua_pushlightuserdata(L, conn);
+    lua_pushcclosure(L, send_response, 2);
 
     bool handled = false;
-    if (Lua::SafeCall(*out2, L, 5, 2, true))
+    if (Lua::SafeCall(*out2, L, 5, 0, true))
         handled = lua_toboolean(L, -2);
         
     if (need_suspend)
         core_resume_fast(1);
-
-    if (handled)
-    {
-        // size_t len;
-        // const char *s = lua_tolstring(L, -1, &len);
-        // if (s && seq)
-        //     sendfunc((const unsigned char*)s, len, conn);
-    }
-
-    // If the command was not handled, send an empty response anyway so that the callback is removed
-    else if (seq)
-    {
-        // unsigned char *b = buf;
-        // *(b++) = 128;
-
-        // *(unsigned short*)b = seq + 1;
-        // b += 2;
-
-        // sendfunc(buf, b-buf, conn);
-    }
     
     lua_settop(L, top);
 }
@@ -1285,13 +1261,13 @@ void enthreadmain(ENetHost *server)
                             }
                         }
                         else
-                            process_client_cmd(mdata, msz, (send_func)send_enet, event.peer);
+                            process_client_cmd(mdata, msz, event.peer);
                     }
 
                     //TODO: return the condition back! but only if on the game screen! because for some reason it's set to true right after game launch
                     else if (1||!df::global::ui->main.autosave_request)
                     {
-                        process_client_cmd(mdata, msz, (send_func)send_enet, event.peer);
+                        process_client_cmd(mdata, msz, event.peer);
                         
                         //TODO: only if moved, zlevel changed, cursor moved, etc.
                         if ((advflags & ADVFLAG_FASTRENDER) && map_render_enabled &&
@@ -1363,7 +1339,7 @@ void enthreadmain(ENetHost *server)
                 t = server->serviceTime;
                 t2 = enabler->gframe_last;
 
-                if (send_map_updates((send_func)send_enet, client_peer))
+                if (send_map_updates(client_peer))
                     enet_host_flush(server);
             }
         }
