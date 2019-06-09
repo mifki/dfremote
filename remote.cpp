@@ -1045,9 +1045,7 @@ void process_client_cmd(const unsigned char *mdata, int msz, ENetPeer *conn)
     lua_pushlightuserdata(L, conn);
     lua_pushcclosure(L, send_response, 2);
 
-    bool handled = false;
-    if (Lua::SafeCall(*out2, L, 5, 0, true))
-        handled = lua_toboolean(L, -2);
+    Lua::SafeCall(*out2, L, 5, 0, true);
         
     if (need_suspend)
         core_resume_fast(1);

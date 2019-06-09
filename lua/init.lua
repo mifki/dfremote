@@ -2378,7 +2378,8 @@ local function _check_utf8(o, path)
 end
 
 local _send_response
-function send_ok(data)
+function send_ok(data, raw)
+    data = raw and (data or '') or mp.pack(data)
     _send_response(128, data)
 end
 
@@ -2386,7 +2387,8 @@ function send_err(data)
     _send_response(130, data)
 end
 
-function send_partial(data)
+function send_partial(data, raw)
+    data = raw and (data or '') or mp.pack(data)
     _send_response(131, data)
 end
 
@@ -2414,7 +2416,7 @@ function handle_command(cmd, subcmd, data, foreign, send_response)
         if ok then
             local a,b = pcall(function() _check_utf8(ret, '') end)
             if a then
-                send_ok(cmd < 128 and (ret or '') or mp.pack(ret))
+                send_ok(ret, cmd < 128)
             else
                 send_err(b .. ' ' .. cmd .. ',' .. subcmd)
             end
