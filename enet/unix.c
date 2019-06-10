@@ -206,6 +206,8 @@ enet_socket_bind (ENetSocket socket, const ENetAddress * address)
        sin.sin_addr.s_addr = INADDR_ANY;
     }
 
+    setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
+
     return bind (socket,
                  (struct sockaddr *) & sin,
                  sizeof (struct sockaddr_in)); 
