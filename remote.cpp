@@ -417,6 +417,37 @@ bool block_is_unmined(int bx, int by, int zlevel)
     return true;
 }
 
+#define DECODE_TILE(is,bg,fg,texpos) \
+{ \
+    if (graphics && (texpos=*(gscreentexpos+tile))) \
+    { \
+        if (gscreentexpos_grayscale[tile]) \
+        { \
+            fg = gscreentexpos_cf[tile]; \
+            bg = gscreentexpos_cbr[tile]; \
+        } \
+        else if (gscreentexpos_addcolor[tile]) \
+        { \
+            bg   = s[2] & 7; \
+            unsigned char bold = (s[3] & 1) * 8; \
+            fg   = (s[1] + bold) % 16; \
+        } \
+        else \
+        { \
+            fg = 15; \
+            bg = 0; \
+        }                     \
+ \
+        is = texpos | (fg << 4) | bg; \
+    } \
+    else \
+    { \
+        texpos = 0; \
+        is = *((unsigned int*)gscreen + tile); \
+        is &= 0x01ffffff; /* Ignore depth */ \
+    } \
+}
+
 void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
@@ -538,47 +569,11 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
 
                     const int tile = x * map_h + y;
                     unsigned char *s = gscreen + tile*4;
-                    unsigned int is;// = (unsigned int*)gscreen + tile;
 
+                    unsigned int is;
                     unsigned char bg, fg;
-
-                    unsigned short texpos = 0;
-                    if (graphics && (texpos=*(gscreentexpos+tile)))
-                    {
-                        *lastinfobyteptr |= 1 << (7-lastinfobyte);
-                        *(unsigned short*)b = texpos;
-                        b += 2;
-
-                        if (gscreentexpos_grayscale[tile])
-                        {
-                            fg = gscreentexpos_cf[tile];
-                            bg = gscreentexpos_cbr[tile];
-                        }
-                        else if (gscreentexpos_addcolor[tile])
-                        {
-                            bg   = s[2] & 7;
-                            unsigned char bold = (s[3] & 1) * 8;
-                            fg   = (s[1] + bold) % 16;
-                        }
-                        else
-                        {
-                            fg = 15;
-                            bg = 0;
-                        }
-
-                        is = texpos | (fg << 4) | bg;                        
-                    }
-                    else
-                    {
-                        is = *((unsigned int*)gscreen + tile);
-                        is &= 0x01ffffff; // Ignore depth information
-
-                        *(b++) = s[0]; //ch
-
-                        bg   = s[2] & 7;
-                        unsigned char bold = (s[3] & 1) * 8;
-                        fg   = (s[1] + bold) % 16;
-                    }
+                    unsigned short texpos;
+                    DECODE_TILE(is, bg, fg, texpos);
 
                     *(b++) = fg | (bg << 4);
 
@@ -708,7 +703,6 @@ bool send_map_updates(ENetPeer *conn)
         int x0 = 0, y0 = 0, dz0 = 0;
         bool deeper = false;
         bool senddz = false, senddz2 = false;
-        df::unit *u = df::unit::find(10281);
 
 godeeper:;
         for (int y = y0; y < maxy; y++)
@@ -741,33 +735,8 @@ godeeper:;
 
                 unsigned int is;
                 unsigned char bg, fg;
-                unsigned short texpos = 0;
-                if (graphics && (texpos=*(gscreentexpos+tile)))
-                {
-                    if (gscreentexpos_grayscale[tile])
-                    {
-                        fg = gscreentexpos_cf[tile];
-                        bg = gscreentexpos_cbr[tile];
-                    }
-                    else if (gscreentexpos_addcolor[tile])
-                    {
-                        bg   = s[2] & 7;
-                        unsigned char bold = (s[3] & 1) * 8;
-                        fg   = (s[1] + bold) % 16;
-                    }
-                    else
-                    {
-                        fg = 15;
-                        bg = 0;
-                    }                    
-
-                    is = texpos | (fg << 4) | bg;
-                }
-                else
-                {
-                    is = *((unsigned int*)gscreen + tile);
-                    is &= 0x01ffffff; // Ignore depth information
-                }
+                unsigned short texpos;
+                DECODE_TILE(is, bg, fg, texpos);
 
                 if (is != rblk->data[xx%16 + (yy%16) * 16])
                 {
