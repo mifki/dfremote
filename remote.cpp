@@ -8,6 +8,7 @@
 
 #include <sys/stat.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 #include <iostream>
 #include <map>
@@ -448,6 +449,8 @@ bool block_is_unmined(int bx, int by, int zlevel)
     } \
 }
 
+static unsigned char mapbuf[10000], mapbuf2[10000];
+
 void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn)
 {
     bool graphics = init->display.flag.is_set(init_display_flags::USE_GRAPHICS);
@@ -549,40 +552,148 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
 
             *(b++) = bx;
             *(b++) = by;
+            unsigned char *firstb = b;
+            *(b++) = 0;
 
-            int lastinfobyte = 0;
-            unsigned char *lastinfobyteptr = NULL;
+            int x0 = 0, y0 = 0, dz0 = 0;
+            bool deeper = false;
+            bool senddz = false, senddz2 = false;
 
+            unsigned char *mapptr = mapbuf, *mapptr2 = mapbuf2;
+
+godeeper:;
             for (int j = 0; j < 16; j++)
             {
                 for (int i = 0; i < 16; i++)
                 {
-                    if (graphics && !(lastinfobyte--))
-                    {
-                        lastinfobyteptr = b;
-                        *(b++) = 0;
-                        lastinfobyte = 7;
-                    }
-
                     int x = bx*16 + i;
                     int y = by*16 + j;
 
                     const int tile = x * map_h + y;
                     unsigned char *s = gscreen + tile*4;
 
+                    int dz = (s[3] & 0xfe) >> 1;
+                    if (dz < dz0)
+                    {
+                        // *(mapptr++) = 0; //ch
+
+                        // // bg   = s[2] & 7;
+                        // // unsigned char bold = (s[3] & 1) * 8;
+                        // // fg   = (s[1] + bold) % 16;
+                        // *(mapptr++) = 0;//fg | (bg << 4);
+
+                        // if (senddz)
+                        // {
+                        //     senddz = false;
+                        //     *(mapptr-1) |= 128;
+                        //     *(mapptr++) = dz0;                        
+                        // }
+                        continue;
+                    }
+                    if (dz > dz0)
+                    {
+                        if (!deeper)
+                        {
+                            x0 = x;
+                            y0 = y;
+                            deeper = true;
+                        }
+
+                        continue;
+                    }
+
                     unsigned int is;
                     unsigned char bg, fg;
                     unsigned short texpos;
                     DECODE_TILE(is, bg, fg, texpos);
 
-                    *(b++) = fg | (bg << 4);
+                    *(mapptr++) = i;
+                    *(mapptr++) = j;
 
-                    int dz = (s[3] & 0xfe) >> 1;                    
-                    if (lastdz != dz) {
-                        *(b-1) |= 128;
-                        *(b++) = dz - lastdz;
-                        lastdz = dz;
-                    }                    
+
+                    if (*(gscreen_under+tile*4))
+                    {
+                        if (mapptr2 - mapbuf2 >= sizeof(mapbuf2)-10)
+                            goto enough;
+
+                        {
+                            unsigned char *s_under = gscreen_under + tile*4;
+
+                            *(mapptr++) = s_under[0]; //ch
+
+                            bg   = s_under[2] & 7;
+                            unsigned char bold = (s_under[3] & 1) * 8;
+                            fg   = (s_under[1] + bold) % 16;
+                            *(mapptr++) = fg | (bg << 4);
+
+                            if (senddz)
+                            {
+                                senddz = false;
+                                *(mapptr-1) |= 128;
+                                *(mapptr++) = dz0;                        
+                            }                            
+                        }
+
+                        *(mapptr2++) = i;//x + gwindow_x;
+                        *(mapptr2++) = j;//y + gwindow_y;
+
+                        if (texpos)
+                        {
+                            *(unsigned short*)mapptr2 = texpos;
+                            mapptr2 += 2;
+
+                            if (gscreentexpos_grayscale[tile])
+                            {
+                                fg = gscreentexpos_cf[tile];
+                                bg = gscreentexpos_cbr[tile];
+                            }
+                            else if (gscreentexpos_addcolor[tile])
+                            {
+                                bg   = s[2] & 7;
+                                unsigned char bold = (s[3] & 1) * 8;
+                                fg   = (s[1] + bold) % 16;
+                            }
+                            else
+                            {
+                                fg = 15;
+                                bg = 0;
+                            }                                                
+                        }
+                        else
+                        {
+                            *(unsigned short*)mapptr2 = s[0];
+                            mapptr2 += 2;
+
+                            bg   = s[2] & 7;
+                            unsigned char bold = (s[3] & 1) * 8;
+                            fg   = (s[1] + bold) % 16;
+                        }
+
+                        *(mapptr2++) = fg | (bg << 4);
+
+                        if (senddz2)
+                        {
+                            senddz2 = false;
+                            *(mapptr2-1) |= 128;
+                            *(mapptr2++) = dz0;                        
+                        }
+                    }
+                    else
+                    {
+                        *(mapptr++) = s[0]; //ch
+
+                        bg   = s[2] & 7;
+                        unsigned char bold = (s[3] & 1) * 8;
+                        fg   = (s[1] + bold) % 16;
+                        *(mapptr++) = fg | (bg << 4);
+
+                        if (senddz)
+                        {
+                            senddz = false;
+                            *(mapptr-1) |= 128;
+                            *(mapptr++) = dz0;                        
+                        }
+                    }
 
                     rblk->data[i + j * 16] = is;
 
@@ -593,8 +704,40 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
                     }                    
                 }
             }
+
+            if (deeper) {
+                dz0++;
+                deeper = false;
+                senddz = true;
+                senddz2 = true;
+
+                // *out2 << "deeper "<<dz0 <<std::endl;
+                goto godeeper;
+            }            
+
+            if (mapptr != mapbuf) // Always
+            {
+                *firstb |= (1 << 3);
+                int len = mapptr-mapbuf;
+                *(short*)b = len;
+                b += 2;
+                memcpy(b, mapbuf, len);
+                b += len;
+            }
+
+            if (mapptr2 != mapbuf2)
+            {
+                *firstb |= (1 << 4);
+                int len = mapptr2-mapbuf2;
+                *(short*)b = len;
+                b += 2;
+                memcpy(b, mapbuf2, len);
+                b += len;
+            }
+
         }
     }
+
 
     enough:;
     send_enet(buf, (int)(b-buf), conn);
@@ -605,8 +748,6 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
         *out2 << "initial map sent" << std::endl;
     }
 }
-
-static unsigned char mapbuf[10000], mapbuf2[10000];
 
 bool send_map_updates(ENetPeer *conn)
 {
