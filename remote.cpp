@@ -509,23 +509,18 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
     int zlevel = gwindow_z;
 
     unsigned char *b = buf;
-    *(b++) = 128;
+    int cnt = 0;    
+
+    //XXX: for example, if the game has already ended, we're on end announcement screen
+    if (!world->map.block_index)
+        goto done;
+
+    *(b++) = 131;
 
     *(unsigned short*)b = seq + 1;
     b += 2;
 
     *(b++) = zlevel;
-    *(b++) = graphics;
-
-    unsigned char *nextblk = b;
-    *(b++) = 0;
-
-    int cnt = 0;
-    int lastdz = 0;
-
-    //XXX: for example, if the game has already ended, we're on end announcement screen
-    if (!world->map.block_index)
-        goto enough;
 
     for (int by = 0; by < blk_h; by++)
     {
@@ -542,8 +537,19 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
             // Limit to number of blocks per msg
             if (++cnt >= 10)
             {
-                *nextblk = idx;
-                goto enough;
+                // *nextblk = idx;
+                // goto enough;
+
+    send_enet(buf, (int)(b-buf), conn);
+    b = buf;
+    *(b++) = 131;
+
+    *(unsigned short*)b = seq + 1;
+    b += 2;
+
+    *(b++) = zlevel;
+
+
             }            
 
             rendered_block *rblk = sent_blocks_idx[bx][by][zlevel];
@@ -562,9 +568,9 @@ void send_initial_map(unsigned short seq, unsigned char startblk, ENetPeer *conn
             unsigned char *mapptr = mapbuf, *mapptr2 = mapbuf2;
 
 godeeper:;
-            for (int j = 0; j < 16; j++)
+            for (uint8_t j = 0; j < 16; j++)
             {
-                for (int i = 0; i < 16; i++)
+                for (uint8_t i = 0; i < 16; i++)
                 {
                     int x = bx*16 + i;
                     int y = by*16 + j;
@@ -574,22 +580,8 @@ godeeper:;
 
                     int dz = (s[3] & 0xfe) >> 1;
                     if (dz < dz0)
-                    {
-                        // *(mapptr++) = 0; //ch
-
-                        // // bg   = s[2] & 7;
-                        // // unsigned char bold = (s[3] & 1) * 8;
-                        // // fg   = (s[1] + bold) % 16;
-                        // *(mapptr++) = 0;//fg | (bg << 4);
-
-                        // if (senddz)
-                        // {
-                        //     senddz = false;
-                        //     *(mapptr-1) |= 128;
-                        //     *(mapptr++) = dz0;                        
-                        // }
                         continue;
-                    }
+
                     if (dz > dz0)
                     {
                         if (!deeper)
@@ -607,14 +599,12 @@ godeeper:;
                     unsigned short texpos;
                     DECODE_TILE(is, bg, fg, texpos);
 
-                    *(mapptr++) = i;
-                    *(mapptr++) = j;
-
+                    *(mapptr++) = (j << 4) | i;
 
                     if (*(gscreen_under+tile*4))
                     {
-                        if (mapptr2 - mapbuf2 >= sizeof(mapbuf2)-10)
-                            goto enough;
+                        // if (mapptr2 - mapbuf2 >= sizeof(mapbuf2)-10)
+                        //     goto enough;
 
                         {
                             unsigned char *s_under = gscreen_under + tile*4;
@@ -634,8 +624,7 @@ godeeper:;
                             }                            
                         }
 
-                        *(mapptr2++) = i;//x + gwindow_x;
-                        *(mapptr2++) = j;//y + gwindow_y;
+                        *(mapptr2++) = (j << 4) | i;
 
                         if (texpos)
                         {
@@ -715,7 +704,7 @@ godeeper:;
                 goto godeeper;
             }            
 
-            if (mapptr != mapbuf) // Always
+            if (mapptr != mapbuf)
             {
                 *firstb |= (1 << 3);
                 int len = mapptr-mapbuf;
@@ -739,14 +728,26 @@ godeeper:;
     }
 
 
-    enough:;
+    // enough:;
     send_enet(buf, (int)(b-buf), conn);
 
-    if (!*nextblk) {
+done:;
+    b = buf;
+    *(b++) = 128;
+
+    *(unsigned short*)b = seq + 1;
+    b += 2;
+
+
+//TODO: send 1 on success, 0 on error (goto from above)
+    send_enet(buf, (int)(b-buf), conn);
+
+
+    // if (!*nextblk) {
         map_render_enabled = true;
         t2 = enabler->gframe_last;
         *out2 << "initial map sent" << std::endl;
-    }
+    // }
 }
 
 bool send_map_updates(ENetPeer *conn)
