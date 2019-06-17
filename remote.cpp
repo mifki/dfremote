@@ -1542,7 +1542,7 @@ bool remote_start()
     INTERPOSE_HOOK(dwarfmode_hook, render).apply(true);
     INTERPOSE_HOOK(dwarfmode_hook, feed).apply(true);
     INTERPOSE_HOOK(embark_hook, render).apply(true);
-    INTERPOSE_HOOK(civlist_hook, render).apply(true);
+    // INTERPOSE_HOOK(civlist_hook, render).apply(true);
     
     enable_building_hooks();
     enable_item_hooks();
