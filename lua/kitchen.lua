@@ -40,7 +40,7 @@ function kitchen_get_data()
             end
         end
 
-        local precision = df.global.ui.bookkeeper_precision    
+        local precision = df.global.ui.nobles.bookkeeper_precision    
         table.insert(ret, precision)
 
         return ret

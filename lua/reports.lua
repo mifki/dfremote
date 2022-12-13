@@ -149,6 +149,53 @@ function reports_get(unitid, rtype)
 end
 
 --luacheck: in=
+function mission_reports_get_list()
+    local ret = {}
+
+    for i,v in ripairs(df.global.world.status.mission_reports) do
+        local unread = v.unk_7 == 0
+        table.insert(ret, { v.title, unread, v.year, v.year_tick })
+    end
+
+    --todo: would it be faster to insert items to right positions instead of sorting?
+--    table.sort(ret, function(a,b) return (a[4] > b[4]) or (a[4] == b[4] and a[5] > b[5]) end)
+
+    return { ret, df.global.cur_year, df.global.cur_year_tick }
+end
+
+--luacheck: in=number
+function mission_reports_get_report(idx)
+    local lines = {}
+
+    --local report = df.global.world.status.mission_reports[idx]
+
+    local ws = df.viewscreen_reportlistst:new()
+
+    ws.units:insert(0, nil)
+    ws.types:insert(0, -1)
+    ws.last_id:insert(0, -1)
+    ws.mission_reports:insert(0, idx)
+    ws.spoils_reports:insert(0, -1)
+
+    ws:logic()
+    ws:render()
+    gui.simulateInput(ws, K'SELECT')
+    ws:logic()
+    ws:render()
+    gui.simulateInput(ws, K'LEAVESCREEN')
+    ws:logic()
+    ws:render()
+
+    for i,v in ipairs(ws.mission_report_text) do
+        table.insert(lines, { ws.mission_report_text[i], ws.mission_report_colors[i] })
+    end
+
+    df.delete(ws)    
+
+    return { lines }
+end
+
+--luacheck: in=
 function popup_dismiss_all()
     df.global.world.status.popups:resize(0)
 end
@@ -170,3 +217,5 @@ function popup_dismiss()
 
     return ret
 end
+
+--print(pcall(function() return json:encode(mission_reports_get_report(2)) end))

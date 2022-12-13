@@ -4,7 +4,7 @@
 * assign
 * -> view unit / demands
 * bookkeeper settings
-	* df.global.ui.bookkeeper_settings
+	* df.global.ui.nobles.bookkeeper_settings
 
 ## Status `z`
 * df.global.ui.tasks

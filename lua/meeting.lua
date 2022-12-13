@@ -843,3 +843,5 @@ function landholders_set(hfid, close)
 		gui.simulateInput(ws, K'LEAVESCREEN')
 	end	
 end
+
+-- print(pcall(function() return json:encode(meeting_get()) end))

@@ -308,7 +308,7 @@ function nobles_get_positions()
             becoming_capital = { false, 0,0,0,0 }
         end
 
-        return { ret, df.global.ui.bookkeeper_settings, alldemands, allmandates, becoming_capital }
+        return { ret, df.global.ui.nobles.bookkeeper_settings, alldemands, allmandates, becoming_capital }
     end)
 end
 
@@ -386,7 +386,7 @@ end
 
 --luacheck: in=number
 function bookkeeper_set_precision(precision)
-    df.global.ui.bookkeeper_settings = precision
+    df.global.ui.nobles.bookkeeper_settings = precision
 end
 
 --luacheck: in=string,number

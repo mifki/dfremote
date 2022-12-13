@@ -282,11 +282,12 @@ local reason_titles = {
 ]]
 
 function is_onbreak(unit)
-    for i,v in pairs(unit.status.misc_traits) do
-        if v.id == df.misc_trait_type.OnBreak then
-            return true
-        end
-    end
+    --todo: fix this, OnBreak was removed, what now?
+    -- for i,v in pairs(unit.status.misc_traits) do
+    --     if v.id == df.misc_trait_type.OnBreak then
+    --         return true
+    --     end
+    -- end
 
     return false
 end
@@ -367,7 +368,7 @@ end
 
 local needs_for_event_types = {
     [df.activity_event_type.Socialize] = { df.need_type.Socialize, df.need_type.Excitement, df.need_type.BeCreative },
-    [df.activity_event_type.Worship] = { df.need_type.PrayOrMedidate },
+    [df.activity_event_type.Worship] = { df.need_type.PrayOrMeditate },
 }
 
 local function has_important_need(unit, need_types)
@@ -1508,7 +1509,7 @@ local unit = df.unit.find(unitid)
 
     local unitws = df.viewscreen_unitst:new()
     unitws.unit = unit
-    unitws.anon_1 = 1
+    unitws.has_kills = 1
     gui.simulateInput(unitws, K'UNITVIEW_KILLS')
     df.delete(unitws)
 

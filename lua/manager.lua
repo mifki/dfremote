@@ -128,7 +128,7 @@ function manager_new_order(idx, amount)
 	o.amount_total = amount
 
 	df.global.world.manager_orders:insert(#df.global.world.manager_orders, o)
-	df.global.ui.manager_cooldown = 0
+	df.global.ui.nobles.manager_cooldown = 0
 end
 
 --luacheck: in=number

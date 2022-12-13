@@ -107,7 +107,7 @@ function status_get_overview()
     local population = df.global.ui.tasks.population    
     local c1,c2,c3 = get_unit_counts()
 
-    local precision = df.global.ui.bookkeeper_precision
+    local precision = df.global.ui.nobles.bookkeeper_precision
 
     return { site_title, datestr, created_wealth, wealth.imported, wealth.exported, ret_food, population, c1,c2,c3, have_appraisal, precision }
 end

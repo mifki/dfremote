@@ -252,8 +252,11 @@ struct_identity type_category::_identity(sizeof(type_category), &df::allocator_f
 
 
 #define CUR_STRUCT itemcache_wrapper
+static const struct_field_info_extra itemcache_wrapper_fields_cats_info = {
+    TID(df::item_type), NULL, NULL, NULL
+};
 static const struct_field_info itemcache_wrapper_fields[] = {
-    { FLD(STATIC_ARRAY, cats), df::identity_traits<type_category >::get(), last_item_type+1, TID(df::item_type) },
+    { FLD(STATIC_ARRAY, cats), df::identity_traits<type_category >::get(), last_item_type+1, &itemcache_wrapper_fields_cats_info },
     { FLD_END }
 };
 struct_identity itemcache_wrapper::_identity(sizeof(itemcache_wrapper), &df::allocator_fn<itemcache_wrapper>, NULL, "itemcache_wrapper",NULL,itemcache_wrapper_fields);

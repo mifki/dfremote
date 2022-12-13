@@ -271,7 +271,7 @@ function get_look_list(detailed)
         local data = {}
 
         if t == df.ui_look_list.T_items.T_type.Item then
-            local item = v.item
+            local item = v.data.Item
 
             local ref = dfhack.items.getGeneralRef(item, df.general_ref_type.IS_ARTIFACT) --as:df.general_ref_artifact
             if ref then
@@ -286,37 +286,39 @@ function get_look_list(detailed)
             end
 
         elseif t == df.ui_look_list.T_items.T_type.Building then
-            title = bldname(v.building)
+            title = bldname(v.data.Building)
             color = 1+8
             if detailed then
-                local bld = v.building
+                local bld = v.data.Building
                 data = { bld.id }
             end
 
-        elseif t == df.ui_look_list.T_items.T_type.Unit and v.unit then
-            title = unit_fulltitle(v.unit)
+        elseif t == df.ui_look_list.T_items.T_type.Unit and v.data.Unit then
+            title = unit_fulltitle(v.data.Unit)
             --xxx: game shows all units in white in loo[k] mode
-            color = 15 --dfhack.units.getProfessionColor(v.unit)
+            color = 15 --dfhack.units.getProfessionColor(v.data.Unit)
             if detailed then
-                local unit = v.unit
+                local unit = v.data.Unit
                 local job, jobcolor = unit_jobtitle(unit, false)
                 data = { unit.id, job, jobcolor }
             end
 
         elseif t == df.ui_look_list.T_items.T_type.Water then
-            if v.spatter_size >= 24 then
-                title = 'stagnant salt water ['.. (v.spatter_size%8) ..'/7]'
-            elseif v.spatter_size >= 16 then
-                title = 'stagnant water ['.. (v.spatter_size%8) ..'/7]'
-            elseif v.spatter_size >= 8 then
-                title = 'salt water ['.. (v.spatter_size%8) ..'/7]'
+            local depth = v.data.Water.depth
+            if depth >= 24 then
+                title = 'stagnant salt water ['.. (depth%8) ..'/7]'
+            elseif depth >= 16 then
+                title = 'stagnant water ['.. (depth%8) ..'/7]'
+            elseif depth >= 8 then
+                title = 'salt water ['.. (depth%8) ..'/7]'
             else
-                title = 'water ['.. v.spatter_size ..'/7]'
+                title = 'water ['.. depth ..'/7]'
             end
             color = 1
 
         elseif t == df.ui_look_list.T_items.T_type.Magma then
-            title = 'magma ['.. v.spatter_size ..'/7]'
+            local depth = v.data.Magma.depth
+            title = 'magma ['.. depth ..'/7]'
             color = 4
 
         elseif t == df.ui_look_list.T_items.T_type.Floor then
@@ -564,7 +566,7 @@ function get_look_list(detailed)
             color = 1
 
         elseif t == df.ui_look_list.T_items.T_type.Flow then
-            local flow = v.flow
+            local flow = v.data.Flow
             local ftype = flow.type
 
             if ftype == df.flow_type.Steam then
@@ -592,7 +594,7 @@ function get_look_list(detailed)
             title = 'Track/Spoor'
 
         elseif t == df.ui_look_list.T_items.T_type.Vermin then
-            local vermin = v.vermin
+            local vermin = v.data.Vermin
             local race = df.global.world.raws.creatures.all[vermin.race]
             title = (vermin.flags.is_colony and 'a colony or ' or '') .. race.name[vermin.amount > 1 and 1 or 0]
             color = 2+8
@@ -612,7 +614,7 @@ function get_look_list(detailed)
                 elseif v.spatter_item_type == -1 then
                     --<a spattering of> <Urist McMiner> <dwarf> <blood>
 
-                    local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.spatter_size+1] or ''
+                    local spatterprefix = spatter_prefixes[v.spatter_mat_state+1][v.data.Spatter.amount+1] or ''
                     if #spatterprefix > 0 then
                         spatterprefix = spatterprefix .. ' '
                     end
@@ -687,7 +689,8 @@ function count_idlers()
                    not df.profession.attrs[prf].military and #unit.military.individual_drills == 0 then
                     local on_break = false
                     for j,t in ipairs(unit.status.misc_traits) do
-                        if t.id == df.misc_trait_type.OnBreak or t.id == df.misc_trait_type.Migrant then
+                        --todo: fix this, OnBreak was removed, what now?
+                        if --[[t.id == df.misc_trait_type.OnBreak or]] t.id == df.misc_trait_type.Migrant then
                             on_break = true
                             break
                         end
@@ -2209,6 +2212,8 @@ local handlers = {
         [4] = announcements_get_new,
         [5] = popup_dismiss,
         [5] = popup_dismiss_all,
+        
+        [10] = mission_reports_get_list,
     },
 
     [192] = {

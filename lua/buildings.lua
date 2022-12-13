@@ -367,7 +367,7 @@ function query__specific_info(bld)
         local fert = (#bld.jobs > 0 and bld.jobs[0].job_type == df.job_type.FertilizeField)
         local fertinfo = { fert, bld.current_fertilization, bld.max_fertilization, bld.material_amount }
 
-        return { seasons, crops, fertinfo, bld.seasonal_fertilize }
+        return { seasons, crops, fertinfo, bld.farm_flags.seasonal_fertilize }
     end
 
     if btype == df.building_type.Stockpile then
@@ -1359,7 +1359,7 @@ function building_set_flag(bldid, flag, value)
             end
 
         elseif flag == 2 then
-            bld.seasonal_fertilize = istrue(value) and 1 or 0
+            bld.farm_flags.seasonal_fertilize = istrue(value) and 1 or 0
         end
 
     elseif btype == df.building_type.Door or btype == df.building_type.Hatch then

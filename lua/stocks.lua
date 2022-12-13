@@ -206,7 +206,7 @@ function stocks_get_categories()
         table.insert(list, { name, v, cat.count, cat.busy })
     end
 
-    local precision = df.global.ui.bookkeeper_precision
+    local precision = df.global.ui.nobles.bookkeeper_precision
 
     return { list, precision }
 end

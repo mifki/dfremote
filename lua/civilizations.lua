@@ -2,16 +2,19 @@
 function civilizations_get_list()
     local ret = {}
 
-    for i,v in ipairs(df.global.world.entities.all) do
-        if v.flags.named_civ then
+    execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_CIVS')
+
+        for i,v in ipairs(ws.entities) do
             local name = translatename(v.name, false)
             local name_eng = translatename(v.name, true)
 
             local race = df.global.world.raws.creatures.all[v.race]
+            local site_gov = v.type == df.historical_entity_type.SiteGovernment
 
-            table.insert(ret, { name, v.id, name_eng, race.name[2] })
+            table.insert(ret, { name, v.id, name_eng, race.name[2], site_gov })
         end
-    end
+    end)
 
     return ret
 end

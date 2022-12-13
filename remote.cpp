@@ -308,7 +308,7 @@ void send_enet(const unsigned char *buf, int sz, ENetPeer *peer)
 
     if (sz >= 500)
     {
-*out2 << "compressing " << sz << std::endl;
+        // *out2 << "compressing " << sz << std::endl;
         strm.zalloc = Z_NULL;
         strm.zfree = Z_NULL;
         strm.opaque = Z_NULL;
@@ -1030,7 +1030,7 @@ godeeper:;
 
     if (*firstb)
     {
-        *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
+        // *out2 << "upd " << (int)(b-buf) << " " << (long)(mapptr-mapbuf) << " " << (long)(mapptr2-mapbuf2) << std::endl;
         send_enet(buf, (int)(b-buf), conn);
         return true;
     }

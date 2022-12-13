@@ -231,6 +231,22 @@ function execute_with_locations_screen(fn)
     end)
 end
 
+function execute_with_world_screen(fn)
+    return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
+        gui.simulateInput(ws, K'D_CIVLIST')
+        local locsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_civlistst
+
+        local ok,ret = pcall(fn, locsws)
+
+        locsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+        if not ok then
+            error (ret)
+        end
+        return ret
+    end)
+end
+
 function execute_with_petitions_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_PETITIONS')

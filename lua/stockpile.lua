@@ -407,7 +407,7 @@ local function animal_to_creature_idx(pos)
     local ret = {}
     for i,v in ipairs(df.global.world.raws.creatures.all) do
         --todo: is this correct?
-        if not v.flags.CASTE_FEATURE_BEAST and not v.flags.CASTE_NIGHT_CREATURE_ANY and not v.flags.CASTE_DEMON and not v.flags.CASTE_TITAN and not v.flags.EQUIPMENT_WAGON then
+        if not v.flags.HAS_ANY_FEATURE_BEAST and not v.flags.HAS_ANY_NIGHT_CREATURE and not v.flags.HAS_ANY_DEMON and not v.flags.HAS_ANY_TITAN and not v.flags.EQUIPMENT_WAGON then
             table.insert(ret, i)
             if pos and #ret == pos then
                 return i
@@ -423,7 +423,7 @@ local function animal_titles()
     local ret = {}
     for i,v in ipairs(df.global.world.raws.creatures.all) do
         --todo: is this correct?
-        if not v.flags.CASTE_FEATURE_BEAST and not v.flags.CASTE_NIGHT_CREATURE_ANY and not v.flags.CASTE_DEMON and not v.flags.CASTE_TITAN and not v.flags.EQUIPMENT_WAGON then
+        if not v.flags.HAS_ANY_FEATURE_BEAST and not v.flags.HAS_ANY_NIGHT_CREATURE and not v.flags.HAS_ANY_DEMON and not v.flags.HAS_ANY_TITAN and not v.flags.EQUIPMENT_WAGON then
             local t = capitalize(v.name[0])
             table.insert(ret, t)
         end

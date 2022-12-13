@@ -157,7 +157,7 @@ local function site_type_name(site)
     elseif t == df.world_site_type.LairShrine then
         return 'lair'
     elseif t == df.world_site_type.Fortress then
-        return (site.subtype_info and site.subtype_info.is_tower) and 'tower' or 'fortress'
+        return (site.subtype_info and site.subtype_info.fortress_type == df.fortress_type.TOWER) and 'tower' or 'fortress' --todo: add the rest of enum values
     elseif t == df.world_site_type.Camp then
         return 'camp'
     elseif t == df.world_site_type.Monument then
@@ -203,7 +203,7 @@ function worldgen_get_world_info()
                 local owner_civ = find_parent_civ(owner) --df.historical_entity.find(site.civ_id)
         
                 --todo: what to check here?
-                if owner_civ and owner_civ.next_member_idx > 0 --[[and owner_civ.flags.named_civ]] then
+                if owner_civ and owner_civ.next_member_idx > 0 --[[and owner_civ.flags.player_civ]] then
                     local key = owner_civ and owner_civ.id or -1
                     local tciv = pop.civs[key]
                     if not tciv then
@@ -247,7 +247,7 @@ function worldgen_get_world_info()
     for i,v in ipairs(df.global.world.entities.all) do
         local pop = pops[v.race]
 
-        if pop and --[[not find_parent_civ(v) and]] v.flags.named_civ and not pop.civs[v.id] and v.next_member_idx > 0 then
+        if pop and --[[not find_parent_civ(v) and]] v.flags.player_civ and not pop.civs[v.id] and v.next_member_idx > 0 then
             local tciv = { id=v.id, name=dfhack.df2utf(dfhack.TranslateName(v.name, true)), sites={} }
             pop.civs[v.id] = tciv
         end

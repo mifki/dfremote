@@ -17,6 +17,52 @@ function petition_unitname(agreement)
 	return '#unknown unit#'
 end
 
+--[[
+        <enum-item name="eradicate_beasts">
+            <item-attr name="caption" value="in order to eradicate beasts"/>
+        </enum-item>
+        <enum-item name="entertain_people">
+            <item-attr name="caption" value="in order to entertain people"/>
+        </enum-item>
+        <enum-item name="make_a_living_as_a_warrior">
+            <item-attr name="caption" value="in order to make a living as a warrior"/>
+        </enum-item>
+        <enum-item name="study">
+            <item-attr name="caption" value="in order to study"/>
+        </enum-item>
+        <enum-item name="flight">
+            <item-attr name="caption" value="in order to flee"/>
+        </enum-item>
+        <enum-item name="scholarship">
+            <item-attr name="caption" value="in order to pursue scholarship"/>
+        </enum-item>
+        <enum-item name="be_with_master">
+            <item-attr name="caption" value="in order to be with the master"/>
+        </enum-item>
+        <enum-item name="become_citizen">
+            <item-attr name="caption" value="in order to become a citizen"/>
+        </enum-item>
+        <enum-item name="prefers_working_alone">
+            <item-attr name="caption" value="in order to continue working alone"/>
+        </enum-item>
+
+
+]]
+
+local petition_reason_short = {
+	[df.history_event_reason.eradicate_beasts] = 'Monster Hunting',
+	[df.history_event_reason.entertain_people] = 'Entertaining',
+	[df.history_event_reason.make_a_living_as_a_warrior] = 'Soldiering',
+	[df.history_event_reason.study] = 'Study'
+}
+
+local petition_reasons_long = {
+	[df.history_event_reason.eradicate_beasts] = 'eradicating monsters',
+	[df.history_event_reason.entertain_people] = 'entertaining citizens and visitors',
+	[df.history_event_reason.make_a_living_as_a_warrior] = 'soldiering',
+	[df.history_event_reason.study] = 'study'
+}
+
 --luacheck: in=
 function petitions_get_list()
 	local ret = {}
@@ -24,21 +70,23 @@ function petitions_get_list()
 	for i,v in ipairs(df.global.ui.petitions) do
 		local agreement = df.agreement.find(v)
 		-- type = 2 - residency, type = 3 - citizenship
-		if agreement and #agreement.parties == 2 and #agreement.details == 1
-		   and (agreement.details[0].type == 2 or agreement.details[0].type == 3) then
+		if agreement and #agreement.parties == 2 and #agreement.details == 1 then
 			local unitname = petition_unitname(agreement)
+			local atype = agreement.details[0].type
 
-			--todo: enum item should be used instead of 41 once it's available in dfhack
-			local reason = (agreement.details[0].type == 3) and 4 or (agreement.details[0].data.data1.reason - 41)
+			if atype == df.agreement_details_type.Residency then
+				local reason = agreement.details[0].data.Residency.reason
 
-			table.insert(ret, { unitname, v, reason })
+				table.insert(ret, { unitname, v, petition_reason_short[reason] })
+
+			elseif atype == df.agreement_details_type.Citizenship then
+				table.insert(ret, { unitname, v, 'Citizenship' })
+			end
 		end
 	end
 
 	return ret
 end
-
-local petition_reasons_long = { 'monster hunting', 'entertaining citizens and visitors', 'soldiering', 'study' }
 
 --luacheck: in=number
 function petition_get_info(id)
@@ -50,29 +98,26 @@ function petition_get_info(id)
 	local atype = agreement.details[0].type
 	local txt = '#unknown petition type#'
 	local unitname = petition_unitname(agreement)
-	local reason = -1
 
-	if atype == 2 then -- residency
-		local site = df.world_site.find(df.global.ui.site_id)
+	if atype == df.agreement_details_type.Residency then
+		local site = df.world_site.find(agreement.details[0].data.Residency.site)
 
-		reason = agreement.details[0].data.data1.reason - 41
+		local reason = agreement.details[0].data.Residency.reason
 
 		txt = '[C:2:0:1]' .. unitname .. ' [C:7:0:1]wishes to reside in [C:6:0:1]' .. translatename(site.name, true)
-		txt = txt .. ' [C:7:0:1]for the purpose of [C:2:0:1]' .. petition_reasons_long[reason+1] .. '.'
+		txt = txt .. ' [C:7:0:1]for the purpose of [C:2:0:1]' .. petition_reasons_long[reason] .. '.'
 
-	elseif atype == 3 then -- citizenship
+	elseif atype == df.agreement_details_type.Citizenship then
 		local entity_id = agreement.parties[1].entity_ids[0]
 		local entity = df.historical_entity.find(entity_id)
 		
-		local site = df.world_site.find(df.global.ui.site_id)
-
-		reason = 4
+		local site = df.world_site.find(agreement.agreement.details[0].data.Residency.site)
 
 		txt = '[C:2:0:1]' .. unitname .. ' [C:7:0:1]wishes to join [C:6:0:1]' .. translatename(entity.name, true)
 		txt = txt .. ' [C:7:0:1]as a citizen of [C:6:0:1]' .. translatename(site.name, true) .. '.'
 	end
 
-	return { unitname, agreement.id, txt, reason }
+	return { unitname, agreement.id, txt }
 end
 
 --luacheck: in=number,bool
