@@ -31,7 +31,11 @@ function unit_iscitizen(unit)
         return false
     end
 
-    return dfhack.units.isOwnGroup(unit)
+    if unit.flags1.tame then
+        return false
+    end
+
+    return dfhack.units.isOwnCiv(unit)
 end
 
 function unit_get_effects(unit)
