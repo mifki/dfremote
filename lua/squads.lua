@@ -37,14 +37,8 @@ end
 function squad_order_title(squad)
     local ordertitle = ''
     
-    --todo: handle other order types
     if #squad.orders > 0 then
-        local ordertype = squad.orders[0]:getType()
-        if ordertype == df.squad_order_type.MOVE then
-            ordertitle = 'Station'
-        elseif ordertype == df.squad_order_type.KILL_LIST then
-            ordertitle = dfhack.df2utf(squad.orders[0].title):utf8capitalize() --hint:df.squad_order_kill_listst
-        end
+        ordertitle = utils.call_with_string(squad.orders[0], 'getDescription')
     end
 
     return ordertitle
