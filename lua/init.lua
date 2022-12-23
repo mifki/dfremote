@@ -1218,7 +1218,7 @@ function get_status()
     end
 
     local hasnewreportalert = false
-    local report_alert = bit32.band(df.global.world.status.flags.whole, 7) --combat/hunting/sparring
+    local report_alert = bit32.band(df.global.world.status.flags.whole, 127) --combat/hunting/sparring/mission/spoils/tribute/interrogation
     if report_alert ~= last_report_alert then
         last_report_alert = report_alert
         hasnewreportalert = true
@@ -2207,13 +2207,14 @@ local handlers = {
 
     [176] = {
         [1] = announcements_get_log,
-        [2] = reports_get_groups,
-        [3] = reports_get,
+        [2] = combat_reports_get_groups,
+        [3] = combat_reports_get,
         [4] = announcements_get_new,
         [5] = popup_dismiss,
         [5] = popup_dismiss_all,
         
-        [10] = mission_reports_get_list,
+        [10] = other_reports_get_list,
+        [11] = other_reports_get_text,
     },
 
     [192] = {

@@ -79,7 +79,7 @@ function announcements_get_log()
 end
 
 --luacheck: in=
-function reports_get_groups()
+function combat_reports_get_groups()
 	local ret = {}
 
     for i,unit in ipairs(df.global.world.units.active) do
@@ -102,13 +102,16 @@ function reports_get_groups()
     --todo: would it be faster to insert items to right positions instead of sorting?
     table.sort(ret, function(a,b) return (a[4] > b[4]) or (a[4] == b[4] and a[5] > b[5]) end)
 
-    df.global.world.status.flags.whole = bit32.band(df.global.world.status.flags.whole, bit32.bnot(7))
+    -- reset new report flags
+    df.global.world.status.flags[0] = false
+    df.global.world.status.flags[1] = false
+    df.global.world.status.flags[2] = false
 
     return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
 --luacheck: in=number,number
-function reports_get(unitid, rtype)
+function combat_reports_get(unitid, rtype)
     local unit = df.unit.find(unitid)
     if not unit then
         error('no unit '..tostring(unitid))
@@ -149,50 +152,130 @@ function reports_get(unitid, rtype)
 end
 
 --luacheck: in=
-function mission_reports_get_list()
+function other_reports_get_list()
     local ret = {}
 
     for i,v in ripairs(df.global.world.status.mission_reports) do
-        local unread = v.unk_7 == 0
-        table.insert(ret, { v.title, unread, v.year, v.year_tick })
+        local unread = not hasbit(v.unk_7, 0)
+        table.insert(ret, { dfhack.df2utf(v.title), {0, i}, unread, v.year, v.year_tick })
+    end
+
+    for i,v in ripairs(df.global.world.status.spoils_reports) do --also includes tribute reports
+        local unread = not hasbit(v.unk_1, 0)
+        table.insert(ret, { dfhack.df2utf(v.title), {1, i}, unread, v.year, v.year_tick })
+    end
+
+    for i,v in ripairs(df.global.world.status.interrogation_reports) do
+        local unread = not hasbit(v.unk_3, 0)
+        table.insert(ret, { dfhack.df2utf(v.title), {2, i}, unread, v.year, v.tick })
     end
 
     --todo: would it be faster to insert items to right positions instead of sorting?
---    table.sort(ret, function(a,b) return (a[4] > b[4]) or (a[4] == b[4] and a[5] > b[5]) end)
+    table.sort(ret, function(a,b) return (a[4] > b[4]) or (a[4] == b[4] and a[5] > b[5]) end)
+
+    -- reset new report flags
+    df.global.world.status.flags[3] = false
+    df.global.world.status.flags[4] = false
+    df.global.world.status.flags[5] = false
+    df.global.world.status.flags[6] = false
 
     return { ret, df.global.cur_year, df.global.cur_year_tick }
 end
 
---luacheck: in=number
-function mission_reports_get_report(idx)
-    local lines = {}
+--luacheck: in={number,number}
+function other_reports_get_text(typeidx)
+    local type = typeidx[1]
+    local idx = typeidx[2]
 
-    --local report = df.global.world.status.mission_reports[idx]
+    if type == 0 then -- mission
+        local ws = df.viewscreen_reportlistst:new()
 
-    local ws = df.viewscreen_reportlistst:new()
+        ws.units:insert(0, nil)
+        ws.types:insert(0, -1)
+        ws.last_id:insert(0, -1)
+        ws.mission_reports:insert(0, idx)
+        ws.spoils_reports:insert(0, -1)
 
-    ws.units:insert(0, nil)
-    ws.types:insert(0, -1)
-    ws.last_id:insert(0, -1)
-    ws.mission_reports:insert(0, idx)
-    ws.spoils_reports:insert(0, -1)
+        -- This will also mark the report as read
+        gui.simulateInput(ws, K'SELECT')
+        gui.simulateInput(ws, K'LEAVESCREEN')
 
-    ws:logic()
-    ws:render()
-    gui.simulateInput(ws, K'SELECT')
-    ws:logic()
-    ws:render()
-    gui.simulateInput(ws, K'LEAVESCREEN')
-    ws:logic()
-    ws:render()
+        local text = ''
 
-    for i,v in ipairs(ws.mission_report_text) do
-        table.insert(lines, { ws.mission_report_text[i], ws.mission_report_colors[i] })
+        for i,v in ipairs(ws.mission_report_text) do
+            local line = dfhack.df2utf(ws.mission_report_text[i].value)
+            local color = ws.mission_report_colors[i]
+
+            line = line:gsub('  ', ' ')
+
+            -- Incomplete lines end with a space, a period means end of paragraph
+            if #text == 0 or text:sub(#text) == '.' then
+                -- ideally the colour value needs to be split into colour and brightness, but the app will accept whatever
+                text = text .. '[B][C:' .. tostring(color) .. ':0:0]'
+            else
+                
+            end
+
+            text = text .. line
+        end
+
+        df.delete(ws)
+
+        if #text == 0 then
+            text = 'Nothing to see here.'
+        end
+
+        return { text }
     end
 
-    df.delete(ws)    
+    if type == 1 then -- spoils, tribute
+        local report = df.global.world.status.spoils_reports[idx]
+        report.unk_1 = bit32.bor(report.unk_1, 1) -- mark as read
 
-    return { lines }
+        local text = ''
+
+        if #report.item_counts > 0 then
+            text = text .. '[B][C:14:0:0]'
+        end
+        for i,count in ipairs(report.item_counts) do
+            local title = generic_item_name(report.item_types[i], report.item_subtypes[i], -1, report.mat_types[i], report.mat_indices[i], count == 1)
+            local line = tostring(count) .. ' ' .. title:utf8lower()
+
+            text = text .. '[P]' .. dfhack.df2utf(line)
+        end
+
+        if #report.item_counts > 0 then
+            text = text .. '[B][C:10:0:0]'
+        end
+        for i,count in ipairs(report.creature_counts) do
+            local raw = df.creature_raw.find(report.creature_races[i])
+            local line = tostring(count) .. ' ' .. (count > 1 and raw.name[1] or raw.name[0])
+
+            text = text .. '[P]' .. dfhack.df2utf(line)
+        end
+
+        if #text == 0 then
+            text = 'Nothing to see here.'
+        end        
+
+        return { text }
+    end
+
+    if type == 2 then -- interrogation
+        local text = ''
+
+        local report = df.global.world.status.interrogation_reports[idx]
+        report.unk_3 = bit32.bor(report.unk_3, 1) -- mark as read
+
+        local officer_name = dfhack.df2utf(report.officer_name)
+        text = text .. '[B][C:1:0:1]Officer: ' .. officer_name
+
+        for i,line in ipairs(report.details) do
+            text = text .. '[B][C:15:0:0]' .. dfhack.df2utf(line.value:gsub('  ', ' '))
+        end
+
+        return { text }
+    end
 end
 
 --luacheck: in=
@@ -218,4 +301,5 @@ function popup_dismiss()
     return ret
 end
 
---print(pcall(function() return json:encode(mission_reports_get_report(2)) end))
+--print(pcall(function() return json:encode(other_reports_get_report({0,2})) end))
+--print(pcall(function() return json:encode(other_reports_get_report({1,0})) end))
