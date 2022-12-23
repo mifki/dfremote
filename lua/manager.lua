@@ -44,7 +44,19 @@ function manager_get_orders()
 		table.insert(orders, { title, o.id, o.amount_left, o.amount_total, o.status.whole, o.max_workshops, #o.item_conditions+#o.order_conditions })
 	end
 
-	return { orders, have_manager }
+	local citizen_count = 0
+	local need_validate = false
+	for i,v in ipairs(df.global.world.units.active) do
+		if unit_iscitizen(v) then
+			citizen_count = citizen_count + 1
+			if citizen_count >= 20 then
+				need_validate = true
+				break
+			end
+		end
+	end
+
+	return { orders, have_manager, need_validate }
 end
 
 local order_templates = nil
