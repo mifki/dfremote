@@ -2026,7 +2026,7 @@ local handlers = {
     [141] = {
         [1] = petitions_get_list,
         [2] = petition_respond,
-        [3] = petition_get_info,
+        [3] = petition_get_text,
     },
 
     [142] = {
