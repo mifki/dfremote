@@ -341,7 +341,7 @@ function generic_item_name(type, subtype, mat_class, mat_type, mat_index, single
     if mat_class ~= -1 then
         local n = mat_category_names[mat_class]
         if n then
-            title = capitalize(n) .. ' ' .. title:lower()
+            title = capitalize(n) .. ' ' .. title:utf8lower()
         end
     end
 
