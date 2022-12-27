@@ -1998,6 +1998,7 @@ local handlers = {
         [5] = location_retire,
         [6] = locations_add,
         [7] = locations_add_get_deity_choices,
+        [8] = locations_add_get_profession_choices,
         
         [10] = location_occupation_get_candidates,
         [11] = location_occupation_assign,

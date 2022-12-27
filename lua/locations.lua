@@ -11,6 +11,14 @@ function location_find_by_id(id)
     return nil
 end
 
+function location_restriction_mode(loc)
+    local allow_outsiders = loc.flags.AllowVisitors
+    local allow_residents = loc.flags.AllowResidents
+    local only_members = loc.flags.OnlyMembers
+
+    return only_members and 3 or (allow_outsiders and 0 or (allow_residents and 1 or 2))
+end
+
 --luacheck: in=
 function locations_get_list()
     return execute_with_locations_screen(function(ws)
@@ -21,10 +29,7 @@ function locations_get_list()
         for j,loc in ipairs(ws.locations) do
             if loc then
                 local ltype = loc:getType()
-
-                local allow_residents = loc.flags[5]
-                local allow_outsiders = loc.flags[4]
-                local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
+                local mode = location_restriction_mode(loc)
 
                 local item = { locname(loc), loc.id, ltype, mode }
 
@@ -42,8 +47,18 @@ function locations_get_list()
                         deity_name = entity and translatename(entity.name, true) or mp.NIL
                     end
 
+                    -- make these a subarray
                     table.insert(item, deity_type)
                     table.insert(item, deity_name)
+
+                elseif ltype == df.abstract_building_type.GUILDHALL then
+                    local loc = loc --as:df.abstract_building_guildhall
+                    local prof = loc.contents.profession
+                    local guild = profession_find_guild(prof)
+
+                    -- make these a subarray
+                    table.insert(item, df.profession.attrs[prof].caption)
+                    table.insert(item, guild and translatename(guild.name,true) or mp.NIL)
                 end
 
                 table.insert(list, item)
@@ -105,7 +120,7 @@ function location_get_info(id)
         for i,occ in ipairs(df.global.world.occupations.all) do
             if occ.group_id == group_id and occ.unit_id ~= -1 then
                 local unit = df.unit.find(occ.unit_id)
-                local unitname = unit and unitname(unit) or '#unknown unit#'
+                local unitname = unitname(unit)
 
                 local pos = #occupations + 1
                 for j,v in ipairs(occupations) do
@@ -131,8 +146,9 @@ function location_get_info(id)
             if loc and loc.id == id then
                 local ltype = loc:getType()
 
-                local info
-                local params
+                local info = {}
+                local params = {}
+                local value_info = mp.NIL
                 if ltype == df.abstract_building_type.LIBRARY then
                     local loc = loc --as:df.abstract_building_inn_tavernst
                     local count_written = ws.unk_1[j]
@@ -201,6 +217,25 @@ function location_get_info(id)
                     }
 
                     params = { loc.contents.desired_instruments }
+
+                    local tier = loc.contents.location_tier
+                    local tier_name = tier >= 2 and 'Temple complex' or (tier == 1 and 'Temple' or 'Shrine')
+                    local next = tier >= #df.global.d_init.temple_value_levels and -1 or df.global.d_init.temple_value_levels[tier]
+                    value_info = { loc.contents.location_value, tier_name, next }
+
+                elseif ltype == df.abstract_building_type.GUILDHALL then
+                    local loc = loc --as:df.abstract_building_guildhall
+                    local prof = loc.contents.profession
+                    local guild = profession_find_guild(prof)
+
+                    info = { df.profession.attrs[prof].caption, guild and translatename(guild.name,true) or mp.NIL }
+
+                    params = {}
+
+                    local tier = loc.contents.location_tier
+                    local tier_name = tier >= 2 and 'Grand guildhall' or (tier == 1 and 'Guildhall' or 'Meeting place')
+                    local next = tier >= #df.global.d_init.guildhall_value_levels and -1 or df.global.d_init.guildhall_value_levels[tier]
+                    value_info = { loc.contents.location_value, tier_name, next }
                 end
 
                 local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
@@ -227,11 +262,9 @@ function location_get_info(id)
                     end
                 end
 
-                local allow_residents = loc.flags[5]
-                local allow_outsiders = loc.flags[4]
-                local mode = allow_outsiders and 2 or (allow_residents and 1 or 0)
+                local mode = location_restriction_mode(loc)
 
-                return { locname(loc), loc.id, ltype, mode, info, occupations, params }
+                return { locname(loc), loc.id, ltype, mode, info, occupations, params, value_info }
             
             else
                 gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
@@ -415,16 +448,15 @@ function location_assign(bldid, locid)
 end
 
 function deity_count_worshippers(deity_id)
-    local worshippers = 0
+    local count = 0
 
     for j,unit in ipairs(df.global.world.units.active) do
-        --todo: I'm not completely sure these conditions are correct
-        if not C_unit_dead(unit) and not unit.flags3[31] and dfhack.units.isOwnCiv(unit) then
-            local uhf = df.historical_figure.find(unit.hist_figure_id)
-            if uhf then
-                for k,l in ipairs(uhf.histfig_links) do
+        if unit_iscitizen(unit) then
+            local hf = df.historical_figure.find(unit.hist_figure_id)
+            if hf then
+                for k,l in ipairs(hf.histfig_links) do
                     if l:getType() == df.histfig_hf_link_type.DEITY and l.target_hf == deity_id then
-                        worshippers = worshippers + 1
+                        count = count + 1
                         break
                     end
                 end
@@ -432,20 +464,19 @@ function deity_count_worshippers(deity_id)
         end
     end
 
-    return worshippers
+    return count
 end
 
 function religion_count_worshippers(religion_id)
-    local worshippers = 0
+    local count = 0
 
     for j,unit in ipairs(df.global.world.units.active) do
-        --todo: I'm not completely sure these conditions are correct
-        if not C_unit_dead(unit) and not unit.flags3[31] and dfhack.units.isOwnCiv(unit) then
-            local uhf = df.historical_figure.find(unit.hist_figure_id)
-            if uhf then
-                for k,l in ipairs(uhf.entity_links) do
+        if unit_iscitizen(unit) then
+            local hf = df.historical_figure.find(unit.hist_figure_id)
+            if hf then
+                for k,l in ipairs(hf.entity_links) do
                     if l:getType() == df.histfig_entity_link_type.MEMBER and l.entity_id == religion_id then
-                        worshippers = worshippers + 1
+                        count = count + 1
                         break
                     end
                 end
@@ -453,7 +484,7 @@ function religion_count_worshippers(religion_id)
         end
     end
 
-    return worshippers
+    return count
 end
 
 function deity_get_spheres(hf)
@@ -506,6 +537,71 @@ function locations_add_get_deity_choices(bldid)
     end)    
 end
 
+function profession_count_workers(prof)
+    local count = 0
+
+    for i,unit in ipairs(df.global.world.units.active) do
+        if unit_iscitizen(unit) then
+            if unit.profession == prof or df.profession.attrs[unit.profession].parent == prof then
+                count = count + 1
+            end
+        end
+    end
+
+    return count
+end
+
+function guild_count_members(guild_id)
+    local count = 0
+
+    for i,unit in ipairs(df.global.world.units.active) do
+        if unit_iscitizen(unit) then
+            local hf = df.historical_figure.find(unit.hist_figure_id)
+            if hf then
+                for j,link in ipairs(hf.entity_links) do
+                    if link:getType() == df.histfig_entity_link_type.MEMBER and link.entity_id == guild_id then
+                        count = count + 1
+                    end
+                end
+            end
+        end
+    end
+
+    return count
+end
+
+function profession_find_guild(prof)
+    local site = df.world_site.find(df.global.ui.site_id)
+    for j,link in ipairs(site.entity_links) do
+        local entity = df.historical_entity.find(link.entity_id)
+        if entity and entity.type == df.historical_entity_type.Guild and #entity.guild_professions > 0 and entity.guild_professions[0].profession == prof then
+            return entity
+        end
+    end
+
+    return nil
+end
+
+--luacheck: in=number
+function locations_add_get_profession_choices(bldid)
+    return execute_with_locations_for_building(bldid, function(ws, bld)
+        gui.simulateInput(ws, K'LOCATION_NEW')
+        gui.simulateInput(ws, K'LOCATION_GUILDHALL')
+
+        local ret = {}
+
+        for i,v in ipairs(df.global.ui_sidebar_menus.location.profession) do
+            local name = df.profession.attrs[v].caption
+            local entity = profession_find_guild(v)
+            local guild_info = entity and { translatename(entity.name,true), guild_count_members(entity.id) } or mp.NIL
+
+            table.insert(ret, { name, i, profession_count_workers(v), guild_info })
+        end
+
+        return ret
+    end)    
+end
+
 --luacheck: in=number,number,number
 function locations_add(bldid, tp, deitytype, deityid)
     return execute_with_locations_for_building(bldid, function(ws, bld)
@@ -541,3 +637,4 @@ end
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
 -- print(pcall(function() return json:encode(location_assign(670,-1)) end))
 -- print(pcall(function() return json:encode(locations_add_get_deity_choices(3)) end))
+-- print(pcall(function() return json:encode(locations_add_get_profession_choices(572)) end))
