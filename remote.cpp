@@ -158,7 +158,7 @@ RENDER_WORLD_MAP render_world_map;
 static tthread::thread * enthread;
 static void enthreadmain(ENetHost*);
 
-unsigned char buf[65536];
+unsigned char buf[1024*1024];
 
 struct rendered_block {
     unsigned char x, y, z;
