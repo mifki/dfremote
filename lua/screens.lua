@@ -3,10 +3,12 @@ function screen_main()
 end
 
 local function save_state()
+    --todo: save cursor pos
     return { mode=df.global.ui.main.mode }
 end
 
 local function restore_state(state)
+    --todo: restore cursor pos
     df.global.ui.main.mode = state.mode
 end
 
@@ -32,21 +34,38 @@ function execute_with_main_mode(mode, fn, active_and_no_reset)
 end
 
 function execute_with_selected_zone(bldid, fn)
-    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and
-       df.global.ui_sidebar_menus.zone.selected and df.global.ui_sidebar_menus.zone.selected.id == bldid then
-        return fn(screen_main(), df.global.ui_sidebar_menus.zone.selected)
+    local zone = df.building.find(bldid)
+    if not zone then
+        error('no zone with id '..tostring(bldid))
     end
 
-    return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws)
-        local zone = df.building.find(bldid)
+    if df.global.ui.main.mode == df.ui_sidebar_mode.Zones and
+       df.global.ui_sidebar_menus.zone.selected and df.global.ui_sidebar_menus.zone.selected.id == bldid then
+        return fn(screen_main(), zone)
+    end
 
-        if not zone then
-            error('no zone with id '..tostring(bldid))
-        end
- 
+    return execute_with_main_mode(df.ui_sidebar_mode.Zones, function(ws) 
         building_focus(zone, ws)
 
         return fn(ws, zone)
+    end)
+end
+
+function execute_with_selected_unit(unitid, fn)
+    local unit = df.unit.find(unitid)
+    if not unit then
+        error('no unit with id '..tostring(unitid))
+    end
+
+    if df.global.ui.main.mode == df.ui_sidebar_mode.ViewUnits and
+       df.global.world.units.active[df.global.ui_selected_unit].id == unitid then
+        return fn(screen_main(), unit)
+    end
+
+    return execute_with_main_mode(df.ui_sidebar_mode.ViewUnits, function(ws) 
+        unit_focus(unit, ws)
+
+        return fn(ws, unit)
     end)
 end
 

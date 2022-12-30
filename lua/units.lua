@@ -11,6 +11,18 @@ function unit_creature_name(unit)
     end
 end
 
+function unit_focus(unit, ws)
+    local x,y,z = dfhack.units.getPosition(unit)
+
+    df.global.cursor.x = x
+    df.global.cursor.y = y
+    df.global.cursor.z = z - 1
+
+    gui.simulateInput(ws or dfhack.gui.getCurViewscreen(), K'CURSOR_UP_Z')
+
+    recenter_view(x, y, z)
+end
+
 --xxx: DFHack's Units::isCitizen() skips melancholy and raving units while they are actually citizens
 function unit_iscitizen(unit)
     if unit.flags1.marauder or unit.flags1.invader_origin or unit.flags1.active_invader or unit.flags1.forest or
@@ -736,19 +748,9 @@ function unit_goto(unitid)
         return
     end
 
-    local x,y,z = dfhack.units.getPosition(unit)
-
     df.global.ui.main.mode = df.ui_sidebar_mode.ViewUnits
 
-    df.global.cursor.x = x
-    df.global.cursor.y = y
-    df.global.cursor.z = z - 1
-
-    local ws = dfhack.gui.getCurViewscreen()
-    --gui.simulateInput(ws, K'CURSOR_DOWN_Z')
-    gui.simulateInput(ws, K'CURSOR_UP_Z')
-
-    recenter_view(x, y, z)
+    unit_focus(unit)
 end
 
 --luacheck: in=number
@@ -1536,8 +1538,92 @@ local unit = df.unit.find(unitid)
     return { text }
 end
 
+local expel_error_string = {
+    [df.ui_sidebar_menus.T_unit.T_expel_error.NOBILITY] = 'Nobility',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.HOLDS_OFFICE] = 'Holds elected office',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.DOES_EXPELLING] = 'Does the expelling',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.SPOUSE_IS_NOT_PRESENT] = 'Spouse is not present',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.SPOUSE_IS_NOBILITY] = 'Spouse is nobility',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.SPOUSE_IS_ELECTED] = 'Spouse is elected',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.SPOUSE_DOES_EXPELLING] = 'Spouse does the expelling',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.CHILD_IS_NOT_PRESENT] = 'Child is not present',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.CHILD_IS_NOBILITY] = 'Child is nobility',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.CHILD_IS_ELECTED] = 'Child is elected',
+    [df.ui_sidebar_menus.T_unit.T_expel_error.CHILD_DOES_EXPELLING] = 'Chuld does the expelling',
+}
+
+--luacheck: in=number
+function unit_get_expel_choices(unitid)
+    return execute_with_selected_unit(unitid, function(ws, unit)
+        df.global.ui_unit_view_mode.value = df.ui_unit_view_mode.T_value.Preferences
+
+        gui.simulateInput(ws, K'UNITVIEW_PRF_EXPEL')
+
+        if df.global.ui_sidebar_menus.unit.expel_error ~= -1 then
+            return { false, expel_error_string[df.global.ui_sidebar_menus.unit.expel_error] or '#unkown reason#' }
+        end
+
+        local location_list = {}        
+        table.insert(location_list, { 'Wilderness (Expel)', -1 })
+
+        if df.global.ui_sidebar_menus.unit.unk_44_11c == 1 then
+            for i,v in ipairs(df.global.ui_sidebar_menus.unit.unk_44_11a) do
+                local site = df.reinterpret_cast(df.world_site, v)
+                if site then
+                    table.insert(location_list, { translatename(site.name, true), site.id })
+                end
+            end
+
+            df.global.ui_sidebar_menus.unit.unk_44_11b = 0
+            gui.simulateInput(ws, K'SELECT')
+        end
+
+        local expel_list = {}
+        for i,v in ipairs(df.global.ui_sidebar_menus.unit.unk_88) do
+            local unit = df.reinterpret_cast(df.unit, v)
+            table.insert(expel_list, { unit_fulltitle(unit), unit.id })
+        end
+
+        df.global.ui_unit_view_mode.value = df.ui_unit_view_mode.T_value.Preferences
+
+        return { true, location_list, expel_list }
+    end)
+end
+
+--luacheck: in=number
+function unit_expel(unitid, locid)
+    return execute_with_selected_unit(unitid, function(ws, unit)
+        df.global.ui_unit_view_mode.value = df.ui_unit_view_mode.T_value.Preferences
+
+        gui.simulateInput(ws, K'UNITVIEW_PRF_EXPEL')
+
+        if df.global.ui_sidebar_menus.unit.expel_error ~= -1 then
+            df.global.ui_unit_view_mode.value = df.ui_unit_view_mode.T_value.Preferences
+            error('can not expel '..tostring(unitid))
+        end
+
+        if df.global.ui_sidebar_menus.unit.unk_44_11c == 1 then
+            for i,v in ipairs(df.global.ui_sidebar_menus.unit.unk_44_11a) do
+                local site = df.reinterpret_cast(df.world_site, v)
+                if (locid == -1 and not site) or (site and locid == site.id) then
+                    df.global.ui_sidebar_menus.unit.unk_44_11b = i
+                    gui.simulateInput(ws, K'SELECT')
+                end
+            end
+
+            if df.global.ui_sidebar_menus.unit.unk_44_11c == 1 then
+                df.global.ui_unit_view_mode.value = df.ui_unit_view_mode.T_value.Preferences
+                error('no expel location'..tostring(locid))
+            end
+        end
+
+        gui.simulateInput(ws, K'SELECT')
+    end)
+end
+
 -- if screen_main()._type == df.viewscreen_dwarfmodest then
 --     print(pcall(function() return json:encode(units_list_dwarves()) end))
 -- end
 
 -- print(pcall(function() return json:encode(unit_jobtitle(df.unit.find(655))) end))
+-- print(pcall(function() return json:encode(unit_get_expel_choices(66900)) end))

@@ -2237,6 +2237,8 @@ local handlers = {
     [195] = {
         [1] = unit_query_selected,
         [2] = unit_follow,
+        [3] = unit_get_expel_choices,
+        [4] = unit_expel,
 
         [10] = units_list_dwarves,
         [11] = units_list_livestock,
