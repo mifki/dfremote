@@ -118,6 +118,8 @@ function status_get_health(include_healthy)
         return { false }
     end
 
+    include_healthy = istrue(include_healthy)
+
     return execute_with_status_page(status_pages.Health, function(ws)
         local ws = ws --as:df.viewscreen_layer_overall_healthst
         local ret = {}
