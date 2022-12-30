@@ -283,12 +283,10 @@ function artifacts_list()
     local ret = {}
 
     --todo: what is the correct way to get artifacts?
-    for i,item in ipairs(df.global.world.items.other.IN_PLAY) do
-        if item.flags.artifact then
-            local artname,realname = itemname(item, 0, true)
-            if realname then
-                table.insert(ret, { realname, item.id, item.flags.whole, false, artname })
-            end
+    for i,item in ipairs(df.global.world.items.other.ANY_ARTIFACT) do
+        local artname,realname = itemname(item, 0, true)
+        if realname then
+            table.insert(ret, { realname, item.id, item.flags.whole, false, artname })
         end
     end
 
