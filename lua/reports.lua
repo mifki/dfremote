@@ -206,7 +206,7 @@ function other_reports_get_text(typeidx)
             local line = dfhack.df2utf(ws.mission_report_text[i].value)
             local color = ws.mission_report_colors[i]
 
-            line = line:gsub('  ', ' ')
+            line = fixspaces(line)
 
             -- Incomplete lines end with a space, a period means end of paragraph
             if #text == 0 or text:sub(#text) == '.' then
@@ -271,7 +271,7 @@ function other_reports_get_text(typeidx)
         text = text .. '[B][C:1:0:1]Officer: ' .. officer_name
 
         for i,line in ipairs(report.details) do
-            text = text .. '[B][C:15:0:0]' .. dfhack.df2utf(line.value:gsub('  ', ' '))
+            text = text .. '[B][C:15:0:0]' .. dfhack.df2utf(fixspaces(line.value))
         end
 
         return { text }

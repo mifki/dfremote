@@ -57,6 +57,10 @@ function capitalize(str)
     return ret
 end
 
+function fixspaces(str)
+    return str:gsub('  +', ' ')
+end
+
 --todo: need to capitalize all words
 function unitname(unit, eng)
     --xxx: temporary - logs say this was called with nil unit from somewhere several times

@@ -984,7 +984,7 @@ function unit_get_thoughts(unitid, is_histfig)
         end
     end
     
-    text = text:gsub('  ', ' ')
+    text = fixspaces(text)
     ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     return { text }
@@ -1531,7 +1531,7 @@ local unit = df.unit.find(unitid)
         end
     end
 
-    text = text:gsub('  ', ' ')
+    text = fixspaces(text)
 
     return { text }
 end

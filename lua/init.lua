@@ -1750,7 +1750,7 @@ function engraving_get_description(id)
                     end
                 end
 
-                text = text:gsub('  ', ' ')
+                text = fixspaces(text)
 
                 local title = dfhack.df2utf(textws.title)
 

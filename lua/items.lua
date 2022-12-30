@@ -225,7 +225,7 @@ function item_get_description(itemid)
     text = text:gsub('%s*%[B]%s*$', '')
     text = text:gsub('%s*%[P]%s*$', '')
 
-    text = text:gsub('  ', ' ')
+    text = fixspaces(text)
 
     ws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
