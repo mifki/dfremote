@@ -65,15 +65,7 @@ function locations_get_list()
             end
         end
 
-        local site_occupations_count = 0
-        local group_id = df.global.ui.group_id
-        for i,v in ipairs(df.global.world.occupations.all) do
-            if v.group_id == group_id and v.unit_id ~= -1 then
-                site_occupations_count = site_occupations_count + 1
-            end
-        end
-
-        return { list, { translatename(site.name, true), site_occupations_count } }
+        return { list, { translatename(site.name, true) } }
     end)
 end
 
@@ -101,49 +93,105 @@ local function count_buildings_in_location(loc, count_type)
 end
 
 local occupation_names = {
-    'Tavern Keeper',
-    'Performer',
-    'Scholar',
-    'Mercenary',
-    'Monster Slayer',
-    'Scribe'    
+    [df.occupation_type.TAVERN_KEEPER]  = 'Tavern Keeper',
+    [df.occupation_type.PERFORMER]      = 'Performer',
+    [df.occupation_type.SCHOLAR]        = 'Scholar',
+    [df.occupation_type.MERCENARY]      = 'Mercenary',
+    [df.occupation_type.MONSTER_SLAYER] = 'Monster Slayer',
+    [df.occupation_type.SCRIBE]         = 'Scribe',
+    [df.occupation_type.MESSENGER]      = 'Messenger'
+}
+
+local occupation_is_assignable = {
+    [df.occupation_type.TAVERN_KEEPER]  = true,
+    [df.occupation_type.PERFORMER]      = true,
+    [df.occupation_type.SCHOLAR]        = true,
+    [df.occupation_type.MERCENARY]      = false,
+    [df.occupation_type.MONSTER_SLAYER] = false,
+    [df.occupation_type.SCRIBE]         = true,
+    [df.occupation_type.MESSENGER]      = true
 }
 
 --luacheck: in=number
 function location_get_info(id)
-    if id == -1 then
-        local site = df.world_site.find(df.global.ui.site_id)
-        local group_id = df.global.ui.group_id
+    -- site-wide occupations
+    -- if id == -1 then
+    --     local site = df.world_site.find(df.global.ui.site_id)
+    --     local group_id = df.global.ui.group_id
 
-        local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
+    --     local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
         
-        for i,occ in ipairs(df.global.world.occupations.all) do
-            if occ.group_id == group_id and occ.unit_id ~= -1 then
-                local unit = df.unit.find(occ.unit_id)
-                local unitname = unitname(unit)
+    --     for i,occ in ipairs(df.global.world.occupations.all) do
+    --         if occ.group_id == group_id and occ.unit_id ~= -1 then
+    --             local unit = df.unit.find(occ.unit_id)
+    --             local unitname = unitname(unit)
 
-                local pos = #occupations + 1
-                for j,v in ipairs(occupations) do
-                    --[[if v[5] == -1 and occ.type == v[3] then
-                        pos = occ.unit_id == -1 and 0 or j
-                        break
-                    end]]
-                    if v[3] > occ.type then
-                        pos = j
-                        break
-                    end
-                end             
+    --             local pos = #occupations + 1
+    --             for j,v in ipairs(occupations) do
+    --                 --[[if v[5] == -1 and occ.type == v[3] then
+    --                     pos = occ.unit_id == -1 and 0 or j
+    --                     break
+    --                 end]]
+    --                 if v[3] > occ.type then
+    --                     pos = j
+    --                     break
+    --                 end
+    --             end             
 
-                table.insert(occupations, pos, { occupation_names[occ.type+1], occ.id, occ.type, unitname, occ.unit_id })
-            end
-        end
+    --             table.insert(occupations, pos, { occupation_names[occ.type], occ.id, occ.type, unitname, occ.unit_id })
+    --         end
+    --     end
 
-        return { translatename(site.name), -1, occupations }
-    end
+    --     return { translatename(site.name), -1, occupations }
+    -- end
 
     return execute_with_locations_screen(function(ws)
         for j,loc in ipairs(ws.locations) do
-            if loc and loc.id == id then
+            if (not loc and id == -1) or (loc and loc.id == id) then
+                local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
+                
+                for i,occ in ipairs(ws.occupations) do
+                    if occ then
+                        local unit = occ.unit_id ~= -1 and df.unit.find(occ.unit_id) or nil
+                        local unitname = occ.unit_id ~= -1 and unitname(unit) or mp.NIL
+
+                        -- grouping by occupation type, and not allowing >1 unassigned occupation of one type
+                        local pos = #occupations + 1
+                        -- for j,v in ipairs(occupations) do --as:{1:string,2:number,3:number,4:string,5:number}
+                        --     if v[5] == -1 and occ.type == v[3] then
+                        --         pos = occ.unit_id == -1 and 0 or j
+                        --         break
+                        --     end
+                        --     if v[3] > occ.type then
+                        --         pos = j
+                        --         break
+                        --     end
+                        -- end
+
+                        --todo: how to get this from ui? game doesn't seem to check occupation type for this
+                        local assignable = occupation_is_assignable[occ.type]
+
+                        if pos > 0 then
+                            table.insert(occupations, pos, { occupation_names[occ.type], { 0, occ.id }, -1, unitname, occ.unit_id, assignable })
+                        end
+
+                    elseif ws.unk_4[i] then
+                        local assignment = df.reinterpret_cast(df.entity_position_assignment, ws.unk_4[i])
+                        local position = df.reinterpret_cast(df.entity_position, ws.unk_3[i])
+
+                        local hf = assignment.histfig ~= -1 and df.historical_figure.find(assignment.histfig) or nil
+                        local unitname = assignment.histfig ~= -1 and hfname(hf) or mp.NIL
+
+                        table.insert(occupations, { capitalize(position.name[0]), { 1, assignment.id }, -1, unitname, -1, true })
+                    end
+                end
+
+                -- site
+                if id == -1 then
+                    local site = df.world_site.find(df.global.ui.site_id)
+                    return { translatename(site.name), -1, -1, -1, {}, occupations, {}, mp.NIL }
+                end
+
                 local ltype = loc:getType()
 
                 local info = {}
@@ -238,30 +286,6 @@ function location_get_info(id)
                     value_info = { loc.contents.location_value, tier_name, next }
                 end
 
-                local occupations = {} --as:{1:string,2:number,3:number,4:string,5:number}[]
-                
-                for i,occ in ipairs(loc.occupations) do
-                    local unit = occ.unit_id ~= -1 and df.unit.find(occ.unit_id) or nil
-                    local unitname = occ.unit_id ~= -1 and (unit and unitname(unit) or '#unknown unit#') or mp.NIL
-
-                    -- grouping by occupation type, and not allowing >1 unassigned occupation of one type
-                    local pos = #occupations + 1
-                    for j,v in ipairs(occupations) do --as:{1:string,2:number,3:number,4:string,5:number}
-                        if v[5] == -1 and occ.type == v[3] then
-                            pos = occ.unit_id == -1 and 0 or j
-                            break
-                        end
-                        if v[3] > occ.type then
-                            pos = j
-                            break
-                        end
-                    end
-
-                    if pos > 0 then
-                        table.insert(occupations, pos, { occupation_names[occ.type+1], occ.id, occ.type, unitname, occ.unit_id })
-                    end
-                end
-
                 local mode = location_restriction_mode(loc)
 
                 return { locname(loc), loc.id, ltype, mode, info, occupations, params, value_info }
@@ -276,12 +300,16 @@ function location_get_info(id)
 end
 
 --luacheck: in=number,number
-function location_occupation_get_candidates(locid, occid)
+function location_occupation_get_candidates(locid, occtypeid)
+    local occtype = occtypeid[1]
+    local occid = occtypeid[2]
+
     return execute_with_locations_screen(function(ws)
         for i,loc in ipairs(ws.locations) do
-            if loc and loc.id == locid then
+            if (not loc and locid == -1) or (loc and loc.id == locid) then
                 for j,occ in ipairs(ws.occupations) do
-                    if occ.id == occid then
+                    if (occtype == 0 and occ and occid == occ.id) or
+                       (occtype == 1 and ws.unk_4[j] and df.reinterpret_cast(df.entity_position_assignment, ws.unk_4[j]).id == occid) then
                         ws.menu = df.viewscreen_locationsst.T_menu.Occupations
                         ws.occupation_idx = j
                         gui.simulateInput(ws, K'SELECT')
@@ -312,15 +340,19 @@ function location_occupation_get_candidates(locid, occid)
 end
 
 --luacheck: in=number,number,number
-function location_occupation_assign(locid, occid, unitid)
+function location_occupation_assign(locid, occtypeid, unitid)
     --xxx: temp fix for an app bug
     unitid = tonumber(unitid)
 
+    local occtype = occtypeid[1]
+    local occid = occtypeid[2]    
+
     return execute_with_locations_screen(function(ws)
         for i,loc in ipairs(ws.locations) do
-            if loc and loc.id == locid then
+            if (not loc and locid == -1) or (loc and loc.id == locid) then
                 for j,occ in ipairs(ws.occupations) do
-                    if occ.id == occid then
+                    if (occtype == 0 and occ and occid == occ.id) or
+                       (occtype == 1 and ws.unk_4[j] and df.reinterpret_cast(df.entity_position_assignment, ws.unk_4[j]).id == occid) then
                         ws.menu = df.viewscreen_locationsst.T_menu.Occupations
                         ws.occupation_idx = j
                         gui.simulateInput(ws, K'SELECT')
@@ -371,11 +403,23 @@ function location_set_restriction(id, mode)
         error('no location '..tostring(id))
     end
 
-    local allow_residents = mode > 0
-    local allow_outsiders = mode == 2
-
-    loc.flags[5] = allow_residents
-    loc.flags[4] = allow_outsiders
+    if mode == 3 then
+        loc.flags.AllowVisitors = false
+        loc.flags.AllowResidents = false
+        loc.flags.OnlyMembers = true
+    elseif mode == 2 then
+        loc.flags.AllowVisitors = false
+        loc.flags.AllowResidents = false
+        loc.flags.OnlyMembers = false
+    elseif mode == 1 then
+        loc.flags.AllowVisitors = false
+        loc.flags.AllowResidents = true
+        loc.flags.OnlyMembers = false
+    elseif mode == 0 then
+        loc.flags.AllowVisitors = true
+        loc.flags.AllowResidents = true
+        loc.flags.OnlyMembers = false
+    end
 
     return true 
 end
@@ -633,7 +677,7 @@ function locations_add(bldid, tp, deitytype, deityid)
 end
 
 -- print(pcall(function() return json:encode(locations_get_list()) end))
--- print(pcall(function() return json:encode(location_get_info(-1)) end))
+-- print(pcall(function() return json:encode(location_get_info(2)) end))
 -- print(pcall(function() return json:encode(location_occupation_get_candidates(2,108)) end))
 -- print(pcall(function() return json:encode(location_assign(670,-1)) end))
 -- print(pcall(function() return json:encode(locations_add_get_deity_choices(3)) end))
