@@ -992,8 +992,8 @@ function unit_get_thoughts(unitid, is_histfig)
     return { text }
 end
 
-local relations_unit = {
-    { 'Pet', 10 },
+local relation_names_unit = {
+    { 'Pet Owner', 10 },
     { 'Spouse', 12 },
     { 'Mother', 11 },
     { 'Father', 11 },
@@ -1028,24 +1028,22 @@ local relations_unit = {
     { 'Considers Brigand', 12 },
     { 'Loyal Soldier', 15 },
     { 'Considers Monster', 13 },    
-    
-    --todo: use correct colours for below
-    { 'Considers Storyteller', 13 },
+    { 'Considers Preacher', 13 },
     { 'Considers Poet', 13 },
     { 'Considers Bard', 13 },
     { 'Considers Dancer', 13 },
-    { 'Master', 13 },
-    { 'Apprentice', 13 },
+    { 'Master', 14 },
+    { 'Apprentice', 14 },
     { 'Companion', 13 },
-    { 'Former Master', 13 },
-    { 'Former Apprentice', 13 },
-    { 'Considers Quarreler', 13 },
-    { 'Considers Flatterer', 13 },
-    { 'Hunter', 13 },
-    { 'Protector Of The Weak', 13 },
+    { 'Former Master', 6 },
+    { 'Former Apprentice', 6 },
+    { 'Considers Quarreler', 12 },
+    { 'Considers Flatterer', 12 },
+    { 'Hunter', 15 },
+    { 'Protector Of The Weak', 11 },
 }
 
-local relations_hf = {
+local relation_names_hf = {
     { 'Mother', 11 },
     { 'Father', 11 },
     { 'Parent', 11 },
@@ -1111,6 +1109,13 @@ local relations_hf = {
     { 'Nephew', 3 },
     { 'Sibling', 3 },
     { 'Grandchild', 3 },
+    { 'Older Half-brother', 11 },
+    { 'Older Half-sister', 11 },
+    { 'Older Half-sibling', 11 },
+    { 'Younger Half-brother', 11 },
+    { 'Younger Half-sister', 11 },
+    { 'Younger Half-sibling', 11 },
+    { 'Half-sibling', 3 }
 }
 
 --luacheck: in=number
@@ -1151,7 +1156,7 @@ function unit_get_relationships(unitid)
 
         local rel_u = ws.relation_unit_type[i]
         local rel_hf = ws.relation_histfig_type[i]
-        local rel = ((rel_hf ~= -1) and relations_hf[rel_hf+1] or relations_unit[rel_u+1]) or { '#unknown relation#', 7 }
+        local rel = ((rel_hf ~= -1) and relation_names_hf[rel_hf+1] or relation_names_unit[rel_u+1]) or { '#unknown relation#', 7 }
         local flags = (v and 1 or 0) + (can_zoom and 2 or 0) + (can_view and 4 or 0)
 
         --todo: pass legendary skill status to flash the names
@@ -1506,7 +1511,7 @@ end
 
 --luacheck: in=number
 function unit_get_kills(unitid)
-local unit = df.unit.find(unitid)
+    local unit = df.unit.find(unitid)
     if not unit then
         error('no unit '..tostring(unitid))
     end

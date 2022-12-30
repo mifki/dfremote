@@ -312,7 +312,7 @@ mat_category_names = { --as:string[]
     [df.entity_material_category.Wool] = 'yarn',
 }
 
---todo: implement this without reaction_product_itemst
+--todo: implement this without reaction_product_itemst?
 function generic_item_name(type, subtype, mat_class, mat_type, mat_index, single)
     --local q = df.item:new()
     local q = df.reaction_product_itemst:new()

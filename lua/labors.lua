@@ -104,9 +104,9 @@ local labor_groups = { --as:{1:string,2:number,3:{_array:{1:string,2:number,3:nu
         { "Refuse", df.profession.NONE, df.unit_labor.HAUL_REFUSE, df.job_skill.NONE }, 
         { "Furniture", df.profession.NONE, df.unit_labor.HAUL_FURNITURE, df.job_skill.NONE }, 
         { "Animals", df.profession.NONE, df.unit_labor.HAUL_ANIMALS, df.job_skill.NONE }, 
-        { "Vehicles", df.profession.NONE, df.unit_labor.HANDLE_VEHICLES, df.job_skill.NONE }, 
         { "Trade Goods", df.profession.NONE, df.unit_labor.HAUL_TRADE, df.job_skill.NONE }, 
-        { "Water", df.profession.NONE, df.unit_labor.HAUL_WATER, df.job_skill.NONE }
+        { "Water", df.profession.NONE, df.unit_labor.HAUL_WATER, df.job_skill.NONE },
+        { "Vehicles", df.profession.NONE, df.unit_labor.HANDLE_VEHICLES, df.job_skill.NONE }
     } },
 }
 
