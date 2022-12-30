@@ -1988,6 +1988,8 @@ local handlers = {
         [3] = justice_get_crime_details,
         [4] = justice_get_convict_choices,
         [5] = justice_convict,
+        [6] = justice_get_interrogate_choices,
+        [7] = justice_interrogate,
     },
 
     [139] = {

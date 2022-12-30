@@ -63,9 +63,8 @@ end
 
 --todo: need to capitalize all words
 function unitname(unit, eng)
-    --xxx: temporary - logs say this was called with nil unit from somewhere several times
     if not unit then
-        return '#no unit#'
+        return '#invalid unit#'
     end
 
     --xxx: temporary fix for unitname() still may be called for non-units (like histfigs) somewhere
@@ -76,6 +75,10 @@ function unitname(unit, eng)
 end
 
 function hfname(hf, eng)
+    if not hf then
+        return '#invalid histfig#'
+    end
+
     local name = dfhack.df2utf(dfhack.TranslateName(hf.name, eng):gsub('`', '\'')) --todo: need gsub here?
     return string.utf8capitalize(name)
 end
