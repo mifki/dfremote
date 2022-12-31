@@ -27,9 +27,7 @@ function civilization_get_info(civid)
     end
 
     local civsws = df.viewscreen_civlistst:new()
-    if df_ver >= 4412 then --dfver:4412-
-        civsws.page = 0
-    end
+    civsws.page = 0
     civsws.entities:insert(0, civ)
     gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)
@@ -116,9 +114,7 @@ function civilization_get_agreement(civid, idx)
     end
 
     local civsws = df.viewscreen_civlistst:new()
-    if df_ver >= 4412 then --dfver:4412-
-        civsws.page = 0
-    end
+    civsws.page = 0
     civsws.entities:insert(0, civ)
     gui.simulateInput(civsws, K'SELECT')
     df.delete(civsws)

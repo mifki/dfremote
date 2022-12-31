@@ -22,9 +22,9 @@ local function ensure_images_loaded(bldid, idx)
 
         local imgws = dfhack.gui.getCurViewscreen()
         if imgws._type == df.viewscreen_image_creatorst then --as:imgws=df.viewscreen_image_creatorst
-            for j,w in ipairs(C_viewscreen_image_creatorst_modes(imgws)) do
+            for j,w in ipairs(imgws.modes) do
                 if w == 5 then
-                    C_viewscreen_image_creatorst_set_mode_cursor(imgws, j)
+                    imgws.mode_cursor = j
                     gui.simulateInput(imgws, K'SELECT')
                     break
                 end

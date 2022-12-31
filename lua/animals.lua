@@ -46,7 +46,7 @@ function animals_get()
 				local available = unit.flags3.available_for_adoption
 				local slaughter = unit.flags2.slaughter
 
-				local geld = C_unit_geld(unit)
+				local geld = unit.flags3.marked_for_gelding
 				local gelded = unit.flags3.gelded
 				local can_geld = not gelded and unit.sex == 1 and animal_is_geldable(unit)
 				
@@ -104,12 +104,11 @@ function animals_set_geld(unitid, val)
 	--xxx: should check if it's a valid action here?
 
 	local unit = df.unit.find(unitid)
-
 	if not unit then
-		return false
+		error('no unit '..tostring(unitid))
 	end
 
-	C_unit_set_geld(unit, istrue(val))
+	unit.flags3.marked_for_gelding = istrue(val)
 	return true
 end
 

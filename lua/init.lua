@@ -200,6 +200,10 @@ function ttcaption(tt)
     return friendly_shape_names[df.tiletype.attrs[tt].shape] or df.tiletype.attrs[tt].caption    
 end
 
+function plant_tree_tile_any_branches(t)
+    return t.branches or t.connection_east or t.connection_south or t.connection_west or t.connection_north
+end
+
 local function coordInTree(tree, x, y, z)
         local x1 = tree.pos.x - math.floor(tree.tree_info.dim_x / 2)
         local x2 = tree.pos.x + math.floor(tree.tree_info.dim_x / 2)
@@ -212,7 +216,7 @@ local function coordInTree(tree, x, y, z)
         local ok,ret = pcall(function()
             if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z >= z1 and z <= z2)) then
                 local t = tree.tree_info.body[z - z1]:_displace((y - y1) * tree.tree_info.dim_x + (x - x1)) --as:df.plant_tree_tile
-                return (t.trunk or C_plant_tree_tile_any_branches(t) or t.twigs) and t or nil
+                return (t.trunk or plant_tree_tile_any_branches(t) or t.twigs) and t or nil
             end
             
             if ((x >= x1 and x <= x2) and (y >= y1 and y <= y2) and (z < z1 and z >= z3)) then
@@ -410,7 +414,7 @@ function get_look_list(detailed)
                                 title = title .. ' roots'
                             elseif t.trunk then
                                 title = title .. ' trunk'
-                            elseif C_plant_tree_tile_any_branches(t) then
+                            elseif plant_tree_tile_any_branches(t) then
                                 title = title .. ' branches'
                             elseif t.twigs then
                                 title = title .. ' twigs'                                    
@@ -624,7 +628,7 @@ function get_look_list(detailed)
                     local matprefix = #mi.material.prefix > 0 and (mi.material.prefix .. ' ') or ''
                     title = spatterprefix .. creatureprefix .. matprefix .. mi.material.state_name[v.spatter_mat_state]
 
-                    local c = C_world_raws_colors()[mi.material.state_color[v.spatter_mat_state]]
+                    local c = df.global.world.raws.descriptors.colors[mi.material.state_color[v.spatter_mat_state]]
                     color = c.color + c.bold*8
 
                 else
@@ -681,7 +685,7 @@ function count_idlers()
     local cnt = 0
 
     for i,unit in ipairs(df.global.world.units.active) do
-        if not C_unit_dead(unit) and not unit.job.current_job then
+        if not unit.flags1.inactive and not unit.job.current_job then
             local prf = unit.profession
             if unit_iscitizen(unit) then
                 --todo: need to check activity_entry.events for individual drills ?
@@ -995,7 +999,7 @@ function get_status()
 
             if not constructed then        
                 name = name .. ' (not built)'
-            elseif bld._type == df.building_coffinst and bld.owner and C_unit_dead(bld.owner) then
+            elseif bld._type == df.building_coffinst and bld.owner and bld.owner.flags1.inactive then
                 --todo: is the check right in 44.xx where dead->inactive ?
                 name = name .. ' (✝\xEF\xB8\x8E)' --todo: this modifier shouldn't be on server side
             elseif bld._type == df.building_doorst and bld.door_flags.forbidden then --hint:df.building_doorst
@@ -1070,7 +1074,7 @@ function get_status()
     --[D]epot access
     if mainmode == df.ui_sidebar_mode.DepotAccess then
         local x = df.global.gps.dimx - 2 - 30 + 1
-        if C_ui_menu_width() == 1 or C_ui_area_map_width() == 2 then
+        if df.global.ui_menu_width[0] == 1 or df.global.ui_menu_width[1] == 2 then
             x = x - (23 + 1)
         end
 
@@ -1146,7 +1150,7 @@ function get_status()
             break
         end
 
-        local flags = C_announcements().flags[ann.type]
+        local flags = df.global.d_init.announcements.flags[ann.type]
         if flags.D_DISPLAY then
             hasnewann = true
         end

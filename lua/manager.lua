@@ -369,7 +369,7 @@ function manager_order_conditions_get(id)
 	        local matname = get_condition_material(v)
 	        local traits = get_condition_traits(v)
 
-	    	table.insert(conditions, { itemtype, i, 0, C_viewscreen_workquota_conditionst_satisfied_items(ws)[i], matname, traits, v.compare_type, v.compare_val })
+	    	table.insert(conditions, { itemtype, i, 0, ws.satisfied_items[i], matname, traits, v.compare_type, v.compare_val })
 	    end
 
 	    for i,v in ipairs(order.order_conditions) do
@@ -377,7 +377,7 @@ function manager_order_conditions_get(id)
 	    	local s = target and ordertitle(target, true) or '#invalid order#'
 	    	
 	    	--todo: why?
-	    	table.insert(conditions, { s, i, 1, mp.NIL--[[ C_viewscreen_workquota_conditionst_satisfied_orders(ws)[i] ]], v.condition })
+	    	table.insert(conditions, { s, i, 1, mp.NIL--[[ ws.satisfied_orders[i] ]], v.condition })
 	    end
 
 	    return { ordertitle(order, true), order.id, conditions, order.frequency, order.status.whole }
@@ -397,8 +397,8 @@ function manager_order_condition_get_item_choices()
 	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_TYPE')
 
 	for i,v in ipairs(q.list_entries) do
-		-- local item_type = C_viewscreen_workquota_conditionst_item_type(q,i)
-		-- local item_subtype = C_viewscreen_workquota_conditionst_item_subtype(q,i)
+		-- local item_type = q.item_types[i]
+		-- local item_subtype = q.item_subtypes[i]
 
 		table.insert(ret, { dfhack.df2utf(v.value):utf8capitalize(), i })
 	end
@@ -423,8 +423,8 @@ function manager_order_condition_get_material_choices()
 	gui.simulateInput(q, K'WORK_ORDER_CONDITION_ITEM_MATERIAL')
 
 	for i,v in ipairs(q.list_entries) do
-		-- local mat_type = q.list_unk1[i]
-		-- local mat_index = q.list_unk2[i]
+		-- local mat_type = q.mat_types[i]
+		-- local mat_index = q.mat_indices[i]
 
 		table.insert(ret, { dfhack.df2utf(v.value):utf8capitalize(), i })
 	end

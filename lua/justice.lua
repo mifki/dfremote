@@ -106,7 +106,7 @@ function justice_get_data()
 				end
 			end
 
-			table.insert(convicts, { fullname, v.id, punishment, C_unit_dead(v) })
+			table.insert(convicts, { fullname, v.id, punishment, v.flags1.inactive })
 		end
 
 		return { true, recent_cases, cold_cases, convicts, ws.jails_needed, ws.jails_present }
@@ -151,7 +151,7 @@ function justice_get_crime_details(crimeid)
 
 	return { crime_name(v), v.id, v.mode,
 			 victim_name, victim_id,
-			 convict_name, convict_id, convict and C_unit_dead(convict) or false,
+			 convict_name, convict_id, convict and convict.flags1.inactive or false,
 			 witnesses, v.flags.needs_trial }
 end
 
@@ -188,7 +188,7 @@ function justice_get_convict_info(unitid)
 		end
 	end
 
-	return { unit_fulltitle(unit), unit.id, C_unit_dead(unit), punishment, crimes, officer_name, officer_id }
+	return { unit_fulltitle(unit), unit.id, unit.flags1.inactive, punishment, crimes, officer_name, officer_id }
 end
 
 local function focus_crime(ws, crimeid)
@@ -240,7 +240,7 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 
 		local ret = {}
 		for i,unit in ipairs(ws.convict_choices) do
-			if show_dead or not C_unit_dead(unit) then
+			if show_dead or not unit.flags1.inactive then
 				local name = unit_fulltitle(unit)
 
 				local wcnt = 0
@@ -251,7 +251,7 @@ function justice_get_convict_choices(crimeid, show_innocent, show_dead)
 				end
 
 				if show_innocent or wcnt > 0 then
-					table.insert(ret, { name, unit.id, C_unit_dead(unit), wcnt })
+					table.insert(ret, { name, unit.id, unit.flags1.inactive, wcnt })
 				end
 			end
 		end
@@ -281,7 +281,7 @@ function justice_get_interrogate_choices(crimeid, show_innocent, show_dead)
 
 		local ret = {}
 		for i,unit in ipairs(ws.interrogate_choices) do
-			if show_dead or not C_unit_dead(unit) then
+			if show_dead or not unit.flags1.inactive then
 				local name = unit_fulltitle(unit)
 
 				local wcnt = 0
@@ -293,7 +293,7 @@ function justice_get_interrogate_choices(crimeid, show_innocent, show_dead)
 
 				if show_innocent or wcnt > 0 then
 					local flags = ws.interrogate_status[i].whole
-					table.insert(ret, { name, unit.id, C_unit_dead(unit), wcnt, flags })
+					table.insert(ret, { name, unit.id, unit.flags1.inactive, wcnt, flags })
 				end
 			end
 		end

@@ -340,10 +340,10 @@ function unit_fullprof(unit)
     local prof = unitprof(unit)
 
     if unit.enemy.undead then
-        if #C_unit_corpse_name(unit) == 0 then
+        if #unit.enemy.undead.undead_name == 0 then
             prof = prof .. ' Corpse'
         else
-            prof = dfhack.df2utf(C_unit_corpse_name(unit)):utf8capitalize() -- reanimated body parts use this string instead
+            prof = dfhack.df2utf(unit.enemy.undead.undead_name):utf8capitalize() -- reanimated body parts use this string instead
         end
     end
   
@@ -502,7 +502,8 @@ function unit_jobtitle(unit, norepeatsuffix, activityonly)
 
             if s and s.cur_alert_idx ~= 0 then
                 local sqpos = s.positions[unit.military.squad_position]
-                local activities,events = C_squad_position_activities_events(sqpos)
+                local activities = { sqpos.activities[0], sqpos.activities[1], sqpos.activities[2] }
+                local events = { sqpos.events[0], sqpos.events[1], sqpos.events[2] }
                 
                 local act_id = -1
                 local ev_id = -1
@@ -956,7 +957,7 @@ function unit_get_thoughts(unitid, is_histfig)
 
         df.delete(unitlistws)
 
-        --[[if not C_unit_dead(unit) and unit_iscitizen(unit) then
+        --[[if not unit.flags1.inactive and unit_iscitizen(unit) then
             local unitws = df.viewscreen_unitst:new()
             unitws.unit = unit
             gui.simulateInput(unitws, K'SELECT')
@@ -1144,7 +1145,7 @@ function unit_get_relationships(unitid)
             namecolor = dfhack.units.getProfessionColor(v)
             id = v.id
             can_view = true
-            can_zoom = not C_unit_dead(v)
+            can_zoom = not v.flags1.inactive
         else
             local hf = ws.relation_hf[i]
             name = hfname(hf)
@@ -1460,7 +1461,7 @@ function unit_get_assigned_animals(unitid)
     local ret = {}
 
     for i,unit in ipairs(df.global.world.units.active) do
-        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not C_unit_dead(unit) and not unit.flags1.forest then
+        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.inactive and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
             if work and unit.relationship_ids[df.unit_relationship_type.Pet] == unitid then
@@ -1479,7 +1480,7 @@ function unit_get_assign_animal_choices(unitid)
     local ret = {}
 
     for i,unit in ipairs(df.global.world.units.active) do
-        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not C_unit_dead(unit) and not unit.flags1.forest then
+        if unit.civ_id == df.global.ui.civ_id and unit.flags1.tame and not unit.flags1.inactive and not unit.flags1.forest then
             local work = (unit.profession == df.profession.TRAINED_WAR or unit.profession == df.profession.TRAINED_HUNTER)
 
             if work and unit.relationship_ids[df.unit_relationship_type.Pet] == -1 then

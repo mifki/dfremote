@@ -11,8 +11,8 @@ function announcements_get_new()
             break
         end
 
-        if ann.type < #C_announcements().flags then
-            local flags = C_announcements().flags[ann.type]
+        if ann.type < #df.global.d_init.announcements.flags then
+            local flags = df.global.d_init.announcements.flags[ann.type]
             if flags.D_DISPLAY then
                 if ann.flags.continuation then
                     cont = ' ' .. dfhack.df2utf(ann.text)

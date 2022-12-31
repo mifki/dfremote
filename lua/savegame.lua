@@ -192,7 +192,7 @@ function progress_worldgen()
     end    
 
     -- If finished loading raws, start worldgen with the requested parameters
-    if not C_viewscreen_new_regionst_loading_raws(ws) then
+    if not ws.load_world_params then
         -- Close 'Welcome to ...' message
         if #ws.welcome_msg > 0 then
             gui.simulateInput(ws, K'LEAVESCREEN')

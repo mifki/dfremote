@@ -10,7 +10,7 @@ function worldgen_status()
         error(errmsg_wrongscreen(ws))
     end
 
-    if C_viewscreen_new_regionst_loading_raws(ws) then
+    if ws.load_world_params then
         return { 'loading' }
     end
 
@@ -85,7 +85,7 @@ function worldgen_cancel()
     end
 
     -- Loading raws, can't cancel
-    if C_viewscreen_new_regionst_loading_raws(ws) then
+    if ws.load_world_params then
         return
     end
 
@@ -194,7 +194,7 @@ function worldgen_get_world_info()
 
             local owner_civ = find_parent_civ(owner) --df.historical_entity.find(site.civ_id)
             --[[if not owner_civ or owner_civ.id ~= site.civ_id then
-                if site_type_name(site) == 'fortress' and #C_world_site_inhabitants(site) == 0 then
+                if site_type_name(site) == 'fortress' and #site.unk_1.inhabitants == 0 then
                     table.insert(reclaimable, site)
                 end
             end]]
@@ -216,22 +216,19 @@ function worldgen_get_world_info()
             end
 
         --[[else
-            if site_type_name(site) == 'fortress' and #C_world_site_inhabitants(site) == 0 then
+            if site_type_name(site) == 'fortress' and #site.unk_1.inhabitants == 0 then
                 table.insert(reclaimable, site)
             end]]
         end
 
-        -- Calculate civ population
-        local inhabitants = C_world_site_inhabitants(site)
-        for j,v in ipairs(inhabitants) do
+        for j,v in ipairs(site.unk_1.inhabitants) do
             local t = pops[v.race]
             if t then
                 t.pop = t.pop + v.count
             end
         end
 
-        local nemesis = C_world_site_nemesis(site)
-        for j,v in ipairs(nemesis) do
+        for j,v in ipairs(site.unk_1.nemesis) do
             local n = df.nemesis_record.find(v)
             if n then
                 local fig = n.figure
