@@ -49,7 +49,7 @@ require 'remote.worldgen'
 require 'remote.embark'
 require 'remote.burrows'
 require 'remote.waypoints'
-require 'remote.civilizations'
+require 'remote.worldinfo'
 require 'remote.justice'
 require 'remote.raws'
 require 'remote.hauling'
@@ -1983,7 +1983,13 @@ local handlers = {
         [2] = civilization_get_info,
         [3] = civilization_get_agreement,
 
-        [10] = worldmap_enter,
+        [10] = world_artifacts_list,
+
+        [20] = missions_list,
+        [21] = mission_get,
+        [22] = mission_set_details,
+        [23] = mission_toggle_actor,
+        [24] = mission_remove,
     },
 
     [138] = {
