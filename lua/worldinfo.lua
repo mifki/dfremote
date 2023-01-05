@@ -262,11 +262,47 @@ function missions_list()
 
         for i,v in ipairs(ws.missions) do
             local title = missiontitle(v)
-            local actors = mission_actors(v)
+            local actors = {}
+            local editable = false
 
-            --todo: determine traval status same way as in mission_get
+            if v.type == df.army_controller.T_type.Request then
+                for j,occ in ipairs(ws.messengers) do
+                    if occ.histfig_id ~= -1 and occ.army_controller_id == v.id then
+                        local name = hfname(df.historical_figure.find(occ.histfig_id))
+                        local travelling = istrue(ws.messengers_travelling[j])
 
-            table.insert(ret, { title, v.id, v.type, actors })
+                        if not travelling then
+                            editable = true
+                        end
+
+                        table.insert(actors, { name, travelling })
+                    end
+                end
+
+                if #v.messengers == 0 then
+                    editable = true
+                end            
+
+            else
+                for j,squad in ipairs(ws.squads) do
+                    if squad.positions[0].occupant ~= -1 and squad.army_controller_id == v.id then
+                        local name = squadname(squad)
+                        local travelling = istrue(ws.squads_travelling[j])
+
+                        if not travelling and squad.army_controller_id == v.id then
+                            editable = true
+                        end                
+
+                        table.insert(actors, { name, travelling })
+                    end
+                end
+
+                if #v.squads == 0 then
+                    editable = true
+                end            
+            end
+
+            table.insert(ret, { title, v.id, v.type, actors, editable })
         end
     end)
 
@@ -297,7 +333,7 @@ function mission_get(id)
                 local sq_mission = df.army_controller.find(occ.army_controller_id)
 
                 local ordertitle, ordertype
-                if occ.army_controller_id == id then
+                if occ.army_controller_id == mission.id then
                     ordertype = 2
                     ordertitle = 'On this mission'
                 elseif sq_mission then
@@ -310,16 +346,16 @@ function mission_get(id)
 
                 local name = occ.histfig_id == -1 and 'Messenger (unfilled)' or hfname(df.historical_figure.find(occ.histfig_id))
 
-                if not travelling and occ.army_controller_id == id then
+                if not travelling and occ.army_controller_id == mission.id then
                     editable = true
                 end
 
-                if #mission.messengers == 0 then
-                    editable = true
-                end            
-
                 table.insert(actors, { name, occ.id, travelling, ordertitle, ordertype })
             end
+
+            if #mission.messengers == 0 then
+                editable = true
+            end            
 
         else
             for j,squad in ipairs(ws.squads) do
@@ -327,7 +363,7 @@ function mission_get(id)
                 local sq_mission = df.army_controller.find(squad.army_controller_id)
 
                 local ordertitle, ordertype
-                if squad.army_controller_id == id then
+                if squad.army_controller_id == mission.id then
                     ordertype = 2
                     ordertitle = 'On this mission'
                 elseif sq_mission then
@@ -341,7 +377,7 @@ function mission_get(id)
                     end
                 end
 
-                if not travelling and squad.army_controller_id == id then
+                if not travelling and squad.army_controller_id == mission.id then
                     editable = true
                 end                
 
@@ -436,7 +472,7 @@ function mission_set_details(id, details)
             data.flags.TakeImportantTreasures = hasbit(new_flags, 2)
             data.flags.LootOtherItems = hasbit(new_flags, 3)
             data.flags.StealLivestock = hasbit(new_flags, 4)
-       end
+        end
 
         return true
     end
