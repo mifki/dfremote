@@ -1984,12 +1984,16 @@ local handlers = {
         [3] = civilization_get_agreement,
 
         [10] = world_artifacts_list,
+        [11] = world_artifacts_recover,
 
         [20] = missions_list,
         [21] = mission_get,
         [22] = mission_set_details,
         [23] = mission_toggle_actor,
         [24] = mission_remove,
+
+        [30] = world_people_list,
+        [31] = world_people_rescue,
     },
 
     [138] = {

@@ -500,7 +500,7 @@ function mission_remove(id)
     end)
 end
 
---luacheck: in=number,number
+--luacheck: in=
 function world_artifacts_list()
     local ret = {}
 
@@ -518,6 +518,85 @@ function world_artifacts_list()
             table.insert(ret, { name, v.id, name_eng, race.name[2], site_gov })
         end
     end)
+
+    return ret
+end
+
+--luacheck: in=
+function world_people_list()
+    local ret = {}
+
+    --todo: can just create the screen instead?
+    execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_PEOPLE')
+
+        ws.people:insert(0,df.historical_figure.find(10));ws.people:insert(0,df.historical_figure.find(11));ws.people:insert(0,df.historical_figure.find(8694));
+
+        for i,v in ipairs(ws.people) do
+            if v then
+                local name = hfname(v, true)
+
+                local race = df.creature_raw.find(v.race)
+                local caste = race.caste[v.caste]
+                local caste_name = caste.caste_name[0]
+                if #caste_name > 0 then
+                    name = name .. ' the ' .. caste_name
+                end
+
+                local location = 'Location unknown'
+
+                if v.info.whereabouts then
+                    if v.info.whereabouts.site ~= -1 then
+                        local site = df.world_site.find(v.info.whereabouts.site)
+                        if site then
+                            location = 'Last in ' .. translatename(site.name,true)
+                        end
+                    elseif v.info.whereabouts.region_id ~= -1 then
+                        local region = df.world_region.find(v.info.whereabouts.region_id)
+                        if region then
+                            location = 'Last in ' .. translatename(region.name,true)
+                        end
+                    elseif v.info.whereabouts.underground_region_id ~= -1 then
+                        location = 'Last in the depths of the world'
+
+                    elseif v.info.whereabouts.army_id ~= -1 then
+                        location = 'Last known to be travelling'
+                    end
+                end
+
+
+                table.insert(ret, { name, v.id, location })
+            end
+        end
+    end)
+
+    return ret
+end
+
+--luacheck: in=
+function world_people_rescue(id)
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_PEOPLE')
+
+        ws.people:insert(0,df.historical_figure.find(10));ws.people:insert(0,df.historical_figure.find(11));ws.people:insert(0,df.historical_figure.find(8694));
+
+        for i,v in ipairs(ws.people) do
+            if v and v.id == id then
+                gui.simulateInput(ws, K'CIV_RESCUE')
+
+                if ws.page == df.viewscreen_civlistst.T_page.Missions and ws.mission_idx ~= -1 then
+                    return { true, ws.missions[ws.mission_idx].id }
+                end
+
+                return { false }
+            end
+
+            gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
+        end
+
+        error('no person ' .. tostring(id))
+    end)    
 end
 
 -- print(pcall(function() return json:encode(civilizations_get_list()) end))
