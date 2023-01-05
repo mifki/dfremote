@@ -314,112 +314,138 @@ end
 
 --luacheck: in=number
 function mission_get(id)
-    local mission = df.army_controller.find(id)
-    if not mission then
-        error('no mission ' .. tostring(id))
-    end
-
     return execute_with_world_screen(function(ws)
         gui.simulateInput(ws, K'CIV_MISSIONS')
 
-        local title = missiontitle(mission)
-        local details = mp.NIL
-        local actors = {}
-        local editable = false
+        for i,mission in ipairs(ws.missions) do
+            if mission.id == id then
+                local title = missiontitle(mission)
+                local details = mp.NIL
+                local actors = {}
+                local editable = false
 
-        if mission.type == df.army_controller.T_type.Request then
-            for j,occ in ipairs(ws.messengers) do
-                local travelling = istrue(ws.messengers_travelling[j])
-                local sq_mission = df.army_controller.find(occ.army_controller_id)
+                -- actors first
+                if mission.type == df.army_controller.T_type.Request then
+                    for j,occ in ipairs(ws.messengers) do
+                        local travelling = istrue(ws.messengers_travelling[j])
+                        local sq_mission = df.army_controller.find(occ.army_controller_id)
 
-                local ordertitle, ordertype
-                if occ.army_controller_id == mission.id then
-                    ordertype = 2
-                    ordertitle = 'On this mission'
-                elseif sq_mission then
-                    ordertype = 1
-                    ordertitle = missiontitle(sq_mission)
+                        local ordertitle, ordertype
+                        if occ.army_controller_id == mission.id then
+                            ordertype = 2
+                            ordertitle = 'On this mission'
+                        elseif sq_mission then
+                            ordertype = 1
+                            ordertitle = missiontitle(sq_mission)
+                        else
+                            ordertype = 0
+                            ordertitle = 'No specific orders'
+                        end
+
+                        local name = occ.histfig_id == -1 and 'Messenger (unfilled)' or hfname(df.historical_figure.find(occ.histfig_id))
+
+                        if not travelling and occ.army_controller_id == mission.id then
+                            editable = true
+                        end
+
+                        table.insert(actors, { name, occ.id, travelling, ordertitle, ordertype })
+                    end
+
+                    if #mission.messengers == 0 then
+                        editable = true
+                    end            
+
                 else
-                    ordertype = 0
-                    ordertitle = 'No specific orders'
+                    for j,squad in ipairs(ws.squads) do
+                        local travelling = istrue(ws.squads_travelling[j])
+                        local sq_mission = df.army_controller.find(squad.army_controller_id)
+
+                        local ordertitle, ordertype
+                        if squad.army_controller_id == mission.id then
+                            ordertype = 2
+                            ordertitle = 'On this mission'
+                        elseif sq_mission then
+                            ordertype = 1
+                            ordertitle = missiontitle(sq_mission)
+                        else
+                            ordertype = 0
+                            ordertitle = squad_order_title(squad)
+                            if #ordertitle == 0 then
+                                ordertitle = 'No specific orders'
+                            end
+                        end
+
+                        if not travelling and squad.army_controller_id == mission.id then
+                            editable = true
+                        end                
+
+                        table.insert(actors, { squadname(squad), squad.id, travelling, ordertitle, ordertype })
+                    end
+
+                    if #mission.squads == 0 then
+                        editable = true
+                    end            
                 end
 
-                local name = occ.histfig_id == -1 and 'Messenger (unfilled)' or hfname(df.historical_figure.find(occ.histfig_id))
+                -- now details
+                if mission.type == df.army_controller.T_type.InvasionOrder then
+                    local data = mission.data.InvasionOrder
+                    local inv_type = data.type
+                    local inv_flags = data.flags
 
-                if not travelling and occ.army_controller_id == mission.id then
-                    editable = true
-                end
+                    local our_type = -1
+                    local our_flags = 0
 
-                table.insert(actors, { name, occ.id, travelling, ordertitle, ordertype })
-            end
+                    if inv_type == df.army_controller_invasion_order.T_type.Raze then
+                        our_type = 2
+                    elseif inv_type == df.army_controller_invasion_order.T_type.TakeOver then
+                        our_type = 7
+                    elseif inv_type == df.army_controller_invasion_order.T_type.Occupy then
+                        our_type = inv_flags.DemandSurrender and 6 or 5
+                    elseif inv_type == df.army_controller_invasion_order.T_type.DemandTribute then
+                        our_type = inv_flags.OngoingTribute and 4 or 3
+                    elseif inv_type == df.army_controller_invasion_order.T_type.Raid then
+                        our_type = 0
+                    elseif inv_type == df.army_controller_invasion_order.T_type.Explore then
+                        our_type = 8
+                    elseif inv_type == df.army_controller_invasion_order.T_type.Pillage then
+                        our_type = 1
+                    end
 
-            if #mission.messengers == 0 then
-                editable = true
-            end            
+                    our_flags = packbits(inv_flags.FreeCaptives, inv_flags.ReleaseOtherPrisoners, inv_flags.TakeImportantTreasures, inv_flags.LootOtherItems, inv_flags.StealLivestock)
 
-        else
-            for j,squad in ipairs(ws.squads) do
-                local travelling = istrue(ws.squads_travelling[j])
-                local sq_mission = df.army_controller.find(squad.army_controller_id)
+                    details = { our_type, our_flags }
 
-                local ordertitle, ordertype
-                if squad.army_controller_id == mission.id then
-                    ordertype = 2
-                    ordertitle = 'On this mission'
-                elseif sq_mission then
-                    ordertype = 1
-                    ordertitle = missiontitle(sq_mission)
-                else
-                    ordertype = 0
-                    ordertitle = squad_order_title(squad)
-                    if #ordertitle == 0 then
-                        ordertitle = 'No specific orders'
+                elseif mission.type == df.army_controller.T_type.Request then
+                    details = {}
+
+                    if editable then
+                        gui.simulateInput(ws, K'CIV_MISSION_DETAILS')
+
+                        if ws.page == df.viewscreen_civlistst.T_page.MissionDetails then
+                            for j,nemesis in ipairs(ws.workers) do
+                                local hf = nemesis.figure
+                                if hf then
+                                    local val,found,idx = utils.binsearch(mission.data.Request.workers, hf.id)
+                                    table.insert(details, { hfname(hf), hf.id, found })
+                                end
+                            end
+                        end
+                    else
+                        for j,hfid in ipairs(mission.data.Request.workers) do
+                            local hf = df.historical_figure.find(hfid)
+                            table.insert(details, { hfname(hf), hf.id, true })
+                        end
                     end
                 end
 
-                if not travelling and squad.army_controller_id == mission.id then
-                    editable = true
-                end                
-
-                table.insert(actors, { squadname(squad), squad.id, travelling, ordertitle, ordertype })
+                return { title, mission.id, mission.type, details, actors, editable }
             end
 
-            if #mission.squads == 0 then
-                editable = true
-            end            
+            gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
         end
 
-        local mtype = mission.type
-        if mtype == df.army_controller.T_type.InvasionOrder then
-            local data = mission.data.InvasionOrder
-            local inv_type = data.type
-            local inv_flags = data.flags
-
-            local our_type = -1
-            local our_flags = 0
-
-            if inv_type == df.army_controller_invasion_order.T_type.Raze then
-                our_type = 2
-            elseif inv_type == df.army_controller_invasion_order.T_type.TakeOver then
-                our_type = 7
-            elseif inv_type == df.army_controller_invasion_order.T_type.Occupy then
-                our_type = inv_flags.DemandSurrender and 6 or 5
-            elseif inv_type == df.army_controller_invasion_order.T_type.DemandTribute then
-                our_type = inv_flags.OngoingTribute and 4 or 3
-            elseif inv_type == df.army_controller_invasion_order.T_type.Raid then
-                our_type = 0
-            elseif inv_type == df.army_controller_invasion_order.T_type.Explore then
-                our_type = 8
-            elseif inv_type == df.army_controller_invasion_order.T_type.Pillage then
-                our_type = 1
-            end
-
-            our_flags = packbits(inv_flags.FreeCaptives, inv_flags.ReleaseOtherPrisoners, inv_flags.TakeImportantTreasures, inv_flags.LootOtherItems, inv_flags.StealLivestock)
-
-            details = { our_type, our_flags }
-        end
-
-        return { title, mission.id, mtype, details, actors, editable }
+        error('no mission ' .. tostring(id))
     end)
 end
 
@@ -431,8 +457,7 @@ function mission_set_details(id, details)
         error('no mission ' .. tostring(id))
     end
 
-    local mtype = mission.type
-    if mtype == df.army_controller.T_type.InvasionOrder then
+    if mission.type == df.army_controller.T_type.InvasionOrder then
         local data = mission.data.InvasionOrder
 
         local new_type = details[1]
@@ -472,6 +497,23 @@ function mission_set_details(id, details)
             data.flags.TakeImportantTreasures = hasbit(new_flags, 2)
             data.flags.LootOtherItems = hasbit(new_flags, 3)
             data.flags.StealLivestock = hasbit(new_flags, 4)
+        end
+
+        return true
+
+    elseif mission.type == df.army_controller.T_type.Request then
+        local hfid = details[1]
+        local select = istrue(details[2])
+
+        local val,found,idx = utils.binsearch(mission.data.Request.workers, hfid)
+        if select then
+            if not found then
+                mission.data.Request.workers:insert(idx, hfid)
+            end
+        else
+            if found then
+                mission.data.Request.workers:erase(idx)
+            end
         end
 
         return true

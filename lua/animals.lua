@@ -160,7 +160,7 @@ function animals_train_war(unitid, val)
 	return true
 end
 
---luacheck: in=number,val
+--luacheck: in=number,bool
 function animals_train_hunting(unitid, val)
 	local unit = df.unit.find(unitid)
 
