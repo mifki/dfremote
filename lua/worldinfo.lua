@@ -608,8 +608,6 @@ function world_people_list()
     execute_with_world_screen(function(ws)
         gui.simulateInput(ws, K'CIV_PEOPLE')
 
-        ws.people:insert(0,df.historical_figure.find(10));ws.people:insert(0,df.historical_figure.find(11));ws.people:insert(0,df.historical_figure.find(8694));
-
         for i,v in ipairs(ws.people) do
             if v then
                 local name = hfname(v, true)
