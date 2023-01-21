@@ -1994,6 +1994,16 @@ local handlers = {
 
         [30] = world_people_list,
         [31] = world_people_rescue,
+
+        [40] = world_sites_list,
+        [41] = world_site_get,
+        [42] = world_site_start_mission,
+
+        [50] = world_news_list_sites,
+        [51] = world_news_get_site_news,
+
+        [60] = world_artifacts_list,
+        [61] = world_artifact_recover,
     },
 
     [138] = {

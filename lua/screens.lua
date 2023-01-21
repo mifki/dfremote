@@ -119,10 +119,9 @@ function execute_with_military_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_MILITARY')
         local milws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_layer_militaryst
+        milws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, milws)
-
-        milws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -135,10 +134,9 @@ function execute_with_units_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_UNITLIST')
         local unitsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_unitlistst
+        unitsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, unitsws)
-
-        unitsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -151,10 +149,9 @@ function execute_with_jobs_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_JOBLIST')
         local jobsws = dfhack.gui.getCurViewscreen()
+        jobsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, jobsws)
-
-        jobsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -179,6 +176,8 @@ function execute_with_status_page(pageid, fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_STATUS')
         local statusws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_overallstatusst
+        statusws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
         if statusws._type ~= df.viewscreen_overallstatusst then
             error('error switching to status screen '..tostring(statusws._type))
         end
@@ -189,10 +188,9 @@ function execute_with_status_page(pageid, fn)
         end
         
         local pagews = dfhack.gui.getCurViewscreen()
-        local ok,ret = pcall(fn, pagews)
-        
         pagews.breakdown_level = df.interface_breakdown_types.STOPSCREEN
-        statusws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
+        local ok,ret = pcall(fn, pagews)
 
         if not ok then
             error (ret)
@@ -207,10 +205,9 @@ function execute_with_manager_screen(fn)
     jobsws:delete()
 
     local managerws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_jobmanagementst
+    managerws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     local ok,ret = pcall(fn, managerws)
-
-    managerws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
     if not ok then
         error (ret)
@@ -222,10 +219,9 @@ function execute_with_manager_orders_screen(fn)
     return execute_with_manager_screen(function(ws)
         gui.simulateInput(ws, K'MANAGER_NEW_ORDER')
         local ordersws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_createquotast
+        ordersws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, ordersws)
-
-        ordersws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -238,10 +234,9 @@ function execute_with_locations_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_LOCATIONS')
         local locsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_locationsst
+        locsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, locsws)
-
-        locsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -254,10 +249,9 @@ function execute_with_world_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_CIVLIST')
         local locsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_civlistst
+        locsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, locsws)
-
-        locsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -270,13 +264,13 @@ function execute_with_petitions_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_PETITIONS')
         local petitionsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_petitionsst
+        petitionsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
         if petitionsws._type ~= df.viewscreen_petitionsst then
             error(errmsg_wrongscreen(petitionsws))
         end
 
         local ok,ret = pcall(fn, petitionsws)
-
-        petitionsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)
@@ -443,13 +437,13 @@ function execute_with_rooms_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_ROOMS')
         local roomsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_buildinglistst
+        roomsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
+
         if roomsws._type ~= df.viewscreen_buildinglistst then
             error(errmsg_wrongscreen(roomsws))
         end
 
         local ok,ret = pcall(fn, roomsws)
-
-        roomsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if not ok then
             error (ret)

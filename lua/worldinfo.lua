@@ -600,6 +600,36 @@ function world_artifacts_list()
     return ret
 end
 
+local function hf_name_with_race_post(hf)
+    local name = hfname(hf, true)
+
+    if hf then
+        local race = df.creature_raw.find(hf.race)
+        local caste = race.caste[hf.caste]
+        local caste_name = caste.caste_name[0]
+        if #caste_name > 0 then
+            name = name .. ' the ' .. caste_name
+        end
+    end
+
+    return name
+end
+
+local function hf_name_with_race_pre(hf)
+    local name = hfname(hf, true)
+
+    if hf then
+        local race = df.creature_raw.find(hf.race)
+        local caste = race.caste[hf.caste]
+        local caste_name = caste.caste_name[0]
+        if #caste_name > 0 then
+            name = 'the ' .. caste_name .. ' ' .. name
+        end
+    end
+
+    return name
+end
+
 --luacheck: in=
 function world_people_list()
     local ret = {}
@@ -610,14 +640,7 @@ function world_people_list()
 
         for i,v in ipairs(ws.people) do
             if v then
-                local name = hfname(v, true)
-
-                local race = df.creature_raw.find(v.race)
-                local caste = race.caste[v.caste]
-                local caste_name = caste.caste_name[0]
-                if #caste_name > 0 then
-                    name = name .. ' the ' .. caste_name
-                end
+                local name = hf_name_with_race_post(v)
 
                 local location = 'Location unknown'
 
@@ -640,7 +663,6 @@ function world_people_list()
                     end
                 end
 
-
                 table.insert(ret, { name, v.id, location })
             end
         end
@@ -649,7 +671,7 @@ function world_people_list()
     return ret
 end
 
---luacheck: in=
+--luacheck: in=number
 function world_people_rescue(id)
     --todo: can just create the screen instead?
     return execute_with_world_screen(function(ws)
@@ -675,9 +697,408 @@ function world_people_rescue(id)
     end)    
 end
 
+local function round(num)
+  return math.floor(num + 0.5)
+end
+
+local function site_population_text(site)
+    local pop = #site.unk_1.nemesis
+    for i,v in ipairs(site.unk_1.inhabitants) do
+        pop = pop + v.count
+    end
+
+    local m = math.ceil(10^(math.floor(math.log(pop)/math.log(10))-1))
+
+    if pop < 7 then
+        poptext = '<10'
+    elseif pop < 65*m then
+        poptext = '~' .. tostring(round(pop/(10*m))*(10*m))
+    elseif pop < 85*m then
+        poptext = '~' .. tostring(75*m)
+    else
+        poptext = '~' .. tostring(100*m)
+    end
+
+    return pop, poptext
+end
+
+local function site_govt(site)
+    for j,link in ipairs(site.entity_links) do
+        local entity = df.historical_entity.find(link.entity_id)
+        if link.type == df.entity_site_link_type.Claim and link.flags.residence then
+            return entity
+        end
+    end
+
+    return nil
+end
+
+local function site_govt_race_civ_rel(site, ourciv)
+    local govt = site_govt(site)
+
+    local govtname = ''
+    local racename = ''
+    local civname = ''
+    local rel = ''
+    local ownciv = false
+
+    if govt then
+        local civ = find_parent_civ(govt)
+
+        govtname = govt and translatename(govt.name, true) or ''
+        civname = civ and translatename(civ.name, true) or ''
+
+        local race = govt.race ~= -1 and df.global.world.raws.creatures.all[govt.race]
+        racename = race and race.name[2] or ''
+
+        local ownciv = civ and civ.id == ourciv.id
+
+        if not civ or not ownciv then
+            if not civ then
+                rel = 'No contact'
+            end
+            local dip = civ and utils.binsearch(ourciv.relations.diplomacy, civ.id, 'group_id') or
+                utils.binsearch(ourciv.relations.diplomacy, govt.id, 'group_id')
+            if dip then
+                if dip.relation == 0 then
+                    rel = dip.flags.alliance and 'Alliance' or 'Peace'
+                elseif dip.relation == 1 then
+                    rel = 'War'
+                elseif dip.relation == 3 then
+                    rel = 'They offer tribute'
+                elseif dip.relation == 4 then
+                    rel = 'They accept tribute'
+                elseif dip.relation == 5 then
+                    rel = 'Skirmishing'
+                end
+            end
+        end
+    end    
+
+    return govtname, racename, civname, rel, ownciv
+end
+
+--luacheck: in=
+function world_sites_list()
+    local ret = {}
+
+    local ourciv = df.historical_entity.find(df.global.ui.civ_id)
+
+    for i,site in ipairs(df.global.world.world_data.sites) do
+        if site.flags.Undiscovered then
+            goto continue
+        end
+
+        local name = translatename(site.name, true)
+        local typename = site_type_name(site)
+        local pop,poptext = site_population_text(site)
+        local govtname, racename, civname, rel = site_govt_race_civ_rel(site, ourciv)
+
+        table.insert(ret, { name, site.id, typename, govtname, civname, pop, poptext, rel, racename })
+
+        ::continue::
+    end
+
+    return ret
+end
+
+--luacheck: in=number
+function world_site_get(id)
+    local ourciv = df.historical_entity.find(df.global.ui.civ_id)
+
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_WORLD')
+
+        local site = df.world_site.find(id)
+
+        if not site then
+            error('no site ' .. tostring(id))
+        end
+
+        ws.map_x = site.pos.x
+        ws.map_y = site.pos.y - 1
+        gui.simulateInput(ws, K'CURSOR_DOWN')
+
+        if ws.site.id ~= site.id then
+            error('did not select site ' .. tostring(id))
+        end
+
+        local artifacts = {}
+
+        for i,artifact in ipairs(ws.site_artifacts) do
+            table.insert(artifacts, { translatename(artifact.name, true), artifact.id })
+        end
+
+        local prisoners = {}
+
+        for i,hf in ipairs(ws.site_prisoners) do
+            table.insert(prisoners, { hf_name_with_race_post(hf), hf.id })
+        end
+
+        local name = translatename(site.name, true)
+        local typename = site_type_name(site)
+        local pop,poptext = site_population_text(site)
+        local govtname, racename, civname, rel, ownciv = site_govt_race_civ_rel(site, ourciv)
+
+        local linked = istrue(ws.site_is_linked)
+
+        if linked then
+            rel = 'Economically linked to you'
+        end
+
+        local mapentry = dfhack.maps.getRegionBiome(site.pos.x, site.pos.y)
+        local landmass = df.world_landmass.find(mapentry.landmass_id)
+        local region = df.world_region.find(mapentry.region_id)
+        local landmassname = landmass and translatename(landmass.name, true) or ''
+        local regionname = region and translatename(region.name, true) or ''
+
+        local action = ''
+        if linked then
+            action = 'Request workers'
+        elseif not ownciv then
+            if govtname == '' then
+                action = 'Explore this site'
+            else
+                action = 'Raid this site'
+            end
+        end
+
+        return { name, site.id, typename, govtname, civname, pop, poptext, rel, racename, artifacts, landmassname, regionname, action, prisoners }
+    end)    
+end
+
+--luacheck: in=number
+function world_site_start_mission(id)
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_WORLD')
+
+        local site = df.world_site.find(id)
+
+        if not site then
+            error('no site ' .. tostring(id))
+        end
+
+        ws.map_x = site.pos.x
+        ws.map_y = site.pos.y - 1
+        gui.simulateInput(ws, K'CURSOR_DOWN')
+
+        if ws.site.id ~= site.id then
+            error('did not select site ' .. tostring(id))
+        end
+
+        gui.simulateInput(ws, K'CIV_RAID')
+
+        if (ws.page == df.viewscreen_civlistst.T_page.Missions or ws.page == df.viewscreen_civlistst.T_page.MissionDetails) and ws.mission_idx ~= -1 then
+            return { true, ws.missions[ws.mission_idx].id }
+        end
+
+        return { false }
+    end)       
+end
+
+local function event_target_site_id(event)
+    if event.type == df.entity_event_type.invasion then
+        return event.data.invasion.site_id
+    elseif event.type == df.entity_event_type.abduction then
+        return event.data.abduction.site_id
+    elseif event.type == df.entity_event_type.occupation then
+        return event.data.occupation.site_id
+    
+    -- next group is not shown in world news
+    -- elseif event.type == df.entity_event_type.beast then
+    --     return event.data.beast.site_id
+    -- elseif event.type == df.entity_event_type.group then
+    --     return event.data.group.site_id
+    -- elseif event.type == df.entity_event_type.harass then
+    --     return event.data.harass.site_id
+    
+    elseif event.type == df.entity_event_type.flee then
+        return event.data.flee.from_site_id
+    elseif event.type == df.entity_event_type.abandon then
+        return event.data.abandon.site_id
+
+    -- next group is not shown in world news
+    -- elseif event.type == df.entity_event_type.reclaimed then
+    --     return event.data.reclaimed.site_id
+    -- elseif event.type == df.entity_event_type.founded then
+    --     return event.data.founded.site_id
+    -- elseif event.type == df.entity_event_type.reclaiming then
+    --     return event.data.reclaiming.site_id
+
+    elseif event.type == df.entity_event_type.leave then
+        return event.data.leave.site_id
+    elseif event.type == df.entity_event_type.insurrection then
+        return event.data.insurrection.site_id
+    elseif event.type == df.entity_event_type.insurrection_end then
+        return event.data.insurrection_end.site_id
+    elseif event.type == df.entity_event_type.claim then
+        return event.data.claim.site_id
+    elseif event.type == df.entity_event_type.artifact_in_site then
+        return event.data.artifact_in_site.site_id
+
+    -- next group is not shown in world news
+    -- elseif event.type == df.entity_event_type.artifact_not_in_site then
+    --     return event.data.artifact_not_in_site.site_id
+    end
+
+    return -1
+end
+
+local function event_target_entity_id(event)
+    if event.type == df.entity_event_type.succession then
+        return event.data.succession.entity_id
+    end
+
+    return -1
+end
+
+--luacheck: in=
+function world_news_list_sites()
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        local ret = {}
+
+        local site_ids = {}
+        local entity_ids = {}
+
+        for i,event in ipairs(ws.rumors) do
+            utils.insert_sorted(site_ids, event_target_site_id(event))
+            utils.insert_sorted(entity_ids, event_target_entity_id(event))
+        end
+
+        local ourciv = df.historical_entity.find(df.global.ui.civ_id)
+
+        for i,site in ipairs(df.global.world.world_data.sites) do
+            if site.flags.Undiscovered then
+                goto continue
+            end
+
+            local govt = site_govt(site)
+
+            if not utils.binsearch(site_ids, site.id) and not (govt and utils.binsearch(entity_ids, govt.id)) then
+                goto continue
+            end
+
+            local name = translatename(site.name, true)
+            local typename = site_type_name(site)
+            local pop,poptext = site_population_text(site)
+            local govtname, racename, civname = site_govt_race_civ_rel(site, ourciv)
+
+            table.insert(ret, { name, site.id, typename, racename })
+
+            ::continue::
+        end
+
+        return ret
+    end)
+end
+
+--luacheck: in=number
+function world_news_get_site_news(id)
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_NEWS')
+
+        local site = df.world_site.find(id)
+
+        if not site then
+            error('no site ' .. tostring(id))
+        end
+
+        ws.news_x = site.pos.x
+        ws.news_y = site.pos.y - 1
+        gui.simulateInput(ws, K'CURSOR_DOWN')
+
+        local text = ''
+
+        for i,line in ipairs(ws.news_text) do
+            if #line.value == 0 or #text == 0 then
+                text = text .. '[B]'
+            end
+            text = text .. dfhack.df2utf(fixspaces(line.value))
+        end        
+
+        return { text }
+    end)    
+end
+
+--luacheck: in=number,string
+function world_artifacts_list(limit, txt)
+    local ret = {}
+
+    limit = limit or 100
+    txt = txt and txt:utf8lower() or ''
+
+    --todo: can just create the screen instead?
+    execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_ARTIFACTS')
+
+        --todo: this is very slow. don't need to select each item in the ui until the name matches
+        for i,v in ipairs(ws.artifact_records) do
+            local det = ws.artifact_details[i]
+            local name = translatename(v.name, true)
+
+            local location = 'Location unknown'
+
+            if det then
+                if det.last_site ~= -1 then
+                    local site = df.world_site.find(det.last_site)
+                    if site then
+                        location = 'Last in ' .. translatename(site.name,true)
+                    end
+                elseif det.last_holder_hf ~= -1 then
+                    local hf = df.historical_figure.find(det.last_holder_hf)
+                    location = 'Last held by ' .. hf_name_with_race_pre(hf)
+                end
+            end
+
+            --todo: also search in location/holder?
+            if name:utf8lower():find(txt) then 
+                table.insert(ret, { name, v.id, location })
+
+                if limit > 0 and #ret >= limit then
+                    break
+                end
+            end
+
+            gui.simulateInput(ws, K'STANDARDSCROLL_DOWN')
+        end
+    end)
+
+    return ret
+end
+
+--luacheck: in=number
+function world_artifact_recover(id)
+    --todo: can just create the screen instead?
+    return execute_with_world_screen(function(ws)
+        gui.simulateInput(ws, K'CIV_ARTIFACTS')
+        for i,v in ipairs(ws.artifact_records) do
+            if v.id == id then
+                ws.artifact_idx = i
+
+                gui.simulateInput(ws, K'CIV_RECOVER')
+
+                if ws.page == df.viewscreen_civlistst.T_page.Missions and ws.mission_idx ~= -1 then
+                    return { true, ws.missions[ws.mission_idx].id }
+                end
+
+                return { false }
+            end
+        end
+    end)
+end
+
+
 -- print(pcall(function() return json:encode(civilizations_get_list()) end))
 -- print(pcall(function() return json:encode(civilization_get_info(75)) end))
 -- print(pcall(function() return json:encode(civilization_get_agreement(75,1)) end))
 -- print(pcall(function() return json:encode(civilization_get_agreement(75,0)) end))
 -- print(pcall(function() return json:encode(missions_list()) end))
 -- print(pcall(function() return json:encode(mission_remove(250039)) end))
+-- print(pcall(function() return json:encode(world_sites_list()) end))
+-- print(pcall(function() return json:encode(world_news_list_sites()) end))
+-- print(pcall(function() return json:encode(world_news_get_site_news(44)) end))
+-- print(pcall(function() return json:encode(world_artifacts_list()) end))

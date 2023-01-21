@@ -130,7 +130,7 @@ function worldgen_resolve_rejected(action)
     end
 end
 
-local function find_parent_civ(civ)
+function find_parent_civ(civ)
     for i,v in ipairs(civ.entity_links) do
         if v._type == df.entity_entity_link and v.type == df.entity_entity_link_type.PARENT then
             return df.historical_entity.find(v.target)
@@ -138,7 +138,7 @@ local function find_parent_civ(civ)
     end
 end
 
-local function site_type_name(site)
+function site_type_name(site)
     local t = site.type
 
     if t == df.world_site_type.PlayerFortress or t == df.world_site_type.MountainHalls then
@@ -157,14 +157,30 @@ local function site_type_name(site)
     elseif t == df.world_site_type.LairShrine then
         return 'lair'
     elseif t == df.world_site_type.Fortress then
-        return (site.subtype_info and site.subtype_info.fortress_type == df.fortress_type.TOWER) and 'tower' or 'fortress' --todo: add the rest of enum values
+        if site.subtype_info then
+            if site.subtype_info.fortress_type == df.fortress_type.CASTLE then
+                return 'castle'
+            elseif site.subtype_info.fortress_type == df.fortress_type.MONASTERY then
+                return 'monastery'
+            elseif site.subtype_info.fortress_type == df.fortress_type.TOWER then
+                return 'tower'
+            end
+        end
+        return site.flags.Town and 'fortress' or 'fort'
     elseif t == df.world_site_type.Camp then
         return 'camp'
     elseif t == df.world_site_type.Monument then
+        if site.subtype_info then
+            if site.subtype_info.monument_type == df.monument_type.TOMB then
+                return 'tomb'
+            elseif site.subtype_info.monument_type == df.monument_type.VAULT then
+                return 'vault'
+            end
+        end
         return 'monument'
     end
 
-    return '!unknown site type!'
+    return 'site'
 end
 
 --todo: conditions for reclaimable are wrong
