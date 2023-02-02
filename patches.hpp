@@ -167,6 +167,10 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x140d75450, 9, true, { 0x48, 0x8b, 0x44, 0x24, 0x28, 0xc6, 0x00, 0x00, 0xc3 }
         };
+
+        #define A_MAINLOOP        0x1407cd0e0
+        #define A_MAINLOOP_CALL   0x140479ca1
+        
     #elif defined(__APPLE__)
         #define A_LOAD_MULTI_PDIM  0x101375600
         #define A_RENDER_MAP       0x100c1fa20
@@ -201,6 +205,9 @@ static void apply_patch(MemoryPatcher *mp, patchdef &p)
         static patchdef p_render_lower_levels = {
             0x1156f30, 5, true, { 0x41, 0xc6, 0x00, 0x00, 0xc3 }
         };
+
+        #define A_MAINLOOP        dlsym(RTLD_DEFAULT, "_Z8mainloopv")
+        #define A_MAINLOOP_CALL   ((int64_t)dlsym(RTLD_DEFAULT, "_ZN9enablerst10async_loopEv") + 0xb0)        
     #endif
 
 #else
