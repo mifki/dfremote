@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-#include <sys/cdefs.h>
+// #include <sys/cdefs.h>
 #include <stdlib.h>
 
 #ifdef _WIN32
