@@ -344,10 +344,12 @@ void remote_connect(color_ostream &out, bool debug, bool no_external, bool no_pu
 	    	out << "Publishing server with name " << publish_name << " and password hash " << pwd_hash << std::endl;
 	}
 
-	out << COLOR_LIGHTGREEN << "Scan the following QR code with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
+	out << COLOR_LIGHTGREEN << "Scan the QR code below with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
 
     show_qrcode_with_data(out, rawdata, rawsz);
     delete[] rawdata;
+
+	out << COLOR_LIGHTGREEN << "Scan the QR code above with Dwarf Fortress Remote iOS app to connect to this server" << std::endl;
 
     // So that any messages from another thread during connection don't interrupt QR code output
     if (publish)

@@ -110,6 +110,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCom
         "remote", "Dwarf Fortress Remote Server (mifki.com/df)",
         remote_cmd, false,
         "  on | off           - Enable or disable remote server\n"
+        "  connect            - Set everything up and print a QR code to connect to this server"
         "  publish <name>     - Publish server to be accessible outside of local network\n"
         "  unpublish          - Stop publishing\n"
         "  port <number>      - Change port number (default is 1235)\n"
