@@ -647,16 +647,19 @@ function locations_add_get_profession_choices(bldid)
 end
 
 --luacheck: in=number,number,number
-function locations_add(bldid, tp, deitytype, deityid)
+function locations_add(bldid, loctype, id1, id2)
     return execute_with_locations_for_building(bldid, function(ws, bld)
         gui.simulateInput(ws, K'LOCATION_NEW')
 
-        if tp == 1 then
+        if loctype == 1 then
             gui.simulateInput(ws, K'LOCATION_INN_TAVERN')
-        elseif tp == 2 then
+        elseif loctype == 2 then
             gui.simulateInput(ws, K'LOCATION_LIBRARY')
-        elseif tp == 3 then
+        elseif loctype == 3 then
             gui.simulateInput(ws, K'LOCATION_TEMPLE')
+
+            local deitytype = id1
+            local deityid = id2
 
             for i,type in ipairs(df.global.ui_sidebar_menus.location.deity_type) do
                 if type == deitytype then
@@ -671,8 +674,22 @@ function locations_add(bldid, tp, deitytype, deityid)
                 end
             end     
 
-            error('no deity/religion '..tostring(deitytype)..' '..tostring(deityid))
-        end
+            error('no deity/religion ' .. tostring(deitytype) .. ' ' .. tostring(deityid))
+        elseif loctype == 4 then
+            gui.simulateInput(ws, K'LOCATION_GUILDHALL')
+
+            local prof = id1
+
+            for i,v in ipairs(df.global.ui_sidebar_menus.location.profession) do
+                if v == prof then
+                    df.global.ui_sidebar_menus.location.cursor_profession = i
+                    gui.simulateInput(ws, K'SELECT')
+                    return true
+                end
+            end     
+
+            error('no profession ' .. tostring(prof))
+        end        
     end)    
 end
 
