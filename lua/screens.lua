@@ -264,11 +264,12 @@ function execute_with_petitions_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_PETITIONS')
         local petitionsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_petitionsst
-        petitionsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if petitionsws._type ~= df.viewscreen_petitionsst then
             error(errmsg_wrongscreen(petitionsws))
         end
+
+        petitionsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, petitionsws)
 
@@ -437,11 +438,12 @@ function execute_with_rooms_screen(fn)
     return execute_with_main_mode(df.ui_sidebar_mode.Default, function(ws)
         gui.simulateInput(ws, K'D_ROOMS')
         local roomsws = dfhack.gui.getCurViewscreen() --as:df.viewscreen_buildinglistst
-        roomsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         if roomsws._type ~= df.viewscreen_buildinglistst then
             error(errmsg_wrongscreen(roomsws))
         end
+
+        roomsws.breakdown_level = df.interface_breakdown_types.STOPSCREEN
 
         local ok,ret = pcall(fn, roomsws)
 

@@ -45,17 +45,19 @@ end
 
 --luacheck: in=
 function petitions_get_list()
-    -- df.global.ui.petitions is the same but let's use the screen just to be sure
-    return execute_with_petitions_screen(function(ws)
-        local ret = {}
-        for i,agreement in ipairs(ws.list) do
-            if #agreement.parties == 2 and #agreement.details == 1 then
-                table.insert(ret, { petition_applicant_name(agreement), agreement.id, petition_reason(agreement) })
-            end
-        end
+    -- execute_with_petitions_screen() could be used here but it'd error when 
+    -- there's no petitions because screen doesn't show in that case
 
-        return ret
-    end)
+    local ret = {}
+
+    for i,v in ipairs(df.global.ui.petitions) do
+        local agreement = df.agreement.find(v)
+        if agreement and #agreement.parties == 2 and #agreement.details == 1 then
+            table.insert(ret, { petition_applicant_name(agreement), agreement.id, petition_reason(agreement) })
+        end
+    end
+
+    return ret
 end
 
 function read_petition_text()
