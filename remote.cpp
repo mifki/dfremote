@@ -1105,6 +1105,16 @@ void process_client_cmd(const unsigned char *mdata, int msz, ENetPeer *conn)
             return;
         }
 
+        if (cmd == 19)
+        {
+            while(map_render_enabled && waiting_render);
+
+            empty_map_cache();
+
+            waiting_render = true;
+            return;
+        }
+
         if (cmd == 20)
         {
             unsigned char *b = buf;
