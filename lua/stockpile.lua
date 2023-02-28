@@ -834,9 +834,9 @@ function organic_fish_titles()
         if raw then
             local caste = raw.caste[indexes[i]]
             local t = capitalize(caste.caste_name[0])
-            if caste.gender == 0 then
+            if caste.sex == df.pronoun_type.she then
                 t = t .. ', ' .. SYMBOL_FEMALE_DF
-            elseif caste.gender == 1 then
+            elseif caste.sex == df.pronoun_type.he then
                 t = t .. ', ' .. SYMBOL_MALE_DF
             end
             table.insert(ret, t)
@@ -857,9 +857,9 @@ function organic_rawfish_titles()
         if raw then
             local caste = raw.caste[indexes[i]]
             local t = 'Unprepared Raw ' .. capitalize(caste.caste_name[0])
-            if caste.gender == 0 then
+            if caste.sex == df.pronoun_type.she then
                 t = t .. ', ' .. SYMBOL_FEMALE_DF
-            elseif caste.gender == 1 then
+            elseif caste.sex == df.pronoun_type.he then
                 t = t .. ', ' .. SYMBOL_MALE_DF
             end
             table.insert(ret, t)

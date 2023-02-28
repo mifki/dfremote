@@ -41,7 +41,7 @@ function squad_order_title(squad)
         ordertitle = utils.call_with_string(squad.orders[0], 'getDescription')
     end
 
-    return ordertitle
+    return dfhack.df2utf(ordertitle)
 end
 
 --luacheck: in=

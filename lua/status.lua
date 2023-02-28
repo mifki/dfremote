@@ -146,7 +146,7 @@ function performance_skill_get_description(_id)
     -- instrument
     if type == 0 then
         local inst = df.global.world.raws.itemdefs.instruments[id]
-        local text = fixspaces(inst.descriptio)
+        local text = fixspaces(inst.description)
         
         text = dfhack.df2utf(text)
 
