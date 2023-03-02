@@ -554,6 +554,13 @@ function get_look_list(detailed)
                 end
 
                 title = matname .. ' ' .. ttcaption(tt)
+
+            elseif ttmat == df.tiletype_material.FROZEN_LIQUID then
+                title = 'ice'
+                if df.tiletype.attrs[tt].shape ~= df.tiletype_shape.FLOOR then
+                    title = title .. ' ' .. ttcaption(tt)
+                end
+
             else
                 title = ttcaption(tt)
             end
