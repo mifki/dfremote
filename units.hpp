@@ -10,7 +10,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
 
-            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
+            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z || ui->main.mode == df::ui_sidebar_mode::Default)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
                         ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];
@@ -26,7 +26,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
 
-            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
+            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z || ui->main.mode == df::ui_sidebar_mode::Default)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
                         ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];
@@ -41,7 +41,7 @@ struct unit_hook : public df::unit
         {
             df::coord _pos = Units::getPosition(this);
 
-            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z)
+            if (df::global::cursor->x != _pos.x || df::global::cursor->y != _pos.y || df::global::cursor->z != _pos.z || ui->main.mode == df::ui_sidebar_mode::Default)
                 if (pos.x-mwindow_x >= 0 && pos.y-gwindow_y >= 0 && pos.x-mwindow_x < curwidth && pos.y-gwindow_y < curheight)
                     if (!((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y])
                         ((uint32_t*)screen_under_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y] = ((uint32_t*)screen_ptr)[(_pos.x-mwindow_x)*curheight + _pos.y-gwindow_y];

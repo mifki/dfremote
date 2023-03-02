@@ -72,7 +72,7 @@ struct cls##_hook : public df::cls \
 \
         for (int x = dbuf->x1-mwindow_x; x <= xmax; x++) \
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++) \
-                if (df::global::cursor->x != x+mwindow_x || df::global::cursor->y != y+gwindow_y || df::global::cursor->z != this->z) \
+                if (df::global::cursor->x != x+mwindow_x || df::global::cursor->y != y+gwindow_y || df::global::cursor->z != this->z || ui->main.mode == df::ui_sidebar_mode::Default) \
                     if (x >= 0 && y >= 0 && x < curwidth && y < curheight) \
                         ((uint32_t*)screen_under_ptr)[x*curheight + y] = ((uint32_t*)screen_ptr)[x*curheight + y]; \
     } \
@@ -149,7 +149,7 @@ struct building_workshopst_hook : public df::building_workshopst
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z && ui->main.mode != df::ui_sidebar_mode::Default)
                     continue;
 
                 if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
@@ -216,7 +216,7 @@ struct building_furnacest_hook : public df::building_furnacest
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z && ui->main.mode != df::ui_sidebar_mode::Default)
                     continue;
 
                 if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
@@ -281,7 +281,7 @@ struct building_tradedepotst_hook : public df::building_tradedepotst
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z && ui->main.mode != df::ui_sidebar_mode::Default)
                     continue;
 
                 if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
@@ -341,7 +341,7 @@ struct building_siegeenginest_hook : public df::building_siegeenginest
         {
             for (int y = dbuf->y1-gwindow_y; y <= ymax; y++)
             {
-                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z)
+                if (df::global::cursor->x == x+mwindow_x && df::global::cursor->y == y+gwindow_y && df::global::cursor->z == this->z && ui->main.mode != df::ui_sidebar_mode::Default)
                     continue;
 
                 // if (dbuf->tile[x-(dbuf->x1-mwindow_x)][y-(dbuf->y1-gwindow_y)] == 32)
