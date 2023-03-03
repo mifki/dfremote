@@ -39,6 +39,18 @@ local designations = { --as:{1:string,2:string,3:number,4:"{1:string,2:string,3:
     { 'Toggle Markers', 'M', df.interface_key.DESIGNATE_TOGGLE_MARKER },
 }
 
+function magma_discovered()
+    for i,v in ipairs(df.global.world.features.map_features) do
+        if tostring(v):find('magma') ~= nil then
+            if v.flags.Discovered then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 --luacheck: in=
 function setup_get_designations()
     local choices = {}
@@ -155,6 +167,15 @@ function setup_get_buildings()
         gui.simulateInput(ws, K'D_BUILDING')
         STATE.building_btns = {}
         return get_choices_build()
+    end)
+end
+
+--luacheck: in=
+function setup_get_buildings2()
+    return execute_with_main_mode(0, function(ws)
+        gui.simulateInput(ws, K'D_BUILDING')
+        STATE.building_btns = {}
+        return { get_choices_build(), magma_discovered() }
     end)
 end
 

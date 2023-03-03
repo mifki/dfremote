@@ -9,6 +9,7 @@ utils = require 'utils'
 
 df_ver = tonumber(dfhack.DF_VERSION:sub(3,4)..dfhack.DF_VERSION:sub(6,7)) -- 4024, 4303, etc.
 
+-- This persists when Lua code is reloaded
 STATE = _G.DFREMOTE_STATE or {
     building_btns = {}, --as:df.interface_button_construction_building_selectorst[]
     designate_cmds = {},
@@ -1239,7 +1240,6 @@ function get_status()
     
     local hasnewpetitions = false
     local petitions = #df.global.ui.petitions
-
     if petitions ~= last_petitions then
         last_petitions = petitions
         hasnewpetitions = true
@@ -1802,6 +1802,11 @@ function close_legends()
 
     ws.cur_page = df.viewscreen_legendsst.T_cur_page.Main --hint:df.viewscreen_legendsst
     gui.simulateInput(ws, K'LEAVESCREEN')
+end
+
+--luacheck: in=
+local function check_magma_discovered()
+    return magma_discovered()
 end
 
 function ensure_native()
@@ -2373,9 +2378,12 @@ local handlers = {
         [6] = perform_update,
         [7] = raws_apply_tileset,
         [8] = raws_apply_creature_gfx,
+        [9] = setup_get_buildings2,
 
         [10] = setup_get_settings,
         [11] = setup_set_setting,
+
+        [20] = check_magma_discovered,
     },
 
     [239] = {
