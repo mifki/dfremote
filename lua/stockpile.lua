@@ -1616,7 +1616,10 @@ function building_stockpile_create()
     df.global.ui.main.mode = df.ui_sidebar_mode.Default
 
     local ws = dfhack.gui.getCurViewscreen()
-    gui.simulateInput(ws, K'D_STOCKPILES')    
+    gui.simulateInput(ws, K'D_STOCKPILES')
+
+    df.global.ui.stockpile.custom_settings.flags.whole = 0
+    df.global.world.selected_stockpile_type = df.stockpile_category.Custom
 end
 
 stockpile_linking_mode = nil

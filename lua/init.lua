@@ -1025,7 +1025,7 @@ function get_status()
                 end
             end
 
-            return 23, (bld and 1 or 0), name
+            return 23, 1, name
         else 
             return 23, 0, nil
         end
@@ -1461,15 +1461,6 @@ end
 
 --luacheck: in=
 function select_confirm()
-    --[[local zoombacktobld = nil
-    if df.global.ui.main.mode == df.ui_sidebar_mode.QueryBuilding then
-
-        local bld = df.global.world.selected_building
-        if bld and df.global.ui_lever_target_type ~= -1 then
-            zoombacktobld = bld
-        end
-    end]]
-
     -- limit zones and stockpiles to 31x31 max
     if ((df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle)
      or (df.global.ui.main.mode == df.ui_sidebar_mode.Stockpiles))
@@ -1480,6 +1471,12 @@ function select_confirm()
         df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
         df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
         df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
+    end
+
+    if designation_supports_prio_marker(df.global.ui.main.mode) and df.global.selection_rect.start_x ~= -30000 then
+        if df.global.ui_sidebar_menus.designation.priority ~= 4000 then
+            df.global.ui_sidebar_menus.designation.priority_set = true
+        end
     end
 
     local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
@@ -1495,10 +1492,6 @@ function select_confirm()
         gui.simulateInput(ws, K'CURSOR_DOWN_Z')
         gui.simulateInput(ws, K'CURSOR_UP_Z')        
     end
-
-    --[[if zoombacktobld then
-        recenter_view(zoombacktobld.centerx, zoombacktobld.centery, zoombacktobld.z)
-    end]]
 end
 
 --luacheck: in=
@@ -1587,36 +1580,7 @@ function set_cursor_pos(data)
     gui.simulateInput(ws, K'CURSOR_UP_Z')
 
     if data:byte(3) ~= 0 then
-        -- limit zones and stockpiles to 31x31 max
-        if ((df.global.ui.main.mode == df.ui_sidebar_mode.Zones and df.global.ui_sidebar_menus.zone.mode == df.ui_sidebar_menus.T_zone.T_mode.Rectangle)
-         or (df.global.ui.main.mode == df.ui_sidebar_mode.Stockpiles))
-         and df.global.selection_rect.start_x ~= -30000 then
-            df.global.cursor.x = math.min(df.global.cursor.x, df.global.selection_rect.start_x + 30)
-            df.global.cursor.x = math.max(df.global.cursor.x, df.global.selection_rect.start_x - 30)
-            df.global.cursor.y = math.min(df.global.cursor.y, df.global.selection_rect.start_y + 30)
-            df.global.cursor.y = math.max(df.global.cursor.y, df.global.selection_rect.start_y - 30)
-            df.global.cursor.z = math.min(df.global.cursor.z, df.global.selection_rect.start_z + 30)
-            df.global.cursor.z = math.max(df.global.cursor.z, df.global.selection_rect.start_z - 30)
-        end
-        
-        if designation_supports_prio_marker(df.global.ui.main.mode) and df.global.selection_rect.start_x ~= -30000 then
-            if df.global.ui_sidebar_menus.designation.priority ~= 4000 then
-                df.global.ui_sidebar_menus.designation.priority_set = true
-            end
-        end
-
-        local maybestockpile = df.global.ui.main.mode == 15 and df.global.selection_rect.start_x ~= -30000
-        local oldstockpilecnt = #df.global.world.buildings.other.STOCKPILE 
-
-        gui.simulateInput(ws, K'SELECT')
-
-        if maybestockpile and df.global.ui.main.mode == 15 and df.global.selection_rect.start_x == -30000 and
-            oldstockpilecnt < #df.global.world.buildings.other.STOCKPILE then
-            df.global.ui.main.mode = df.ui_sidebar_mode.QueryBuilding
-            local ws = screen_main()
-            gui.simulateInput(ws, K'CURSOR_DOWN_Z')
-            gui.simulateInput(ws, K'CURSOR_UP_Z')        
-        end
+        select_confirm()
     end
 
     if df.global.ui.main.mode == df.ui_sidebar_mode.Hauling then
