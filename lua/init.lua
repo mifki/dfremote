@@ -461,8 +461,9 @@ function get_look_list(detailed)
 
                             elseif df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
                                 title = 'smooth ' .. title
+                            elseif df.tiletype.attrs[tt].shape == df.tiletype_shape.WALL then
+                                title = 'rough-hewn ' .. title
                             end
-                            --todo: detailed
         
                             break
                         end
@@ -470,7 +471,7 @@ function get_look_list(detailed)
                 end                
 
             elseif ttmat == df.tiletype_material.STONE or ttmat == df.tiletype_material.SOIL or
-                ttmat == df.tiletype_material.DRIFTWOOD then
+                   ttmat == df.tiletype_material.DRIFTWOOD then
 
                 local biome_offset_idx = block.region_offset[block.designation[x%16][y%16].biome]
                 local geolayer_idx = block.designation[x%16][y%16].geolayer_index
@@ -505,6 +506,7 @@ function get_look_list(detailed)
                 if df.tiletype.attrs[tt].special == df.tiletype_special.FURROWED then
                     title = 'furrowed ' .. matinfo.material.state_name[0]
                 else
+                    --todo: soil/clay floor is shown as just "clay" above ground and "clay cavern floor" below ground
                     title = matinfo.material.state_adj[0] .. ' ' .. ttcaption(tt)
 
                     if df.tiletype.attrs[tt].shape == df.tiletype_shape.FLOOR then
@@ -528,6 +530,8 @@ function get_look_list(detailed)
 
                     elseif df.tiletype.attrs[tt].special == df.tiletype_special.SMOOTH then
                         title = 'smooth ' .. title
+                    elseif df.tiletype.attrs[tt].shape == df.tiletype_shape.WALL and ttmat == df.tiletype_material.STONE then
+                        title = 'rough-hewn ' .. title
                     end
                 end
 
